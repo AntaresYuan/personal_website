@@ -313,10 +313,9 @@
     tableRows.slice().sort((a, b) => {
       const va = sortValue(a.c, key), vb = sortValue(b.c, key);
       let r = va < vb ? -1 : va > vb ? 1 : 0;
-      if (r === 0) {                                                // stable tiebreak: title asc
+      if (r === 0) {                                                // tiebreak: always title-ascending (intentionally not reversed by dir)
         const ta = (a.c.title ?? '').toLowerCase(), tb = (b.c.title ?? '').toLowerCase();
-        r = ta < tb ? -1 : ta > tb ? 1 : 0;
-        return r;
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
       }
       return r * dir;
     }).forEach(({ tr }) => tbody.appendChild(tr));                  // appendChild moves existing nodes
@@ -358,7 +357,7 @@
       { key: 'links',   label: 'Links' },
     ];
     const headHtml = COLS.map((col) =>
-      `<th scope="col" data-col="${col.key}"><button type="button">${col.label}<span class="sort-arrow" aria-hidden="true"></span></button></th>`
+      `<th scope="col" data-col="${col.key}"><button type="button" aria-label="Sort by ${col.label}">${col.label}<span class="sort-arrow" aria-hidden="true"></span></button></th>`
     ).join('');
     const rowHtml = (c) => {
       const tagSlugs = (c.tags ?? []).map(t => t.toLowerCase()).join('|');
