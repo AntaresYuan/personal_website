@@ -153,7 +153,7 @@
         <div class="board-views" role="tablist" aria-label="Board view">
           <button class="view-tab is-active" type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="true" data-view="board">Board</button>
           <button class="view-tab" type="button" role="tab" id="tab-table" aria-controls="view-table" aria-selected="false" data-view="table">Table</button>
-          <button class="view-tab is-disabled" type="button" role="tab" aria-disabled="true" aria-selected="false" tabindex="-1" title="coming soon">Timeline</button>
+          <button class="view-tab" type="button" role="tab" id="tab-timeline" aria-controls="view-timeline" aria-selected="false" data-view="timeline">Timeline</button>
           <button class="view-tab" type="button" role="tab" id="tab-specs" aria-controls="view-specs" aria-selected="false" data-view="specs">Specs</button>
         </div>
       </div>
@@ -397,6 +397,11 @@
     <!-- Spec view — the same cards as a long-form document (every card with its
          `details` expanded). JS-rendered (scripts/render.js) on first switch. -->
     <div class="board-spec-view" id="view-specs" role="tabpanel" aria-labelledby="tab-specs" hidden></div>
+
+    <!-- Timeline view — Shipped cards on a real date axis (a "ship log"); Now /
+         Next / Later below as an un-dated "Horizon" (priority order, not a
+         schedule). JS-rendered (scripts/render.js) on first switch. -->
+    <div class="board-timeline-view" id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden></div>
 
   </section>
 

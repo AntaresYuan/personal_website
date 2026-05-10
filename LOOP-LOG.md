@@ -91,3 +91,34 @@ critical/should-fix; only pre-existing nits noted). No changes needed.
 **Status: ✅ DONE.** PR #80 squash-merged → `a74cd32` on main → CF redeployed →
 verified live (`data-view="specs"` tab + `#view-specs` panel present; Table view
 + kanban unaffected; #75 rebuild Action found no diff). Commented on #78.
+
+---
+
+## 2026-05-10 — Task 3/6: `#78` board Timeline view
+
+**Branch:** `feat/board-timeline-view`
+
+**What:**
+- Enabled the previously-disabled **"Timeline"** tab (`data-view="timeline"`,
+  `id`/`aria-controls`; dropped `is-disabled`/`aria-disabled`/`tabindex=-1`).
+  New `#view-timeline` `role="tabpanel"` container after `#view-specs`.
+- `render.js`: `buildTimelineView()` — Shipped cards on a real time axis
+  (sorted by `c.updated` ascending = a "ship log", grouped by year, vertical
+  rail + dots, each entry: date · title · summary · impact · links, clickable
+  to open the card-detail panel). Now/Next/Later below as an un-dated
+  "Horizon" section with three lanes — copy says "priority order, not a
+  schedule". `VIEW_PANELS` now has 4 entries; `switchView` lazy-builds the
+  timeline on first activation. Refactored the `#view-table` card-open
+  delegation into a small `wireCardOpener(containerId, sel)` helper, reused
+  for `#view-timeline`.
+- `styles/main.css`: `.timeline-doc` (max-width 880, centered) + `.timeline-*`
+  (rail/dot/year/entry) + `.horizon-*` (3-col lanes, collapses to 1 col ≤768px).
+  No `display` declared on `.board-timeline-view` (so the UA `[hidden]` rule
+  still hides it). No tag-filter integration (reading view, like the spec view).
+
+**Tested:**
+- `node -c scripts/render.js` → syntax OK.
+- `node scripts/build.js` → passes; new static markup (`data-view="timeline"`,
+  `#view-timeline`) survives the build; rebuild idempotent.
+
+**Status:** branch pushed → PR opened → awaiting sub-agent review → merge → verify.

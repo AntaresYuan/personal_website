@@ -257,6 +257,7 @@
   let currentFilter = 'all';
   let tableBuilt = false;
   let specsBuilt = false;
+  let timelineBuilt = false;
   let tableRows = [];                      // [{ tr, c }] — for sorting
   let tableSort = { key: null, dir: 1 };   // dir: 1 = asc, -1 = desc
 
@@ -432,12 +433,81 @@
     specsBuilt = true;
   };
 
-  // The three view panels, keyed by their tab's data-view value.
-  const VIEW_PANELS = { board: 'board', table: 'view-table', specs: 'view-specs' };
+  // Build the Timeline view into #view-timeline from cardIndex. Shipped cards
+  // sit on a real date axis (a "ship log", oldest → newest, grouped by year);
+  // Now/Next/Later have no real dates, so they go below as an un-dated
+  // "Horizon" (priority order, not a schedule). A reading view: no tag filter.
+  const buildTimelineView = () => {
+    const host = document.getElementById('view-timeline');
+    if (!host) return;
+    const cards = [...cardIndex.values()];
+    if (cards.length === 0) {
+      host.innerHTML = `<p class="timeline-empty">no cards yet</p>`;
+      timelineBuilt = true;
+      return;
+    }
+    const linksOf = (c) => (c.links ?? []).filter(l => l.href && l.href !== '#')
+      .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
+
+    // ── Shipped → time axis ──────────────────────────────────────────
+    const shipped = cards.filter(c => c.status === 'shipped').slice().sort((a, b) =>
+      (a.updated ?? '').localeCompare(b.updated ?? ''));   // oldest first
+    const yearOf = (d) => (typeof d === 'string' && /^\d{4}/.test(d)) ? d.slice(0, 4) : 'Undated';
+    const years = [];                                       // preserve first-seen order
+    const byYear = new Map();
+    shipped.forEach((c) => {
+      const y = yearOf(c.updated);
+      if (!byYear.has(y)) { byYear.set(y, []); years.push(y); }
+      byYear.get(y).push(c);
+    });
+    // Put "Undated" last if present
+    const orderedYears = years.filter(y => y !== 'Undated').concat(years.includes('Undated') ? ['Undated'] : []);
+    const entryHtml = (c) => `<div class="timeline-entry" data-card-id="${escape(c.displayId)}" tabindex="0" role="button" aria-label="Open details for ${escape(c.title ?? '')}">
+        <span class="timeline-dot" aria-hidden="true"></span>
+        ${c.updated ? `<p class="timeline-date">${escape(c.updated)}</p>` : ''}
+        <h4 class="timeline-title">${escape(c.title ?? '')}</h4>
+        ${c.summary ? `<p class="timeline-summary">${safeRich(c.summary)}</p>` : ''}
+        ${c.impact ? `<p class="timeline-impact">${escape(c.impact)}</p>` : ''}
+        ${linksOf(c) ? `<div class="timeline-links">${linksOf(c)}</div>` : ''}
+      </div>`;
+    const shippedHtml = shipped.length === 0
+      ? `<p class="timeline-empty">nothing shipped yet</p>`
+      : `<ol class="timeline-rail">${orderedYears.map((y) =>
+          `<li class="timeline-year"><h3 class="timeline-year-head">${escape(y)}</h3>${byYear.get(y).map(entryHtml).join('')}</li>`
+        ).join('')}</ol>`;
+
+    // ── Now / Next / Later → un-dated horizon ────────────────────────
+    const horizonCard = (c) => `<div class="horizon-card" data-card-id="${escape(c.displayId)}" tabindex="0" role="button" aria-label="Open details for ${escape(c.title ?? '')}">
+        <h4 class="horizon-card-title">${escape(c.title ?? '')}</h4>
+        ${c.summary ? `<p class="horizon-card-summary">${safeRich(c.summary)}</p>` : ''}
+      </div>`;
+    const laneHtml = (s) => {
+      const lc = cards.filter(c => c.status === s);
+      return `<div class="horizon-lane">
+        <h3 class="horizon-lane-head">${STATUS_LABEL[s]} <span class="horizon-lane-count">${lc.length}</span></h3>
+        ${lc.length === 0 ? `<p class="horizon-lane-empty">—</p>` : lc.map(horizonCard).join('')}
+      </div>`;
+    };
+
+    host.innerHTML = `<div class="timeline-doc">
+      <section class="timeline-shipped" aria-label="Shipped — by date">
+        <h3 class="timeline-section-head">Shipped <span class="timeline-section-note">— what I've shipped, when</span></h3>
+        ${shippedHtml}
+      </section>
+      <section class="timeline-horizon" aria-label="Now / Next / Later — horizon">
+        <h3 class="timeline-section-head">Horizon <span class="timeline-section-note">— priority order, not a schedule</span></h3>
+        <div class="horizon-lanes">${['now', 'next', 'later'].map(laneHtml).join('')}</div>
+      </section>
+    </div>`;
+    timelineBuilt = true;
+  };
+
+  // The four view panels, keyed by their tab's data-view value.
+  const VIEW_PANELS = { board: 'board', table: 'view-table', specs: 'view-specs', timeline: 'view-timeline' };
 
   // Switch the active board view. Only tabs carrying [data-view] are
-  // switchable; disabled ones (Timeline) are ignored. The non-default
-  // views (table, specs) are built lazily on first activation.
+  // switchable; disabled ones are ignored. The non-default views
+  // (table, specs, timeline) are built lazily on first activation.
   const switchView = (view) => {
     document.querySelectorAll('.board-views .view-tab').forEach((t) => {
       const active = t.dataset.view === view;
@@ -445,8 +515,9 @@
       t.setAttribute('aria-selected', active ? 'true' : 'false');
       if (t.dataset.view) t.tabIndex = active ? 0 : -1;
     });
-    if (view === 'table' && !tableBuilt) buildTableView();
-    if (view === 'specs' && !specsBuilt) buildSpecView();
+    if (view === 'table'    && !tableBuilt)    buildTableView();
+    if (view === 'specs'    && !specsBuilt)    buildSpecView();
+    if (view === 'timeline' && !timelineBuilt) buildTimelineView();
     Object.entries(VIEW_PANELS).forEach(([v, id]) => {
       const el = document.getElementById(id);
       if (el) el.hidden = (v !== view);
@@ -475,20 +546,25 @@
     });
     enabledTabs().forEach((t) => { t.tabIndex = t.classList.contains('is-active') ? 0 : -1; });
 
-    // Open a card when its table row is clicked / Enter/Space-activated.
-    const table = document.getElementById('view-table');
-    if (table) {
-      table.addEventListener('click', (ev) => {
+    // Open the card-detail panel when an element matching `sel` (carrying
+    // data-card-id) inside `containerId` is clicked or Enter/Space-activated.
+    // Used by the Table view (table rows) and the Timeline view (entries).
+    const wireCardOpener = (containerId, sel) => {
+      const host = document.getElementById(containerId);
+      if (!host) return;
+      host.addEventListener('click', (ev) => {
         if (ev.target.closest('a')) return;                        // let link clicks through
-        const tr = ev.target.closest('tr[data-card-id]');
-        if (tr) openCardModal(tr.dataset.cardId);
+        const el = ev.target.closest(sel);
+        if (el) openCardModal(el.dataset.cardId);
       });
-      table.addEventListener('keydown', (ev) => {
+      host.addEventListener('keydown', (ev) => {
         if (ev.key !== 'Enter' && ev.key !== ' ') return;
-        const tr = ev.target.closest('tr[data-card-id]');
-        if (tr && document.activeElement === tr) { ev.preventDefault(); openCardModal(tr.dataset.cardId); }
+        const el = ev.target.closest(sel);
+        if (el && document.activeElement === el) { ev.preventDefault(); openCardModal(el.dataset.cardId); }
       });
-    }
+    };
+    wireCardOpener('view-table', 'tr[data-card-id]');
+    wireCardOpener('view-timeline', '[data-card-id]');
   };
 
   const renderLens = (lens) => {

@@ -759,6 +759,115 @@ button:focus-visible,
 .spec-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-12); }
 .spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
 
+/* ── Timeline view ────────────────────────────────────────────────────
+   Shipped cards on a real date axis ("ship log"); Now/Next/Later below
+   as an un-dated horizon. Built by scripts/render.js. (No `display` set
+   on .board-timeline-view so the UA [hidden] rule still hides it.) */
+.timeline-doc { max-width: 880px; margin: 0 auto; padding-top: var(--sp-8); }
+.timeline-empty {
+  padding: var(--sp-24);
+  text-align: center;
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+.timeline-section-head {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding-bottom: var(--sp-8);
+  margin-bottom: var(--sp-20);
+  border-bottom: var(--bw) solid var(--color-line);
+}
+.timeline-section-note { text-transform: none; letter-spacing: 0; color: var(--color-text-faint); }
+.timeline-shipped { margin-bottom: var(--sp-48); }
+.timeline-rail { list-style: none; }
+.timeline-year { position: relative; padding-left: var(--sp-24); border-left: 2px solid var(--color-line); margin-bottom: var(--sp-24); }
+.timeline-year:last-child { border-left-color: transparent; }
+.timeline-year-head {
+  font-family: var(--font-mono);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-dim);
+  margin: 0 0 var(--sp-16) calc(-1 * var(--sp-24));
+  padding-left: var(--sp-24);
+}
+.timeline-entry {
+  position: relative;
+  margin-bottom: var(--sp-20);
+  cursor: pointer;
+  padding: var(--sp-4) var(--sp-8) var(--sp-8);
+  margin-left: calc(-1 * var(--sp-8));
+  border-radius: var(--r-sm);
+  transition: background var(--dur-quick);
+}
+.timeline-entry:hover { background: var(--color-bg-soft); }
+.timeline-entry:focus-visible { outline: 2px solid var(--color-blue); outline-offset: -2px; }
+.timeline-dot {
+  position: absolute;
+  left: calc(-1 * var(--sp-24) - 5px);
+  top: var(--sp-8);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-yellow);
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 0 0 1px var(--color-line);
+}
+.timeline-date { font-family: var(--font-mono); font-size: var(--fs-11); color: var(--color-text-faint); margin-bottom: var(--sp-4); }
+.timeline-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-17);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  margin-bottom: var(--sp-4);
+}
+.timeline-summary { color: var(--color-text-dim); margin-bottom: var(--sp-4); }
+.timeline-impact { color: var(--color-blue); font-size: var(--fs-12); margin-bottom: var(--sp-4); }
+.timeline-links { display: flex; flex-wrap: wrap; gap: var(--sp-12); }
+.timeline-links a { color: var(--color-blue); font-size: var(--fs-13); }
+
+/* horizon — Now / Next / Later (no real dates) */
+.horizon-lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-16); }
+.horizon-lane-head {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding-bottom: var(--sp-6);
+  margin-bottom: var(--sp-10);
+  border-bottom: var(--bw) solid var(--color-line-soft);
+}
+.horizon-lane-count {
+  display: inline-block;
+  margin-left: var(--sp-4);
+  padding: 0 var(--sp-6);
+  border-radius: var(--r-sm);
+  background: var(--color-bg-soft);
+  color: var(--color-text-dim);
+}
+.horizon-lane-empty { color: var(--color-text-faint); font-family: var(--font-mono); font-size: var(--fs-12); }
+.horizon-card {
+  padding: var(--sp-10);
+  margin-bottom: var(--sp-8);
+  border: var(--bw) solid var(--color-line-soft);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color var(--dur-quick), transform var(--dur-quick);
+}
+.horizon-card:hover { border-color: var(--color-blue); transform: translateY(-1px); }
+.horizon-card:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 1px; }
+.horizon-card-title { font-size: var(--fs-13); font-weight: var(--fw-medium); color: var(--color-text); margin-bottom: var(--sp-4); }
+.horizon-card-summary { font-size: var(--fs-12); color: var(--color-text-dim); }
+
+@media (max-width: 768px) {
+  .horizon-lanes { grid-template-columns: 1fr; }
+}
+
 /* ── Card ─────────────────────────────────────────────────────────────── */
 .card {
   /* Reset user-agent button styles (rendered as <button> for click + a11y) */
