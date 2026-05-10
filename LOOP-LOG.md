@@ -315,3 +315,38 @@ Board). Hard-refresh works around it; this fix prevents recurrence:
   and wraps the build in try/catch (logs + shows an in-panel "Couldn't build this
   view — …" message) so a build error surfaces instead of silently leaving the
   view unchanged.
+
+---
+
+## 2026-05-10 — Timeline redesign: horizontal mini-Gantt
+
+Owner wasn't happy with the plain vertical-rail Timeline; confirmed the new
+shape via questions: **horizontal axis, years marked, shipped projects as
+bars** (`started` → `updated`/end) **on a real month/year scale, overlapping
+bars packed into lanes** (a mini-Gantt); a project with no `started` shows as
+a dot at its end date; **Now/Next/Later dropped from the Timeline** (they stay
+in Board/Table/Spec); hand-built, no library. Owner also asked for a `started`
+field on cards (shipped + Now, `"YYYY-MM-DD"`) — that's a follow-up content
+edit, pending the owner's start dates; until then every shipped card renders
+as a dot.
+
+- `render.js` — rewrote `buildTimelineView()`: parse `started`/`updated`,
+  build a date axis (earliest → max(latest end, today), padded), proportional
+  `left`/`width` %, greedy lane-packing for overlaps, month/year tick marks +
+  a "today" line. Markers are clickable (reuse the `wireCardOpener('view-timeline', …)`
+  delegation). Bars vs dots handled. The timeline is chronological — the
+  audience lens doesn't apply (still calls `rebuildIfVisible('view-timeline')`
+  in `applyAudience`, which is now a harmless no-op rebuild).
+- `styles/main.css` — replaced the whole `/* Timeline view */` block (and the
+  now-unused `.horizon-*` rules) with the horizontal-Gantt styles: a `--track-w`
+  (≈160px/month) that's at least the container width, an `overflow-x: auto`
+  scroller, dashed month gridlines + solid year lines, the axis line, a blue
+  "today" line, lane rows, and bar/dot markers whose label spills past short bars.
+
+**Tested:** `node -c scripts/render.js` → OK; `node scripts/build.js` → passes,
+idempotent (index.html's only diff is the new `render.js` `?v=` hash from the
+cache-bust). No browser here — the owner will review the live result; expect
+to iterate on spacing/labels/colours.
+
+**Status:** branch pushed → PR opened → review → merge → verify. (Then: the
+`started` content edit once the owner sends the start dates.)

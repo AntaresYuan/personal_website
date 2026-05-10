@@ -775,18 +775,14 @@ button:focus-visible,
 .spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
 
 /* ── Timeline view ────────────────────────────────────────────────────
-   Shipped cards on a real date axis ("ship log"); Now/Next/Later below
-   as an un-dated horizon. Built by scripts/render.js. (No `display` set
-   on .board-timeline-view so the UA [hidden] rule still hides it.) */
-.timeline-doc { max-width: 880px; margin: 0 auto; padding-top: var(--sp-8); }
-.timeline-empty {
-  padding: var(--sp-24);
-  text-align: center;
-  color: var(--color-text-faint);
-  font-family: var(--font-mono);
-  font-size: var(--fs-12);
-}
-.timeline-section-head {
+   A horizontal "ship log" / mini-Gantt: each Shipped card is a bar from its
+   `started` date to its `updated` (end) date, on a real month/year axis;
+   bars that overlap in time stack into lanes. A card with no `started` (or
+   started >= end) renders as a dot at its end date. Built by scripts/render.js.
+   (No `display` set on .board-timeline-view, so the UA [hidden] rule still
+   hides it.) Markers (bars/dots) are positioned by left/width % set inline. */
+.timeline-doc { padding-top: var(--sp-8); }
+.timeline-head {
   font-family: var(--font-mono);
   font-size: var(--fs-12);
   letter-spacing: var(--tracking-wide);
@@ -796,92 +792,117 @@ button:focus-visible,
   margin-bottom: var(--sp-20);
   border-bottom: var(--bw) solid var(--color-line);
 }
-.timeline-section-note { text-transform: none; letter-spacing: 0; color: var(--color-text-faint); }
-.timeline-shipped { margin-bottom: var(--sp-48); }
-.timeline-rail { list-style: none; }
-.timeline-year { position: relative; padding-left: var(--sp-24); border-left: 2px solid var(--color-line); margin-bottom: var(--sp-24); }
-.timeline-year:last-child { border-left-color: transparent; }
-.timeline-year-head {
+.timeline-head-note { text-transform: none; letter-spacing: 0; }
+.timeline-empty {
+  padding: var(--sp-24);
+  text-align: center;
+  color: var(--color-text-faint);
   font-family: var(--font-mono);
-  font-size: var(--fs-15);
-  font-weight: var(--fw-semibold);
-  color: var(--color-text-dim);
-  margin: 0 0 var(--sp-16) calc(-1 * var(--sp-24));
-  padding-left: var(--sp-24);
+  font-size: var(--fs-12);
 }
-.timeline-entry {
+.timeline-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* The track: a relative box at least as wide as the container (--track-w from
+   render.js ≈ 160px/month). 26px of bottom padding holds the axis line + the
+   month labels; everything inside is positioned by left/width %. */
+.timeline-track {
   position: relative;
-  margin-bottom: var(--sp-20);
-  cursor: pointer;
-  padding: var(--sp-4) var(--sp-8) var(--sp-8);
-  margin-left: calc(-1 * var(--sp-8));
-  border-radius: var(--r-sm);
-  transition: background var(--dur-quick);
+  width: var(--track-w, 100%);
+  min-width: 100%;
+  padding-bottom: 26px;
 }
-.timeline-entry:hover { background: var(--color-bg-soft); }
-.timeline-entry:focus-visible { outline: 2px solid var(--color-blue); outline-offset: -2px; }
-.timeline-dot {
+/* Month gridlines + labels. The dashed line runs the full lane height; the
+   label sits just below the axis, centred on the tick. */
+.timeline-tick {
   position: absolute;
-  left: calc(-1 * var(--sp-24) - 5px);
-  top: var(--sp-8);
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--color-yellow);
-  border: 2px solid var(--color-bg);
-  box-shadow: 0 0 0 1px var(--color-line);
+  top: 0;
+  bottom: 26px;
+  width: 0;
+  border-left: var(--bw) dashed var(--color-line-soft);
+  pointer-events: none;
 }
-.timeline-date { font-family: var(--font-mono); font-size: var(--fs-11); color: var(--color-text-faint); margin-bottom: var(--sp-4); }
-.timeline-title {
-  font-family: var(--font-serif);
-  font-size: var(--fs-17);
+.timeline-tick.is-year { border-left-style: solid; border-left-color: var(--color-line); }
+.timeline-tick-label {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+.timeline-tick.is-year .timeline-tick-label { color: var(--color-text-dim); font-weight: var(--fw-semibold); }
+/* The axis line, just above the month labels. */
+.timeline-axis {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  height: var(--bw-thick);
+  background: var(--color-line);
+}
+/* "today" — a distinct vertical line through the lanes. */
+.timeline-today {
+  position: absolute;
+  top: 0;
+  bottom: 26px;
+  width: 0;
+  border-left: var(--bw-thick) solid var(--color-blue);
+  pointer-events: none;
+}
+.timeline-today-label {
+  position: absolute;
+  top: -1px;
+  left: 5px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-blue);
+  white-space: nowrap;
+}
+/* Lanes — rows of markers above the axis. z-index lifts them over the grid. */
+.timeline-lanes { position: relative; z-index: 1; padding-bottom: var(--sp-8); }
+.timeline-lane { position: relative; height: 34px; }
+/* A bar (a project's start→end span) or a point (no `started`). Width % set
+   inline for bars; points are width:0 with the fill drawn as a small dot. The
+   label sits at the bar's left edge and is allowed to spill past a short bar. */
+.timeline-marker { position: absolute; top: 5px; height: 24px; cursor: pointer; }
+.timeline-marker.is-point { width: 0; }
+.timeline-marker-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-sm);
+  background: var(--color-yellow-soft);
+  border: var(--bw) solid var(--color-yellow);
+  transition: filter var(--dur-quick), box-shadow var(--dur-quick);
+}
+.timeline-marker.is-point .timeline-marker-fill {
+  inset: auto;
+  top: 50%;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  border-width: 2px;
+}
+.timeline-marker-label {
+  position: absolute;
+  left: var(--sp-8);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: var(--fs-12);
   font-weight: var(--fw-medium);
   color: var(--color-text);
-  margin-bottom: var(--sp-4);
+  pointer-events: none;
 }
-.timeline-summary { color: var(--color-text-dim); margin-bottom: var(--sp-4); }
-.timeline-impact { color: var(--color-blue); font-size: var(--fs-12); margin-bottom: var(--sp-4); }
-.timeline-links { display: flex; flex-wrap: wrap; gap: var(--sp-12); }
-.timeline-links a { color: var(--color-blue); font-size: var(--fs-13); }
-
-/* horizon — Now / Next / Later (no real dates) */
-.horizon-lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-16); }
-.horizon-lane-head {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-  padding-bottom: var(--sp-6);
-  margin-bottom: var(--sp-10);
-  border-bottom: var(--bw) solid var(--color-line-soft);
+.timeline-marker.is-point .timeline-marker-label { left: 12px; }
+.timeline-marker:hover .timeline-marker-fill,
+.timeline-marker:focus-visible .timeline-marker-fill {
+  filter: brightness(0.97);
+  box-shadow: 0 0 0 2px var(--color-blue);
 }
-.horizon-lane-count {
-  display: inline-block;
-  margin-left: var(--sp-4);
-  padding: 0 var(--sp-6);
-  border-radius: var(--r-sm);
-  background: var(--color-bg-soft);
-  color: var(--color-text-dim);
-}
-.horizon-lane-empty { color: var(--color-text-faint); font-family: var(--font-mono); font-size: var(--fs-12); }
-.horizon-card {
-  padding: var(--sp-10);
-  margin-bottom: var(--sp-8);
-  border: var(--bw) solid var(--color-line-soft);
-  border-radius: var(--r-sm);
-  background: var(--color-surface);
-  cursor: pointer;
-  transition: border-color var(--dur-quick), transform var(--dur-quick);
-}
-.horizon-card:hover { border-color: var(--color-blue); transform: translateY(-1px); }
-.horizon-card:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 1px; }
-.horizon-card-title { font-size: var(--fs-13); font-weight: var(--fw-medium); color: var(--color-text); margin-bottom: var(--sp-4); }
-.horizon-card-summary { font-size: var(--fs-12); color: var(--color-text-dim); }
-
-@media (max-width: 768px) {
-  .horizon-lanes { grid-template-columns: 1fr; }
-}
+.timeline-marker:focus-visible { outline: none; }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
 .card {

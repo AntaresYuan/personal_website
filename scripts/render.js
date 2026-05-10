@@ -474,71 +474,125 @@
     specsBuilt = true;
   };
 
-  // Build the Timeline view into #view-timeline from cardIndex. Shipped cards
-  // sit on a real date axis (a "ship log", oldest → newest, grouped by year);
-  // Now/Next/Later have no real dates, so they go below as an un-dated
-  // "Horizon" (priority order, not a schedule). A reading view: no tag filter.
+  // Build the Timeline view into #view-timeline — a horizontal "ship log":
+  // every Shipped card laid out on a real month/year axis as a bar from its
+  // `started` date to its `updated` (end) date; bars that overlap in time get
+  // packed into separate lanes (a mini-Gantt). A card with no parseable
+  // `started` (or started >= end) renders as a single dot at its end date.
+  // Only Shipped cards — Now/Next/Later live in the Board/Table/Spec views.
+  // Always chronological; the audience lens doesn't apply here.
   const buildTimelineView = () => {
     const host = document.getElementById('view-timeline');
     if (!host) return;
-    const cards = currentCards();
-    if (cards.length === 0) {
-      host.innerHTML = `<p class="timeline-empty">no cards yet</p>`;
+    const shipped = [...cardIndex.values()].filter((c) => c.status === 'shipped');
+
+    const DAY = 86400000;
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // YYYY-MM-DD or YYYY-MM → epoch ms (UTC noon, to dodge DST); null otherwise.
+    const parseDate = (d) => {
+      const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?/.exec(String(d ?? ''));
+      return m ? Date.UTC(+m[1], +m[2] - 1, m[3] ? +m[3] : 1, 12) : null;
+    };
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+
+    // { c, displayId, start, end, isPoint } — end = updated; start = `started`
+    // if it parses and falls strictly before end, else null (→ a point at end).
+    const items = shipped.map((c) => {
+      const end = parseDate(c.updated);
+      const sr  = parseDate(c.started);
+      const start = (sr != null && end != null && sr < end) ? sr : null;
+      return { c, displayId: c.displayId, start, end, isPoint: start == null };
+    }).filter((it) => it.end != null);
+
+    if (items.length === 0) {
+      host.innerHTML = `<div class="timeline-doc"><h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date</span></h3><p class="timeline-empty">nothing shipped yet</p></div>`;
       timelineBuilt = true;
       return;
     }
-    const linksOf = (c) => (c.links ?? []).filter(l => l.href && l.href !== '#')
-      .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
 
-    // ── Shipped → time axis ──────────────────────────────────────────
-    const shipped = cards.filter(c => c.status === 'shipped').slice().sort((a, b) =>
-      (a.updated ?? '').localeCompare(b.updated ?? ''));   // oldest first
-    const yearOf = (d) => (typeof d === 'string' && /^\d{4}/.test(d)) ? d.slice(0, 4) : 'Undated';
-    const years = [];                                       // preserve first-seen order
-    const byYear = new Map();
-    shipped.forEach((c) => {
-      const y = yearOf(c.updated);
-      if (!byYear.has(y)) { byYear.set(y, []); years.push(y); }
-      byYear.get(y).push(c);
+    // Axis: earliest start/end → max(latest end, today), padded a little.
+    const lo  = Math.min(...items.map((it) => it.start != null ? it.start : it.end));
+    const hi  = Math.max(today, ...items.map((it) => it.end));
+    const pad = Math.max(DAY * 14, (hi - lo) * 0.05);
+    const axisMin = lo - pad, axisMax = hi + pad;
+    const span = (axisMax - axisMin) || DAY;
+    const pct  = (t) => Math.max(0, Math.min(100, ((t - axisMin) / span) * 100));
+
+    // Lane-pack: order by start (points use their date); place each item in
+    // the first lane that's clear (a week's gap) at that point, else a new one.
+    const GAP = DAY * 7;
+    const ordered = items.slice().sort((a, b) =>
+      (a.start != null ? a.start : a.end) - (b.start != null ? b.start : b.end));
+    const lanes = [];
+    ordered.forEach((it) => {
+      const itStart = it.start != null ? it.start : it.end;
+      let lane = lanes.find((L) => L.endsAt + GAP <= itStart);
+      if (!lane) { lane = { endsAt: -Infinity, items: [] }; lanes.push(lane); }
+      lane.items.push(it);
+      lane.endsAt = Math.max(lane.endsAt, it.end);
     });
-    // Put "Undated" last if present
-    const orderedYears = years.filter(y => y !== 'Undated').concat(years.includes('Undated') ? ['Undated'] : []);
-    const entryHtml = (c) => `<div class="timeline-entry" data-card-id="${escape(c.displayId)}" tabindex="0" role="button" aria-label="Open details for ${escape(c.title ?? '')}">
-        <span class="timeline-dot" aria-hidden="true"></span>
-        ${c.updated ? `<p class="timeline-date">${escape(c.updated)}</p>` : ''}
-        <h4 class="timeline-title">${escape(c.title ?? '')}</h4>
-        ${c.summary ? `<p class="timeline-summary">${safeRich(c.summary)}</p>` : ''}
-        ${c.impact ? `<p class="timeline-impact">${escape(c.impact)}</p>` : ''}
-        ${linksOf(c) ? `<div class="timeline-links">${linksOf(c)}</div>` : ''}
-      </div>`;
-    const shippedHtml = shipped.length === 0
-      ? `<p class="timeline-empty">nothing shipped yet</p>`
-      : `<ol class="timeline-rail">${orderedYears.map((y) =>
-          `<li class="timeline-year"><h3 class="timeline-year-head">${escape(y)}</h3>${byYear.get(y).map(entryHtml).join('')}</li>`
-        ).join('')}</ol>`;
 
-    // ── Now / Next / Later → un-dated horizon ────────────────────────
-    const horizonCard = (c) => `<div class="horizon-card" data-card-id="${escape(c.displayId)}" tabindex="0" role="button" aria-label="Open details for ${escape(c.title ?? '')}">
-        <h4 class="horizon-card-title">${escape(c.title ?? '')}</h4>
-        ${c.summary ? `<p class="horizon-card-summary">${safeRich(c.summary)}</p>` : ''}
-      </div>`;
-    const laneHtml = (s) => {
-      const lc = cards.filter(c => c.status === s);
-      return `<div class="horizon-lane">
-        <h3 class="horizon-lane-head">${STATUS_LABEL[s]} <span class="horizon-lane-count">${lc.length}</span></h3>
-        ${lc.length === 0 ? `<p class="horizon-lane-empty">—</p>` : lc.map(horizonCard).join('')}
+    // Month ticks across the range; January (or, if none, the first tick)
+    // carries the year. Each tick also draws a faint full-height gridline.
+    const ticks = [];
+    {
+      const d0 = new Date(axisMin);
+      let ty = d0.getUTCFullYear(), tm = d0.getUTCMonth();
+      if (d0.getUTCDate() > 1 || d0.getUTCHours() > 0) { tm += 1; if (tm > 11) { tm = 0; ty += 1; } }
+      let t = Date.UTC(ty, tm, 1, 12);
+      let guard = 0;
+      while (t <= axisMax && guard++ < 600) {
+        const dt = new Date(t);
+        ticks.push({ t, label: MONTHS[dt.getUTCMonth()], year: dt.getUTCMonth() === 0 ? dt.getUTCFullYear() : null });
+        let nm = dt.getUTCMonth() + 1, ny = dt.getUTCFullYear();
+        if (nm > 11) { nm = 0; ny += 1; }
+        t = Date.UTC(ny, nm, 1, 12);
+      }
+      if (ticks.length && !ticks.some((tk) => tk.year != null)) {
+        ticks[0].year = new Date(ticks[0].t).getUTCFullYear();
+      }
+    }
+
+    // Natural track width: ~160px per month, but never narrower than the
+    // container (so sparse data still fills the width instead of huddling left).
+    const trackPx = Math.round(Math.max(1, (axisMax - axisMin) / (DAY * 30.4)) * 160);
+
+    const markerHtml = (it) => {
+      const c = it.c;
+      const left = pct(it.isPoint ? it.end : it.start);
+      const dateText = it.isPoint
+        ? escape(c.updated ?? '')
+        : `${escape(c.started ?? '')} → ${escape(c.updated ?? '')}`;
+      const style = it.isPoint
+        ? `left:${left.toFixed(3)}%`
+        : `left:${left.toFixed(3)}%;width:${Math.max(0.4, pct(it.end) - left).toFixed(3)}%`;
+      return `<div class="timeline-marker ${it.isPoint ? 'is-point' : 'is-bar'}" style="${style}" data-card-id="${escape(it.displayId)}" tabindex="0" role="button" title="${dateText}" aria-label="Open details for ${escape(c.title ?? '')} — ${dateText}">
+        <span class="timeline-marker-fill" aria-hidden="true"></span>
+        <span class="timeline-marker-label">${escape(c.title ?? '')}</span>
       </div>`;
     };
 
+    const lanesHtml = lanes.map((L) =>
+      `<div class="timeline-lane">${L.items.map(markerHtml).join('')}</div>`
+    ).join('');
+    const ticksHtml = ticks.map((tk) =>
+      `<div class="timeline-tick${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%"><span class="timeline-tick-label">${tk.year != null ? tk.year : escape(tk.label)}</span></div>`
+    ).join('');
+    const todayHtml = (today >= axisMin && today <= axisMax)
+      ? `<div class="timeline-today" style="left:${pct(today).toFixed(3)}%"><span class="timeline-today-label">today</span></div>`
+      : '';
+
     host.innerHTML = `<div class="timeline-doc">
-      <section class="timeline-shipped" aria-label="Shipped — by date">
-        <h3 class="timeline-section-head">Shipped <span class="timeline-section-note">— what I've shipped, when</span></h3>
-        ${shippedHtml}
-      </section>
-      <section class="timeline-horizon" aria-label="Now / Next / Later — horizon">
-        <h3 class="timeline-section-head">Horizon <span class="timeline-section-note">— priority order, not a schedule</span></h3>
-        <div class="horizon-lanes">${['now', 'next', 'later'].map(laneHtml).join('')}</div>
-      </section>
+      <h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date</span></h3>
+      <div class="timeline-scroll">
+        <div class="timeline-track" style="--track-w:${trackPx}px">
+          ${ticksHtml}
+          <div class="timeline-lanes">${lanesHtml}</div>
+          <div class="timeline-axis" aria-hidden="true"></div>
+          ${todayHtml}
+        </div>
+      </div>
     </div>`;
     timelineBuilt = true;
   };
