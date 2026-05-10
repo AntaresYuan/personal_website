@@ -468,6 +468,21 @@ button:focus-visible,
 }
 .board-stat.sep { color: var(--color-text-faint); }
 
+/* Audience lens — small <select> in the board toolbar. Re-orders cards
+   for a particular reader (HR / founders / collaborators); "For everyone"
+   is the default no-op. Behaviour: scripts/render.js. */
+.audience-lens {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-dim);
+  background: var(--color-bg-soft);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  padding: 3px var(--sp-6);
+  cursor: pointer;
+}
+.audience-lens:hover { border-color: var(--color-blue); color: var(--color-text); }
+
 /* ── Filter chips ──────────────────────────────────────────────────── */
 .board-filters {
   display: flex;

@@ -256,6 +256,7 @@
      AND table rows (the Spec and Timeline views are reading docs — no filter). */
 
   let currentFilter = 'all';
+  let currentAudience = 'everyone';        // audience lens — see personaSort / applyAudience
   let tableBuilt = false;
   let specsBuilt = false;
   let timelineBuilt = false;
@@ -264,6 +265,29 @@
 
   const STATUS_LABEL = { shipped: 'Shipped', now: 'Now', next: 'Next', later: 'Later' };
   const STATUS_RANK  = { shipped: 0, now: 1, next: 2, later: 3 };
+
+  /* ── Audience lens ─────────────────────────────────────────────────
+     A reading preset that re-orders cards for a particular reader,
+     cutting across every view. Default 'everyone' is a strict no-op, so
+     the SSG-prerendered output is unchanged. Just a sort/curation layer
+     — no layout change. Higher score = earlier. */
+  const scoreFor = (c, persona) => {
+    const tags = (c.tags ?? []).map((t) => String(t).toLowerCase());
+    const hasImpact = !!(c.impact && String(c.impact).trim());
+    const hasLinks = (c.links ?? []).some((l) => l.href && l.href !== '#');
+    const is01 = tags.includes('0→1') || tags.includes('0->1');
+    switch (persona) {
+      case 'hr':            return (c.status === 'shipped' ? 3 : 0) + (hasImpact ? 2 : 0);
+      case 'founders':      return (is01 ? 3 : 0) + (c.status === 'next' || c.status === 'later' ? 2 : 0) + (c.status === 'now' ? 1 : 0);
+      case 'collaborators': return (c.status === 'now' ? 3 : 0) + (hasLinks ? 1 : 0) + (c.status === 'next' ? 1 : 0);
+      default:              return 0;       // 'everyone'
+    }
+  };
+  // Returns a re-ordered COPY. Array.sort is stable, so equal-score cards
+  // keep their incoming (board) order; 'everyone' returns the copy untouched.
+  const personaSort = (cards, persona) => (persona && persona !== 'everyone')
+    ? cards.slice().sort((a, b) => scoreFor(b, persona) - scoreFor(a, persona))
+    : cards.slice();
 
   // Toggle `.is-filtered` (CSS hides it) on every card and table row whose
   // data-tags doesn't include the active tag. Re-applied when the table is
@@ -345,7 +369,7 @@
   const buildTableView = () => {
     const host = document.getElementById('view-table');
     if (!host) return;
-    const cards = [...cardIndex.values()];
+    const cards = personaSort([...cardIndex.values()], currentAudience);
     if (cards.length === 0) {
       host.innerHTML = `<p class="table-empty">no cards yet</p>`;
       tableBuilt = true;
@@ -396,7 +420,7 @@
   const buildSpecView = () => {
     const host = document.getElementById('view-specs');
     if (!host) return;
-    const cards = [...cardIndex.values()];
+    const cards = personaSort([...cardIndex.values()], currentAudience);
     if (cards.length === 0) {
       host.innerHTML = `<p class="spec-empty">no cards yet</p>`;
       specsBuilt = true;
@@ -441,7 +465,7 @@
   const buildTimelineView = () => {
     const host = document.getElementById('view-timeline');
     if (!host) return;
-    const cards = [...cardIndex.values()];
+    const cards = personaSort([...cardIndex.values()], currentAudience);
     if (cards.length === 0) {
       host.innerHTML = `<p class="timeline-empty">no cards yet</p>`;
       timelineBuilt = true;
@@ -501,6 +525,35 @@
       </section>
     </div>`;
     timelineBuilt = true;
+  };
+
+  // Apply the audience lens: re-order the kanban column DOM nodes in place,
+  // and (re)build the flat views so they pick up the new order. 'everyone'
+  // restores board order. The Timeline's Shipped section stays chronological
+  // regardless (a date axis is its identity); only its Horizon lanes re-order.
+  const applyAudience = (persona) => {
+    currentAudience = (persona && persona !== 'everyone') ? persona : 'everyone';
+    const orderIdx = new Map();
+    orderedIds().forEach((id, i) => orderIdx.set(id, i));
+    ['shipped', 'now', 'next', 'later'].forEach((status) => {
+      const root = document.querySelector(`[data-cards="${status}"]`);
+      if (!root) return;
+      const pairs = Array.from(root.querySelectorAll('.card[data-card-id]'))
+        .map((n) => ({ n, c: cardIndex.get(n.dataset.cardId), o: orderIdx.get(n.dataset.cardId) ?? 0 }))
+        .filter((p) => p.c);
+      pairs.sort((a, b) => {
+        const s = (currentAudience === 'everyone') ? 0 : (scoreFor(b.c, currentAudience) - scoreFor(a.c, currentAudience));
+        return s !== 0 ? s : a.o - b.o;                  // tie / 'everyone' → board order
+      });
+      pairs.forEach(({ n }) => root.appendChild(n));
+    });
+    // Flat views order via personaSort on build — invalidate, and rebuild any
+    // that's currently visible so the change is immediate.
+    tableBuilt = specsBuilt = timelineBuilt = false;
+    const rebuildIfVisible = (id, build) => { const el = document.getElementById(id); if (el && !el.hidden) build(); };
+    rebuildIfVisible('view-table', buildTableView);
+    rebuildIfVisible('view-specs', buildSpecView);
+    rebuildIfVisible('view-timeline', buildTimelineView);
   };
 
   // The four view panels, keyed by their tab's data-view value.
@@ -566,6 +619,9 @@
     };
     wireCardOpener('view-table', 'tr[data-card-id]');
     wireCardOpener('view-timeline', '[data-card-id]');
+
+    // Audience lens — re-order cards per reader (no-op for 'everyone').
+    document.getElementById('audience-lens')?.addEventListener('change', (ev) => applyAudience(ev.target.value));
   };
 
   const renderLens = (lens) => {

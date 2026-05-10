@@ -132,3 +132,36 @@ pre-merge (commit 9eecc9f).
 verified live (`data-view="timeline"` tab + `#view-timeline` panel present;
 Spec/Table/kanban unaffected; #75 rebuild Action found no diff). Commented on
 #78. **Board view modes complete: Board · Table · Timeline · Specs.**
+
+---
+
+## 2026-05-10 — Task 4/6: `#78` audience lens
+
+**Branch:** `feat/board-audience-lens`
+
+**What:**
+- Added a small `<select id="audience-lens">` to the board toolbar (right side,
+  after the card counts): **For everyone** (default) · For HR · For founders ·
+  For collaborators. `aria-label` on the control.
+- `render.js`: `currentAudience` state; `scoreFor(c, persona)` (a per-persona
+  scoring fn — HR boosts shipped + cards with an `impact`; founders boost `0→1`
+  tags + next/later; collaborators boost `now` + cards with links); `personaSort`
+  (stable sort by score desc; `'everyone'` returns the array untouched). The
+  four `buildXView` functions now order their card list through `personaSort`.
+  `applyAudience(persona)` re-orders the kanban column DOM nodes in place
+  (`appendChild`, with a board-order tiebreak so `'everyone'` restores the
+  original order) and rebuilds any flat view that's currently visible. The
+  Timeline's Shipped section stays chronological regardless (a date axis is its
+  identity); only its Horizon lanes re-order. Wired a `change` listener on the
+  select. **`'everyone'` is a strict no-op** — boot doesn't call `applyAudience`,
+  so the SSG-prerendered card order is unchanged (verified: `git diff` on
+  index.html is +7 lines = just the `<select>` markup, no reordered cards).
+- `styles/main.css`: `.audience-lens` — small monospace `<select>` matching the
+  toolbar; hover state. Existing tokens.
+
+**Tested:**
+- `node -c scripts/render.js` → syntax OK.
+- `node scripts/build.js` → passes; `id="audience-lens"` present in built HTML;
+  prerendered kanban card order unchanged; rebuild idempotent.
+
+**Status:** branch pushed → PR opened → awaiting sub-agent review → merge → verify.
