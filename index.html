@@ -405,9 +405,9 @@
          `details` expanded). JS-rendered (scripts/render.js) on first switch. -->
     <div class="board-spec-view" id="view-specs" role="tabpanel" aria-labelledby="tab-specs" hidden></div>
 
-    <!-- Timeline view — Shipped cards on a real date axis (a "ship log"); Now /
-         Next / Later below as an un-dated "Horizon" (priority order, not a
-         schedule). JS-rendered (scripts/render.js) on first switch. -->
+    <!-- Timeline view — a horizontal "ship log" / mini-Gantt: every Shipped
+         card as a bar (started → updated) on a real month/year axis, overlapping
+         bars packed into lanes. JS-rendered (scripts/render.js) on first switch. -->
     <div class="board-timeline-view" id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden></div>
 
   </section>
@@ -665,7 +665,7 @@
      Pre-rendered HTML means no script is needed for first paint; these
      just add interactivity (modal, terminal, ⌘K palette). They still
      execute in document order after parse. -->
-<script src="scripts/render.js?v=38cdef50"   defer></script>
+<script src="scripts/render.js?v=494ce172"   defer></script>
 <script src="scripts/terminal.js?v=c7e4f7c1" defer></script>
 <script src="scripts/palette.js?v=5da44171"  defer></script>
 </body>

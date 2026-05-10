@@ -255,10 +255,12 @@
   /* ── Board view modes + tag filter ─────────────────────────────────
      The board has four views: Kanban (default — what build-html prerenders,
      so agents / no-JS see it), Table (sortable/filterable), Spec (long-form
-     doc), Timeline (Shipped on a date axis + Now/Next/Later as a horizon).
-     The non-default views are built lazily on first switch, all from
-     cardIndex (already in board order). Tag filter chips dim kanban cards
-     AND table rows (the Spec and Timeline views are reading docs — no filter). */
+     doc), Timeline (a horizontal Shipped-only ship-log / mini-Gantt).
+     The non-default views are built lazily on first switch, mostly from
+     cardIndex (already in board order; Timeline is always chronological).
+     Tag filter chips dim kanban cards AND table rows (the Spec and Timeline
+     views are reading docs — no filter). The audience lens reorders the
+     kanban / table / spec; the Timeline stays chronological. */
 
   let currentFilter = 'all';
   let currentAudience = 'everyone';        // audience lens — see personaSort / applyAudience
@@ -599,11 +601,11 @@
 
   // Apply the audience lens: re-order the kanban column DOM nodes in place,
   // and (re)build the flat views so they pick up the new order. 'everyone'
-  // restores board order. The Timeline's Shipped section stays chronological
-  // regardless (a date axis is its identity); only its Horizon lanes re-order.
-  // Note: the lens is purely a visual curation layer — the card-detail panel's
-  // ↑/↓ nav (and its "N / M" indicator) stay in the canonical board order, not
-  // the lensed order, since "next card" would otherwise be view-dependent.
+  // restores board order. (The Timeline is always chronological — the rebuild
+  // call below is a harmless no-op for it.) Note: the lens is purely a visual
+  // curation layer — the card-detail panel's ↑/↓ nav (and its "N / M"
+  // indicator) stay in the canonical board order, not the lensed order, since
+  // "next card" would otherwise be view-dependent.
   const applyAudience = (persona) => {
     currentAudience = (persona && persona !== 'everyone') ? persona : 'everyone';
     const orderIdx = new Map();
