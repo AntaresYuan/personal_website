@@ -296,3 +296,22 @@ PR bodies / multi-paragraph comments to a temp file and pass `--body-file`
 (markdown with `## headings` inline trips a gh prompt). `~/.claude/settings.json`
 holds the allowlist. The `.claude/settings.local.json` in this repo is the wrong
 path (project root here is the home dir) — it's gitignored and inert.
+
+---
+
+## 2026-05-10 — Post-loop fix: Timeline/Specs tabs "did nothing"
+
+Owner reported: clicking the Timeline / Specs tabs highlighted the tab but the
+content stayed the kanban. Diagnosed as a **stale-cached `render.js`** — CF Pages
+serves the `.js` files with a longer TTL than the `must-revalidate` `index.html`,
+so a normal reload pairs the new HTML (Timeline/Specs tabs enabled) with an old
+`render.js` whose `switchView` only knew Board↔Table (everything-else → reset to
+Board). Hard-refresh works around it; this fix prevents recurrence:
+
+- `build-html.js` now appends a content-hash `?v=` to each `<script src="scripts/*.js">`
+  (idempotent — re-derived from the current file each build). The `?v=` lives in
+  the always-fresh `index.html`, so a script change forces a refetch.
+- `render.js` — `switchView` now flips the panel **before** the lazy `buildXView()`,
+  and wraps the build in try/catch (logs + shows an in-panel "Couldn't build this
+  view — …" message) so a build error surfaces instead of silently leaving the
+  view unchanged.

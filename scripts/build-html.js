@@ -412,6 +412,22 @@ html = replaceInner(html, 'contact-list',  contactListHtml());
 // Footer
 html = replaceInner(html, 'footer-copyright', footerHtml());
 
+// Cache-bust the runtime scripts: append a content hash as `?v=` to each
+// <script src="scripts/*.js">. index.html is served must-revalidate (so it's
+// always fresh) but the .js files get a longer CDN TTL — without this, a fresh
+// index.html can pair with a stale render.js. Idempotent: an existing `?v=` is
+// re-derived from the current file content each build.
+const crypto = require('crypto');
+['render.js', 'terminal.js', 'palette.js'].forEach((f) => {
+  const v = crypto.createHash('sha1')
+    .update(fs.readFileSync(path.join(root, 'scripts', f)))
+    .digest('hex').slice(0, 8);
+  html = html.replace(
+    new RegExp(`src="scripts/${f.replace('.', '\\.')}(\\?v=[^"]*)?"`),
+    `src="scripts/${f}?v=${v}"`
+  );
+});
+
 /* ── Write ────────────────────────────────────────────────────────────── */
 fs.writeFileSync(tplPath, html);
 console.log(`✓ wrote index.html     (${fs.statSync(tplPath).size} bytes, ${cards.length} cards inlined)`);

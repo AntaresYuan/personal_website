@@ -588,13 +588,24 @@
       t.setAttribute('aria-selected', active ? 'true' : 'false');
       if (t.dataset.view) t.tabIndex = active ? 0 : -1;
     });
-    if (view === 'table'    && !tableBuilt)    buildTableView();
-    if (view === 'specs'    && !specsBuilt)    buildSpecView();
-    if (view === 'timeline' && !timelineBuilt) buildTimelineView();
+    // Show the active panel, hide the rest — do this FIRST, so the view
+    // actually changes even if a lazy build below throws.
     Object.entries(VIEW_PANELS).forEach(([v, id]) => {
       const el = document.getElementById(id);
       if (el) el.hidden = (v !== view);
     });
+    // Build the non-default views lazily on first activation. Guard it so a
+    // build error surfaces (console + an in-panel message) instead of leaving
+    // the view blank with no clue why.
+    try {
+      if (view === 'table'    && !tableBuilt)    buildTableView();
+      if (view === 'specs'    && !specsBuilt)    buildSpecView();
+      if (view === 'timeline' && !timelineBuilt) buildTimelineView();
+    } catch (e) {
+      console.error('[render] failed to build view:', view, e);
+      const el = document.getElementById(VIEW_PANELS[view]);
+      if (el) el.innerHTML = `<p style="padding:24px;color:var(--color-text-faint);font-family:var(--font-mono);font-size:13px;">Couldn’t build this view — ${escape(String((e && e.message) || e))}</p>`;
+    }
   };
 
   const wireViewTabs = () => {
