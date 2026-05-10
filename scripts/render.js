@@ -247,12 +247,13 @@
     });
   };
 
-  /* ── Board view modes (kanban ⇄ table) + tag filter ────────────────
-     The board renders as the kanban by default (and that's what build-html
-     prerenders, so agents / no-JS see it). The "Table" tab shows the same
-     cards as a sortable, filterable table — built lazily on first switch
-     from cardIndex (already in board order). Tag filter chips dim cards
-     AND table rows alike. Disabled tabs (Timeline / Specs) stay inert. */
+  /* ── Board view modes + tag filter ─────────────────────────────────
+     The board has four views: Kanban (default — what build-html prerenders,
+     so agents / no-JS see it), Table (sortable/filterable), Spec (long-form
+     doc), Timeline (Shipped on a date axis + Now/Next/Later as a horizon).
+     The non-default views are built lazily on first switch, all from
+     cardIndex (already in board order). Tag filter chips dim kanban cards
+     AND table rows (the Spec and Timeline views are reading docs — no filter). */
 
   let currentFilter = 'all';
   let tableBuilt = false;
