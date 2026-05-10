@@ -11,8 +11,13 @@
      section → smooth-scroll to anchor
      card    → CustomEvent('agent:open-card')  (render.js opens the panel)
      command → focus terminal input + prefill
+     faq     → show the answer inline; jump to the relevant card / section
      link    → open in new tab
-   ════════════════════════════════════════════════════════════════════════ */
+
+   The palette doubles as a pure-retrieval "ask this portfolio" (#76 Phase 1):
+   a small hand-authored FAQ list (below) plus token-overlap scoring, so a
+   typed question like "are you looking for a job" surfaces the right FAQ
+   entry / card. No embeddings, no model calls — just retrieval. */
 (() => {
   const root = document.getElementById('palette');
   const backdrop = document.getElementById('palette-backdrop');
@@ -67,6 +72,27 @@
     { label: '/llms-full.txt',   desc: 'agent full content',            href: '/llms-full.txt', external: true },
     { label: '/admin/',          desc: 'CMS (auth required)',           href: '/admin/',        external: true },
     { label: 'npx antares-cv',   desc: 'resume in your terminal',       href: 'https://www.npmjs.com/package/antares-cv', external: true },
+  ];
+
+  // Hand-authored FAQ — the "ask this portfolio" corpus (#76 Phase 1). Each
+  // entry: q (the question, also the result label), a (a one-line answer
+  // shown inline), and a target — `cardId` (opens the card panel), `anchor`
+  // (smooth-scrolls), or `href` (opens externally). cardIds assume the
+  // default board order: shipped 1/2/3 → SHIP-01/02/03; now 1/2/3 → NOW-01…
+  const FAQ = [
+    { q: 'are you looking for a job / open to roles?', a: 'Yes — open to AI PM roles at top labs & big-tech, founder conversations, and independent collaborations.', anchor: '#contact' },
+    { q: "what's your strongest shipped project?", a: 'SusBench — an IUI 2025 benchmark for how susceptible computer-use agents are to UI dark patterns; cited by 2 papers.', cardId: 'SHIP-03' },
+    { q: 'what are you building right now?', a: 'Lark Loom (a collaborative AI agent in the Lark ecosystem), Gmail++ (AI email ranking), and ApplyMint (one-click job-application autofill).', anchor: '#now' },
+    { q: 'how do I get in touch / contact you?', a: "Email and socials are in the Contact section — that's the fastest way.", anchor: '#contact' },
+    { q: 'where did you study / education?', a: 'Human-Centered Design & Engineering (HCDE) at the University of Washington.', anchor: '#main-content' },
+    { q: 'is this site agent-friendly? can an AI read it?', a: 'Yes — /llms.txt and /llms-full.txt, an embedded CLI on the page, and `npx antares-cv`. See the agent surfaces section.', anchor: '#agents' },
+    { q: "what's the site built with / tech stack?", a: 'Vanilla HTML/CSS/JS, Decap CMS, a pre-rendering SSG, deployed on Cloudflare Pages. Source is on GitHub.', href: 'https://github.com/AntaresYuan/personal_website' },
+    { q: 'what does "a star to ship by" mean?', a: 'A north star you steer by — pick a direction worth committing to, then ship toward it.', anchor: '#main-content' },
+    { q: "what's a Pi-shaped AI PM?", a: 'Product + HCI-research depth, plus enough builder fluency to ship 0→1 — not just spec it.', anchor: '#lens' },
+    { q: "what's Worth Fly?", a: 'WorthFly — flight search, decision support and alert drafts; the final fare, inventory and ticketing stay with the real booking channel.', cardId: 'SHIP-01' },
+    { q: "what's Gmail++ / Gmail Plus Plus?", a: 'An AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences.', cardId: 'NOW-02' },
+    { q: 'is the source code available?', a: 'Yes — github.com/AntaresYuan/personal_website (and there is a /admin/ CMS for editing content).', href: 'https://github.com/AntaresYuan/personal_website' },
+    { q: 'how do I edit the content?', a: 'Through Decap CMS at /admin/ (GitHub OAuth — owner only). A GitHub Action then rebuilds the static artifacts.', href: '/admin/' },
   ];
 
   const STATUS_GLYPH = { shipped: '✓', now: '→', next: '◇', later: '○' };
@@ -155,6 +181,24 @@
       });
     });
 
+    // FAQ — "ask this portfolio". The question is the label; the answer is
+    // shown inline; selecting it jumps to the relevant card / section / link.
+    FAQ.forEach((f) => {
+      out.push({
+        kind: 'faq',
+        icon: '?',
+        label: f.q,
+        answer: f.a,
+        meta: '',
+        search: `${f.q} ${f.a}`.toLowerCase(),
+        action: () => {
+          if (f.cardId) document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id: f.cardId } }));
+          else if (f.anchor) scrollToAnchor(f.anchor);
+          else if (f.href) window.open(f.href, '_blank', 'noopener');
+        },
+      });
+    });
+
     return out;
   };
 
@@ -179,9 +223,12 @@
   };
 
   /* ── Search / scoring ──────────────────────────────────────────── */
-  // Three-tier scoring: prefix > substring > subsequence. Prefix on the
-  // visible label dominates; everything else falls back to the combined
-  // search string. Empty query returns a curated default set.
+  // Common words to ignore when scoring multi-word ("question-like") queries.
+  const STOPWORDS = new Set(['a','an','the','is','are','was','were','be','of','to','in','on','at','for','and','or','do','does','did','what','whats','how','why','who','when','where','your','you','my','i','me','we','this','that','it','its','with','about','can','could','should','would','have','has','get','tell','show','give','any','am','re','s']);
+
+  // Tiers, best to worst: prefix-on-label > substring-on-label > substring-on-
+  // search > token-overlap (for multi-word / question queries — this is the
+  // "ask" path) > subsequence. Empty query returns a curated default set.
   const score = (q, item) => {
     if (!q) return 0;
     const label = item.label.toLowerCase();
@@ -190,6 +237,15 @@
     if (label.startsWith(q)) return 1000 - label.length;
     if (label.includes(q))   return 500  - label.indexOf(q);
     if (search.includes(q))  return 250  - search.indexOf(q);
+
+    // Token overlap — for multi-word / natural-language queries. Score by how
+    // many meaningful query tokens appear in the item's search text. Ranks
+    // above bare subsequence (which matches almost anything for long queries).
+    const tokens = q.split(/[^a-z0-9+]+/).filter((t) => t.length > 1 && !STOPWORDS.has(t));
+    if (tokens.length >= 2) {
+      const hits = tokens.filter((t) => search.includes(t)).length;
+      if (hits >= 2 || (hits === 1 && tokens.length === 2)) return 150 + hits;
+    }
 
     // Subsequence: every char of q appears in order
     let i = 0;
@@ -210,8 +266,9 @@
       ).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
       const topShipped = items.filter((it) => it.kind === 'card' && it.desc === 'shipped').slice(0, 2);
       const cv = items.filter((it) => it.kind === 'cmd' && it.label === 'cv');
+      const faq = items.filter((it) => it.kind === 'faq').slice(0, 1);   // first FAQ ("are you looking for a job")
       const ext = items.filter((it) => it.kind === 'ext' && it.label.startsWith('Source')).slice(0, 1);
-      return [...sections, ...topShipped, ...cv, ...ext];
+      return [...sections, ...topShipped, ...faq, ...cv, ...ext];
     }
     return items
       .map((it) => ({ it, s: score(q, it) }))
@@ -236,15 +293,19 @@
 
     if (selected >= matches.length) selected = 0;
 
-    list.innerHTML = matches.map((it, i) => `
-      <li class="palette-result ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
+    list.innerHTML = matches.map((it, i) => {
+      const secondLine = (it.kind === 'faq' && it.answer)
+        ? `<div class="palette-result-answer">${escape(it.answer)}</div>`
+        : (it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : '');
+      return `<li class="palette-result ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
         <span class="palette-result-icon" aria-hidden="true">${escape(it.icon)}</span>
         <div class="palette-result-body">
           <div class="palette-result-label">${escape(it.label)}</div>
-          ${it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : ''}
+          ${secondLine}
         </div>
         ${it.meta ? `<span class="palette-result-meta">${escape(it.meta)}</span>` : ''}
-      </li>`).join('');
+      </li>`;
+    }).join('');
 
     list._matches = matches;
   };

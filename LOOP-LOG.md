@@ -176,3 +176,36 @@ still present; #75 rebuild Action found no diff). **#78 CLOSED** — all four pa
 shipped (Board · Table · Timeline · Specs view modes + the audience lens; PRs
 #79 #80 #81 #82). The "filter chips: frequency vs curated featuredTags"
 sub-decision left for the owner.
+
+---
+
+## 2026-05-10 — Task 5/6: `#76` Phase 1 — pure-retrieval "ask this portfolio"
+
+**Branch:** `feat/qa-phase1`
+
+**What** (folded into the existing ⌘K palette — no new file, no new surface):
+- `scripts/palette.js`: a hand-authored `FAQ` array (~13 entries — "are you
+  looking for a job", "strongest shipped project", "what are you building now",
+  "tech stack", "what's a Pi-shaped AI PM", project blurbs, etc.). Each becomes
+  a palette item of `kind: 'faq'` — the question is the label, the answer shows
+  inline, and selecting it opens the relevant card panel (`agent:open-card`
+  CustomEvent), scrolls to a section, or opens a link. The FAQ map is in JS,
+  NOT in content/*.json.
+- Scoring: added a **token-overlap** tier to `score()` for multi-word /
+  question-like queries (tokenize, drop stopwords, count how many tokens hit
+  the item's search text) — ranks above bare subsequence so "are you looking
+  for a job" surfaces the right FAQ/card. Single-word queries unchanged.
+- `render()` special-cases `kind === 'faq'` to show the answer in a prose
+  `.palette-result-answer` line (not the uppercase `.palette-result-desc`).
+- The empty-query default set now includes the first FAQ ("looking for a job").
+- `index.html`: palette placeholder → "Search · or just ask…".
+- `styles/main.css`: `.palette-result-answer`.
+- **NO embeddings, NO Workers AI, NO model calls** — Phase 2 (build-time
+  embeddings) and Phase 3 (Workers AI generation) are deliberately left for the
+  owner to decide; not touched.
+
+**Tested:**
+- `node -c scripts/palette.js` → syntax OK.
+- `node scripts/build.js` → passes; rebuild idempotent.
+
+**Status:** branch pushed → PR opened → awaiting sub-agent review → merge → verify.
