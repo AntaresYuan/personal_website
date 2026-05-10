@@ -410,7 +410,9 @@
       btn.addEventListener('click', () => sortTableBy(btn.closest('th').dataset.col));
     });
     applyFilter(currentFilter);
-    applyTableSort();              // no-op unless a sort was already chosen
+    // Rows arrive in personaSort order (the audience lens); a column the user
+    // has explicitly sorted by takes precedence over that. No-op if unsorted.
+    applyTableSort();
     tableBuilt = true;
   };
 
@@ -531,6 +533,9 @@
   // and (re)build the flat views so they pick up the new order. 'everyone'
   // restores board order. The Timeline's Shipped section stays chronological
   // regardless (a date axis is its identity); only its Horizon lanes re-order.
+  // Note: the lens is purely a visual curation layer — the card-detail panel's
+  // ↑/↓ nav (and its "N / M" indicator) stay in the canonical board order, not
+  // the lensed order, since "next card" would otherwise be view-dependent.
   const applyAudience = (persona) => {
     currentAudience = (persona && persona !== 'everyone') ? persona : 'everyone';
     const orderIdx = new Map();
