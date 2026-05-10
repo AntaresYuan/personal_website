@@ -151,9 +151,10 @@
           <span id="board-name-text">Roadmap</span>
         </h2>
         <div class="board-views" role="tablist" aria-label="Board view">
-          <button class="view-tab is-active" type="button" role="tab" aria-selected="true">Board</button>
-          <button class="view-tab is-disabled" type="button" role="tab" aria-selected="false" aria-disabled="true" title="coming soon">Timeline</button>
-          <button class="view-tab is-disabled" type="button" role="tab" aria-selected="false" aria-disabled="true" title="coming soon">Specs</button>
+          <button class="view-tab is-active" type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="true" data-view="board">Board</button>
+          <button class="view-tab" type="button" role="tab" id="tab-table" aria-controls="view-table" aria-selected="false" data-view="table">Table</button>
+          <button class="view-tab is-disabled" type="button" role="tab" aria-disabled="true" aria-selected="false" title="coming soon">Timeline</button>
+          <button class="view-tab is-disabled" type="button" role="tab" aria-disabled="true" aria-selected="false" title="coming soon">Specs</button>
         </div>
       </div>
       <div class="board-toolbar-right">
@@ -167,7 +168,7 @@
     <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="ai pm" aria-pressed="false">AI PM</button><button class="filter-chip" type="button" data-filter="0→1" aria-pressed="false">0→1</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button><button class="filter-chip" type="button" data-filter="productivity" aria-pressed="false">Productivity</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button></div>
 
     <!-- columns -->
-    <div class="board" id="board">
+    <div class="board" id="board" role="tabpanel" aria-labelledby="tab-board">
       <article class="column col-shipped" id="col-shipped" aria-labelledby="col-shipped-title">
         <header class="col-head">
           <h3 class="col-title" id="col-shipped-title"><span class="col-dot"></span>Shipped</h3>
@@ -387,6 +388,11 @@
             </button></div>
       </article>
     </div>
+
+    <!-- Table view of the same cards — JS-rendered (scripts/render.js) on the
+         first switch to it. The kanban above stays the SSG-prerendered
+         default, so agents and no-JS visitors see that. -->
+    <div class="board-table-view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden></div>
 
   </section>
 

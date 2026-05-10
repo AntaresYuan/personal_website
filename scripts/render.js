@@ -247,6 +247,32 @@
     });
   };
 
+  /* ── Board view modes (kanban ⇄ table) + tag filter ────────────────
+     The board renders as the kanban by default (and that's what build-html
+     prerenders, so agents / no-JS see it). The "Table" tab shows the same
+     cards as a sortable, filterable table — built lazily on first switch
+     from cardIndex (already in board order). Tag filter chips dim cards
+     AND table rows alike. Disabled tabs (Timeline / Specs) stay inert. */
+
+  let currentFilter = 'all';
+  let tableBuilt = false;
+  let tableRows = [];                      // [{ tr, c }] — for sorting
+  let tableSort = { key: null, dir: 1 };   // dir: 1 = asc, -1 = desc
+
+  const STATUS_LABEL = { shipped: 'Shipped', now: 'Now', next: 'Next', later: 'Later' };
+  const STATUS_RANK  = { shipped: 0, now: 1, next: 2, later: 3 };
+
+  // Toggle `.is-filtered` (CSS hides it) on every card and table row whose
+  // data-tags doesn't include the active tag. Re-applied when the table is
+  // built so it inherits whatever filter is currently selected.
+  const applyFilter = (f) => {
+    document.querySelectorAll('.card[data-tags], .board-table tbody tr[data-tags]').forEach((el) => {
+      if (f === 'all') { el.classList.remove('is-filtered'); return; }
+      const tags = (el.dataset.tags || '').split('|');
+      el.classList.toggle('is-filtered', !tags.includes(f));
+    });
+  };
+
   // Click delegation for filter chips. Always wired regardless of whether
   // the chips were rendered statically (build-html) or dynamically.
   const wireFilterChipClicks = () => {
@@ -261,16 +287,164 @@
       });
       chip.classList.add('is-active');
       chip.setAttribute('aria-pressed', 'true');
-      const f = chip.dataset.filter;
-      document.querySelectorAll('.card').forEach((card) => {
-        if (f === 'all') {
-          card.classList.remove('is-filtered');
-        } else {
-          const tags = (card.dataset.tags || '').split('|');
-          card.classList.toggle('is-filtered', !tags.includes(f));
-        }
-      });
+      currentFilter = chip.dataset.filter || 'all';
+      applyFilter(currentFilter);
     });
+  };
+
+  const sortValue = (c, key) => {
+    switch (key) {
+      case 'title':   return (c.title ?? '').toLowerCase();
+      case 'status':  return STATUS_RANK[c.status] ?? 9;
+      case 'tags':    return (c.tags ?? []).join(' ').toLowerCase();
+      case 'impact':  return (c.impact ?? '').toLowerCase();
+      case 'updated': return c.updated ?? '';                       // YYYY-MM-DD sorts lexically
+      case 'links':   return (c.links ?? []).filter(l => l.href && l.href !== '#').length;
+      default:        return '';
+    }
+  };
+
+  // Re-order the tbody rows per tableSort + reflect the state in <th>s.
+  const applyTableSort = () => {
+    const host = document.getElementById('view-table');
+    const tbody = host && host.querySelector('tbody');
+    if (!tbody || !tableSort.key || tableRows.length === 0) return;
+    const { key, dir } = tableSort;
+    tableRows.slice().sort((a, b) => {
+      const va = sortValue(a.c, key), vb = sortValue(b.c, key);
+      let r = va < vb ? -1 : va > vb ? 1 : 0;
+      if (r === 0) {                                                // stable tiebreak: title asc
+        const ta = (a.c.title ?? '').toLowerCase(), tb = (b.c.title ?? '').toLowerCase();
+        r = ta < tb ? -1 : ta > tb ? 1 : 0;
+        return r;
+      }
+      return r * dir;
+    }).forEach(({ tr }) => tbody.appendChild(tr));                  // appendChild moves existing nodes
+    host.querySelectorAll('th[data-col]').forEach((th) => {
+      const arrow = th.querySelector('.sort-arrow');
+      if (th.dataset.col === key) {
+        th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        if (arrow) arrow.textContent = dir === 1 ? '▲' : '▼';
+      } else {
+        th.removeAttribute('aria-sort');
+        if (arrow) arrow.textContent = '';
+      }
+    });
+  };
+
+  const sortTableBy = (key) => {
+    if (tableSort.key === key) tableSort.dir = -tableSort.dir;
+    else { tableSort.key = key; tableSort.dir = 1; }
+    applyTableSort();
+  };
+
+  // Build the <table> into #view-table from cardIndex. Idempotent; called
+  // lazily on first switch to the Table view.
+  const buildTableView = () => {
+    const host = document.getElementById('view-table');
+    if (!host) return;
+    const cards = [...cardIndex.values()];
+    if (cards.length === 0) {
+      host.innerHTML = `<p class="table-empty">no cards yet</p>`;
+      tableBuilt = true;
+      return;
+    }
+    const COLS = [
+      { key: 'title',   label: 'Title' },
+      { key: 'status',  label: 'Status' },
+      { key: 'tags',    label: 'Tags' },
+      { key: 'impact',  label: 'Impact' },
+      { key: 'updated', label: 'Updated' },
+      { key: 'links',   label: 'Links' },
+    ];
+    const headHtml = COLS.map((col) =>
+      `<th scope="col" data-col="${col.key}"><button type="button">${col.label}<span class="sort-arrow" aria-hidden="true"></span></button></th>`
+    ).join('');
+    const rowHtml = (c) => {
+      const tagSlugs = (c.tags ?? []).map(t => t.toLowerCase()).join('|');
+      const links = (c.links ?? []).filter(l => l.href && l.href !== '#')
+        .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
+      return `<tr data-card-id="${escape(c.displayId)}" data-tags="${escape(tagSlugs)}" tabindex="0" role="button" aria-label="Open details for ${escape(c.title ?? '')}">
+        <td class="tt-title">${escape(c.title ?? '')}</td>
+        <td class="tt-status">${escape(STATUS_LABEL[c.status] ?? c.status ?? '')}</td>
+        <td class="tt-tags">${escape((c.tags ?? []).join(' · '))}</td>
+        <td class="tt-impact">${escape(c.impact ?? '')}</td>
+        <td class="tt-updated">${escape(c.updated ?? '')}</td>
+        <td class="tt-links">${links}</td>
+      </tr>`;
+    };
+    host.innerHTML = `<table class="board-table">
+      <thead><tr>${headHtml}</tr></thead>
+      <tbody>${cards.map(rowHtml).join('')}</tbody>
+    </table>`;
+
+    const tbody = host.querySelector('tbody');
+    tableRows = Array.from(tbody.querySelectorAll('tr[data-card-id]')).map((tr, i) => ({ tr, c: cards[i] }));
+    host.querySelectorAll('th[data-col] button').forEach((btn) => {
+      btn.addEventListener('click', () => sortTableBy(btn.closest('th').dataset.col));
+    });
+    applyFilter(currentFilter);
+    applyTableSort();              // no-op unless a sort was already chosen
+    tableBuilt = true;
+  };
+
+  // Switch between the kanban (#board) and the table (#view-table). Only
+  // tabs carrying [data-view] are switchable; disabled ones are ignored.
+  const switchView = (view) => {
+    document.querySelectorAll('.board-views .view-tab').forEach((t) => {
+      const active = t.dataset.view === view;
+      t.classList.toggle('is-active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+      if (t.dataset.view) t.tabIndex = active ? 0 : -1;
+    });
+    const board = document.getElementById('board');
+    const table = document.getElementById('view-table');
+    if (view === 'table') {
+      if (!tableBuilt) buildTableView();
+      if (board) board.hidden = true;
+      if (table) table.hidden = false;
+    } else {
+      if (table) table.hidden = true;
+      if (board) board.hidden = false;
+    }
+  };
+
+  const wireViewTabs = () => {
+    const list = document.querySelector('.board-views');
+    if (!list) return;
+    const enabledTabs = () => Array.from(list.querySelectorAll('.view-tab[data-view]'));
+    list.addEventListener('click', (ev) => {
+      const tab = ev.target.closest('.view-tab[data-view]');
+      if (tab) switchView(tab.dataset.view);
+    });
+    // Roving-tabindex arrow nav (ARIA tablist pattern).
+    list.addEventListener('keydown', (ev) => {
+      if (!ev.target.closest('.view-tab[data-view]')) return;
+      const tabs = enabledTabs();
+      const i = tabs.indexOf(ev.target);
+      let next = null;
+      if (ev.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+      else if (ev.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (ev.key === 'Home') next = tabs[0];
+      else if (ev.key === 'End') next = tabs[tabs.length - 1];
+      if (next) { ev.preventDefault(); next.focus(); switchView(next.dataset.view); }
+    });
+    enabledTabs().forEach((t) => { t.tabIndex = t.classList.contains('is-active') ? 0 : -1; });
+
+    // Open a card when its table row is clicked / Enter/Space-activated.
+    const table = document.getElementById('view-table');
+    if (table) {
+      table.addEventListener('click', (ev) => {
+        if (ev.target.closest('a')) return;                        // let link clicks through
+        const tr = ev.target.closest('tr[data-card-id]');
+        if (tr) openCardModal(tr.dataset.cardId);
+      });
+      table.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        const tr = ev.target.closest('tr[data-card-id]');
+        if (tr && document.activeElement === tr) { ev.preventDefault(); openCardModal(tr.dataset.cardId); }
+      });
+    }
   };
 
   const renderLens = (lens) => {
@@ -489,6 +663,7 @@
       // Wire interactive behavior — needed in both prerendered and runtime
       // modes since build-html.js only emits markup, not event listeners.
       wireFilterChipClicks();
+      wireViewTabs();
       wireModal();
     } catch (e) {
       console.error('[render]', e);

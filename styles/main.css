@@ -592,6 +592,87 @@ button:focus-visible,
   border-radius: var(--r-md);
 }
 
+/* ── Table view ───────────────────────────────────────────────────────
+   Alternate "view mode" for the board: the same cards as a sortable,
+   filterable table. Switched in via .board-views; the kanban (#board)
+   stays the prerendered default. Markup built by scripts/render.js. */
+.board-table-view {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.board-table th,
+.board-table td {
+  text-align: left;
+  padding: var(--sp-8) var(--sp-10);
+  border-bottom: var(--bw) solid var(--color-line-soft);
+  vertical-align: top;
+}
+.board-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+  border-bottom-color: var(--color-line);
+}
+.board-table th button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+}
+.board-table th button:hover { color: var(--color-text); }
+.board-table th[aria-sort="ascending"] button,
+.board-table th[aria-sort="descending"] button { color: var(--color-text); }
+.board-table th .sort-arrow { font-size: var(--fs-10); opacity: 0.75; }
+.board-table tbody tr {
+  cursor: pointer;
+  transition: background var(--dur-quick);
+}
+.board-table tbody tr:hover { background: var(--color-bg-soft); }
+.board-table tbody tr:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: -2px;
+}
+.board-table tbody tr.is-filtered { display: none; }
+.board-table .tt-title  { font-weight: var(--fw-medium); color: var(--color-text); }
+.board-table .tt-status {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-dim);
+  white-space: nowrap;
+}
+.board-table .tt-tags   { font-family: var(--font-mono); font-size: var(--fs-10); color: var(--color-text-faint); }
+.board-table .tt-impact { color: var(--color-blue); font-size: var(--fs-11); }
+.board-table .tt-updated{ font-family: var(--font-mono); font-size: var(--fs-11); color: var(--color-text-faint); white-space: nowrap; }
+.board-table .tt-links a { color: var(--color-blue); white-space: nowrap; }
+.board-table .tt-links a + a { margin-left: var(--sp-8); }
+.board-table .table-empty {
+  padding: var(--sp-24);
+  text-align: center;
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+
 /* ── Card ─────────────────────────────────────────────────────────────── */
 .card {
   /* Reset user-agent button styles (rendered as <button> for click + a11y) */
