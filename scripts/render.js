@@ -113,9 +113,13 @@
 
   // Tiny markdown renderer for card details. Handles: ## h2, ### h3,
   // - / * lists, paragraphs, inline `code`, **bold**, *italic*. No HTML
-  // pass-through — input is escaped first.
-  const mini = (md) => {
+  // pass-through — input is escaped first. `opts.demote` (default 0) shifts
+  // emitted heading levels down (clamped to h6) so `details` headings can sit
+  // *below* the surrounding title's level — e.g. the spec view's <h4> card
+  // titles want their `details` headings at <h5>+.
+  const mini = (md, opts) => {
     if (!md) return '';
+    const demote = (opts && opts.demote) || 0;
     const lines = escape(md).split(/\r?\n/);
     let html = '';
     let listOpen = false;
@@ -126,7 +130,8 @@
       const m = /^(#{2,3})\s+(.*)$/.exec(line);
       if (m) {
         closeList();
-        html += `<h${m[1].length}>${m[2]}</h${m[1].length}>`;
+        const lvl = Math.min(6, m[1].length + demote);
+        html += `<h${lvl}>${m[2]}</h${lvl}>`;
         continue;
       }
       if (/^[-*]\s+/.test(line)) {
@@ -288,6 +293,9 @@
   const personaSort = (cards, persona) => (persona && persona !== 'everyone')
     ? cards.slice().sort((a, b) => scoreFor(b, persona) - scoreFor(a, persona))
     : cards.slice();
+  // All cards, in board order, lensed by the current audience — what the
+  // Table / Spec / Timeline views render from.
+  const currentCards = () => personaSort([...cardIndex.values()], currentAudience);
 
   // Toggle `.is-filtered` (CSS hides it) on every card and table row whose
   // data-tags doesn't include the active tag. Re-applied when the table is
@@ -369,7 +377,7 @@
   const buildTableView = () => {
     const host = document.getElementById('view-table');
     if (!host) return;
-    const cards = personaSort([...cardIndex.values()], currentAudience);
+    const cards = currentCards();
     if (cards.length === 0) {
       host.innerHTML = `<p class="table-empty">no cards yet</p>`;
       tableBuilt = true;
@@ -386,6 +394,12 @@
     const headHtml = COLS.map((col) =>
       `<th scope="col" data-col="${col.key}"><button type="button" aria-label="Sort by ${col.label}">${col.label}<span class="sort-arrow" aria-hidden="true"></span></button></th>`
     ).join('');
+    // Whole rows are clickable (open the card panel). `role="button"` on a
+    // `<tr>` overrides the implicit `row` role — a pragmatic clickable-row
+    // pattern (cf. Linear/Notion); the row carries `aria-label` + `tabindex=0`
+    // and the Enter/Space handler (wireCardOpener) preventDefaults Space, and
+    // inner `<a>` clicks pass through. A "purer" alternative (a `<button>` in
+    // the title cell) was considered and skipped — it loses whole-row clicks.
     const rowHtml = (c) => {
       const tagSlugs = (c.tags ?? []).map(t => t.toLowerCase()).join('|');
       const links = (c.links ?? []).filter(l => l.href && l.href !== '#')
@@ -422,7 +436,7 @@
   const buildSpecView = () => {
     const host = document.getElementById('view-specs');
     if (!host) return;
-    const cards = personaSort([...cardIndex.values()], currentAudience);
+    const cards = currentCards();
     if (cards.length === 0) {
       host.innerHTML = `<p class="spec-empty">no cards yet</p>`;
       specsBuilt = true;
@@ -433,7 +447,7 @@
         `<span class="tag${i % 2 ? ' tag-blue' : ''}">${escape(t)}</span>`).join('');
       const links = (c.links ?? []).filter(l => l.href && l.href !== '#')
         .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
-      const details = mini(c.details);
+      const details = mini(c.details, { demote: 3 });   // spec-card titles are <h4> → headings here at <h5>/<h6>
       const foot = [
         c.updated ? `<span class="spec-card-updated">updated ${escape(c.updated)}</span>` : '',
         c.impact ? `<span class="spec-card-impact">${escape(c.impact)}</span>` : '',
@@ -467,7 +481,7 @@
   const buildTimelineView = () => {
     const host = document.getElementById('view-timeline');
     if (!host) return;
-    const cards = personaSort([...cardIndex.values()], currentAudience);
+    const cards = currentCards();
     if (cards.length === 0) {
       host.innerHTML = `<p class="timeline-empty">no cards yet</p>`;
       timelineBuilt = true;

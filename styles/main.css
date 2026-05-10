@@ -745,7 +745,7 @@ button:focus-visible,
 .spec-card-tags { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-bottom: var(--sp-12); }
 .spec-card-body { margin-bottom: var(--sp-12); }
 .spec-card-body:empty { display: none; }
-.spec-card-body h2, .spec-card-body h3 {
+.spec-card-body h5, .spec-card-body h6 {
   font-family: var(--font-serif);
   font-size: var(--fs-15);
   font-weight: var(--fw-medium);

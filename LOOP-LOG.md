@@ -221,3 +221,43 @@ render. No changes needed.
 verified live (palette placeholder = "Search · or just ask…"; audience-lens
 still present; #75 rebuild Action found no diff). Commented on #76 (kept open —
 Phase 2 [embeddings] / Phase 3 [Workers AI] left for the owner).
+
+---
+
+## 2026-05-10 — Task 6/6: a11y polish + simplify pass on the loop's new code
+
+**Branch:** `feat/a11y-views-pass`
+
+**What:**
+- `mini()` (the tiny markdown renderer) gained an optional `opts.demote` (a
+  number, default 0) that shifts emitted heading levels down, clamped to `<h6>`.
+  `buildSpecView` now calls `mini(c.details, { demote: 3 })` so a `## …`
+  heading inside a card's `details` renders as `<h5>` — below the card's `<h4>`
+  title instead of jumping back up to `<h2>`. CSS: `.spec-card-body h2, h3` →
+  `.spec-card-body h5, h6`. (The card-detail *modal* keeps its existing
+  heading order — pre-existing, lower priority, not touched here.)
+- Documented the `role="button"`-on-`<tr>` / `.timeline-entry` / `.horizon-card`
+  clickable-row pattern in a code comment: it overrides the implicit `row`
+  role, but the elements carry `aria-label` + `tabindex=0`, the Enter/Space
+  handler (`wireCardOpener`) preventDefaults Space, and inner `<a>` clicks pass
+  through; the "purer" alternative (a `<button>` in the title cell) was
+  considered and skipped because it loses whole-row clicks. (Kept as-is.)
+- Verified (read-through): focus order is sane (`.board-views` tabs → toolbar
+  `<select>` → `.board-filters` chips → board/table/timeline content → card
+  panel → ⌘K palette). `prefers-reduced-motion`: the global `*` rule already
+  zeroes `transition-duration`, covering the new hover transforms; no new
+  `@keyframes` in the loop's code — nothing to add.
+- Simplify pass (self-review — the loop's code already went through 6 sub-agent
+  reviews; the only DRY win): extracted `currentCards()` = `personaSort([...
+  cardIndex.values()], currentAudience)`, used by the three `buildXView`
+  functions instead of the inline expression. No other refactors warranted
+  (shared `applyFilter` / `wireCardOpener` / `personaSort`+`scoreFor` /
+  `VIEW_PANELS` are already in place; the build fns render different enough
+  markup that further abstraction would hurt readability).
+
+**Tested:**
+- `node -c scripts/render.js` → syntax OK.
+- `node scripts/build.js` → passes; rebuild idempotent; `index.html` unchanged
+  (the diff is JS + CSS only).
+
+**Status:** branch pushed → PR opened → awaiting sub-agent review → merge → verify.
