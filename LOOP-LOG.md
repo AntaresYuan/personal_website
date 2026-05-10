@@ -50,3 +50,39 @@ which is a semantics gray area inside a `<table>`; revisit in the a11y pass.
 **Status: ✅ DONE.** PR #79 squash-merged → `1aec4f4` on main → CF redeployed →
 verified live (`data-view="table"` tab + `#view-table` panel present; CTA copy
 not regressed; #75 rebuild Action found no diff). Commented on #78.
+
+---
+
+## 2026-05-10 — Task 2/6: `#78` board Spec view
+
+**Branch:** `feat/board-spec-view`
+
+**What:**
+- Enabled the previously-disabled **"Specs"** tab (`data-view="specs"`, `id`/
+  `aria-controls`, removed `is-disabled`/`aria-disabled`/`tabindex=-1`). Added a
+  `#view-specs` `role="tabpanel"` container after `#view-table` in index.html.
+- `render.js`: `buildSpecView()` renders all cards (from `cardIndex`, board
+  order) as a long-form document — grouped by status (Shipped / Now / Next /
+  Later), each card a `<section>` with id badge, `<h4>` title, summary, tags,
+  the `details` markdown via the existing `mini()` helper, an updated/impact
+  foot line, and links. Refactored `switchView()` to drive 3 panels via a
+  `VIEW_PANELS` map (build lazily on first activation; toggle `hidden`).
+  `wireViewTabs()` already iterates `.view-tab[data-view]`, so the new tab is
+  picked up for click + arrow-key nav with no change there.
+- `styles/main.css`: `.spec-doc` (prose width, centered) + `.spec-group*` /
+  `.spec-card*` styles, incl. prose styles for the `mini()` output inside
+  `.spec-card-body`. No `display` set on `.board-spec-view` so the UA `[hidden]`
+  rule still hides it (same trick as `#view-table`).
+- Deliberately **no tag-filter integration** in the Spec view — it's a
+  read-the-whole-thing document; the chips are a board affordance.
+
+**Tested:**
+- `node -c scripts/render.js` → syntax OK.
+- `node scripts/build.js` → passes; the new static markup (`data-view="specs"`,
+  `#view-specs`) survives the build; rebuild is idempotent.
+
+**Known follow-up (a11y, task 6):** `mini()` emits `<h2>`/`<h3>` for `details`
+markdown headings, which land under the card's `<h4>` title — a heading-order
+quirk (the modal has the same). Revisit in the a11y pass.
+
+**Status:** branch pushed → PR opened → awaiting sub-agent review → merge → verify.

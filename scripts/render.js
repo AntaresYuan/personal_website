@@ -256,6 +256,7 @@
 
   let currentFilter = 'all';
   let tableBuilt = false;
+  let specsBuilt = false;
   let tableRows = [];                      // [{ tr, c }] — for sorting
   let tableSort = { key: null, dir: 1 };   // dir: 1 = asc, -1 = desc
 
@@ -387,8 +388,56 @@
     tableBuilt = true;
   };
 
-  // Switch between the kanban (#board) and the table (#view-table). Only
-  // tabs carrying [data-view] are switchable; disabled ones are ignored.
+  // Build the long-form Spec view into #view-specs from cardIndex — every
+  // card with its `details` expanded, grouped by status. A reading view:
+  // no filter integration (the tag chips are a board affordance).
+  const buildSpecView = () => {
+    const host = document.getElementById('view-specs');
+    if (!host) return;
+    const cards = [...cardIndex.values()];
+    if (cards.length === 0) {
+      host.innerHTML = `<p class="spec-empty">no cards yet</p>`;
+      specsBuilt = true;
+      return;
+    }
+    const cardSection = (c) => {
+      const tags = (c.tags ?? []).map((t, i) =>
+        `<span class="tag${i % 2 ? ' tag-blue' : ''}">${escape(t)}</span>`).join('');
+      const links = (c.links ?? []).filter(l => l.href && l.href !== '#')
+        .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
+      const details = mini(c.details);
+      const foot = [
+        c.updated ? `<span class="spec-card-updated">updated ${escape(c.updated)}</span>` : '',
+        c.impact ? `<span class="spec-card-impact">${escape(c.impact)}</span>` : '',
+      ].filter(Boolean).join('');
+      return `<section class="spec-card" aria-labelledby="spec-${escape(c.displayId)}">
+        <p class="spec-card-id">${escape(c.displayId)}</p>
+        <h4 class="spec-card-title" id="spec-${escape(c.displayId)}">${escape(c.title ?? '')}</h4>
+        ${c.summary ? `<p class="spec-card-summary">${safeRich(c.summary)}</p>` : ''}
+        ${tags ? `<div class="spec-card-tags">${tags}</div>` : ''}
+        ${details ? `<div class="spec-card-body">${details}</div>` : ''}
+        ${foot ? `<p class="spec-card-foot">${foot}</p>` : ''}
+        ${links ? `<div class="spec-card-links">${links}</div>` : ''}
+      </section>`;
+    };
+    const groups = ['shipped', 'now', 'next', 'later'].map((s) => {
+      const gc = cards.filter((c) => c.status === s);
+      if (gc.length === 0) return '';
+      return `<section class="spec-group">
+        <h3 class="spec-group-head">${STATUS_LABEL[s]} <span class="spec-group-count">${gc.length}</span></h3>
+        ${gc.map(cardSection).join('')}
+      </section>`;
+    }).join('');
+    host.innerHTML = `<div class="spec-doc">${groups}</div>`;
+    specsBuilt = true;
+  };
+
+  // The three view panels, keyed by their tab's data-view value.
+  const VIEW_PANELS = { board: 'board', table: 'view-table', specs: 'view-specs' };
+
+  // Switch the active board view. Only tabs carrying [data-view] are
+  // switchable; disabled ones (Timeline) are ignored. The non-default
+  // views (table, specs) are built lazily on first activation.
   const switchView = (view) => {
     document.querySelectorAll('.board-views .view-tab').forEach((t) => {
       const active = t.dataset.view === view;
@@ -396,16 +445,12 @@
       t.setAttribute('aria-selected', active ? 'true' : 'false');
       if (t.dataset.view) t.tabIndex = active ? 0 : -1;
     });
-    const board = document.getElementById('board');
-    const table = document.getElementById('view-table');
-    if (view === 'table') {
-      if (!tableBuilt) buildTableView();
-      if (board) board.hidden = true;
-      if (table) table.hidden = false;
-    } else {
-      if (table) table.hidden = true;
-      if (board) board.hidden = false;
-    }
+    if (view === 'table' && !tableBuilt) buildTableView();
+    if (view === 'specs' && !specsBuilt) buildSpecView();
+    Object.entries(VIEW_PANELS).forEach(([v, id]) => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = (v !== view);
+    });
   };
 
   const wireViewTabs = () => {

@@ -676,6 +676,89 @@ button:focus-visible,
   font-size: var(--fs-12);
 }
 
+/* ── Spec view ────────────────────────────────────────────────────────
+   "Read the roadmap as a document" — every card with its `details`
+   expanded, grouped by status. Built by scripts/render.js. (No `display`
+   set on .board-spec-view so the UA [hidden] rule still hides it.) */
+.spec-doc { max-width: var(--w-prose); margin: 0 auto; padding-top: var(--sp-8); }
+.spec-empty {
+  padding: var(--sp-24);
+  text-align: center;
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+.spec-group { margin-bottom: var(--sp-40); }
+.spec-group-head {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding-bottom: var(--sp-8);
+  margin-bottom: var(--sp-16);
+  border-bottom: var(--bw) solid var(--color-line);
+}
+.spec-group-count {
+  display: inline-block;
+  margin-left: var(--sp-6);
+  padding: 0 var(--sp-6);
+  border-radius: var(--r-sm);
+  background: var(--color-bg-soft);
+  color: var(--color-text-dim);
+}
+.spec-card {
+  padding: var(--sp-20) 0;
+  border-bottom: var(--bw) solid var(--color-line-soft);
+}
+.spec-card:last-child { border-bottom: none; }
+.spec-card-id {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-4);
+}
+.spec-card-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-19);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  margin-bottom: var(--sp-8);
+}
+.spec-card-summary { color: var(--color-text-dim); margin-bottom: var(--sp-12); }
+.spec-card-tags { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-bottom: var(--sp-12); }
+.spec-card-body { margin-bottom: var(--sp-12); }
+.spec-card-body:empty { display: none; }
+.spec-card-body h2, .spec-card-body h3 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-medium);
+  margin: var(--sp-16) 0 var(--sp-8);
+}
+.spec-card-body p  { margin-bottom: var(--sp-10); }
+.spec-card-body ul { padding-left: var(--sp-20); margin-bottom: var(--sp-10); }
+.spec-card-body li { margin-bottom: var(--sp-4); }
+.spec-card-body code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  background: var(--color-bg-soft);
+  padding: 1px var(--sp-4);
+  border-radius: 3px;
+}
+.spec-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-12);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-8);
+}
+.spec-card-impact { color: var(--color-blue); }
+.spec-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-12); }
+.spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
+
 /* ── Card ─────────────────────────────────────────────────────────────── */
 .card {
   /* Reset user-agent button styles (rendered as <button> for click + a11y) */

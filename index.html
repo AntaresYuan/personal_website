@@ -154,7 +154,7 @@
           <button class="view-tab is-active" type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="true" data-view="board">Board</button>
           <button class="view-tab" type="button" role="tab" id="tab-table" aria-controls="view-table" aria-selected="false" data-view="table">Table</button>
           <button class="view-tab is-disabled" type="button" role="tab" aria-disabled="true" aria-selected="false" tabindex="-1" title="coming soon">Timeline</button>
-          <button class="view-tab is-disabled" type="button" role="tab" aria-disabled="true" aria-selected="false" tabindex="-1" title="coming soon">Specs</button>
+          <button class="view-tab" type="button" role="tab" id="tab-specs" aria-controls="view-specs" aria-selected="false" data-view="specs">Specs</button>
         </div>
       </div>
       <div class="board-toolbar-right">
@@ -393,6 +393,10 @@
          first switch to it. The kanban above stays the SSG-prerendered
          default, so agents and no-JS visitors see that. -->
     <div class="board-table-view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden></div>
+
+    <!-- Spec view — the same cards as a long-form document (every card with its
+         `details` expanded). JS-rendered (scripts/render.js) on first switch. -->
+    <div class="board-spec-view" id="view-specs" role="tabpanel" aria-labelledby="tab-specs" hidden></div>
 
   </section>
 
