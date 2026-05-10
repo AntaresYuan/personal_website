@@ -33,7 +33,13 @@ The owner can delete this file once the loop has wrapped up.
 - `node scripts/build.js` → passes; index.html still prerenders the kanban; my
   static additions (Table tab, `#view-table`, `role="tabpanel"`) survive the
   build; rebuild is idempotent (no diff on a second run).
-- (No browser available in this environment — runtime behaviour to be confirmed
-  by the PR code review + a post-deploy `curl` of antaresyuan.site.)
+- Self-review caught a bug: `.board { display:grid }` would override the UA
+  `[hidden]` rule, so `board.hidden = true` wouldn't visually hide the kanban
+  (you'd see kanban + table stacked). Fixed with `.board[hidden]{display:none}`.
+- (No browser in this environment — full runtime behaviour to be confirmed by
+  the PR code review + a post-deploy `curl` of antaresyuan.site.)
 
-**Status:** branch pushed → PR opened → awaiting code review → merge → verify.
+**Known follow-up (a11y, task 6):** table rows use `role="button"` on `<tr>`,
+which is a semantics gray area inside a `<table>`; revisit in the a11y pass.
+
+**Status:** branch pushed → PR #79 opened → fixing review findings → merge → verify.

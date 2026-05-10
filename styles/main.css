@@ -596,6 +596,9 @@ button:focus-visible,
    Alternate "view mode" for the board: the same cards as a sortable,
    filterable table. Switched in via .board-views; the kanban (#board)
    stays the prerendered default. Markup built by scripts/render.js. */
+/* `.board { display: grid }` would otherwise win over the UA [hidden] rule,
+   so toggling `hidden` on the kanban needs this to actually take effect. */
+.board[hidden] { display: none; }
 .board-table-view {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
