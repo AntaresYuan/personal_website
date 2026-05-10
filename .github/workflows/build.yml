@@ -1,0 +1,50 @@
+name: Rebuild artifacts
+
+# Decap CMS (via /admin/) commits edits to content/*.json — the source of
+# truth — but it does NOT run the build. This workflow regenerates the
+# committed artifacts (index.html, llms.txt, llms-full.txt, sitemap.xml) so
+# they stay in sync, then commits them back to main.
+#
+# Loop safety: the bot commit only touches artifacts, never content/** or
+# scripts/**, so it cannot re-trigger this workflow via the paths filter.
+# `[skip ci]` in the message is a belt-and-suspenders second guard.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+      - 'scripts/**'
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-artifacts
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        run: node scripts/build.js
+
+      - name: Commit artifacts if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Artifacts already in sync — nothing to commit."
+            exit 0
+          fi
+          git add -A
+          git commit -m "chore: rebuild artifacts from content [skip ci]"
+          git push origin HEAD:main
