@@ -94,7 +94,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=3c76ac12">
+<link rel="stylesheet" href="styles/main.css?v=580c5398">
 </head>
 <body>
 
@@ -160,6 +160,21 @@
           </div>
           <span class="cta-arrow">→</span>
         </a></div>
+    <!-- "Ask this portfolio" — a grounded Q&A, visible above the fold.
+         With the antares-qa Worker (content/site.json → qa.workerUrl) it
+         answers inline; without one it opens the ⌘K palette pre-filled.
+         Wired in scripts/render.js (wireHeroAsk). -->
+    <div class="hero-ask" id="hero-ask">
+      <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
+        <span class="hero-ask-prompt" aria-hidden="true">$</span>
+        <input class="hero-ask-input" id="hero-ask-input" type="text"
+               placeholder="ask anything about my work…"
+               aria-label="Ask this portfolio a question" maxlength="280">
+        <button class="hero-ask-go" id="hero-ask-go" type="submit">ask</button>
+      </form>
+      <p class="hero-ask-hint">answers are drawn straight from this site — it's the data talking, not a clone of me</p>
+      <div class="hero-ask-answer" id="hero-ask-answer" hidden></div>
+    </div>
   </header>
 
   <!-- ── BOARD ───────────────────────────────────────────────────── -->
@@ -687,7 +702,7 @@
      Pre-rendered HTML means no script is needed for first paint; these
      just add interactivity (modal, terminal, ⌘K palette). They still
      execute in document order after parse. -->
-<script src="scripts/render.js?v=3c236847"   defer></script>
+<script src="scripts/render.js?v=4be362ca"   defer></script>
 <script src="scripts/terminal.js?v=e8b722f4" defer></script>
 <script src="scripts/palette.js?v=5da44171"  defer></script>
 </body>
