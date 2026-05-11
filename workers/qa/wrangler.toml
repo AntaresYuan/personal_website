@@ -1,0 +1,41 @@
+# ─────────────────────────────────────────────────────────────────────
+# Cloudflare Worker config for the "ask this portfolio" Q&A endpoint.
+#
+# It answers a visitor's question using ONLY the site's own content
+# (it fetches https://antaresyuan.site/llms-full.txt as grounding) via
+# Workers AI. Free tier covers it for a personal site. The retrieval-only
+# answers in the ⌘K palette work without this Worker; this just powers the
+# "✨ ask this portfolio (AI answer)" option.
+#
+# Deploy:
+#   cd workers/qa
+#   npx wrangler login          # one-time, browser auth
+#   npx wrangler deploy
+#
+# After first deploy the URL is:
+#   https://antares-qa.<your-subdomain>.workers.dev
+#
+# Put that URL into content/site.json → qa.workerUrl (or via /admin/ →
+# Site meta → Q&A assistant). Empty there ⇒ the AI option doesn't show.
+# ─────────────────────────────────────────────────────────────────────
+
+name = "antares-qa"
+main = "src/index.js"
+compatibility_date = "2026-05-09"
+
+# Workers AI — auto-provisioned, just bind it. Used as `env.AI.run(model, …)`.
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+# ── Optional: per-IP rate limiting ───────────────────────────────────
+# Cloudflare's native rate-limit binding (no KV namespace to create).
+# Uncomment, run `npx wrangler deploy`, and the Worker will 429 abusers.
+# The Workers-AI free-tier daily budget is the backstop if you skip this.
+# [[unsafe.bindings]]
+# name = "RATE_LIMITER"
+# type = "ratelimit"
+# namespace_id = "1001"
+# simple = { limit = 20, period = 60 }   # 20 requests / 60 s per key (IP)

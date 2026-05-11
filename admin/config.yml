@@ -90,6 +90,12 @@ collections:
               - { label: "Mapping",           name: "mapping",       widget: "select", options: ["pathname","url","title","og:title","specific","number"], required: false, default: "pathname" }
               - { label: "Theme",             name: "theme",         widget: "select", options: ["light","dark","preferred_color_scheme"], required: false, default: "light" }
               - { label: "Input position",    name: "inputPosition", widget: "select", options: ["top","bottom"], required: false, default: "top" }
+          - label: "Q&A assistant"
+            name: "qa"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — empty = the ⌘K palette's AI-answer option is hidden (keyword/FAQ answers still work)." }
 
   # ── Hero / profile ─────────────────────────────────────────────────
   - name: "profile"
