@@ -25,7 +25,7 @@
     "category": "General",
     "categoryId": "DIC_kwDOSYXV8c4C8tqu",
     "mapping": "pathname",
-    "theme": "light",
-    "inputPosition": "top"
+    "theme": "preferred_color_scheme",
+    "inputPosition": "bottom"
   }
 }
