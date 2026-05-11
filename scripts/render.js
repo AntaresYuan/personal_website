@@ -266,7 +266,7 @@
   let currentAudience = 'everyone';        // audience lens — see personaSort / applyAudience
   let tableBuilt = false;
   let specsBuilt = false;
-  let timelineBuilt = false;
+  let timelineBuilt = false, timelineInstance = null;
   let tableRows = [];                      // [{ tr, c }] — for sorting
   let tableSort = { key: null, dir: 1 };   // dir: 1 = asc, -1 = desc
 
@@ -476,156 +476,138 @@
     specsBuilt = true;
   };
 
-  // Build the Timeline view into #view-timeline — a horizontal Gantt ("ship
-  // log") in the spirit of Notion's timeline view: a month scale across the
-  // top, then one labelled pill bar per Shipped project. A bar spans
-  // [`started` → `updated`]; a project with no parseable `started` (or
-  // started ≥ end) becomes a pill pinned at its ship date. Overlapping bars
-  // lane-pack so nothing overprints. Each bar carries [dot] id · title · date
-  // inline, and clicking it opens the card-detail panel (wireCardOpener wires
-  // any [data-card-id] in here). Only Shipped cards; always chronological —
-  // the audience lens doesn't apply. Geometry: a fixed ~150px/month scale
-  // (CSS stretches the track to fill the panel when there's room), bars get a
-  // minimum on-screen width so the inline label always fits, and the axis is
-  // padded enough that the rightmost bar stays inside it.
+  // ── Timeline view ──────────────────────────────────────────────────
+  // Roadmap → Timeline renders a real interactive timeline (drag to pan,
+  // ⌃-scroll to zoom) via the vendored vis-timeline library, loaded lazily
+  // the first time the tab is opened. One item per Shipped card: a `range`
+  // bar [`started` → `updated`] when a `started` date is given, otherwise a
+  // `point` (a dot at the ship date — no fake width). vis lane-stacks
+  // overlapping items; a "current time" line marks today. Clicking an item
+  // opens its card-detail panel. Only Shipped cards; the audience lens
+  // doesn't apply (always chronological).
+
+  const VIS_TIMELINE_VER = '8.5.1';
+  // Lazily load the vendored vis-timeline bundle (≈540 KB) + its stylesheet,
+  // once. Resolves with the global `vis` (which carries Timeline + DataSet).
+  let visTimelinePromise = null;
+  const loadVisTimeline = () => {
+    if (window.vis && window.vis.Timeline) return Promise.resolve(window.vis);
+    if (visTimelinePromise) return visTimelinePromise;
+    visTimelinePromise = new Promise((resolve, reject) => {
+      const base = 'vendor/vis-timeline/vis-timeline-graph2d.min';
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `${base}.css?v=${VIS_TIMELINE_VER}`;
+      document.head.appendChild(link);
+      const s = document.createElement('script');
+      s.src = `${base}.js?v=${VIS_TIMELINE_VER}`;
+      s.onload = () => (window.vis && window.vis.Timeline)
+        ? resolve(window.vis)
+        : reject(new Error('vis-timeline loaded but window.vis is missing'));
+      s.onerror = () => reject(new Error('failed to load vendor/vis-timeline'));
+      document.head.appendChild(s);
+    });
+    return visTimelinePromise;
+  };
+
   const buildTimelineView = () => {
     const host = document.getElementById('view-timeline');
     if (!host) return;
+
     const shipped = [...cardIndex.values()].filter((c) => c.status === 'shipped');
-
-    const DAY = 86400000;
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    // YYYY-MM-DD or YYYY-MM → epoch ms (UTC noon, to dodge DST); null otherwise.
-    const parseDate = (d) => {
+    // 'YYYY-MM-DD' / 'YYYY-MM' → 'YYYY-MM-DD' (DD defaults to 01); null if it
+    // doesn't look like a date.
+    const isoDate = (d) => {
       const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?/.exec(String(d ?? ''));
-      return m ? Date.UTC(+m[1], +m[2] - 1, m[3] ? +m[3] : 1, 12) : null;
+      return m ? `${m[1]}-${m[2]}-${m[3] || '01'}` : null;
     };
-    const now = new Date();
-    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12);
-    const fmtFull  = (t) => { const d = new Date(t); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; };
-    const fmtShort = (t) => { const d = new Date(t); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`; };
+    const toDate  = (iso) => new Date(`${iso}T12:00:00`);   // local noon — dodges DST edges
+    const fmtFull = (iso) => { const [y, mo, da] = iso.split('-').map(Number); return `${MONTHS[mo - 1]} ${da}, ${y}`; };
 
-    // { c, displayId, start, end, isPoint, posT } — end = updated; start =
-    // `started` if it parses & falls strictly before end, else null (a point).
-    // posT = the anchor time (a bar's start, or a point's date).
-    const items = shipped.map((c) => {
-      const end = parseDate(c.updated);
-      const sr  = parseDate(c.started);
-      const start = (sr != null && end != null && sr < end) ? sr : null;
-      return { c, displayId: c.displayId, start, end, isPoint: start == null, posT: start != null ? start : end };
-    }).filter((it) => it.end != null).sort((a, b) => a.posT - b.posT);
+    // One vis item per shipped card. A `range` ([started, updated]) when
+    // `started` is a real date strictly before `updated`; otherwise a `point`
+    // at `updated` — a dot at the ship date, no invented duration.
+    const visItems = [];
+    shipped.forEach((c) => {
+      const end = isoDate(c.updated);
+      if (!end) return;
+      const start = isoDate(c.started);
+      const isRange = start != null && start < end;
+      const dateText = isRange ? `${fmtFull(start)} → ${fmtFull(end)}` : fmtFull(end);
+      visItems.push({
+        id: c.displayId,
+        content: `<span class="vt-id">${escape(c.displayId)}</span> ${escape(c.title ?? '')}`,
+        title: `${escape(c.title ?? '')} · ${escape(dateText)}`,    // hover tooltip
+        start: toDate(isRange ? start : end),
+        ...(isRange ? { end: toDate(end) } : {}),
+        type: isRange ? 'range' : 'point',
+        className: 'vt-item',
+      });
+    });
 
-    const headHtml = `<h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date${items.length ? ` · ${items.length} project${items.length === 1 ? '' : 's'}` : ''}</span></h3>`;
-    if (items.length === 0) {
+    const headHtml = `<h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date${visItems.length ? ` · ${visItems.length} project${visItems.length === 1 ? '' : 's'}` : ''}</span></h3>`;
+    if (visItems.length === 0) {
       host.innerHTML = `<div class="timeline-doc">${headHtml}<p class="timeline-empty">nothing shipped yet</p></div>`;
       timelineBuilt = true;
       return;
     }
 
-    // ── geometry ─────────────────────────────────────────────────────
-    const PX_PER_MONTH = 150, MONTH_DAYS = 30.4;
-    const MIN_TRACK_PX = 900;            // narrowest the track is ever drawn
-    const MIN_BAR_PX = 260, GUTTER_PX = 14, DOT_PX = 10;   // a bar never narrower than this (≈ fits "id · title · date"); lane gutter; sliver a point reserves
-    const LANE_H = 40;                                      // px slot per lane (bar 28px + 12px gap; mirrors --tl-lane-h in CSS)
-    const pxToT = (px) => (px / PX_PER_MONTH) * MONTH_DAYS * DAY;   // px → time, at the fixed scale (track-independent)
-    const minBarT0 = pxToT(MIN_BAR_PX), gutterT0 = pxToT(GUTTER_PX), dotT0 = pxToT(DOT_PX);
-    // Each item reserves max(its span, a min bar) of time + a gutter; today is
-    // always inside the window (so its marker shows).
-    const reservedT0 = (it) => Math.max(it.isPoint ? dotT0 : (it.end - it.posT), minBarT0);
-    const dataLo = Math.min(...items.map((it) => it.posT));
-    const dataHi = Math.max(...items.map((it) => it.end));
-    const lo = Math.min(dataLo, today), hi = Math.max(dataHi, today);
-    const pad = Math.max(DAY * 10, (hi - lo) * 0.05);
-    const rightNeed = Math.max(...items.map((it) => it.posT + reservedT0(it))) + gutterT0;
-    const leftNeed  = dataLo - gutterT0;
-    const axisMin = Math.min(lo - pad, leftNeed);
-    const axisMax = Math.max(hi + pad, rightNeed);
-    const span = (axisMax - axisMin) || DAY;
-    const pct = (t) => ((t - axisMin) / span) * 100;
-    const trackPx = Math.max(Math.round((span / (MONTH_DAYS * DAY)) * PX_PER_MONTH), MIN_TRACK_PX);
-    // Final on-screen metrics, in time units, at the (possibly bumped) track
-    // scale — used for *both* lane packing and bar widths so they agree. When
-    // the track is bumped to MIN_TRACK_PX these come out ≤ the *0 values
-    // above, so the axis (sized with those) is still wide enough. */
-    const minBarT = (MIN_BAR_PX / trackPx) * span, gutterT = (GUTTER_PX / trackPx) * span, dotT = (DOT_PX / trackPx) * span;
-    const reservedT = (it) => Math.max(it.isPoint ? dotT : (it.end - it.posT), minBarT);
+    host.innerHTML = `<div class="timeline-doc">${headHtml}<div class="vt-host" aria-label="Shipped projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
+    timelineBuilt = true;   // claim it now so a second tab-click doesn't re-load the bundle
 
-    // Greedy lane-pack: items already sorted by posT; each occupies
-    // [posT, posT + reservedT]; place it in the first lane clear at posT.
-    const lanes = [];
-    items.forEach((it) => {
-      let lane = lanes.find((L) => L.endsAt <= it.posT);
-      if (!lane) { lane = { endsAt: -Infinity, items: [] }; lanes.push(lane); }
-      lane.items.push(it);
-      lane.endsAt = Math.max(lane.endsAt, it.posT + reservedT(it) + gutterT);
+    // Window bounds: snug around the data + today, with a month of pan room.
+    const DAY = 86400000;
+    const stamps = visItems.flatMap((it) => [it.start.getTime(), it.end ? it.end.getTime() : null]).filter((n) => n != null);
+    stamps.push(Date.now());
+    const lo = Math.min(...stamps), hi = Math.max(...stamps);
+    const winPad = Math.max(DAY * 10, (hi - lo) * 0.06);
+    const panPad = Math.max(DAY * 45, (hi - lo) * 0.25);
+
+    loadVisTimeline().then((vis) => {
+      const el = host.querySelector('.vt-host');
+      if (!el) return;
+      el.textContent = '';
+      if (timelineInstance) { try { timelineInstance.destroy(); } catch (_) { /* noop */ } timelineInstance = null; }
+      timelineInstance = new vis.Timeline(el, new vis.DataSet(visItems), {
+        orientation: { axis: 'top', item: 'top' },
+        align: 'auto',
+        stack: true,
+        margin: { item: { horizontal: 12, vertical: 8 }, axis: 14 },
+        min: new Date(lo - panPad),
+        max: new Date(hi + panPad),
+        start: new Date(lo - winPad),
+        end: new Date(hi + winPad),
+        zoomMin: DAY * 21,            // don't let it zoom in past ~3 weeks…
+        zoomMax: DAY * 366 * 25,      // …or out past ~25 years
+        zoomKey: 'ctrlKey',           // plain wheel scrolls the page; Ctrl-wheel zooms
+        showCurrentTime: true,        // the "today" line
+        selectable: true,
+        multiselect: false,
+        editable: false,
+        clickToUse: false,
+        maxHeight: 460,
+        tooltip: { followMouse: true, overflowMethod: 'cap' },
+      });
+      timelineInstance.on('select', (props) => {
+        const id = props.items && props.items[0];
+        if (id != null) { openCardModal(String(id)); timelineInstance.setSelection([]); }
+      });
+    }).catch((err) => {
+      console.error('[timeline]', err);
+      const el = host.querySelector('.vt-host');
+      if (el) el.innerHTML = `<p class="timeline-empty">couldn’t load the timeline view — ${escape(String((err && err.message) || err))}</p>`;
     });
-
-    // Month ticks; January (or, failing that, the first tick) carries the year.
-    const ticks = [];
-    {
-      const d0 = new Date(axisMin);
-      let ty = d0.getUTCFullYear(), tm = d0.getUTCMonth();
-      if (d0.getUTCDate() > 1 || d0.getUTCHours() > 0) { tm += 1; if (tm > 11) { tm = 0; ty += 1; } }
-      let t = Date.UTC(ty, tm, 1, 12), guard = 0;
-      while (t <= axisMax && guard++ < 600) {
-        const dt = new Date(t);
-        ticks.push({ t, label: MONTHS[dt.getUTCMonth()], year: dt.getUTCMonth() === 0 ? dt.getUTCFullYear() : null });
-        let nm = dt.getUTCMonth() + 1, ny = dt.getUTCFullYear();
-        if (nm > 11) { nm = 0; ny += 1; }
-        t = Date.UTC(ny, nm, 1, 12);
-      }
-      if (ticks.length && !ticks.some((tk) => tk.year != null)) ticks[0].year = new Date(ticks[0].t).getUTCFullYear();
-    }
-
-    // ── markup ───────────────────────────────────────────────────────
-    const lanesH = Math.max(lanes.length, 1) * LANE_H;
-    const minBarPct = (MIN_BAR_PX / trackPx) * 100;
-    const barHtml = (it, laneIdx, idx) => {
-      const c = it.c;
-      const left = Math.max(0, pct(it.posT));
-      const widthPct = Math.max(it.isPoint ? 0 : (pct(it.end) - pct(it.posT)), minBarPct);
-      const when = it.isPoint ? fmtShort(it.posT) : `${fmtShort(it.posT)} → ${fmtShort(it.end)}`;
-      const dateFull = it.isPoint ? fmtFull(it.posT) : `${fmtFull(it.posT)} → ${fmtFull(it.end)}`;
-      return `<div class="tl-bar" data-tone="${idx % 2 === 0 ? 'a' : 'b'}" style="left:${left.toFixed(3)}%;width:${widthPct.toFixed(3)}%;top:${laneIdx * LANE_H}px" data-card-id="${escape(it.displayId)}" tabindex="0" role="button" title="${escape(c.title ?? '')} · ${escape(dateFull)}" aria-label="${escape(c.title ?? '')} — shipped ${escape(dateFull)}; open details">
-        <span class="tl-bar-dot" aria-hidden="true"></span>
-        <span class="tl-bar-id">${escape(c.displayId)}</span>
-        <span class="tl-bar-name">${escape(c.title ?? '')}</span>
-        <span class="tl-bar-when">${escape(when)}</span>
-      </div>`;
-    };
-    let barIdx = 0;
-    const barsHtml = lanes.map((L, i) => L.items.map((it) => barHtml(it, i, barIdx++)).join('')).join('');
-    const gridHtml = ticks.map((tk) =>
-      `<span class="tl-gridline${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%"></span>`).join('');
-    const monthsHtml = ticks.map((tk) =>
-      `<span class="tl-month${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%">${escape(tk.label)}${tk.year != null ? ` <b>${tk.year}</b>` : ''}</span>`).join('');
-    const todayPct = pct(today).toFixed(3);
-    const todayHtml = `<span class="tl-today-line" style="left:${todayPct}%"></span>`;
-    const todayPillHtml = `<span class="tl-today-pill" style="left:${todayPct}%">today · ${escape(fmtShort(today))}</span>`;
-
-    host.innerHTML = `<div class="timeline-doc">
-      ${headHtml}
-      <div class="timeline-scroll">
-        <div class="tl-track" style="--track-w:${trackPx}px">
-          <div class="tl-scale">${monthsHtml}${todayPillHtml}</div>
-          <div class="tl-body" style="height:${lanesH}px">
-            <div class="tl-grid" aria-hidden="true">${gridHtml}${todayHtml}</div>
-            ${barsHtml}
-          </div>
-        </div>
-      </div>
-      <p class="tl-hint">click a bar to open the project</p>
-    </div>`;
-    timelineBuilt = true;
   };
 
   // Apply the audience lens: re-order the kanban column DOM nodes in place,
-  // and (re)build the flat views so they pick up the new order. 'everyone'
-  // restores board order. (The Timeline is always chronological — the rebuild
-  // call below is a harmless no-op for it.) Note: the lens is purely a visual
-  // curation layer — the card-detail panel's ↑/↓ nav (and its "N / M"
-  // indicator) stay in the canonical board order, not the lensed order, since
-  // "next card" would otherwise be view-dependent.
+  // and (re)build the order-sensitive flat views (table, specs). 'everyone'
+  // restores board order. The Timeline is always chronological so the lens
+  // doesn't touch it — and rebuilding it would leak the live vis-timeline
+  // instance, so we deliberately leave `timelineBuilt` alone. Note: the lens
+  // is purely a visual curation layer — the card-detail panel's ↑/↓ nav (and
+  // its "N / M" indicator) stay in the canonical board order, not the lensed
+  // order, since "next card" would otherwise be view-dependent.
   const applyAudience = (persona) => {
     currentAudience = (persona && persona !== 'everyone') ? persona : 'everyone';
     const orderIdx = new Map();
@@ -643,12 +625,12 @@
       pairs.forEach(({ n }) => root.appendChild(n));
     });
     // Flat views order via personaSort on build — invalidate, and rebuild any
-    // that's currently visible so the change is immediate.
-    tableBuilt = specsBuilt = timelineBuilt = false;
+    // that's currently visible so the change is immediate. (Timeline excluded:
+    // chronological, and not safe to blindly rebuild — see comment above.)
+    tableBuilt = specsBuilt = false;
     const rebuildIfVisible = (id, build) => { const el = document.getElementById(id); if (el && !el.hidden) build(); };
     rebuildIfVisible('view-table', buildTableView);
     rebuildIfVisible('view-specs', buildSpecView);
-    rebuildIfVisible('view-timeline', buildTimelineView);
   };
 
   // The four view panels, keyed by their tab's data-view value.
@@ -682,6 +664,11 @@
       const el = document.getElementById(VIEW_PANELS[view]);
       if (el) el.innerHTML = `<p style="padding:24px;color:var(--color-text-faint);font-family:var(--font-mono);font-size:13px;">Couldn’t build this view — ${escape(String((e && e.message) || e))}</p>`;
     }
+    // vis-timeline can't size itself while its panel is display:none, so a
+    // redraw on (re-)show fixes a timeline that was built/grew while hidden.
+    if (view === 'timeline' && timelineInstance) {
+      try { timelineInstance.redraw(); } catch (_) { /* a transient redraw hiccup shouldn't nuke the view */ }
+    }
   };
 
   const wireViewTabs = () => {
@@ -708,7 +695,8 @@
 
     // Open the card-detail panel when an element matching `sel` (carrying
     // data-card-id) inside `containerId` is clicked or Enter/Space-activated.
-    // Used by the Table view (table rows) and the Timeline view (entries).
+    // Used by the Table view (table rows). The Timeline view wires its own
+    // open-on-select handler (vis-timeline owns those clicks).
     const wireCardOpener = (containerId, sel) => {
       const host = document.getElementById(containerId);
       if (!host) return;
@@ -724,7 +712,6 @@
       });
     };
     wireCardOpener('view-table', 'tr[data-card-id]');
-    wireCardOpener('view-timeline', '[data-card-id]');
 
     // Audience lens — re-order cards per reader (no-op for 'everyone').
     document.getElementById('audience-lens')?.addEventListener('change', (ev) => applyAudience(ev.target.value));

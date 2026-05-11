@@ -1,0 +1,4 @@
+vis-timeline is dual-licensed: MIT OR Apache-2.0.
+See LICENSE-MIT in this folder for the MIT text, and
+https://github.com/visjs/vis-timeline/blob/master/LICENSE.Apache-2.0.txt
+for the Apache-2.0 text. See README.md here for what's vendored and why.

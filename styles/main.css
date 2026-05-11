@@ -775,13 +775,12 @@ button:focus-visible,
 .spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
 
 /* ── Timeline view ────────────────────────────────────────────────────
-   A horizontal Gantt ("ship log") in the spirit of Notion's timeline view: a
-   month scale across the top, then one labelled pill bar per Shipped project,
-   lane-packed so overlapping bars stack. Built by scripts/render.js — bars and
-   gridlines are positioned by left/width % inside a track that's ≈150px/month
-   wide (CSS stretches it to fill the panel when there's room); .tl-body gets
-   an inline height = lanes × 40px. Clicking a bar opens the card-detail panel
-   (wireCardOpener wires any [data-card-id] in here).
+   Roadmap → Timeline is an interactive timeline rendered by the vendored
+   vis-timeline library (vendor/vis-timeline/, lazy-loaded by scripts/render.js
+   → buildTimelineView). vis ships its own stylesheet (also lazy-loaded, so it
+   lands *after* this file) — the `.vt-host …` overrides below win on
+   specificity (the extra `.vt-host` class) and bend it to the site palette:
+   pill range-bars / dot points, mono axis labels, a blue "today" line.
    (No `display` on .board-timeline-view, so the UA [hidden] rule still hides it.) */
 .timeline-doc { padding-top: var(--sp-8); }
 .timeline-head {
@@ -802,129 +801,96 @@ button:focus-visible,
   font-family: var(--font-mono);
   font-size: var(--fs-12);
 }
-/* The scroll canvas — the track may be wider than the panel. */
-.timeline-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: var(--sp-8);
-}
-/* The track: ≈150px/month wide (set inline as --track-w), stretched to fill
-   the panel when there's room. A month-scale strip on top, then the lanes. */
-.tl-track {
-  --tl-lane-h: 40px;
-  --tl-bar-h: 28px;
-  position: relative;
-  width: var(--track-w, 100%);
-  min-width: 100%;
-}
-/* Month scale: month/year labels + the "today" pill, with a baseline rule. */
-.tl-scale {
-  position: relative;
-  height: 26px;
-  margin-bottom: var(--sp-12);
-  border-bottom: var(--bw) solid var(--color-line);
-}
-.tl-month {
-  position: absolute;
-  top: 7px;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-  white-space: nowrap;
-  pointer-events: none;
-}
-.tl-month b { color: var(--color-text-dim); font-weight: var(--fw-semibold); }
-.tl-today-pill {
-  position: absolute;
-  top: 3px;
-  transform: translateX(-50%);
-  padding: 1px 7px;
-  background: var(--color-blue);
-  color: var(--color-bg);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide);
-  white-space: nowrap;
-  pointer-events: none;
-}
-/* Lanes body — a relative box; gridlines fill it, bars sit absolutely on it. */
-.tl-body { position: relative; }
-.tl-grid { position: absolute; inset: 0; pointer-events: none; }
-.tl-gridline {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 0;
-  border-left: var(--bw) dashed var(--color-line-soft);
-}
-.tl-gridline.is-year { border-left-style: solid; border-left-color: var(--color-line); }
-.tl-today-line {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 0;
-  border-left: var(--bw-thick) solid var(--color-blue);
-  opacity: 0.5;
-}
-/* A project bar — a pill carrying [dot] id · title · date, clickable. */
-.tl-bar {
-  position: absolute;
-  height: var(--tl-bar-h);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-8);
-  padding: 0 var(--sp-12);
-  border-radius: 999px;
-  border: var(--bw) solid var(--color-yellow);
-  background: var(--color-yellow-soft);
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  cursor: pointer;
-  z-index: 1;
-  transition: transform var(--dur-quick), box-shadow var(--dur-quick);
-}
-.tl-bar[data-tone="b"] { background: var(--color-blue-soft); border-color: var(--color-blue); }
-.tl-bar:hover, .tl-bar:focus-visible {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card-hover);
-}
-.tl-bar-dot {
-  flex: 0 0 auto;
-  width: 7px; height: 7px;
-  border-radius: 999px;
-  background: var(--color-yellow);
-}
-.tl-bar[data-tone="b"] .tl-bar-dot { background: var(--color-blue); }
-.tl-bar-id {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-text-dim);
-}
-.tl-bar-name {
-  flex: 1 1 auto;
-  min-width: 2em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: var(--fs-13);
-  font-weight: var(--fw-medium);
-}
-.tl-bar-when {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  color: var(--color-text-faint);
-}
 .tl-hint {
   margin-top: var(--sp-16);
   font-family: var(--font-mono);
   font-size: var(--fs-10);
   letter-spacing: var(--tracking-wide);
   color: var(--color-text-faint);
+}
+/* The element handed to vis.Timeline(). min-height keeps the layout from
+   jumping while the ≈540 KB bundle loads ("loading…" sits here first). */
+.vt-host {
+  width: 100%;
+  min-height: 140px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+}
+
+/* ── vis-timeline overrides — all scoped to .vt-host so they out-specify
+   the library's own (later-loaded) stylesheet ─────────────────────────── */
+.vt-host .vis-timeline {
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+}
+.vt-host .vis-panel.vis-bottom,
+.vt-host .vis-panel.vis-center,
+.vt-host .vis-panel.vis-left,
+.vt-host .vis-panel.vis-right,
+.vt-host .vis-panel.vis-top { border-color: var(--color-line); }
+.vt-host .vis-foreground .vis-group { border-bottom: none; }
+.vt-host .vis-labelset .vis-label { border-color: var(--color-line); }
+/* time axis — mono, faint; the "major" tick (month / year) a touch stronger */
+.vt-host .vis-time-axis .vis-text {
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 4px 5px;
+}
+.vt-host .vis-time-axis .vis-text.vis-major { color: var(--color-text-dim); font-weight: var(--fw-semibold); }
+.vt-host .vis-time-axis .vis-grid.vis-minor { border-color: var(--color-line-soft); }
+.vt-host .vis-time-axis .vis-grid.vis-major { border-color: var(--color-line); }
+/* the "today" line */
+.vt-host .vis-current-time { background-color: var(--color-blue); width: var(--bw-thick); opacity: 0.6; }
+/* items — range pills + point dots, in the warm accent */
+.vt-host .vis-item {
+  background-color: var(--color-yellow-soft);
+  border-color: var(--color-yellow);
+  border-width: var(--bw);
+  border-radius: var(--r-md);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: box-shadow var(--dur-quick), border-color var(--dur-quick);
+}
+.vt-host .vis-item.vis-range { border-radius: 999px; }
+.vt-host .vis-item.vis-dot {
+  background-color: var(--color-yellow);
+  border-color: var(--color-yellow);
+  border-width: 5px;
+}
+.vt-host .vis-item:hover { box-shadow: var(--shadow-card); border-color: var(--color-blue); }
+.vt-host .vis-item.vis-selected,
+.vt-host .vis-item.vis-point.vis-selected {
+  background-color: var(--color-yellow-soft);
+  border-color: var(--color-blue);
+  box-shadow: var(--shadow-card-hover);
+}
+.vt-host .vis-item .vis-item-content { padding: 4px var(--sp-10); }
+.vt-host .vis-item .vt-id {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-dim);
+  margin-right: var(--sp-8);
+}
+/* drop the library's blue interaction glow */
+.vt-host .vis-active { box-shadow: none; }
+/* tooltip — match the site's dark-on-light chips */
+.vt-host .vis-tooltip {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border: none;
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card-hover);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  padding: var(--sp-6) var(--sp-10);
 }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
