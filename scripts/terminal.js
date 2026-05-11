@@ -323,7 +323,7 @@
         try { data = await r.json(); } catch (_) { /* non-JSON response */ }
         if (r.ok && data && data.answer) {
           const ans = escape(String(data.answer)).replace(/\n+/g, '<br>');
-          setLine(`${ans}<br><span class="term-dim">✨ generated from this site's content — answers reflect the data here, not me</span>`, 'term-out');
+          setLine(`${ans}<br><span class="term-dim">✨ an AI answering in my voice — strictly from this site's content (not me typing)</span>`, 'term-out');
         } else {
           const why = (data && data.error) ? ` — ${escape(String(data.error))}` : '';
           setLine(`<span class="term-err">couldn’t get an answer right now${why}.</span> <span class="term-dim">try rephrasing, or </span><span class="term-key">search ${escape((q.split(/\s+/)[0] || '').toLowerCase())}</span>`, 'term-out');
