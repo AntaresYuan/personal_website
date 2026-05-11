@@ -947,7 +947,7 @@
     const url = String((site && site.qa && site.qa.workerUrl) || '').trim();
     const cards = (board && board.cards) ? board.cards : [];
     const show = (html, cls) => { ans.className = `hero-ask-answer${cls ? ' ' + cls : ''}`; ans.innerHTML = html; ans.hidden = false; };
-    const NOTE_AI = `<p class="hero-ask-note">✨ generated from this site's content — answers reflect the data here, not me</p>`;
+    const NOTE_AI = `<p class="hero-ask-note">✨ an AI answering in my voice — strictly from this site's content (not me typing)</p>`;
     const NOTE_FAQ = `<p class="hero-ask-note">drawn from this site's content — the roadmap below has the full picture</p>`;
 
     // a "→ open SHIP-01" / "→ Lens" link for a matched FAQ/card target
