@@ -79,6 +79,12 @@
      until CSS resolves the .avatar-img background-image rule. -->
 <link rel="preload" as="image" href="media/avatar-calm.png" fetchpriority="high">
 
+<!-- The Roadmap → Timeline view lazy-loads vis-timeline (≈540 KB) the first
+     time it's opened — prefetch it at idle so that switch isn't network-blocked.
+     (Keep ?v= in sync with VIS_TIMELINE_VER in scripts/render.js.) -->
+<link rel="prefetch" as="script" href="vendor/vis-timeline/vis-timeline-graph2d.min.js?v=8.5.1">
+<link rel="prefetch" as="style"  href="vendor/vis-timeline/vis-timeline-graph2d.min.css?v=8.5.1">
+
 <!-- Theme: a localStorage override ('light' | 'dark'), else the OS preference.
      Runs synchronously, before the stylesheet, so <html data-theme> is set
      before first paint — no flash. data-theme-mode (auto|light|dark) drives
@@ -722,7 +728,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=f82cdf2a"   defer></script>
+<script src="scripts/render.js?v=14d45fd5"   defer></script>
 <script src="scripts/terminal.js?v=220438c1" defer></script>
 <script src="scripts/palette.js?v=3182eecc"  defer></script>
 </body>
