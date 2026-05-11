@@ -301,9 +301,9 @@
 
   // ask <question> — a grounded AI answer from the antares-qa Worker
   // (workers/qa/, fed the site's /llms-full.txt). Needs content/site.json →
-  // qa.workerUrl to be set; otherwise it explains what's missing. The fetch
-  // is fire-and-forget — the "asking…" line is replaced in place when the
-  // answer (or an error) arrives, so the terminal stays usable meanwhile.
+  // qa.workerUrl to be set; otherwise it explains what's missing. The "asking…"
+  // line is replaced in place when the answer (or an error) arrives. The prompt
+  // is locked while we wait so nothing else prints in between.
   cmds.ask = (args) => {
     if (askBusy) return print('<span class="term-dim">one moment — still working on the last question.</span>', 'term-dim');
     const q = (args || []).join(' ').trim();
@@ -313,7 +313,11 @@
       return print('<span class="term-dim">the </span><span class="term-key">ask</span><span class="term-dim"> command needs the antares-qa Worker deployed (see </span><span class="term-key">workers/qa/README.md</span><span class="term-dim">). For now try </span><span class="term-key">whoami</span><span class="term-dim"> · </span><span class="term-key">projects</span><span class="term-dim"> · </span><span class="term-key">cat &lt;ID&gt;</span><span class="term-dim"> · </span><span class="term-key">search</span><span class="term-dim">.</span>');
     }
     print("<span class=\"term-dim\">asking this portfolio… (takes a few seconds — two passes)</span>", 'term-dim');
-    const lineNode = promptLine.previousElementSibling;          // the "asking…" line — replaced in place when the answer lands
+    // `print()` above is BUFFERED inside exec()'s printBatch — it isn't in the
+    // DOM yet. Grab the "asking…" line only after that batch flushes (next
+    // microtask), so we replace the right node and not the line above it.
+    let lineNode = null;
+    queueMicrotask(() => { lineNode = promptLine.previousElementSibling; });
     const setLine = (html, cls) => {
       if (lineNode) { lineNode.className = `terminal-line ${cls || 'term-out'}`; lineNode.innerHTML = html; }
       else { print(html, cls); }
