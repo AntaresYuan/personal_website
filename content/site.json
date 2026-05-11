@@ -1,15 +1,15 @@
 {
   "meta": {
-    "title": "Antares Yuan — AI PM",
-    "lang": "en",
-    "locale": "en_US",
+    "title": "Antares Yuan",
     "siteName": "Antares Yuan",
+    "description": "AI Product Manager. A living roadmap of what I've shipped, what I'm building, and where I'm going.",
     "url": "https://antaresyuan.site",
     "author": "Chenjie (Antares) Yuan",
+    "lang": "en",
+    "locale": "en_US",
     "ogImage": "media/avatar-calm.png",
     "ogImageWidth": "512",
-    "ogImageHeight": "512",
-    "description": "AI Product Manager. A living roadmap of what I've shipped, what I'm building, and where I'm going."
+    "ogImageHeight": "512"
   },
   "footer": {
     "copyright": "© 2026 Antares Yuan",
@@ -25,7 +25,7 @@
     "category": "General",
     "categoryId": "DIC_kwDOSYXV8c4C8tqu",
     "mapping": "pathname",
-    "theme": "preferred_color_scheme",
-    "inputPosition": "bottom"
+    "theme": "light",
+    "inputPosition": "top"
   }
 }
