@@ -514,7 +514,10 @@
     const host = document.getElementById('view-timeline');
     if (!host) return;
 
-    const shipped = [...cardIndex.values()].filter((c) => c.status === 'shipped');
+    // Shipped + Now: the two statuses with real dates. Next/Later have no
+    // `started` (only the card's last-edit `updated`), so they'd have nowhere
+    // to sit on a date axis — they stay in the Board/Table/Specs views.
+    const cards = [...cardIndex.values()].filter((c) => c.status === 'shipped' || c.status === 'now');
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     // 'YYYY-MM-DD' / 'YYYY-MM' → 'YYYY-MM-DD' (DD defaults to 01); null if it
     // doesn't look like a date.
@@ -524,6 +527,7 @@
     };
     const toDate  = (iso) => new Date(`${iso}T12:00:00`);   // local noon — dodges DST edges
     const fmtFull = (iso) => { const [y, mo, da] = iso.split('-').map(Number); return `${MONTHS[mo - 1]} ${da}, ${y}`; };
+    const NOW = new Date();    // live "today" — in-progress projects extend to here
 
     // Colour-by-category: a card's "category" is its first tag (or "Other").
     // Categories get a palette tone in first-seen order — the first 4 distinct
@@ -532,45 +536,58 @@
     const TONE_COUNT = 4;
     const categoryOf = (c) => (c.tags && c.tags.length ? c.tags[0] : 'Other');
     const toneOf = new Map();          // category → tone index (0…TONE_COUNT)
-    shipped.forEach((c) => {
+    cards.forEach((c) => {
       const cat = categoryOf(c);
       if (!toneOf.has(cat)) toneOf.set(cat, toneOf.size < TONE_COUNT ? toneOf.size + 1 : 0);
     });
     const legendItems = [...toneOf.entries()].filter(([, t]) => t >= 1).map(([cat, t]) => ({ tone: t, label: cat }));
     if ([...toneOf.values()].includes(0)) legendItems.push({ tone: 0, label: 'Other' });
 
-    // One vis item per shipped card. A `range` ([started, updated]) when
-    // `started` is a real date strictly before `updated`; otherwise a `point`
-    // at `updated` — a dot at the ship date, no invented duration.
+    // One vis item per card. Shipped → a `range` [started, updated] (if a
+    // `started` date is given and is earlier), else a `point` at `updated`.
+    // Now → a `range` [started, today] (open-ended, marked `vt-now`), or a
+    // `point` at `updated`/today if there's no `started`.
     const visItems = [];
-    shipped.forEach((c) => {
-      const end = isoDate(c.updated);
-      if (!end) return;
+    let nShipped = 0, nNow = 0;
+    cards.forEach((c) => {
       const start = isoDate(c.started);
-      const isRange = start != null && start < end;
-      const dateText = isRange ? `${fmtFull(start)} → ${fmtFull(end)}` : fmtFull(end);
+      const end   = isoDate(c.updated);
+      const tone  = `vt-tone-${toneOf.get(categoryOf(c))}`;
+      let span, dateText, cls;
+      if (c.status === 'now') {
+        nNow++;
+        cls = `vt-item ${tone} vt-now`;
+        if (start)    { span = { start: toDate(start), end: NOW, type: 'range' }; dateText = `in progress · since ${fmtFull(start)}`; }
+        else if (end) { span = { start: toDate(end), type: 'point' };             dateText = `in progress · updated ${fmtFull(end)}`; }
+        else          { span = { start: NOW, type: 'point' };                     dateText = 'in progress'; }
+      } else {                                   // shipped
+        if (!end) return;
+        nShipped++;
+        cls = `vt-item ${tone}`;
+        if (start != null && start < end) { span = { start: toDate(start), end: toDate(end), type: 'range' }; dateText = `${fmtFull(start)} → ${fmtFull(end)}`; }
+        else                              { span = { start: toDate(end), type: 'point' };                    dateText = fmtFull(end); }
+      }
       visItems.push({
         id: c.displayId,
         content: `<span class="vt-id">${escape(c.displayId)}</span> ${escape(c.title ?? '')}`,
         title: `${escape(c.title ?? '')} · ${escape(dateText)}`,    // hover tooltip
-        start: toDate(isRange ? start : end),
-        ...(isRange ? { end: toDate(end) } : {}),
-        type: isRange ? 'range' : 'point',
-        className: `vt-item vt-tone-${toneOf.get(categoryOf(c))}`,
+        ...span,
+        className: cls,
       });
     });
 
-    const headHtml = `<h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date${visItems.length ? ` · ${visItems.length} project${visItems.length === 1 ? '' : 's'}` : ''}</span></h3>`;
+    const headMain = nNow > 0 ? 'Shipped &amp; in&nbsp;progress' : 'Shipped';
+    const headHtml = `<h3 class="timeline-head">${headMain} <span class="timeline-head-note">— a project timeline, by date</span></h3>`;
     if (visItems.length === 0) {
-      host.innerHTML = `<div class="timeline-doc">${headHtml}<p class="timeline-empty">nothing shipped yet</p></div>`;
+      host.innerHTML = `<div class="timeline-doc"><h3 class="timeline-head">Timeline <span class="timeline-head-note">— a project timeline, by date</span></h3><p class="timeline-empty">nothing on the timeline yet</p></div>`;
       timelineBuilt = true;
       return;
     }
     const legendHtml = legendItems.length >= 2
-      ? `<div class="vt-legend">${legendItems.map((L) => `<span class="vt-legend-item vt-tone-${L.tone}"><span class="vt-swatch" aria-hidden="true"></span>${escape(L.label)}</span>`).join('')}</div>`
-      : '';
+      ? `<div class="vt-legend">${legendItems.map((L) => `<span class="vt-legend-item vt-tone-${L.tone}"><span class="vt-swatch" aria-hidden="true"></span>${escape(L.label)}</span>`).join('')}${nNow > 0 ? `<span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>in progress</span>` : ''}</div>`
+      : (nNow > 0 ? `<div class="vt-legend"><span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>in progress</span></div>` : '');
 
-    host.innerHTML = `<div class="timeline-doc">${headHtml}${legendHtml}<div class="vt-host" aria-label="Shipped projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
+    host.innerHTML = `<div class="timeline-doc">${headHtml}${legendHtml}<div class="vt-host" aria-label="Shipped and in-progress projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
     timelineBuilt = true;   // claim it now so a second tab-click doesn't re-load the bundle
 
     // Window bounds: around the data + today, with margin (so an item near the

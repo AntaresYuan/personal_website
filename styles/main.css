@@ -832,6 +832,8 @@ button:focus-visible,
   border-radius: 999px;
   background: var(--tone-stroke, var(--color-yellow));
 }
+/* the "in progress" legend chip — a dashed ring, mirroring the dashed bars */
+.vt-legend-now .vt-swatch { background: transparent; border: var(--bw-thick) dashed var(--color-text-dim); }
 /* The element handed to vis.Timeline(). min-height keeps the layout from
    jumping while the ≈540 KB bundle loads ("loading…" sits here first). */
 .vt-host {
@@ -904,6 +906,9 @@ button:focus-visible,
   border-color: var(--color-blue);
   box-shadow: var(--shadow-card-hover);
 }
+/* in-progress (status = now) — a dashed bar with a "▸ continuing" cap */
+.vt-host .vis-item.vt-now.vis-range { border-style: dashed; border-width: var(--bw-thick); }
+.vt-host .vis-item.vt-now .vis-item-content::after { content: " ▸"; opacity: 0.55; font-weight: var(--fw-semibold); }
 /* let a narrow range bar's label spill out beside it instead of being clipped
    to "SH…" (vis clips it to .vis-item-overflow by default) */
 .vt-host .vis-item .vis-item-overflow { overflow: visible; }
