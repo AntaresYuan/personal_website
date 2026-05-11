@@ -132,11 +132,13 @@ const heroNameHtml = () => {
   return escape(profile.name) + accent;
 };
 
-// Hero meta row: role · location · status · pills(tags)
+// Hero meta row: role · location · [résumé ↓] · status · pills(tags).
+// `profile.resume` (a path, set via the CMS file widget) — empty ⇒ no link.
 const heroMetaHtml = () => {
   const parts = [];
   if (profile.role)     parts.push(`<span>${escape(profile.role)}</span>`);
   if (profile.location) parts.push(`<span class="sep">·</span><span>${escape(profile.location)}</span>`);
+  if (profile.resume)   parts.push(`<span class="sep">·</span><a class="hero-resume" href="${escape(profile.resume)}" target="_blank" rel="noopener">résumé&nbsp;↓</a>`);
   if (profile.status)   parts.push(`<span class="sep">·</span><span class="now-pill"><span class="pulse"></span>${escape(profile.status)}</span>`);
   (profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
   return parts.join('');

@@ -340,6 +340,16 @@ button:focus-visible,
   animation: pulse 2s var(--ease-in-out) infinite;
 }
 .hero-meta .sep { color: var(--color-text-faint); }
+/* "résumé ↓" — a quiet text link in the meta row (shown only if profile.resume is set) */
+.hero-meta .hero-resume {
+  color: var(--color-blue);
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+.hero-meta .hero-resume:hover { color: var(--color-blue-deep); }
 
 /* ── Hero CTAs (3 audience entries) ───────────────────────────────────── */
 .hero-ctas {
