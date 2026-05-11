@@ -21,6 +21,7 @@ const profile = read('content/profile.json');
 const board   = read('content/board.json');
 const lens    = read('content/lens.json');
 const contact = read('content/contact.json');
+const lastUpdated = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 const STATUS_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
@@ -118,7 +119,7 @@ ${stripTags(contact.intro ?? '')}
 ${(contact.items ?? []).map(it => `- ${it.key}: ${it.label} (${it.href})`).join('\n')}
 
 ---
-Generated ${new Date().toISOString().slice(0, 10)} from content/*.json. Last site update: ${site.footer?.lastUpdated ?? ''}
+Generated ${new Date().toISOString().slice(0, 10)} from content/*.json. Last site update: ${lastUpdated}
 `;
 
 /* ── Write ────────────────────────────────────────────────────────────── */

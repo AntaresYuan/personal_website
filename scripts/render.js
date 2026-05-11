@@ -32,9 +32,9 @@
       if (m) m.setAttribute('content', site.meta.description);
     }
     $('#brand-name').textContent = site.meta?.title?.split('—')[0]?.trim() ?? '';
-    $('#last-updated').textContent = site.footer?.lastUpdated
-      ? `updated ${site.footer.lastUpdated}`
-      : '';
+    // Only override the build-time "updated <date>" if site.json pins one;
+    // otherwise leave the auto value (last-commit date) baked in by build-html.js.
+    if (site.footer?.lastUpdated) $('#last-updated').textContent = `updated ${site.footer.lastUpdated}`;
     $('#footer-copyright').innerHTML = [
       escape(site.footer?.copyright ?? ''),
       site.footer?.tagline ? `<em>${escape(site.footer.tagline)}</em>` : '',
