@@ -17,8 +17,9 @@
   </style>
 </head>
 <body>
-  <!-- Fallback message — visible only if Decap fails to mount (e.g. bundle
-       failed to load, JS error). Removed by the script's onload handler. -->
+  <!-- Fallback message — visible only if the CMS fails to mount (bundle didn't
+       load, JS error, …). Removed by the script's onload handler (and, anyway,
+       the CMS replaces the body content when it boots). -->
   <div id="cms-loading-msg">
     <strong>Loading the CMS…</strong><br>
     If this message stays for more than 10 seconds, the CMS bundle failed to
@@ -26,17 +27,28 @@
     error to <code>chenjy4@uw.edu</code>.
   </div>
 
-  <!-- Decap CMS: in-browser CMS that commits content edits to the GitHub repo.
-       Single editor: only repo collaborators (i.e. the owner) can authenticate
-       through GitHub OAuth. Public visitors hit /admin/ but cannot log in.
+  <!-- Sveltia CMS — a modern, ~5× faster, ~1/3 the size successor to Decap CMS
+       (https://github.com/sveltia/sveltia-cms). In-browser CMS that commits
+       content edits to the GitHub repo. Reads the same admin/config.yml and
+       uses the same GitHub OAuth (the workers/decap-oauth Worker — Sveltia
+       speaks the same OAuth protocol as Decap). Single editor: only repo
+       collaborators can authenticate; public visitors hit /admin/ but can't
+       log in.
 
-       The bundle is vendored (admin/decap-cms.js, v3.12.2) instead of loaded
-       from a public npm CDN — jsDelivr and unpkg are unreliable from mainland
-       CN. The script MUST sit at the end of <body>: Decap's init() calls
-       document.body.appendChild(), so document.body has to exist already.
-       The onload handler removes the fallback message once the CMS boots. -->
+       Vendored (admin/sveltia-cms.js, v0.160.0) rather than loaded from a
+       public npm CDN — jsDelivr/unpkg are unreliable from mainland CN. MUST
+       sit at the end of <body> (the CMS mounts into document.body). The onload
+       handler clears the fallback message once the bundle has loaded.
+
+       ── Rollback ─────────────────────────────────────────────────────────
+       To switch back to Decap CMS (still vendored at admin/decap-cms.js):
+       comment out the Sveltia <script> below and uncomment the Decap one.
+       Both read admin/config.yml; no other change needed. -->
   <script
-    src="./decap-cms.js"
+    src="./sveltia-cms.js"
     onload="document.getElementById('cms-loading-msg')?.remove()"></script>
+  <!-- Decap CMS (fallback) — see "Rollback" above:
+  <script src="./decap-cms.js" onload="document.getElementById('cms-loading-msg')?.remove()"></script>
+  -->
 </body>
 </html>

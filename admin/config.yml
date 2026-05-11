@@ -1,5 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────
-# Decap CMS configuration.
+# CMS configuration — read by Sveltia CMS (admin/index.html); also valid
+# for Decap CMS (the vendored fallback). This file format is shared between
+# the two, so a rollback needs no config change.
 #
 # Backend: GitHub OAuth via a self-hosted Cloudflare Worker proxy.
 # Worker source: workers/decap-oauth/  (deploy: see that folder's README)
@@ -7,7 +9,9 @@
 # Local preview during development:
 #   - run a static server from repo root (e.g. `npx serve .`)
 #   - visit http://localhost:3000/admin/?local_backend=true
-#   - run `npx decap-server` in another terminal (no auth, file-system writes)
+#   - in another terminal: `npx @sveltia/cms-proxy-server`
+#     (or the Decap one, `npx decap-server` — Sveltia accepts either;
+#      no auth, writes straight to the local filesystem)
 # ─────────────────────────────────────────────────────────────────────
 
 backend:
@@ -29,40 +33,68 @@ public_folder: "/media"
 # ─────────────────────────────────────────────────────────────────────
 collections:
   # ── Site meta + footer ─────────────────────────────────────────────
+  # NOTE: Sveltia CMS rejects Decap-style dotted field names ("meta.title"),
+  # so the nested groups are real `object` widgets. Every sub-field of each
+  # group is listed (even rarely-edited ones) — both editors serialize an
+  # object from exactly the fields declared here, so an omitted sub-field
+  # would be dropped from content/site.json on the next save.
   - name: "site"
     label: "Site meta"
+    icon: settings          # Sveltia: Material Symbols name; Decap ignores it
     files:
       - file: "content/site.json"
         label: "Site"
         name: "site"
         format: "json"
         fields:
-          - { label: "Title",       name: "meta.title",       widget: "string" }
-          - { label: "Language",    name: "meta.lang",        widget: "string", default: "en" }
-          - { label: "Description", name: "meta.description", widget: "text" }
-          - { label: "Footer copyright",  name: "footer.copyright",  widget: "string" }
-          - { label: "Footer tagline",    name: "footer.tagline",    widget: "string" }
-          - { label: "Last updated (YYYY-MM-DD)", name: "footer.lastUpdated", widget: "string" }
-          # ── Cloudflare Web Analytics ─────────────────────────────────
-          # Get the token from dash.cloudflare.com → Web Analytics →
-          # Add a site → copy the value from the data-cf-beacon JSON.
-          # Leave empty to disable.
-          - { label: "Cloudflare Analytics Token", name: "analytics.cfAnalyticsToken", widget: "string", required: false, hint: "From dash.cloudflare.com → Web Analytics. Empty = disabled." }
-          # ── Giscus comments ──────────────────────────────────────────
-          # Setup: enable Discussions on the GitHub repo, then visit
-          # giscus.app, configure for AntaresYuan/personal_website, and
-          # paste the generated repo-id and category-id below.
-          - { label: "Giscus repo (owner/name)", name: "giscus.repo",       widget: "string", required: false, default: "AntaresYuan/personal_website" }
-          - { label: "Giscus repo ID",           name: "giscus.repoId",     widget: "string", required: false, hint: "From giscus.app — empty = comments disabled" }
-          - { label: "Giscus category",          name: "giscus.category",   widget: "string", required: false, default: "General" }
-          - { label: "Giscus category ID",       name: "giscus.categoryId", widget: "string", required: false, hint: "From giscus.app" }
-          - { label: "Giscus mapping",           name: "giscus.mapping",    widget: "select", options: ["pathname","url","title","og:title","specific","number"], required: false, default: "pathname" }
-          - { label: "Giscus theme",             name: "giscus.theme",      widget: "select", options: ["light","dark","preferred_color_scheme"], required: false, default: "light" }
-          - { label: "Giscus input position",    name: "giscus.inputPosition", widget: "select", options: ["top","bottom"], required: false, default: "top" }
+          - label: "Meta — <head> / SEO"
+            name: "meta"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Title",            name: "title",          widget: "string" }
+              - { label: "Site name",        name: "siteName",       widget: "string" }
+              - { label: "Description",      name: "description",    widget: "text" }
+              - { label: "Canonical URL",    name: "url",            widget: "string", hint: "e.g. https://antaresyuan.site" }
+              - { label: "Author",           name: "author",         widget: "string" }
+              - { label: "Language",         name: "lang",           widget: "string", default: "en" }
+              - { label: "Locale",           name: "locale",         widget: "string", default: "en_US", hint: "e.g. en_US" }
+              - { label: "OG / social image (path)", name: "ogImage", widget: "string", hint: "A file under media/, e.g. media/avatar-calm.png" }
+              - { label: "OG image width",   name: "ogImageWidth",   widget: "string", default: "512" }
+              - { label: "OG image height",  name: "ogImageHeight",  widget: "string", default: "512" }
+          - label: "Footer"
+            name: "footer"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Copyright", name: "copyright", widget: "string" }
+              - { label: "Tagline",   name: "tagline",   widget: "string" }
+              - { label: "Last updated (YYYY-MM-DD)", name: "lastUpdated", widget: "string" }
+          - label: "Cloudflare Web Analytics"
+            name: "analytics"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Analytics token", name: "cfAnalyticsToken", widget: "string", required: false, hint: "dash.cloudflare.com → Web Analytics → your site → the data-cf-beacon token. Empty = analytics off." }
+          - label: "Giscus comments"
+            name: "giscus"
+            widget: "object"
+            collapsed: true
+            # Setup: enable Discussions on the GitHub repo, configure at
+            # giscus.app for AntaresYuan/personal_website, paste the IDs below.
+            fields:
+              - { label: "Repo (owner/name)", name: "repo",          widget: "string", required: false, default: "AntaresYuan/personal_website" }
+              - { label: "Repo ID",           name: "repoId",        widget: "string", required: false, hint: "From giscus.app — empty = comments disabled" }
+              - { label: "Category",          name: "category",      widget: "string", required: false, default: "General" }
+              - { label: "Category ID",       name: "categoryId",    widget: "string", required: false, hint: "From giscus.app" }
+              - { label: "Mapping",           name: "mapping",       widget: "select", options: ["pathname","url","title","og:title","specific","number"], required: false, default: "pathname" }
+              - { label: "Theme",             name: "theme",         widget: "select", options: ["light","dark","preferred_color_scheme"], required: false, default: "light" }
+              - { label: "Input position",    name: "inputPosition", widget: "select", options: ["top","bottom"], required: false, default: "top" }
 
   # ── Hero / profile ─────────────────────────────────────────────────
   - name: "profile"
     label: "Hero / profile"
+    icon: person
     files:
       - file: "content/profile.json"
         label: "Profile"
@@ -75,8 +107,17 @@ collections:
           - { label: "Location",     name: "location",    widget: "string" }
           - { label: "Status (now)", name: "status",      widget: "string" }
           - { label: "Slogan",       name: "slogan",      widget: "text" }
+          - { label: "Manifesto",    name: "manifesto",   widget: "text", required: false, hint: "One-liner — the through-line of the whole site." }
           - { label: "Résumé / CV — English (PDF)", name: "resumeEn", widget: "file", required: false, hint: "English résumé (PDF recommended). When set, a 'résumé ↓' link shows up in the hero. Empty = no link." }
           - { label: "Résumé / CV — 中文 (PDF)",     name: "resumeZh", widget: "file", required: false, hint: "中文简历（建议 PDF）。设置后 hero 会显示「简历 ↓」链接。留空则不显示。" }
+          - label: "Avatar (illustrated portrait)"
+            name: "avatar"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Calm (default)",   name: "calm",    widget: "image" }
+              - { label: "Talking (on hover/tap)", name: "talking", widget: "image" }
+              - { label: "Alt text",         name: "alt",     widget: "string" }
           - label: "Tags"
             name: "tags"
             widget: "list"
@@ -86,6 +127,8 @@ collections:
             widget: "list"
             min: 1
             max: 4
+            collapsed: true
+            summary: "{{fields.audience}} → {{fields.label}}"
             fields:
               - { label: "Audience",  name: "audience", widget: "string" }
               - { label: "Label",     name: "label",    widget: "string" }
@@ -95,6 +138,7 @@ collections:
   # ── Board: project cards ───────────────────────────────────────────
   - name: "board"
     label: "Board (Shipped/Now/Next/Later)"
+    icon: dashboard
     files:
       - file: "content/board.json"
         label: "Cards"
@@ -104,7 +148,8 @@ collections:
           - label: "Cards"
             name: "cards"
             widget: "list"
-            summary: "{{fields.title}} · {{fields.status}}"
+            collapsed: true
+            summary: "{{fields.status}} · {{fields.title}}"
             fields:
               - { label: "ID (slug)", name: "id",      widget: "string" }
               - label: "Status"
@@ -123,6 +168,8 @@ collections:
                 name: "links"
                 widget: "list"
                 required: false
+                collapsed: true
+                summary: "{{fields.label}} — {{fields.href}}"
                 fields:
                   - { label: "Label", name: "label", widget: "string" }
                   - { label: "URL",   name: "href",  widget: "string" }
@@ -133,6 +180,7 @@ collections:
   # ── Lens: principles ───────────────────────────────────────────────
   - name: "lens"
     label: "Lens (how I think)"
+    icon: lightbulb
     files:
       - file: "content/lens.json"
         label: "Lens"
@@ -149,6 +197,7 @@ collections:
           - label: "Items"
             name: "items"
             widget: "list"
+            collapsed: true
             summary: "{{fields.num}} {{fields.main}}"
             fields:
               - { label: "Number (e.g. / 01)", name: "num",   widget: "string" }
@@ -158,6 +207,7 @@ collections:
   # ── Contact ────────────────────────────────────────────────────────
   - name: "contact"
     label: "Contact"
+    icon: mail
     files:
       - file: "content/contact.json"
         label: "Contact"
@@ -175,6 +225,7 @@ collections:
           - label: "Items"
             name: "items"
             widget: "list"
+            collapsed: true
             summary: "{{fields.key}} · {{fields.label}}"
             fields:
               - { label: "Key (email / linkedin / …)", name: "key",   widget: "string" }
