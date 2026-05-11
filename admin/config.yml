@@ -75,7 +75,8 @@ collections:
           - { label: "Location",     name: "location",    widget: "string" }
           - { label: "Status (now)", name: "status",      widget: "string" }
           - { label: "Slogan",       name: "slogan",      widget: "text" }
-          - { label: "Résumé / CV (PDF)", name: "resume", widget: "file", required: false, hint: "Upload your résumé (PDF recommended). When set, a small 'résumé ↓' link shows up in the hero. Leave empty for no link." }
+          - { label: "Résumé / CV — English (PDF)", name: "resumeEn", widget: "file", required: false, hint: "English résumé (PDF recommended). When set, a 'résumé ↓' link shows up in the hero. Empty = no link." }
+          - { label: "Résumé / CV — 中文 (PDF)",     name: "resumeZh", widget: "file", required: false, hint: "中文简历（建议 PDF）。设置后 hero 会显示「简历 ↓」链接。留空则不显示。" }
           - label: "Tags"
             name: "tags"
             widget: "list"
