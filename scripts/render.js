@@ -985,7 +985,7 @@
       }
       // Send both: `messages` for the multi-turn Worker, `q` so an older
       // single-turn deployment still works (it ignores `messages`).
-      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo }) })
+      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo }), signal: AbortSignal.timeout(30000) })
         .then(async (r) => {
           let d = {};
           try { d = await r.json(); } catch (_) { /* non-JSON */ }
@@ -993,7 +993,9 @@
             ? String(d.answer)
             : ("Sorry — I couldn't get an answer right now" + ((d && d.error) ? ` (${d.error})` : '') + '. Try again in a moment, or rephrase.');
         })
-        .catch(() => "Sorry — I couldn't reach the answer service right now. Try again in a moment.")
+        .catch((e) => (e && e.name === 'TimeoutError')
+          ? "Sorry — that took too long. Try again in a moment."
+          : "Sorry — I couldn't reach the answer service right now. Try again in a moment.")
         .then(finish);
     };
 
