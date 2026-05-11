@@ -416,6 +416,87 @@ button:focus-visible,
 }
 .hero-meta .hero-resume:hover { color: var(--color-blue-deep); }
 
+/* ── Hero "ask this portfolio" bar ────────────────────────────────────
+   Spans the full hero width, below the name/meta and the CTAs. A grounded
+   Q&A: with the antares-qa Worker (content/site.json → qa.workerUrl) it
+   shows a generated answer inline; without one it opens the ⌘K palette
+   pre-filled with the question. Wired in scripts/render.js (wireHeroAsk). */
+.hero-ask {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-24);
+}
+.hero-ask-form {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
+  padding: var(--sp-8) var(--sp-12);
+  background: var(--color-surface);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  transition: border-color var(--dur-quick);
+}
+.hero-ask-form:focus-within { border-color: var(--color-blue); }
+.hero-ask-prompt {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-14);
+  color: var(--color-text-faint);
+  user-select: none;
+}
+.hero-ask-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--color-text);
+  padding: var(--sp-4) 0;
+}
+.hero-ask-input::placeholder { color: var(--color-text-faint); }
+.hero-ask-input:focus { outline: none; }
+.hero-ask-go {
+  flex: 0 0 auto;
+  padding: var(--sp-6) var(--sp-14);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+}
+.hero-ask-go:hover { border-color: var(--color-blue); color: var(--color-blue); }
+.hero-ask-hint {
+  margin-top: var(--sp-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+}
+.hero-ask-answer {
+  margin-top: var(--sp-12);
+  padding: var(--sp-14) var(--sp-16);
+  background: var(--color-surface-alt);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+  line-height: var(--lh-base);
+  color: var(--color-text-dim);
+}
+.hero-ask-answer.is-thinking { color: var(--color-text-faint); font-style: italic; }
+.hero-ask-answer-text { color: var(--color-text); margin: 0; }
+.hero-ask-note {
+  margin: var(--sp-8) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+}
+
 /* ── Hero CTAs (3 audience entries) ───────────────────────────────────── */
 .hero-ctas {
   display: flex;

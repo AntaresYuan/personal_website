@@ -934,6 +934,49 @@
     syncGiscus(resolvedTheme(themeStored()));   // in case the iframe is already up
   };
 
+  /* ── Hero "ask this portfolio" bar ──────────────────────────────────
+     With the antares-qa Worker (site.json → qa.workerUrl) it answers
+     inline; without one it opens the ⌘K palette pre-filled with the
+     question (the palette has the hand-authored FAQ retrieval). */
+  const wireHeroAsk = (site) => {
+    const form = document.getElementById('hero-ask-form');
+    const input = document.getElementById('hero-ask-input');
+    const ans = document.getElementById('hero-ask-answer');
+    if (!form || !input || !ans) return;
+    const url = String((site && site.qa && site.qa.workerUrl) || '').trim();
+    const show = (html, cls) => { ans.className = `hero-ask-answer${cls ? ' ' + cls : ''}`; ans.innerHTML = html; ans.hidden = false; };
+    const openPalette = (q) => {
+      document.getElementById('palette-fab')?.click();
+      setTimeout(() => {
+        const pi = document.getElementById('palette-input');
+        if (pi) { pi.value = q; pi.dispatchEvent(new Event('input', { bubbles: true })); pi.focus(); }
+      }, 60);
+    };
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      if (!url) { ans.hidden = true; openPalette(q); return; }
+      show('thinking…', 'is-thinking');
+      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
+        .then(async (r) => {
+          let data = {};
+          try { data = await r.json(); } catch (_) { /* non-JSON */ }
+          if (r.ok && data && data.answer) {
+            show(`<p class="hero-ask-answer-text">${escape(String(data.answer)).replace(/\n+/g, '<br>')}</p>`
+              + `<p class="hero-ask-note">✨ generated from this site's content — answers reflect the data here, not me</p>`);
+          } else {
+            const why = (data && data.error) ? ` (${escape(String(data.error))})` : '';
+            show(`<p class="hero-ask-answer-text">Couldn’t get an answer right now${why}.</p>`
+              + `<p class="hero-ask-note">Press ⌘K to search the site instead.</p>`);
+          }
+        })
+        .catch(() => show(`<p class="hero-ask-answer-text">Couldn’t reach the answer service.</p>`
+          + `<p class="hero-ask-note">Press ⌘K to search the site instead.</p>`));
+    });
+    input.addEventListener('input', () => { if (!input.value.trim()) ans.hidden = true; });
+  };
+
   const wireModal = () => {
     // Card click → open
     document.addEventListener('click', (ev) => {
@@ -1017,6 +1060,7 @@
       wireViewTabs();
       wireModal();
       wireTheme();
+      wireHeroAsk(site);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');
