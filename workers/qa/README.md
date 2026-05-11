@@ -1,15 +1,16 @@
 # `antares-qa` — "ask this portfolio" Q&A Worker
 
-Powers the **✨ ask this portfolio (AI answer)** option in the ⌘K command palette
-(issue #76, Phase 3). It's a small Cloudflare Worker that takes a visitor's
-question, fetches the site's own content (`/llms-full.txt`, ≈5 KB — the canonical
-dump), and asks **Workers AI** to answer **using only that context**. The system
-prompt forbids role-play and tells the model to say so when the answer isn't on
-the site. No API keys touch the frontend; CORS is locked to the site origin.
+Powers the **`ask <question>`** command in the embedded terminal (issue #76,
+Phase 3). It's a small Cloudflare Worker that takes a visitor's question, fetches
+the site's own content (`/llms-full.txt`, ≈5 KB — the canonical dump), and asks
+**Workers AI** to answer **using only that context**. The system prompt forbids
+role-play and tells the model to say so when the answer isn't on the site. No
+API keys touch the frontend; CORS is locked to the site origin.
 
-The palette's plain keyword/FAQ answers (Phase 1) work **without** this Worker —
-this only adds the "explain in a paragraph" path. If `content/site.json` →
-`qa.workerUrl` is empty, the AI option simply doesn't appear.
+(The ⌘K command palette stays a plain search/launcher — it has its own
+hand-authored FAQ answers, #76 Phase 1, which need no Worker.) If
+`content/site.json` → `qa.workerUrl` is empty, the terminal's `ask` command just
+reports it isn't wired up yet; nothing else changes.
 
 ## Deploy
 
@@ -21,8 +22,8 @@ npx wrangler deploy
 
 After the first deploy the URL is `https://antares-qa.<your-subdomain>.workers.dev`.
 Put that URL into **`content/site.json` → `qa.workerUrl`** (or via `/admin/` →
-**Site meta → Q&A assistant**). Done — the ⌘K palette will start offering AI
-answers.
+**Site meta → Q&A assistant**). Done — the terminal's `ask <question>` command
+will start returning AI answers.
 
 Workers AI is auto-provisioned; the only binding is `[ai] binding = "AI"` in
 `wrangler.toml` (already there). The free tier comfortably covers a personal

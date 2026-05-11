@@ -41,11 +41,6 @@
   // save), refresh manually. Cheap to rebuild — no need for live sync.
   let items = [];
 
-  // The "ask this portfolio" Worker URL (issue #76, Phase 3) — from
-  // content/site.json → qa.workerUrl, loaded on boot. Empty ⇒ the AI-answer
-  // option doesn't appear (the keyword/FAQ answers below still work).
-  let qaUrl = '';
-
   const STATIC_SECTIONS = [
     { label: 'Hero',     desc: 'name, slogan, intro',          anchor: '#main-content' },
     { label: 'Board',    desc: 'shipped / now / next / later', anchor: '#shipped' },
@@ -261,17 +256,8 @@
     return -1;
   };
 
-  // Heuristic: does the typed text read like a natural-language question
-  // (rather than a keyword)? Used to decide whether to surface the AI-answer
-  // option at the top — for short keyword queries ("board", "cv") it stays out
-  // of the way, so ⌘K's "type → Enter → jump" still works.
-  const QUESTION_RE = /^(what|whats|how|why|who|whose|where|when|which|is|are|am|do|does|did|can|could|should|would|will|tell|explain|describe|show|got|have|has|any|open)\b/i;
-  const looksLikeQuestion = (raw) => raw.includes('?') || QUESTION_RE.test(raw) || raw.split(/\s+/).filter(Boolean).length >= 4;
-  const askItem = (raw) => ({ kind: 'ask', icon: '✨', label: raw, desc: 'ask this portfolio — an AI answer grounded in this site', meta: 'AI', _q: raw });
-
   const filter = (q) => {
-    const raw = q.trim();
-    q = raw.toLowerCase();
+    q = q.trim().toLowerCase();
     if (!q) {
       // Default landing set — most useful entry points
       const order = ['Board', 'Terminal', 'Agents', 'Contact'];
@@ -284,13 +270,12 @@
       const ext = items.filter((it) => it.kind === 'ext' && it.label.startsWith('Source')).slice(0, 1);
       return [...sections, ...topShipped, ...faq, ...cv, ...ext];
     }
-    const matches = items
+    return items
       .map((it) => ({ it, s: score(q, it) }))
       .filter((x) => x.s > -1)
       .sort((a, b) => b.s - a.s)
+      .slice(0, 12)
       .map((x) => x.it);
-    if (qaUrl && looksLikeQuestion(raw)) return [askItem(raw), ...matches.slice(0, 11)];
-    return matches.slice(0, 12);
   };
 
   /* ── Rendering ─────────────────────────────────────────────────── */
@@ -312,8 +297,7 @@
       const secondLine = (it.kind === 'faq' && it.answer)
         ? `<div class="palette-result-answer">${escape(it.answer)}</div>`
         : (it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : '');
-      const cls = `palette-result${it.kind === 'ask' ? ' is-ask' : ''}${i === selected ? ' is-selected' : ''}`;
-      return `<li class="${cls}" data-idx="${i}" role="option" aria-selected="${i === selected}">
+      return `<li class="palette-result ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
         <span class="palette-result-icon" aria-hidden="true">${escape(it.icon)}</span>
         <div class="palette-result-body">
           <div class="palette-result-label">${escape(it.label)}</div>
@@ -363,40 +347,8 @@
     const matches = list._matches ?? [];
     const it = matches[i];
     if (!it) return;
-    if (it.kind === 'ask') { askAI(it, i); return; }   // stays open, answers inline
     close();
     setTimeout(() => it.action(), 80);
-  };
-
-  /* ── "Ask this portfolio" — Phase 3 (#76) ──────────────────────────
-     A grounded AI answer from the antares-qa Worker (workers/qa/, fed the
-     site's /llms-full.txt). Only offered when site.json's qa.workerUrl is
-     set. Replaces the result row's body in place; the keyword matches
-     below it stay. */
-  const askAI = (it, idx) => {
-    if (!qaUrl) return;
-    const li = list.querySelector(`.palette-result[data-idx="${idx}"]`);
-    const body = li && li.querySelector('.palette-result-body');
-    if (!li || !body || li.dataset.asking === '1') return;
-    li.dataset.asking = '1';
-    const q = it._q;
-    const head = `<div class="palette-result-label">${escape(q)}</div>`;
-    body.innerHTML = `${head}<div class="palette-result-answer is-thinking">thinking…</div>`;
-    li.scrollIntoView({ block: 'nearest' });
-    fetch(qaUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
-      .then(async (r) => {
-        let data = {};
-        try { data = await r.json(); } catch (_) { /* non-JSON response */ }
-        if (r.ok && data && data.answer) {
-          body.innerHTML = `${head}<div class="palette-result-answer">${escape(String(data.answer))}</div>`
-            + `<div class="palette-result-note">✨ generated from this site's content — answers reflect the data here, not me</div>`;
-        } else {
-          const why = (data && data.error) ? ` (${escape(String(data.error))})` : '';
-          body.innerHTML = `${head}<div class="palette-result-answer">couldn’t get an answer right now${why}. Try the matches below, or rephrase.</div>`;
-        }
-      })
-      .catch(() => { body.innerHTML = `${head}<div class="palette-result-answer">couldn’t reach the answer service. Try the matches below.</div>`; })
-      .finally(() => { delete li.dataset.asking; });
   };
 
   /* ── Keyboard ──────────────────────────────────────────────────── */
@@ -451,12 +403,10 @@
   /* ── Boot ──────────────────────────────────────────────────────── */
   (async () => {
     try {
-      const [board, lens, site] = await Promise.all([
+      const [board, lens] = await Promise.all([
         json('content/board.json'),
         json('content/lens.json'),
-        json('content/site.json').catch(() => ({})),   // optional — just for qa.workerUrl
       ]);
-      qaUrl = String((site && site.qa && site.qa.workerUrl) || '').trim();
       items = buildItems(board, lens);
     } catch (e) {
       // Even if content fails to load, sections + commands + ext links still work
