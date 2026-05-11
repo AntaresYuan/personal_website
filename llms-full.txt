@@ -57,7 +57,7 @@ Links:
 ## NOW-01 · NOW · Lark Loom
 The collaborative AI Agent rooted  in the Lark ecosystem.
 Tags: Lark AI Challenge for College Students, AI Agent PM, Delivery Layer Developer, Collaboration, Lark
-Updated: 2026-05-09
+Updated: 2026-05-11
 Links:
   - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
   - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
