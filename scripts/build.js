@@ -9,3 +9,4 @@
 require('./build-html');
 require('./build-llms');
 require('./build-sitemap');
+require('./build-agent-brief');

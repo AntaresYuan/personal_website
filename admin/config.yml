@@ -237,3 +237,27 @@ collections:
               - { label: "Key (email / linkedin / …)", name: "key",   widget: "string" }
               - { label: "Display label", name: "label", widget: "string" }
               - { label: "URL",           name: "href",  widget: "string" }
+
+  # ── Assistant knowledge ────────────────────────────────────────────
+  # Private-ish notes that feed the "ask" assistant (workers/qa/) but are
+  # NOT rendered on the public page. The build flattens them into
+  # /agent-brief.txt, which the Worker appends to the site content it uses
+  # as grounding. (agent-brief.txt is a deployed static file — fetchable by
+  # URL, just not linked anywhere. It's "off the site", not "secret".)
+  - name: "agent_brief"
+    label: "Assistant knowledge"
+    icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
+    files:
+      - file: "content/agent-brief.json"
+        label: "Assistant knowledge"
+        name: "agent_brief"
+        format: "json"
+        fields:
+          - label: "Notes — these feed the “ask” assistant; they are NOT shown on the public site"
+            name: "notes"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
+              - { label: "What the assistant should know (markdown OK)", name: "body", widget: "text" }

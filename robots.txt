@@ -4,8 +4,10 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /agent-brief.txt
 
 Sitemap: https://antaresyuan.site/sitemap.xml
 
 # Agent-readable summary at /llms.txt
 # Full content dump at /llms-full.txt
+# /agent-brief.txt — supplemental notes that feed the "ask" assistant only (not part of the site)
