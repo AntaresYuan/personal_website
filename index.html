@@ -94,7 +94,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=580c5398">
+<link rel="stylesheet" href="styles/main.css?v=c8cc9f92">
 </head>
 <body>
 
@@ -700,10 +700,12 @@
 
 <!-- defer keeps these out of the critical path on slow mobile networks.
      Pre-rendered HTML means no script is needed for first paint; these
-     just add interactivity (modal, terminal, ⌘K palette). They still
-     execute in document order after parse. -->
-<script src="scripts/render.js?v=4be362ca"   defer></script>
+     just add interactivity (modal, terminal, ⌘K palette, hero "ask"). They
+     execute in document order after parse — qa-faq.js (the shared FAQ +
+     retrieval) must come before render.js / palette.js. -->
+<script src="scripts/qa-faq.js?v=657b3299"      defer></script>
+<script src="scripts/render.js?v=7d267adf"   defer></script>
 <script src="scripts/terminal.js?v=e8b722f4" defer></script>
-<script src="scripts/palette.js?v=5da44171"  defer></script>
+<script src="scripts/palette.js?v=3182eecc"  defer></script>
 </body>
 </html>
