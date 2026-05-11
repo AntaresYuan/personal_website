@@ -412,21 +412,32 @@ html = replaceInner(html, 'contact-list',  contactListHtml());
 // Footer
 html = replaceInner(html, 'footer-copyright', footerHtml());
 
-// Cache-bust the runtime scripts: append a content hash as `?v=` to each
-// <script src="scripts/*.js">. index.html is served must-revalidate (so it's
-// always fresh) but the .js files get a longer CDN TTL — without this, a fresh
-// index.html can pair with a stale render.js. Idempotent: an existing `?v=` is
+// Cache-bust the runtime assets: append a content hash as `?v=` to each
+// <script src="scripts/*.js"> and to the <link rel="stylesheet" href="styles/main.css">.
+// index.html is served must-revalidate (so it's always fresh) but the .js/.css
+// files get a longer CDN TTL — without this, a fresh index.html can pair with a
+// stale render.js *or* a stale main.css (which leaves new views, e.g. the
+// timeline, rendering completely unstyled). Idempotent: an existing `?v=` is
 // re-derived from the current file content each build.
 const crypto = require('crypto');
-['render.js', 'terminal.js', 'palette.js'].forEach((f) => {
-  const v = crypto.createHash('sha1')
-    .update(fs.readFileSync(path.join(root, 'scripts', f)))
-    .digest('hex').slice(0, 8);
+const hashOf = (rel) => crypto.createHash('sha1')
+  .update(fs.readFileSync(path.join(root, rel)))
+  .digest('hex').slice(0, 8);
+['scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js'].forEach((rel) => {
+  const v = hashOf(rel);
   html = html.replace(
-    new RegExp(`src="scripts/${f.replace('.', '\\.')}(\\?v=[^"]*)?"`),
-    `src="scripts/${f}?v=${v}"`
+    new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
+    `src="${rel}?v=${v}"`
   );
 });
+{
+  const rel = 'styles/main.css';
+  const v = hashOf(rel);
+  html = html.replace(
+    new RegExp(`href="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
+    `href="${rel}?v=${v}"`
+  );
+}
 
 /* ── Write ────────────────────────────────────────────────────────────── */
 fs.writeFileSync(tplPath, html);

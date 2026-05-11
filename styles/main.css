@@ -775,12 +775,13 @@ button:focus-visible,
 .spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
 
 /* ── Timeline view ────────────────────────────────────────────────────
-   A horizontal "ship log" / mini-Gantt: each Shipped project gets a detail
-   card stacked above a real month/year axis, plus a bar on the axis from its
-   `started` date to its `updated` (end) date (or a dot if there's no
-   `started`); overlapping bars pack into lanes, and cards stack into rows
-   when they'd collide. Built by scripts/render.js — cards/bars/ticks are
-   positioned by left/width % (and the cards/bars boxes get an inline height).
+   A horizontal Gantt ("ship log") in the spirit of Notion's timeline view: a
+   month scale across the top, then one labelled pill bar per Shipped project,
+   lane-packed so overlapping bars stack. Built by scripts/render.js — bars and
+   gridlines are positioned by left/width % inside a track that's ≈150px/month
+   wide (CSS stretches it to fill the panel when there's room); .tl-body gets
+   an inline height = lanes × 40px. Clicking a bar opens the card-detail panel
+   (wireCardOpener wires any [data-card-id] in here).
    (No `display` on .board-timeline-view, so the UA [hidden] rule still hides it.) */
 .timeline-doc { padding-top: var(--sp-8); }
 .timeline-head {
@@ -801,128 +802,130 @@ button:focus-visible,
   font-family: var(--font-mono);
   font-size: var(--fs-12);
 }
-.timeline-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-top: var(--sp-8); }
-/* The track: a relative flex-column at least as wide as the visible panel
-   (--track-w ≈ 170px/month). Stacks: cards box → bars box → axis line →
-   month labels. The grid (month lines + today line) is laid over all of it. */
-.timeline-track {
+/* The scroll canvas — the track may be wider than the panel. */
+.timeline-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--sp-8);
+}
+/* The track: ≈150px/month wide (set inline as --track-w), stretched to fill
+   the panel when there's room. A month-scale strip on top, then the lanes. */
+.tl-track {
+  --tl-lane-h: 40px;
+  --tl-bar-h: 28px;
   position: relative;
-  display: flex;
-  flex-direction: column;
   width: var(--track-w, 100%);
   min-width: 100%;
 }
-/* Grid: vertical month lines + the "today" line, behind the cards/bars. Spans
-   from the top down to the top of the month-label strip (22px). */
-.timeline-grid {
+/* Month scale: month/year labels + the "today" pill, with a baseline rule. */
+.tl-scale {
+  position: relative;
+  height: 26px;
+  margin-bottom: var(--sp-12);
+  border-bottom: var(--bw) solid var(--color-line);
+}
+.tl-month {
   position: absolute;
-  top: 0;
-  bottom: 22px;
-  left: 0;
-  right: 0;
+  top: 7px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  white-space: nowrap;
   pointer-events: none;
 }
-.timeline-tick {
+.tl-month b { color: var(--color-text-dim); font-weight: var(--fw-semibold); }
+.tl-today-pill {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 3px;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  background: var(--color-blue);
+  color: var(--color-bg);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Lanes body — a relative box; gridlines fill it, bars sit absolutely on it. */
+.tl-body { position: relative; }
+.tl-grid { position: absolute; inset: 0; pointer-events: none; }
+.tl-gridline {
+  position: absolute;
+  top: 0; bottom: 0;
   width: 0;
   border-left: var(--bw) dashed var(--color-line-soft);
 }
-.timeline-tick.is-year { border-left-style: solid; border-left-color: var(--color-line); }
-.timeline-today {
+.tl-gridline.is-year { border-left-style: solid; border-left-color: var(--color-line); }
+.tl-today-line {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 0; bottom: 0;
   width: 0;
   border-left: var(--bw-thick) solid var(--color-blue);
+  opacity: 0.5;
 }
-.timeline-today.is-edge { left: auto; right: 0; }
-.timeline-today-label {
+/* A project bar — a pill carrying [dot] id · title · date, clickable. */
+.tl-bar {
   position: absolute;
-  top: -2px;
-  left: 5px;
+  height: var(--tl-bar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: 0 var(--sp-12);
+  border-radius: 999px;
+  border: var(--bw) solid var(--color-yellow);
+  background: var(--color-yellow-soft);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  transition: transform var(--dur-quick), box-shadow var(--dur-quick);
+}
+.tl-bar[data-tone="b"] { background: var(--color-blue-soft); border-color: var(--color-blue); }
+.tl-bar:hover, .tl-bar:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+}
+.tl-bar-dot {
+  flex: 0 0 auto;
+  width: 7px; height: 7px;
+  border-radius: 999px;
+  background: var(--color-yellow);
+}
+.tl-bar[data-tone="b"] .tl-bar-dot { background: var(--color-blue); }
+.tl-bar-id {
+  flex: 0 0 auto;
   font-family: var(--font-mono);
   font-size: var(--fs-10);
-  color: var(--color-blue);
-  white-space: nowrap;
-}
-.timeline-today.is-edge .timeline-today-label { left: auto; right: 5px; }
-/* Cards box — rows of detail cards above the axis. */
-.timeline-cards { position: relative; z-index: 1; }
-.timeline-card {
-  position: absolute;
-  width: 232px;
-  max-width: calc(100vw - var(--sp-48));
-  /* `--left` (a %) is set inline; clamp it so a right-edge card stays in the track */
-  left: min(var(--left, 0%), calc(100% - 240px));
-  padding: var(--sp-8) var(--sp-10) var(--sp-10);
-  background: var(--color-surface);
-  border: var(--bw) solid var(--color-line-soft);
-  border-radius: var(--r-sm);
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(20,20,30,0.05));
-  cursor: pointer;
-  transition: border-color var(--dur-quick), transform var(--dur-quick), box-shadow var(--dur-quick);
-}
-.timeline-card:hover, .timeline-card:focus-visible {
-  border-color: var(--color-blue);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card-hover, 0 4px 12px rgba(20,20,30,0.08));
-}
-.timeline-card:focus-visible { outline: none; }
-/* a little nub at the card's bottom-left, pointing down toward its bar */
-.timeline-card-stem {
-  position: absolute;
-  left: var(--sp-10);
-  bottom: -7px;
-  width: 0; height: 0;
-  border: 4px solid transparent;
-  border-top-color: var(--color-line-soft);
-}
-.timeline-card-id { font-family: var(--font-mono); font-size: var(--fs-10); letter-spacing: var(--tracking-wide); color: var(--color-text-faint); margin-bottom: 2px; }
-.timeline-card-title { font-size: var(--fs-13); font-weight: var(--fw-medium); color: var(--color-text); margin-bottom: 2px; line-height: var(--lh-snug); }
-.timeline-card-date { font-family: var(--font-mono); font-size: var(--fs-10); color: var(--color-text-faint); margin-bottom: var(--sp-6); }
-.timeline-card-summary {
-  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-wide);
   color: var(--color-text-dim);
-  line-height: var(--lh-snug);
-  margin-bottom: var(--sp-6);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+}
+.tl-bar-name {
+  flex: 1 1 auto;
+  min-width: 2em;
   overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
 }
-.timeline-card-impact { font-size: var(--fs-11); color: var(--color-blue); margin-bottom: var(--sp-4); }
-.timeline-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-8); }
-.timeline-card-links a { color: var(--color-blue); font-size: var(--fs-11); white-space: nowrap; }
-/* Bars box — the Gantt bars / dots, lane-packed, sitting above the axis. */
-.timeline-bars { position: relative; z-index: 1; padding-bottom: 3px; }
-.timeline-bar {
-  position: absolute;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--color-yellow-soft);
-  border: var(--bw) solid var(--color-yellow);
-}
-.timeline-bar.is-point {
-  width: 11px;
-  height: 11px;
-  transform: translateX(-50%);
-  border-width: 2px;
-}
-/* The axis line + the month-label strip, as flex children below the bars. */
-.timeline-axis { flex: 0 0 auto; height: var(--bw-thick); background: var(--color-line); }
-.timeline-months { position: relative; flex: 0 0 auto; height: 22px; }
-.timeline-month {
-  position: absolute;
-  top: var(--sp-6);
-  transform: translateX(-50%);
+.tl-bar-when {
+  flex: 0 0 auto;
   font-family: var(--font-mono);
   font-size: var(--fs-10);
   color: var(--color-text-faint);
-  white-space: nowrap;
 }
-.timeline-month.is-year { color: var(--color-text-dim); font-weight: var(--fw-semibold); }
+.tl-hint {
+  margin-top: var(--sp-16);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+}
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
 .card {
