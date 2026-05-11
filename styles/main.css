@@ -477,39 +477,99 @@ button:focus-visible,
   letter-spacing: var(--tracking-wide);
   color: var(--color-text-faint);
 }
-.hero-ask-answer {
-  margin-top: var(--sp-12);
-  padding: var(--sp-14) var(--sp-16);
-  background: var(--color-surface-alt);
+
+/* ── Ask Antares — the multi-turn chat panel the hero "ask" bar opens ──
+   A centred modal (same family as the ⌘K palette / card-detail panel). It's
+   a transcript, not a chat-bubble UI; the persistent note labels it as an AI.
+   Wired in scripts/render.js (wireAskPanel). Colours are token-driven, so
+   light/dark both adapt; full-screen on narrow viewports. */
+.ask-panel-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(8, 8, 12, 0.62);
+  backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity var(--dur-base);
+}
+.ask-panel-backdrop.is-open { opacity: 1; }
+.ask-panel {
+  position: fixed; z-index: 91;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -48%) scale(0.985);
+  width: min(720px, 92vw);
+  max-height: min(80vh, 720px);
+  display: flex; flex-direction: column;
+  background: var(--color-surface);
   border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-md);
-  font-size: var(--fs-14);
-  line-height: var(--lh-base);
-  color: var(--color-text-dim);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card-hover);
+  opacity: 0; transition: opacity var(--dur-base), transform var(--dur-base) var(--ease-out);
 }
-.hero-ask-answer.is-thinking { color: var(--color-text-faint); font-style: italic; }
-.hero-ask-answer-text { color: var(--color-text); margin: 0; }
-/* "→ SHIP-01" / "→ lens" jump link inside an answer — a quiet inline link */
-.hero-ask-more {
-  background: none;
-  border: 0;
-  padding: 0;
-  margin-left: var(--sp-6);
-  font: inherit;
-  font-size: var(--fs-13);
-  color: var(--color-blue);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  white-space: nowrap;
-  cursor: pointer;
+.ask-panel.is-open { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.ask-panel-head {
+  display: flex; align-items: center; gap: var(--sp-10);
+  padding: var(--sp-12) var(--sp-16);
+  border-bottom: var(--bw) solid var(--color-line-soft);
+  font-family: var(--font-mono); font-size: var(--fs-13);
 }
-.hero-ask-more:hover { color: var(--color-blue-deep); }
-.hero-ask-note {
-  margin: var(--sp-8) 0 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide);
+.ask-panel-title { display: inline-flex; align-items: center; gap: var(--sp-8); font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
+.ask-panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-yellow); box-shadow: 0 0 0 3px var(--color-yellow-glow); }
+.ask-panel-clear, .ask-panel-close {
+  background: none; border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
+  color: var(--color-text-faint); font: inherit; font-size: var(--fs-11);
+  padding: var(--sp-4) var(--sp-8); cursor: pointer;
+  transition: border-color var(--dur-quick), color var(--dur-quick);
+}
+.ask-panel-clear:hover, .ask-panel-close:hover { border-color: var(--color-text-faint); color: var(--color-text); }
+.ask-panel-log {
+  flex: 1 1 auto; overflow-y: auto;
+  padding: var(--sp-16);
+  display: flex; flex-direction: column; gap: var(--sp-16);
+}
+.ask-panel-log:focus { outline: none; }
+.ask-panel-empty { color: var(--color-text-faint); font-size: var(--fs-13); }
+.ask-msg-label {
+  font-family: var(--font-mono); font-size: var(--fs-10); letter-spacing: var(--tracking-wide);
+  text-transform: uppercase; color: var(--color-text-faint); margin-bottom: var(--sp-4);
+}
+.ask-msg-text { font-size: var(--fs-14); line-height: var(--lh-base); color: var(--color-text); white-space: pre-wrap; }
+.ask-msg-you { align-self: flex-end; max-width: 88%; text-align: right; }
+.ask-msg-you .ask-msg-text {
+  display: inline-block; text-align: left;
+  background: var(--color-blue-soft); color: var(--color-text);
+  padding: var(--sp-8) var(--sp-12); border-radius: var(--r-md);
+}
+.ask-msg-bot .ask-msg-text { color: var(--color-text-dim); }
+.ask-msg-bot.is-thinking .ask-msg-text { color: var(--color-text-faint); font-style: italic; }
+.ask-panel-note {
+  margin: 0; padding: var(--sp-6) var(--sp-16);
+  border-top: var(--bw) solid var(--color-line-soft);
+  font-family: var(--font-mono); font-size: var(--fs-10); letter-spacing: var(--tracking-wide);
   color: var(--color-text-faint);
+}
+.ask-panel-form {
+  display: flex; align-items: center; gap: var(--sp-10);
+  padding: var(--sp-10) var(--sp-12);
+  border-top: var(--bw) solid var(--color-line-soft);
+}
+.ask-panel-input {
+  flex: 1 1 auto; min-width: 0; border: 0; background: transparent;
+  font-family: var(--font-mono); font-size: var(--fs-13); color: var(--color-text);
+  padding: var(--sp-6) var(--sp-4);
+}
+.ask-panel-input::placeholder { color: var(--color-text-faint); }
+.ask-panel-input:focus { outline: none; }
+.ask-panel-send {
+  flex: 0 0 auto; padding: var(--sp-6) var(--sp-14);
+  border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
+  background: var(--color-surface-alt); color: var(--color-text-dim);
+  font-family: var(--font-mono); font-size: var(--fs-12); letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  cursor: pointer; transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+}
+.ask-panel-send:hover { border-color: var(--color-blue); color: var(--color-blue); }
+.ask-panel-send:disabled, .ask-panel-input:disabled { opacity: 0.55; cursor: default; }
+body.ask-panel-open { overflow: hidden; }
+@media (max-width: 560px) {
+  .ask-panel { left: 0; top: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; transform: none; }
+  .ask-panel.is-open { transform: none; }
 }
 
 /* ── Hero CTAs (3 audience entries) ───────────────────────────────────── */

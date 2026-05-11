@@ -29,7 +29,8 @@ const SITE = 'https://antaresyuan.site';
 const LLMS_FULL_URL = `${SITE}/llms-full.txt`;        // the public site content
 const AGENT_BRIEF_URL = `${SITE}/agent-brief.txt`;   // supplemental notes Antares wrote for the assistant (not rendered on the site)
 const MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';   // alt: @cf/meta/llama-3.1-8b-instruct, @cf/meta/llama-3.3-70b-instruct-fp8-fast
-const MAX_Q_CHARS = 500;
+const MAX_MSG_CHARS = 600;     // per turn (user or assistant) in a multi-turn request
+const MAX_TURNS = 8;           // keep at most this many recent turns of history
 const MAX_CONTEXT_CHARS = 24000;
 
 // Pass 1 — generate, in Antares's first-person voice, strictly from the content.
@@ -77,13 +78,36 @@ function reply(obj, status, headers) {
   });
 }
 
-async function ai(env, system, user, temperature, maxTokens) {
-  const out = await env.AI.run(MODEL, {
-    messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-    max_tokens: maxTokens,
-    temperature,
-  });
+async function ai(env, messages, temperature, maxTokens) {
+  const out = await env.AI.run(MODEL, { messages, max_tokens: maxTokens, temperature });
   return String((out && (out.response ?? out.result ?? '')) || '').trim();
+}
+
+// Normalize the request into a clean alternating user/assistant turn list.
+// Accepts { messages: [{role,content}, …] } (multi-turn) or { q: "…" } (single).
+// Returns [] if there's no usable user question to answer.
+function normTurns(body) {
+  let turns = [];
+  if (body && Array.isArray(body.messages)) {
+    turns = body.messages
+      .map((m) => ({
+        role: (m && m.role === 'assistant') ? 'assistant' : 'user',
+        content: String((m && m.content) || '').trim().slice(0, MAX_MSG_CHARS),
+      }))
+      .filter((m) => m.content);
+  } else {
+    const q = String((body && body.q) || '').trim().slice(0, MAX_MSG_CHARS);
+    if (q) turns = [{ role: 'user', content: q }];
+  }
+  // Collapse any accidental consecutive same-role turns, keep last MAX_TURNS,
+  // and require the conversation to end with a user turn.
+  const collapsed = [];
+  for (const t of turns) {
+    if (collapsed.length && collapsed[collapsed.length - 1].role === t.role) collapsed[collapsed.length - 1].content += '\n' + t.content;
+    else collapsed.push({ ...t });
+  }
+  const recent = collapsed.slice(-MAX_TURNS);
+  return (recent.length && recent[recent.length - 1].role === 'user') ? recent : [];
 }
 
 export default {
@@ -92,7 +116,7 @@ export default {
     const ch = cors(origin);
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: ch });
-    if (request.method !== 'POST') return reply({ error: 'POST a JSON body: { "q": "your question" }' }, 405, ch);
+    if (request.method !== 'POST') return reply({ error: 'POST JSON: { "q": "…" } or { "messages": [{role,content},…] }' }, 405, ch);
 
     // Optional per-IP rate limit (only if the RATE_LIMITER binding is configured — see wrangler.toml).
     if (env.RATE_LIMITER && typeof env.RATE_LIMITER.limit === 'function') {
@@ -103,8 +127,8 @@ export default {
 
     let body;
     try { body = await request.json(); } catch { return reply({ error: 'invalid JSON body' }, 400, ch); }
-    const q = String((body && body.q) || '').trim().slice(0, MAX_Q_CHARS);
-    if (!q) return reply({ error: 'missing "q" (the question)' }, 400, ch);
+    const turns = normTurns(body);   // [{role:'user'|'assistant', content}, …], ending with a user turn
+    if (!turns.length) return reply({ error: 'no question — send { "q": "…" } or a "messages" array ending with a user turn' }, 400, ch);
 
     // Grounding context: the public site content + (if any) Antares's
     // supplemental notes. Both edge-cached. The site content is required;
@@ -118,16 +142,16 @@ export default {
     let context = brief ? `${siteContent}\n\n${brief}` : siteContent;
     if (context.length > MAX_CONTEXT_CHARS) context = context.slice(0, MAX_CONTEXT_CHARS);
 
-    // Pass 1 — generate.
+    // Pass 1 — generate, given the system prompt + the conversation so far.
     let draft;
-    try { draft = await ai(env, GEN_PROMPT(context), q, 0.2, 420); }
+    try { draft = await ai(env, [{ role: 'system', content: GEN_PROMPT(context) }, ...turns], 0.2, 420); }
     catch (e) { return reply({ error: 'generation failed', detail: String((e && e.message) || e) }, 502, ch); }
     if (!draft) return reply({ error: 'the model returned an empty answer' }, 502, ch);
 
-    // Pass 2 — fact-check + minimal rewrite. If it fails, keep the draft.
+    // Pass 2 — fact-check + minimal rewrite of the latest answer. If it fails, keep the draft.
     let answer = draft, verified = false;
     try {
-      const checked = await ai(env, VERIFY_PROMPT(context), `DRAFT:\n${draft}`, 0.1, 420);
+      const checked = await ai(env, [{ role: 'system', content: VERIFY_PROMPT(context) }, { role: 'user', content: `DRAFT:\n${draft}` }], 0.1, 420);
       if (checked) { answer = checked; verified = true; }
     } catch { /* verify unavailable — return the (prompt-grounded) draft */ }
 
