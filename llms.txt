@@ -1,4 +1,4 @@
-# Antares Yuan — AI PM
+# Antares Yuan
 
 > AI Product Manager. A living roadmap of what I've shipped, what I'm building, and where I'm going.
 
