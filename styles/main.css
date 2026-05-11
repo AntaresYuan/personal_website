@@ -489,6 +489,21 @@ button:focus-visible,
 }
 .hero-ask-answer.is-thinking { color: var(--color-text-faint); font-style: italic; }
 .hero-ask-answer-text { color: var(--color-text); margin: 0; }
+/* "→ SHIP-01" / "→ lens" jump link inside an answer — a quiet inline link */
+.hero-ask-more {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-left: var(--sp-6);
+  font: inherit;
+  font-size: var(--fs-13);
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hero-ask-more:hover { color: var(--color-blue-deep); }
 .hero-ask-note {
   margin: var(--sp-8) 0 0;
   font-family: var(--font-mono);

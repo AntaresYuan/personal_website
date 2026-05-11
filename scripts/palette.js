@@ -74,26 +74,12 @@
     { label: 'npx antares-cv',   desc: 'resume in your terminal',       href: 'https://www.npmjs.com/package/antares-cv', external: true },
   ];
 
-  // Hand-authored FAQ — the "ask this portfolio" corpus (#76 Phase 1). Each
-  // entry: q (the question, also the result label), a (a one-line answer
-  // shown inline), and a target — `cardId` (opens the card panel), `anchor`
-  // (smooth-scrolls), or `href` (opens externally). cardIds assume the
-  // default board order: shipped 1/2/3 → SHIP-01/02/03; now 1/2/3 → NOW-01…
-  const FAQ = [
-    { q: 'are you looking for a job / open to roles?', a: 'Yes — open to AI PM roles at top labs & big-tech, founder conversations, and independent collaborations.', anchor: '#contact' },
-    { q: "what's your strongest shipped project?", a: 'SusBench — an IUI 2025 benchmark for how susceptible computer-use agents are to UI dark patterns; cited by 2 papers.', cardId: 'SHIP-03' },
-    { q: 'what are you building right now?', a: 'Lark Loom (a collaborative AI agent in the Lark ecosystem), Gmail++ (AI email ranking), and ApplyMint (one-click job-application autofill).', anchor: '#now' },
-    { q: 'how do I get in touch / contact you?', a: "Email and socials are in the Contact section — that's the fastest way.", anchor: '#contact' },
-    { q: 'where did you study / education?', a: 'Human-Centered Design & Engineering (HCDE) at the University of Washington.', anchor: '#main-content' },
-    { q: 'is this site agent-friendly? can an AI read it?', a: 'Yes — /llms.txt and /llms-full.txt, an embedded CLI on the page, and `npx antares-cv`. See the agent surfaces section.', anchor: '#agents' },
-    { q: "what's the site built with / tech stack?", a: 'Vanilla HTML/CSS/JS, Decap CMS, a pre-rendering SSG, deployed on Cloudflare Pages. Source is on GitHub.', href: 'https://github.com/AntaresYuan/personal_website' },
-    { q: 'what does "a star to ship by" mean?', a: 'A north star you steer by — pick a direction worth committing to, then ship toward it.', anchor: '#main-content' },
-    { q: "what's a Pi-shaped AI PM?", a: 'Product + HCI-research depth, plus enough builder fluency to ship 0→1 — not just spec it.', anchor: '#lens' },
-    { q: "what's Worth Fly?", a: 'WorthFly — flight search, decision support and alert drafts; the final fare, inventory and ticketing stay with the real booking channel.', cardId: 'SHIP-01' },
-    { q: "what's Gmail++ / Gmail Plus Plus?", a: 'An AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences.', cardId: 'NOW-02' },
-    { q: 'is the source code available?', a: 'Yes — github.com/AntaresYuan/personal_website (and there is a /admin/ CMS for editing content).', href: 'https://github.com/AntaresYuan/personal_website' },
-    { q: 'how do I edit the content?', a: 'Through Decap CMS at /admin/ (GitHub OAuth — owner only). A GitHub Action then rebuilds the static artifacts.', href: '/admin/' },
-  ];
+  // Hand-authored FAQ — the "ask this portfolio" corpus (#76 Phase 1). The
+  // data + a tiny retrieval matcher now live in scripts/qa-faq.js (window.QA),
+  // shared with the hero "ask" bar (scripts/render.js). Loaded as a <script>
+  // before this one; if it didn't load, FAQ entries just won't show in ⌘K —
+  // everything else still works.
+  const FAQ = (window.QA && window.QA.FAQ) || [];
 
   const STATUS_GLYPH = { shipped: '✓', now: '→', next: '◇', later: '○' };
   const idPrefix = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };

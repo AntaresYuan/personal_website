@@ -935,44 +935,58 @@
   };
 
   /* ── Hero "ask this portfolio" bar ──────────────────────────────────
-     With the antares-qa Worker (site.json → qa.workerUrl) it answers
-     inline; without one it opens the ⌘K palette pre-filled with the
-     question (the palette has the hand-authored FAQ retrieval). */
-  const wireHeroAsk = (site) => {
+     Self-contained — it never bounces the visitor into ⌘K. With the
+     antares-qa Worker (site.json → qa.workerUrl) it answers inline with a
+     grounded generation; otherwise (or if the Worker errors) it answers
+     inline from the hand-authored FAQ / card retrieval in qa-faq.js. */
+  const wireHeroAsk = (site, board) => {
     const form = document.getElementById('hero-ask-form');
     const input = document.getElementById('hero-ask-input');
     const ans = document.getElementById('hero-ask-answer');
     if (!form || !input || !ans) return;
     const url = String((site && site.qa && site.qa.workerUrl) || '').trim();
+    const cards = (board && board.cards) ? board.cards : [];
     const show = (html, cls) => { ans.className = `hero-ask-answer${cls ? ' ' + cls : ''}`; ans.innerHTML = html; ans.hidden = false; };
-    const openPalette = (q) => {
-      document.getElementById('palette-fab')?.click();
-      setTimeout(() => {
-        const pi = document.getElementById('palette-input');
-        if (pi) { pi.value = q; pi.dispatchEvent(new Event('input', { bubbles: true })); pi.focus(); }
-      }, 60);
+    const NOTE_AI = `<p class="hero-ask-note">✨ generated from this site's content — answers reflect the data here, not me</p>`;
+    const NOTE_FAQ = `<p class="hero-ask-note">drawn from this site's content — the roadmap below has the full picture</p>`;
+
+    // a "→ open SHIP-01" / "→ Lens" link for a matched FAQ/card target
+    const moreLink = (m) => {
+      if (!m) return '';
+      if (m.cardId)  return ` <button type="button" class="hero-ask-more" data-card-id="${escape(m.cardId)}">→ ${escape(m.cardId)}</button>`;
+      if (m.anchor)  { const n = ({ '#shipped': 'shipped', '#now': 'now', '#lens': 'lens', '#agents': 'agent surfaces', '#contact': 'contact', '#terminal': 'terminal', '#main-content': 'top' })[m.anchor] || m.anchor.replace('#', ''); return ` <a class="hero-ask-more" href="${escape(m.anchor)}">→ ${escape(n)}</a>`; }
+      if (m.href)    return ` <a class="hero-ask-more" href="${escape(m.href)}" ${/^https?:/.test(m.href) ? 'target="_blank" rel="noopener"' : ''}>→ ${escape(m.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`;
+      return '';
     };
+    const retrieve = (q) => (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
+    const showRetrieval = (q) => {
+      const m = retrieve(q);
+      if (m) show(`<p class="hero-ask-answer-text">${escape(m.answer)}${moreLink(m)}</p>${NOTE_FAQ}`);
+      else   show(`<p class="hero-ask-answer-text">I don't see that on the site.</p><p class="hero-ask-note">The roadmap below has what Antares has shipped and is building.</p>`);
+    };
+
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const q = input.value.trim();
       if (!q) return;
-      if (!url) { ans.hidden = true; openPalette(q); return; }
+      if (!url) { showRetrieval(q); return; }
       show('thinking…', 'is-thinking');
       fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
         .then(async (r) => {
           let data = {};
           try { data = await r.json(); } catch (_) { /* non-JSON */ }
           if (r.ok && data && data.answer) {
-            show(`<p class="hero-ask-answer-text">${escape(String(data.answer)).replace(/\n+/g, '<br>')}</p>`
-              + `<p class="hero-ask-note">✨ generated from this site's content — answers reflect the data here, not me</p>`);
+            show(`<p class="hero-ask-answer-text">${escape(String(data.answer)).replace(/\n+/g, '<br>')}</p>${NOTE_AI}`);
           } else {
-            const why = (data && data.error) ? ` (${escape(String(data.error))})` : '';
-            show(`<p class="hero-ask-answer-text">Couldn’t get an answer right now${why}.</p>`
-              + `<p class="hero-ask-note">Press ⌘K to search the site instead.</p>`);
+            showRetrieval(q);   // Worker errored — fall back to the curated answer, still inline
           }
         })
-        .catch(() => show(`<p class="hero-ask-answer-text">Couldn’t reach the answer service.</p>`
-          + `<p class="hero-ask-note">Press ⌘K to search the site instead.</p>`));
+        .catch(() => showRetrieval(q));
+    });
+    // Clicking "→ SHIP-01" opens the card panel (reuses the cross-surface event).
+    ans.addEventListener('click', (ev) => {
+      const b = ev.target.closest('.hero-ask-more[data-card-id]');
+      if (b) { ev.preventDefault(); document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id: b.dataset.cardId } })); }
     });
     input.addEventListener('input', () => { if (!input.value.trim()) ans.hidden = true; });
   };
@@ -1060,7 +1074,7 @@
       wireViewTabs();
       wireModal();
       wireTheme();
-      wireHeroAsk(site);
+      wireHeroAsk(site, board);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');

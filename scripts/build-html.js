@@ -432,7 +432,7 @@ const crypto = require('crypto');
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js'].forEach((rel) => {
+['scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
