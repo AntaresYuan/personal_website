@@ -1,19 +1,7 @@
 {
-  "name": "Antares",
-  "nameAccent": "Yuan",
-  "role": "AI Product Manager",
-  "location": "Seattle | Beijing · currently remote working at YiTang",
-  "status": "Building in public",
-  "slogan": "A star to ship by.",
   "manifesto": "I build AI products by treating myself like one — versioned, measured, always shipping.",
-  "tags": ["Pi-Shaped AI PM", "AI Agent Native", "0→1", "HCI Researcher", "HCDE @ UDub"],
-  "avatar": {
-    "calm":    "media/avatar-calm.png",
-    "talking": "media/avatar-talking.png",
-    "alt":     "Antares — illustrated portrait"
-  },
   "ctas": [
-        {
+    {
       "audience": "for agents",
       "label": "use the CLI",
       "anchor": "#terminal",
@@ -37,5 +25,23 @@
       "anchor": "#contact",
       "note": "open to founder convos & contracts"
     }
-  ]
+  ],
+  "name": "Antares",
+  "status": "Building in public",
+  "nameAccent": "Yuan",
+  "location": "Seattle | Beijing · currently remote working at YitangLabs",
+  "role": "AI Product Manager",
+  "tags": [
+    "Pi-Shaped AI PM",
+    "AI Agent Native",
+    "0→1",
+    "HCI Researcher",
+    "HCDE @ UDub"
+  ],
+  "avatar": {
+    "calm": "media/avatar-calm.png",
+    "talking": "media/avatar-talking.png",
+    "alt": "Antares — illustrated portrait"
+  },
+  "slogan": "A star to ship by."
 }
