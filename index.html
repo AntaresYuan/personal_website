@@ -16,7 +16,7 @@
 
 <!-- ── Theme + favicon ───────────────────────────────────────────── -->
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1A1A1F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="media/avatar-calm.png">
 <!-- llmstxt.org — agent-readable summary + full content dump -->
@@ -79,7 +79,22 @@
      until CSS resolves the .avatar-img background-image rule. -->
 <link rel="preload" as="image" href="media/avatar-calm.png" fetchpriority="high">
 
-<link rel="stylesheet" href="styles/main.css?v=abad9029">
+<!-- Theme: a localStorage override ('light' | 'dark'), else the OS preference.
+     Runs synchronously, before the stylesheet, so <html data-theme> is set
+     before first paint — no flash. data-theme-mode (auto|light|dark) drives
+     the topnav toggle's icon; scripts/render.js wires the click + keeps "auto"
+     tracking the OS. -->
+<script>
+  (function () {
+    var d = document.documentElement, m = 'auto';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+
+<link rel="stylesheet" href="styles/main.css?v=3c76ac12">
 </head>
 <body>
 
@@ -90,7 +105,14 @@
   <!-- ── TOP NAV ─────────────────────────────────────────────────── -->
   <nav class="topnav rise">
     <div class="brand"><span class="dot"></span><span id="brand-name">Antares Yuan</span></div>
-    <div class="meta" id="last-updated">updated 2026-05-11</div>
+    <div class="topnav-end">
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">
+        <span class="tt-icon tt-auto"  aria-hidden="true">◐</span>
+        <span class="tt-icon tt-light" aria-hidden="true">☀</span>
+        <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
+      </button>
+      <span class="meta" id="last-updated">updated 2026-05-11</span>
+    </div>
   </nav>
 
   <!-- ── HERO ────────────────────────────────────────────────────── -->
@@ -665,7 +687,7 @@
      Pre-rendered HTML means no script is needed for first paint; these
      just add interactivity (modal, terminal, ⌘K palette). They still
      execute in document order after parse. -->
-<script src="scripts/render.js?v=275b436c"   defer></script>
+<script src="scripts/render.js?v=3c236847"   defer></script>
 <script src="scripts/terminal.js?v=c7e4f7c1" defer></script>
 <script src="scripts/palette.js?v=5da44171"  defer></script>
 </body>

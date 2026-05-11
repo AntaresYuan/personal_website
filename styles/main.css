@@ -120,7 +120,47 @@
   --shadow-card:       0 1px 2px rgba(20, 20, 30, 0.04), 0 4px 12px rgba(20, 20, 30, 0.04);
   --shadow-card-hover: 0 2px 4px rgba(20, 20, 30, 0.06), 0 12px 24px rgba(20, 20, 30, 0.08);
   --shadow-cta:        0 2px 0 var(--color-blue-deep);
+
+  color-scheme: light;
 }
+
+/* ── Dark theme ───────────────────────────────────────────────────────
+   <html data-theme="dark"> is set by the inline <head> script (from a
+   localStorage override, or — with none — the OS preference; render.js's
+   matchMedia listener keeps "auto" live). Re-pointing the colour/shadow
+   custom properties is enough — the rest of the stylesheet reads them. Warm
+   dark, to mirror the warm-cream light theme. The "soft" tints flip to
+   *dark* tints (they're used as backgrounds behind --color-text, which is
+   now light); the accents brighten a touch for legibility on dark. */
+:root[data-theme="dark"] {
+  --color-bg:        #14130D;  /* warm near-black */
+  --color-bg-soft:   #1C1A12;
+  --color-surface:   #201E15;  /* a hair lighter than bg — cards/panels */
+  --color-surface-alt:#262213;
+  --color-line:      #3B382A;
+  --color-line-soft: #2A2820;
+  --color-text:      #F1EEE3;  /* warm off-white */
+  --color-text-dim:  #B7B2A1;
+  --color-text-faint:#8D8979;
+  --color-yellow:        #F3C622;
+  --color-yellow-soft:   #4A3D11;  /* dark amber — tinted bg behind light text */
+  --color-yellow-glow:   #31290C;
+  --color-blue:          #8DA2FF;  /* links / accent — legible on dark */
+  --color-blue-soft:     #20274C;  /* dark navy tint */
+  --color-blue-deep:     #B4C1FF;  /* hover / pressed — brighter on dark */
+  --color-success:       #4FC074;
+  --color-warn:          #E89D40;
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.45), 0 6px 18px rgba(0, 0, 0, 0.40);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.55), 0 16px 32px rgba(0, 0, 0, 0.50);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.55);
+
+  color-scheme: dark;
+}
+/* dark equivalents of the timeline category tints — the bright ones are
+   hardcoded hexes in the Timeline section (not custom properties). */
+:root[data-theme="dark"] .vt-tone-3 { --tone-fill: #163420; }   /* mint-green */
+:root[data-theme="dark"] .vt-tone-4 { --tone-fill: #3B2A12; }   /* amber      */
+:root[data-theme="dark"] .vt-tone-0 { --tone-fill: #2A271C; }   /* neutral    */
 
 /* ════════════════════════════════════════════════════════════════════════
    BASE
@@ -224,6 +264,31 @@ button:focus-visible,
   vertical-align: 1px;
 }
 .topnav .meta { color: var(--color-text-faint); font-size: var(--fs-12); }
+.topnav-end { display: flex; align-items: center; gap: var(--sp-12); }
+/* Theme toggle — cycles auto → light → dark; the visible glyph (◐ ☀ ☾) is
+   picked by [data-theme-mode] on <html> (set by the inline <head> script /
+   render.js). Before either runs, default to ◐ (auto). */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  padding: 0;
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  color: var(--color-text-dim);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+}
+.theme-toggle:hover { border-color: var(--color-text-faint); color: var(--color-text); }
+.theme-toggle .tt-icon { display: none; }
+:root:not([data-theme-mode]) .theme-toggle .tt-auto,
+:root[data-theme-mode="auto"]  .theme-toggle .tt-auto  { display: inline; }
+:root[data-theme-mode="light"] .theme-toggle .tt-light { display: inline; }
+:root[data-theme-mode="dark"]  .theme-toggle .tt-dark  { display: inline; }
 
 /* ════════════════════════════════════════════════════════════════════════
    HERO

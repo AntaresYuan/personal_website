@@ -889,6 +889,51 @@
     openCardModal(ids[nextIdx]);
   };
 
+  /* ── Theme toggle ───────────────────────────────────────────────────
+     The inline <head> script already set <html data-theme> (resolved
+     light|dark) and data-theme-mode (auto|light|dark) from localStorage / the
+     OS. Here we wire the topnav button to cycle auto → light → dark, keep
+     "auto" tracking the OS as it changes, and nudge the giscus iframe to match. */
+  const THEME_MODES = ['auto', 'light', 'dark'];
+  const themeStored = () => { try { const t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark') ? t : 'auto'; } catch (_) { return 'auto'; } };
+  const osDark = () => !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const resolvedTheme = (mode) => (mode === 'auto') ? (osDark() ? 'dark' : 'light') : mode;
+  const syncGiscus = (theme) => {
+    try { document.querySelector('iframe.giscus-frame')?.contentWindow?.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app'); } catch (_) { /* noop */ }
+  };
+  const applyTheme = (mode) => {
+    const t = resolvedTheme(mode);
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-theme-mode', mode);
+    syncGiscus(t);
+  };
+  const themeLabel = (mode) => mode === 'auto' ? 'Theme: auto (follows your system) — click for light'
+    : mode === 'light' ? 'Theme: light — click for dark'
+    : 'Theme: dark — click for auto';
+  const wireTheme = () => {
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+      const refreshLabel = (mode) => { btn.setAttribute('aria-label', themeLabel(mode)); btn.title = themeLabel(mode); };
+      refreshLabel(themeStored());
+      btn.addEventListener('click', () => {
+        const next = THEME_MODES[(THEME_MODES.indexOf(themeStored()) + 1) % THEME_MODES.length];
+        try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (_) { /* noop */ }
+        applyTheme(next);
+        refreshLabel(next);
+      });
+    }
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const onChange = () => { if (themeStored() === 'auto') applyTheme('auto'); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+    }
+    // When giscus (re)loads its iframe, push the current theme to it.
+    window.addEventListener('message', (ev) => {
+      if (ev.origin === 'https://giscus.app' && ev.data && typeof ev.data === 'object' && 'giscus' in ev.data) syncGiscus(resolvedTheme(themeStored()));
+    });
+    syncGiscus(resolvedTheme(themeStored()));   // in case the iframe is already up
+  };
+
   const wireModal = () => {
     // Card click → open
     document.addEventListener('click', (ev) => {
@@ -971,6 +1016,7 @@
       wireFilterChipClicks();
       wireViewTabs();
       wireModal();
+      wireTheme();
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');
