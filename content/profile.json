@@ -31,6 +31,7 @@
   "nameAccent": "Yuan",
   "location": "Seattle | Beijing · currently remote working at YitangLabs",
   "role": "AI Product Manager",
+  "resumeEn": "",
   "tags": [
     "Pi-Shaped AI PM",
     "AI Agent Native",
@@ -43,7 +44,6 @@
     "talking": "media/avatar-talking.png",
     "alt": "Antares — illustrated portrait"
   },
-  "slogan": "A star to ship by.",
-  "resumeEn": "",
-  "resumeZh": ""
+  "resumeZh": "/media/袁晨杰产品简历4.22.pdf",
+  "slogan": "A star to ship by."
 }
