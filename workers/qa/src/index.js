@@ -6,12 +6,14 @@
    →  { "error": "<reason>", "detail"? }                                          on failure (4xx/5xx)
 
    What it does:
-     1. fetch https://<SITE>/llms-full.txt  — the full content of Antares's
-        site (projects, principles, contact, bio), the ONLY source of truth.
+     1. fetch the grounding context — https://<SITE>/llms-full.txt (the public
+        site content) + https://<SITE>/agent-brief.txt (supplemental notes
+        Antares wrote for the assistant via the CMS, not rendered on the
+        site; may be empty). Together: the ONLY source of truth.
      2. GENERATE — Workers AI answers in the FIRST PERSON as Antares, told to
-        ground every fact in that content and never invent.
+        ground every fact in that context and never invent.
      3. VERIFY (anti-hallucination pass) — a second, low-temperature call
-        rewrites the draft so every claim is supported by the content,
+        rewrites the draft so every claim is supported by the context,
         keeping the first-person voice. If it fails, the (prompt-grounded)
         draft is returned and `verified` is false.
 
@@ -24,13 +26,14 @@
    ════════════════════════════════════════════════════════════════════════ */
 
 const SITE = 'https://antaresyuan.site';
-const LLMS_FULL_URL = `${SITE}/llms-full.txt`;
+const LLMS_FULL_URL = `${SITE}/llms-full.txt`;        // the public site content
+const AGENT_BRIEF_URL = `${SITE}/agent-brief.txt`;   // supplemental notes Antares wrote for the assistant (not rendered on the site)
 const MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';   // alt: @cf/meta/llama-3.1-8b-instruct, @cf/meta/llama-3.3-70b-instruct-fp8-fast
 const MAX_Q_CHARS = 500;
-const MAX_CONTEXT_CHARS = 16000;
+const MAX_CONTEXT_CHARS = 24000;
 
 // Pass 1 — generate, in Antares's first-person voice, strictly from the content.
-const GEN_PROMPT = (context) => `You are an AI assistant that answers in the FIRST PERSON as Antares Yuan (an AI Product Manager) — say "I", "my", "I built…". You speak only from the CONTEXT below, which is the full content of Antares's site (projects shipped / in progress / planned, principles, contact, bio).
+const GEN_PROMPT = (context) => `You are an AI assistant that answers in the FIRST PERSON as Antares Yuan (an AI Product Manager) — say "I", "my", "I built…". You speak only from the CONTEXT below — the content of Antares's site (projects shipped / in progress / planned, principles, contact, bio) plus any background notes Antares wrote for you.
 
 Hard rules — these matter more than sounding good:
 1. GROUND EVERYTHING. Every factual claim — project names, what a project does, dates, numbers ("cited by 2 papers", "saved 10 hrs"), where I studied, what I'm open to, the tech stack, anything specific — must be supported by the CONTEXT. You may rephrase, connect stated facts, and tell it as flowing first-person prose; you may NOT introduce any fact that isn't in the CONTEXT.
@@ -43,7 +46,7 @@ CONTEXT:
 ${context}`;
 
 // Pass 2 — strict fact-check + minimal rewrite (the anti-hallucination pass).
-const VERIFY_PROMPT = (context) => `You are a strict fact-checker. Below is CONTEXT (the full content of Antares Yuan's site) and a DRAFT answer written in the first person as Antares. Return a corrected version of the DRAFT in which EVERY factual claim is supported by the CONTEXT:
+const VERIFY_PROMPT = (context) => `You are a strict fact-checker. Below is CONTEXT (Antares Yuan's site content plus background notes he wrote) and a DRAFT answer written in the first person as Antares. Return a corrected version of the DRAFT in which EVERY factual claim is supported by the CONTEXT:
 - Remove or soften any claim, number, date, name, duration, or detail not present in the CONTEXT.
 - Keep the first-person voice, the conversational tone, and the flow.
 - Add nothing. Don't tack on caveats like "based on the site" — just make the prose accurate.
@@ -103,13 +106,17 @@ export default {
     const q = String((body && body.q) || '').trim().slice(0, MAX_Q_CHARS);
     if (!q) return reply({ error: 'missing "q" (the question)' }, 400, ch);
 
-    // Grounding context: the site's own content dump. Cached at the edge.
-    let context = '';
-    try {
-      const r = await fetch(LLMS_FULL_URL, { cf: { cacheTtl: 600, cacheEverything: true } });
-      if (r.ok) context = (await r.text()).trim().slice(0, MAX_CONTEXT_CHARS);
-    } catch { /* fall through */ }
-    if (!context) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);
+    // Grounding context: the public site content + (if any) Antares's
+    // supplemental notes. Both edge-cached. The site content is required;
+    // the brief is best-effort (may be empty / 404).
+    const grab = async (url) => {
+      try { const r = await fetch(url, { cf: { cacheTtl: 600, cacheEverything: true } }); return r.ok ? (await r.text()).trim() : ''; }
+      catch { return ''; }
+    };
+    const [siteContent, brief] = await Promise.all([grab(LLMS_FULL_URL), grab(AGENT_BRIEF_URL)]);
+    if (!siteContent) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);
+    let context = brief ? `${siteContent}\n\n${brief}` : siteContent;
+    if (context.length > MAX_CONTEXT_CHARS) context = context.slice(0, MAX_CONTEXT_CHARS);
 
     // Pass 1 — generate.
     let draft;

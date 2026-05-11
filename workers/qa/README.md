@@ -2,18 +2,13 @@
 
 Powers the hero **"ask"** bar and the terminal's **`ask <question>`** command
 (issue #76, Phase 3). It's a small Cloudflare Worker that answers a visitor's
-question **in the first person, as Antares** ("I built…"), grounded only in the
-site's own content:
+question **in the first person, as Antares** ("I built…"), grounded only in:
 
-1. **fetch** `/llms-full.txt` (≈5 KB — the canonical content dump). That's the
-   only source of truth.
-2. **generate** — Workers AI answers in Antares's first-person voice, told to
-   ground every fact in that content and never invent (no made-up numbers,
-   dates, durations, names…); if something isn't on the site, it says so.
-3. **verify** (anti-hallucination pass) — a second, low-temperature call
-   rewrites the draft so every claim is supported by the content, keeping the
-   voice. If that pass fails, the prompt-grounded draft is returned and the
-   response's `verified` flag is `false`.
+1. **fetch the grounding context** —
+   - `/llms-full.txt` — the public site content (projects, principles, contact, bio), built from `content/*.json`.
+   - `/agent-brief.txt` — **supplemental notes Antares wrote for the assistant** via the CMS ("Assistant knowledge" collection → `content/agent-brief.json` → flattened by `scripts/build-agent-brief.js`). These don't render on the public page; they just make the assistant's picture of Antares fuller. May be empty. *(It's a deployed static file — fetchable by URL, just not linked anywhere. "Off the site", not "secret".)*
+2. **generate** — Workers AI answers in Antares's first-person voice, told to ground every fact in that context and never invent (no made-up numbers, dates, durations, names…); if something isn't there, it says so.
+3. **verify** (anti-hallucination pass) — a second, low-temperature call rewrites the draft so every claim is supported by the context, keeping the voice. If that pass fails, the prompt-grounded draft is returned and the response's `verified` flag is `false`.
 
 No API keys touch the frontend; CORS is locked to the site origin.
 
@@ -57,8 +52,12 @@ it errored and the raw draft was returned.
 
 - **Voice & grounding** live in `src/index.js` — `GEN_PROMPT` (the first-person
   answer) and `VERIFY_PROMPT` (the fact-check rewrite). To make answers richer
-  *stories*, the lever is the **content** (`content/*.json` → `llms-full.txt`),
-  not the prompt — the model can only narrate what's actually written there.
+  *stories*, the lever is the **content**, not the prompt — the model can only
+  narrate what's actually written. Two places to add content: the public stuff
+  (`content/*.json` → `llms-full.txt`, e.g. a card's "Details" markdown), and
+  the **off-site** stuff (the CMS "Assistant knowledge" collection →
+  `content/agent-brief.json` → `agent-brief.txt`, for things you don't want on
+  the visible page).
 - **Model**: `@cf/meta/llama-3.1-8b-instruct-fast` (cheap + fast). If it's ever
   unavailable, change `MODEL` in `src/index.js` to `@cf/meta/llama-3.1-8b-instruct`
   or `@cf/meta/llama-3.3-70b-instruct-fp8-fast`.
