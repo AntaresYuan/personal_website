@@ -5,9 +5,13 @@ name: Rebuild artifacts
 # committed artifacts (index.html, llms.txt, llms-full.txt, sitemap.xml) so
 # they stay in sync, then commits them back to main.
 #
-# Loop safety: the bot commit only touches artifacts, never content/** or
-# scripts/**, so it cannot re-trigger this workflow via the paths filter.
-# `[skip ci]` in the message is a belt-and-suspenders second guard.
+# Loop safety: the bot commit only touches artifacts, never content/**,
+# scripts/** or styles/**, so it cannot re-trigger this workflow via the
+# paths filter. `[skip ci]` in the message is a belt-and-suspenders 2nd guard.
+#
+# styles/** is in the filter because index.html embeds a content-hash of
+# styles/main.css as a `?v=` cache-bust — a CSS-only edit must rebuild so the
+# hash (and thus the served stylesheet) updates.
 
 on:
   push:
@@ -15,6 +19,7 @@ on:
     paths:
       - 'content/**'
       - 'scripts/**'
+      - 'styles/**'
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
 
 permissions:

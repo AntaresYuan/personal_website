@@ -476,14 +476,18 @@
     specsBuilt = true;
   };
 
-  // Build the Timeline view into #view-timeline — a horizontal "ship log":
-  // each Shipped project gets a detail card stacked above a real month/year
-  // axis, plus a bar on the axis from its `started` date to its `updated`
-  // (end) date; overlapping bars pack into lanes (a mini-Gantt). A project
-  // with no parseable `started` (or started >= end) shows a dot at its end
-  // date. Cards stack into rows when they'd collide horizontally. Only Shipped
-  // cards — Now/Next/Later live in the Board/Table/Spec views. Always
-  // chronological; the audience lens doesn't apply here.
+  // Build the Timeline view into #view-timeline — a horizontal Gantt ("ship
+  // log") in the spirit of Notion's timeline view: a month scale across the
+  // top, then one labelled pill bar per Shipped project. A bar spans
+  // [`started` → `updated`]; a project with no parseable `started` (or
+  // started ≥ end) becomes a pill pinned at its ship date. Overlapping bars
+  // lane-pack so nothing overprints. Each bar carries [dot] id · title · date
+  // inline, and clicking it opens the card-detail panel (wireCardOpener wires
+  // any [data-card-id] in here). Only Shipped cards; always chronological —
+  // the audience lens doesn't apply. Geometry: a fixed ~150px/month scale
+  // (CSS stretches the track to fill the panel when there's room), bars get a
+  // minimum on-screen width so the inline label always fits, and the axis is
+  // padded enough that the rightmost bar stays inside it.
   const buildTimelineView = () => {
     const host = document.getElementById('view-timeline');
     if (!host) return;
@@ -498,7 +502,8 @@
     };
     const now = new Date();
     const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12);
-    const fmtDate = (t) => { const d = new Date(t); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; };
+    const fmtFull  = (t) => { const d = new Date(t); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; };
+    const fmtShort = (t) => { const d = new Date(t); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`; };
 
     // { c, displayId, start, end, isPoint, posT } — end = updated; start =
     // `started` if it parses & falls strictly before end, else null (a point).
@@ -510,49 +515,50 @@
       return { c, displayId: c.displayId, start, end, isPoint: start == null, posT: start != null ? start : end };
     }).filter((it) => it.end != null).sort((a, b) => a.posT - b.posT);
 
+    const headHtml = `<h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date${items.length ? ` · ${items.length} project${items.length === 1 ? '' : 's'}` : ''}</span></h3>`;
     if (items.length === 0) {
-      host.innerHTML = `<div class="timeline-doc"><h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date</span></h3><p class="timeline-empty">nothing shipped yet</p></div>`;
+      host.innerHTML = `<div class="timeline-doc">${headHtml}<p class="timeline-empty">nothing shipped yet</p></div>`;
       timelineBuilt = true;
       return;
     }
 
-    // Axis: earliest posT/start → latest end, padded a little (tight to the
-    // data). If "today" sits inside that window it gets a marker; if it's
-    // already past the window, a small "today ▸" hint pins to the right edge.
-    const lo  = Math.min(...items.map((it) => it.posT));
-    const hi  = Math.max(...items.map((it) => it.end));
-    const pad = Math.max(DAY * 7, (hi - lo) * 0.04);
-    const axisMin = lo - pad, axisMax = hi + pad;
+    // ── geometry ─────────────────────────────────────────────────────
+    const PX_PER_MONTH = 150, MONTH_DAYS = 30.4;
+    const MIN_TRACK_PX = 900;            // narrowest the track is ever drawn
+    const MIN_BAR_PX = 260, GUTTER_PX = 14, DOT_PX = 10;   // a bar never narrower than this (≈ fits "id · title · date"); lane gutter; sliver a point reserves
+    const LANE_H = 40;                                      // px slot per lane (bar 28px + 12px gap; mirrors --tl-lane-h in CSS)
+    const pxToT = (px) => (px / PX_PER_MONTH) * MONTH_DAYS * DAY;   // px → time, at the fixed scale (track-independent)
+    const minBarT0 = pxToT(MIN_BAR_PX), gutterT0 = pxToT(GUTTER_PX), dotT0 = pxToT(DOT_PX);
+    // Each item reserves max(its span, a min bar) of time + a gutter; today is
+    // always inside the window (so its marker shows).
+    const reservedT0 = (it) => Math.max(it.isPoint ? dotT0 : (it.end - it.posT), minBarT0);
+    const dataLo = Math.min(...items.map((it) => it.posT));
+    const dataHi = Math.max(...items.map((it) => it.end));
+    const lo = Math.min(dataLo, today), hi = Math.max(dataHi, today);
+    const pad = Math.max(DAY * 10, (hi - lo) * 0.05);
+    const rightNeed = Math.max(...items.map((it) => it.posT + reservedT0(it))) + gutterT0;
+    const leftNeed  = dataLo - gutterT0;
+    const axisMin = Math.min(lo - pad, leftNeed);
+    const axisMax = Math.max(hi + pad, rightNeed);
     const span = (axisMax - axisMin) || DAY;
-    const pct  = (t) => Math.max(0, Math.min(100, ((t - axisMin) / span) * 100));
+    const pct = (t) => ((t - axisMin) / span) * 100;
+    const trackPx = Math.max(Math.round((span / (MONTH_DAYS * DAY)) * PX_PER_MONTH), MIN_TRACK_PX);
+    // Final on-screen metrics, in time units, at the (possibly bumped) track
+    // scale — used for *both* lane packing and bar widths so they agree. When
+    // the track is bumped to MIN_TRACK_PX these come out ≤ the *0 values
+    // above, so the axis (sized with those) is still wide enough. */
+    const minBarT = (MIN_BAR_PX / trackPx) * span, gutterT = (GUTTER_PX / trackPx) * span, dotT = (DOT_PX / trackPx) * span;
+    const reservedT = (it) => Math.max(it.isPoint ? dotT : (it.end - it.posT), minBarT);
 
-    // Track pixel width: ~170px / month, never narrower than the visible panel
-    // (so sparse data fills the width rather than huddling left).
-    const monthsWide = Math.max(1, (axisMax - axisMin) / (DAY * 30.4));
-    const trackPx = Math.round(monthsWide * 170);
-    const viewPx = Math.max(trackPx, host.clientWidth || 1000);   // best estimate of the rendered width
-
-    // Greedy lane-pack helper: items already sorted by posT; an item occupies
-    // [posT, posT + width(it)]; place each in the first lane clear at posT,
-    // tracking lane.endsAt. Returns rows: each row = array of items.
-    const pack = (widthOf) => {
-      const rows = [];
-      items.forEach((it) => {
-        let row = rows.find((r) => r.endsAt <= it.posT);
-        if (!row) { row = { endsAt: -Infinity, items: [] }; rows.push(row); }
-        row.items.push(it);
-        row.endsAt = Math.max(row.endsAt, it.posT + widthOf(it));
-      });
-      return rows.map((r) => r.items);
-    };
-    // Bars/dots: a bar spans [start, end]; a point gets a tiny ~10px span so
-    // near-coincident dots still stack instead of overlapping.
-    const dotSpan = Math.max(DAY * 3, (12 / viewPx) * span);
-    const barRows = pack((it) => it.isPoint ? dotSpan : (it.end - it.posT));
-    // Cards: each occupies roughly its on-screen width (~250px) in time (plus
-    // a small gutter), so adjacent cards stack into rows instead of overprinting.
-    const cardMinT = (250 / viewPx) * span;
-    const cardRows = pack((it) => Math.max(it.isPoint ? 0 : (it.end - it.posT), cardMinT) + (8 / viewPx) * span);
+    // Greedy lane-pack: items already sorted by posT; each occupies
+    // [posT, posT + reservedT]; place it in the first lane clear at posT.
+    const lanes = [];
+    items.forEach((it) => {
+      let lane = lanes.find((L) => L.endsAt <= it.posT);
+      if (!lane) { lane = { endsAt: -Infinity, items: [] }; lanes.push(lane); }
+      lane.items.push(it);
+      lane.endsAt = Math.max(lane.endsAt, it.posT + reservedT(it) + gutterT);
+    });
 
     // Month ticks; January (or, failing that, the first tick) carries the year.
     const ticks = [];
@@ -560,8 +566,7 @@
       const d0 = new Date(axisMin);
       let ty = d0.getUTCFullYear(), tm = d0.getUTCMonth();
       if (d0.getUTCDate() > 1 || d0.getUTCHours() > 0) { tm += 1; if (tm > 11) { tm = 0; ty += 1; } }
-      let t = Date.UTC(ty, tm, 1, 12);
-      let guard = 0;
+      let t = Date.UTC(ty, tm, 1, 12), guard = 0;
       while (t <= axisMax && guard++ < 600) {
         const dt = new Date(t);
         ticks.push({ t, label: MONTHS[dt.getUTCMonth()], year: dt.getUTCMonth() === 0 ? dt.getUTCFullYear() : null });
@@ -573,58 +578,43 @@
     }
 
     // ── markup ───────────────────────────────────────────────────────
-    const CARD_ROW_H = 164, BAR_LANE_H = 16;   // a row's slot; a full card (id+title+date+2-line summary+impact+links) ≈ 150-165px
-    const linksOf = (c) => (c.links ?? []).filter(l => l.href && l.href !== '#')
-      .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
-    const cardHtml = (it, rowIdx) => {
+    const lanesH = Math.max(lanes.length, 1) * LANE_H;
+    const minBarPct = (MIN_BAR_PX / trackPx) * 100;
+    const barHtml = (it, laneIdx, idx) => {
       const c = it.c;
-      const dateText = it.isPoint ? fmtDate(it.posT) : `${fmtDate(it.posT)} → ${fmtDate(it.end)}`;
-      const aria = `Open details for ${escape(c.title ?? '')} — ${escape(dateText)}`;
-      return `<div class="timeline-card" style="--left:${pct(it.posT).toFixed(3)}%;bottom:${rowIdx * CARD_ROW_H}px" data-card-id="${escape(it.displayId)}" tabindex="0" role="button" aria-label="${aria}">
-        <span class="timeline-card-stem" aria-hidden="true"></span>
-        <p class="timeline-card-id">${escape(c.displayId)}</p>
-        <h4 class="timeline-card-title">${escape(c.title ?? '')}</h4>
-        <p class="timeline-card-date">${escape(dateText)}</p>
-        ${c.summary ? `<p class="timeline-card-summary">${safeRich(c.summary)}</p>` : ''}
-        ${c.impact ? `<p class="timeline-card-impact">${escape(c.impact)}</p>` : ''}
-        ${linksOf(c) ? `<div class="timeline-card-links">${linksOf(c)}</div>` : ''}
+      const left = Math.max(0, pct(it.posT));
+      const widthPct = Math.max(it.isPoint ? 0 : (pct(it.end) - pct(it.posT)), minBarPct);
+      const when = it.isPoint ? fmtShort(it.posT) : `${fmtShort(it.posT)} → ${fmtShort(it.end)}`;
+      const dateFull = it.isPoint ? fmtFull(it.posT) : `${fmtFull(it.posT)} → ${fmtFull(it.end)}`;
+      return `<div class="tl-bar" data-tone="${idx % 2 === 0 ? 'a' : 'b'}" style="left:${left.toFixed(3)}%;width:${widthPct.toFixed(3)}%;top:${laneIdx * LANE_H}px" data-card-id="${escape(it.displayId)}" tabindex="0" role="button" title="${escape(c.title ?? '')} · ${escape(dateFull)}" aria-label="${escape(c.title ?? '')} — shipped ${escape(dateFull)}; open details">
+        <span class="tl-bar-dot" aria-hidden="true"></span>
+        <span class="tl-bar-id">${escape(c.displayId)}</span>
+        <span class="tl-bar-name">${escape(c.title ?? '')}</span>
+        <span class="tl-bar-when">${escape(when)}</span>
       </div>`;
     };
-    const barHtml = (it, laneIdx) => {
-      const left = pct(it.posT);
-      const style = it.isPoint
-        ? `left:${left.toFixed(3)}%;bottom:${laneIdx * BAR_LANE_H}px`
-        : `left:${left.toFixed(3)}%;width:${Math.max(0.4, pct(it.end) - left).toFixed(3)}%;bottom:${laneIdx * BAR_LANE_H}px`;
-      return `<div class="timeline-bar ${it.isPoint ? 'is-point' : 'is-span'}" style="${style}" aria-hidden="true"></div>`;
-    };
-
-    const cardsHtml = cardRows.map((row, i) => row.map((it) => cardHtml(it, i)).join('')).join('');
-    const barsHtml  = barRows.map((row, i) => row.map((it) => barHtml(it, i)).join('')).join('');
-    const ticksHtml = ticks.map((tk) =>
-      `<div class="timeline-tick${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%"></div>`
-    ).join('');
+    let barIdx = 0;
+    const barsHtml = lanes.map((L, i) => L.items.map((it) => barHtml(it, i, barIdx++)).join('')).join('');
+    const gridHtml = ticks.map((tk) =>
+      `<span class="tl-gridline${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%"></span>`).join('');
     const monthsHtml = ticks.map((tk) =>
-      `<span class="timeline-month${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%">${tk.year != null ? tk.year : escape(tk.label)}</span>`
-    ).join('');
-    const todayInRange = today >= axisMin && today <= axisMax;
-    const todayHtml = todayInRange
-      ? `<div class="timeline-today" style="left:${pct(today).toFixed(3)}%"><span class="timeline-today-label">today</span></div>`
-      : (today > axisMax ? `<div class="timeline-today is-edge"><span class="timeline-today-label">today ▸ ${escape(fmtDate(today))}</span></div>` : '');
-
-    const cardsBoxH = Math.max(cardRows.length, 1) * CARD_ROW_H;
-    const barsBoxH  = Math.max(barRows.length, 1) * BAR_LANE_H;
+      `<span class="tl-month${tk.year != null ? ' is-year' : ''}" style="left:${pct(tk.t).toFixed(3)}%">${escape(tk.label)}${tk.year != null ? ` <b>${tk.year}</b>` : ''}</span>`).join('');
+    const todayPct = pct(today).toFixed(3);
+    const todayHtml = `<span class="tl-today-line" style="left:${todayPct}%"></span>`;
+    const todayPillHtml = `<span class="tl-today-pill" style="left:${todayPct}%">today · ${escape(fmtShort(today))}</span>`;
 
     host.innerHTML = `<div class="timeline-doc">
-      <h3 class="timeline-head">Shipped <span class="timeline-head-note">— a ship log, by date</span></h3>
+      ${headHtml}
       <div class="timeline-scroll">
-        <div class="timeline-track" style="--track-w:${trackPx}px">
-          <div class="timeline-grid" aria-hidden="true">${ticksHtml}${todayHtml}</div>
-          <div class="timeline-cards" style="height:${cardsBoxH}px">${cardsHtml}</div>
-          <div class="timeline-bars" style="height:${barsBoxH}px">${barsHtml}</div>
-          <div class="timeline-axis" aria-hidden="true"></div>
-          <div class="timeline-months" aria-hidden="true">${monthsHtml}</div>
+        <div class="tl-track" style="--track-w:${trackPx}px">
+          <div class="tl-scale">${monthsHtml}${todayPillHtml}</div>
+          <div class="tl-body" style="height:${lanesH}px">
+            <div class="tl-grid" aria-hidden="true">${gridHtml}${todayHtml}</div>
+            ${barsHtml}
+          </div>
         </div>
       </div>
+      <p class="tl-hint">click a bar to open the project</p>
     </div>`;
     timelineBuilt = true;
   };
