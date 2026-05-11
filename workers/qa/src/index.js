@@ -10,8 +10,9 @@
    canonical content dump) and hands it to the model as context. The system
    prompt forbids role-play and tells it to say so when the answer isn't in
    the context. No keys in the frontend; CORS is locked to the site origin
-   (+ localhost for dev). The ⌘K palette's retrieval answers don't need this
-   Worker — this just powers the "✨ ask this portfolio (AI answer)" option.
+   (+ localhost for dev). This powers the embedded terminal's `ask <question>`
+   command; the ⌘K palette stays a plain search/launcher (its FAQ answers,
+   #76 Phase 1, need no Worker).
 
    Deploy: see wrangler.toml. Free tier covers a personal site's volume.
    ════════════════════════════════════════════════════════════════════════ */

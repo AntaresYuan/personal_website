@@ -95,7 +95,7 @@ collections:
             widget: "object"
             collapsed: true
             fields:
-              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — empty = the ⌘K palette's AI-answer option is hidden (keyword/FAQ answers still work)." }
+              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
 
   # ── Hero / profile ─────────────────────────────────────────────────
   - name: "profile"

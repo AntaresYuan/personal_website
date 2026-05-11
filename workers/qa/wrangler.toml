@@ -3,9 +3,9 @@
 #
 # It answers a visitor's question using ONLY the site's own content
 # (it fetches https://antaresyuan.site/llms-full.txt as grounding) via
-# Workers AI. Free tier covers it for a personal site. The retrieval-only
-# answers in the ⌘K palette work without this Worker; this just powers the
-# "✨ ask this portfolio (AI answer)" option.
+# Workers AI. Free tier covers it for a personal site. This powers the
+# embedded terminal's `ask <question>` command; the ⌘K palette is a plain
+# search/launcher and needs no Worker.
 #
 # Deploy:
 #   cd workers/qa
@@ -16,7 +16,7 @@
 #   https://antares-qa.<your-subdomain>.workers.dev
 #
 # Put that URL into content/site.json → qa.workerUrl (or via /admin/ →
-# Site meta → Q&A assistant). Empty there ⇒ the AI option doesn't show.
+# Site meta → Q&A assistant). Empty there ⇒ the terminal's `ask` says so.
 # ─────────────────────────────────────────────────────────────────────
 
 name = "antares-qa"

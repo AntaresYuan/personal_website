@@ -29,7 +29,7 @@
   };
 
   /* ── State ──────────────────────────────────────────────────────── */
-  const state = { profile: null, board: null, lens: null, contact: null };
+  const state = { profile: null, board: null, lens: null, contact: null, qaUrl: '' };
   const history = [];
   let historyIdx = -1;
 
@@ -182,6 +182,7 @@
       ['cat <ID>',                   'full details for a card (e.g. cat SHIP-01)'],
       ['open <ID>',                  'open a card in the side panel'],
       ['search <keyword>',           'fuzzy match across all cards'],
+      ['ask <question>',             'ask this portfolio (AI answer, grounded in the site)'],
       ['recent [--days=N]',          'recently updated cards (default: top 5)'],
       ['now',                        'shortcut for projects --status=now'],
       ['lens',                       'principles / how I think'],
@@ -295,6 +296,40 @@
     }
     print(`<span class="term-dim">${matches.length} match${matches.length === 1 ? '' : 'es'} for '${escape(q)}':</span>`);
     printCardTable(matches);
+  };
+
+  // ask <question> — a grounded AI answer from the antares-qa Worker
+  // (workers/qa/, fed the site's /llms-full.txt). Needs content/site.json →
+  // qa.workerUrl to be set; otherwise it explains what's missing. The fetch
+  // is fire-and-forget — the "asking…" line is replaced in place when the
+  // answer (or an error) arrives, so the terminal stays usable meanwhile.
+  cmds.ask = (args) => {
+    const q = (args || []).join(' ').trim();
+    if (!q) return print('usage: ask &lt;your question&gt; — e.g. <span class="term-key">ask are you open to roles?</span>', 'term-err');
+    const url = state.qaUrl;
+    if (!url) {
+      return print('<span class="term-dim">the </span><span class="term-key">ask</span><span class="term-dim"> command needs the antares-qa Worker deployed (see </span><span class="term-key">workers/qa/README.md</span><span class="term-dim">). For now try </span><span class="term-key">whoami</span><span class="term-dim"> · </span><span class="term-key">projects</span><span class="term-dim"> · </span><span class="term-key">cat &lt;ID&gt;</span><span class="term-dim"> · </span><span class="term-key">search</span><span class="term-dim">.</span>');
+    }
+    print("<span class=\"term-dim\">asking this portfolio… (grounded in the site's content)</span>", 'term-dim');
+    const lineNode = promptLine.previousElementSibling;
+    const setLine = (html, cls) => {
+      if (lineNode) { lineNode.className = `terminal-line ${cls || 'term-out'}`; lineNode.innerHTML = html; }
+      else { print(html, cls); }
+      scrollToBottom();
+    };
+    fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
+      .then(async (r) => {
+        let data = {};
+        try { data = await r.json(); } catch (_) { /* non-JSON response */ }
+        if (r.ok && data && data.answer) {
+          const ans = escape(String(data.answer)).replace(/\n+/g, '<br>');
+          setLine(`${ans}<br><span class="term-dim">✨ generated from this site's content — answers reflect the data here, not me</span>`, 'term-out');
+        } else {
+          const why = (data && data.error) ? ` — ${escape(String(data.error))}` : '';
+          setLine(`<span class="term-err">couldn’t get an answer right now${why}.</span> <span class="term-dim">try rephrasing, or </span><span class="term-key">search ${escape((q.split(/\s+/)[0] || '').toLowerCase())}</span>`, 'term-out');
+        }
+      })
+      .catch(() => setLine('<span class="term-err">couldn’t reach the answer service.</span> <span class="term-dim">try again in a moment.</span>', 'term-out'));
   };
 
   cmds.recent = (args, opts) => {
@@ -651,13 +686,14 @@
   loadHistory();
   (async () => {
     try {
-      const [profile, board, lens, contact] = await Promise.all([
+      const [profile, board, lens, contact, site] = await Promise.all([
         json('content/profile.json'),
         json('content/board.json'),
         json('content/lens.json'),
         json('content/contact.json'),
+        json('content/site.json').catch(() => ({})),   // optional — just for qa.workerUrl
       ]);
-      Object.assign(state, { profile, board, lens, contact });
+      Object.assign(state, { profile, board, lens, contact, qaUrl: String((site && site.qa && site.qa.workerUrl) || '').trim() });
 
       print(
         [
