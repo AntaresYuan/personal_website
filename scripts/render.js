@@ -573,7 +573,7 @@
     }
 
     // ── markup ───────────────────────────────────────────────────────
-    const CARD_ROW_H = 132, BAR_LANE_H = 16;
+    const CARD_ROW_H = 164, BAR_LANE_H = 16;   // a row's slot; a full card (id+title+date+2-line summary+impact+links) ≈ 150-165px
     const linksOf = (c) => (c.links ?? []).filter(l => l.href && l.href !== '#')
       .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
     const cardHtml = (it, rowIdx) => {
