@@ -512,6 +512,11 @@ button:focus-visible,
 }
 .ask-panel-title { display: inline-flex; align-items: center; gap: var(--sp-8); font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
 .ask-panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-yellow); box-shadow: 0 0 0 3px var(--color-yellow-glow); }
+.ask-panel-ai {
+  font-size: var(--fs-10); letter-spacing: var(--tracking-wide); font-weight: var(--fw-medium);
+  color: var(--color-text-faint); border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
+  padding: 1px var(--sp-6); cursor: help;
+}
 .ask-panel-clear, .ask-panel-close {
   background: none; border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
   color: var(--color-text-faint); font: inherit; font-size: var(--fs-11);
@@ -539,12 +544,6 @@ button:focus-visible,
 }
 .ask-msg-bot .ask-msg-text { color: var(--color-text-dim); }
 .ask-msg-bot.is-thinking .ask-msg-text { color: var(--color-text-faint); font-style: italic; }
-.ask-panel-note {
-  margin: 0; padding: var(--sp-6) var(--sp-16);
-  border-top: var(--bw) solid var(--color-line-soft);
-  font-family: var(--font-mono); font-size: var(--fs-10); letter-spacing: var(--tracking-wide);
-  color: var(--color-text-faint);
-}
 .ask-panel-form {
   display: flex; align-items: center; gap: var(--sp-10);
   padding: var(--sp-10) var(--sp-12);
