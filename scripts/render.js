@@ -712,7 +712,15 @@
     if (!list) return;
     const enabledTabs = () => Array.from(list.querySelectorAll('.view-tab[data-view]'));
     list.addEventListener('click', (ev) => {
-      const tab = ev.target.closest('.view-tab[data-view]');
+      let tab = ev.target.closest('.view-tab[data-view]');
+      if (!tab) {                       // clicked the segmented control's gap/padding — snap to the nearest tab by x
+        const x = ev.clientX; let best = Infinity;
+        enabledTabs().forEach((t) => {
+          const r = t.getBoundingClientRect();
+          const d = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+          if (d < best) { best = d; tab = t; }
+        });
+      }
       if (tab) switchView(tab.dataset.view);
     });
     // Roving-tabindex arrow nav (ARIA tablist pattern).
