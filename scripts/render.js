@@ -453,8 +453,8 @@
       const foot = [
         c.updated ? `<span class="spec-card-updated">updated ${escape(c.updated)}</span>` : '',
         c.impact ? `<span class="spec-card-impact">${escape(c.impact)}</span>` : '',
-      ].filter(Boolean).join('');
-      return `<section class="spec-card" aria-labelledby="spec-${escape(c.displayId)}">
+      ].filter(Boolean).join('<span class="spec-card-sep" aria-hidden="true">·</span>');
+      return `<section class="spec-card" data-status="${escape(c.status ?? '')}" aria-labelledby="spec-${escape(c.displayId)}">
         <p class="spec-card-id">${escape(c.displayId)}</p>
         <h4 class="spec-card-title" id="spec-${escape(c.displayId)}">${escape(c.title ?? '')}</h4>
         ${c.summary ? `<p class="spec-card-summary">${safeRich(c.summary)}</p>` : ''}
@@ -468,7 +468,7 @@
       const gc = cards.filter((c) => c.status === s);
       if (gc.length === 0) return '';
       return `<section class="spec-group">
-        <h3 class="spec-group-head">${STATUS_LABEL[s]} <span class="spec-group-count">${gc.length}</span></h3>
+        <h3 class="spec-group-head"><span class="spec-group-dot" data-status="${s}" aria-hidden="true"></span>${STATUS_LABEL[s]} <span class="spec-group-count">${gc.length}</span></h3>
         ${gc.map(cardSection).join('')}
       </section>`;
     }).join('');

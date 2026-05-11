@@ -923,8 +923,11 @@ body.ask-panel-open { overflow: hidden; }
 
 /* ── Spec view ────────────────────────────────────────────────────────
    "Read the roadmap as a document" — every card with its `details`
-   expanded, grouped by status. Built by scripts/render.js. (No `display`
-   set on .board-spec-view so the UA [hidden] rule still hides it.) */
+   expanded, grouped by status. Built by scripts/render.js. Reads like a
+   typeset spec sheet: status-dotted section heads, a status-tinted left
+   rail per card, a prominent lead line, mono metadata, well-set detail
+   prose. (No `display` set on .board-spec-view so the UA [hidden] rule
+   still hides it.) */
 .spec-doc { max-width: var(--w-prose); margin: 0 auto; padding-top: var(--sp-8); }
 .spec-empty {
   padding: var(--sp-24);
@@ -933,60 +936,101 @@ body.ask-panel-open { overflow: hidden; }
   font-family: var(--font-mono);
   font-size: var(--fs-12);
 }
-.spec-group { margin-bottom: var(--sp-40); }
+
+.spec-group { margin-bottom: var(--sp-48); }
+.spec-group:last-child { margin-bottom: var(--sp-16); }
 .spec-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-8);
   font-family: var(--font-mono);
-  font-size: var(--fs-12);
+  font-size: var(--fs-13);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--color-text-faint);
-  padding-bottom: var(--sp-8);
-  margin-bottom: var(--sp-16);
+  color: var(--color-text-dim);
+  padding-bottom: var(--sp-10);
+  margin-bottom: var(--sp-20);
   border-bottom: var(--bw) solid var(--color-line);
 }
+.spec-group-dot {
+  align-self: center;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+}
+.spec-group-dot[data-status="shipped"] { background: var(--color-success); }
+.spec-group-dot[data-status="now"]     { background: var(--color-warn); }
+.spec-group-dot[data-status="next"]    { background: var(--color-blue); }
+.spec-group-dot[data-status="later"]   { background: var(--color-text-faint); }
 .spec-group-count {
-  display: inline-block;
-  margin-left: var(--sp-6);
-  padding: 0 var(--sp-6);
+  margin-left: auto;
+  padding: 1px var(--sp-6);
   border-radius: var(--r-sm);
   background: var(--color-bg-soft);
-  color: var(--color-text-dim);
+  color: var(--color-text-faint);
+  font-size: var(--fs-11);
+  letter-spacing: 0;
+  text-transform: none;
 }
+
 .spec-card {
-  padding: var(--sp-20) 0;
-  border-bottom: var(--bw) solid var(--color-line-soft);
+  padding: var(--sp-24) 0 var(--sp-24) var(--sp-20);
+  border-left: 3px solid var(--color-line-soft);
 }
-.spec-card:last-child { border-bottom: none; }
+.spec-card + .spec-card { border-top: var(--bw) solid var(--color-line-soft); }
+.spec-card[data-status="shipped"] { border-left-color: color-mix(in srgb, var(--color-success) 60%, var(--color-line-soft)); }
+.spec-card[data-status="now"]     { border-left-color: color-mix(in srgb, var(--color-warn) 60%, var(--color-line-soft)); }
+.spec-card[data-status="next"]    { border-left-color: color-mix(in srgb, var(--color-blue) 55%, var(--color-line-soft)); }
+.spec-card > :last-child { margin-bottom: 0; }
 .spec-card-id {
   font-family: var(--font-mono);
   font-size: var(--fs-10);
   letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
   color: var(--color-text-faint);
   margin-bottom: var(--sp-4);
 }
 .spec-card-title {
   font-family: var(--font-serif);
-  font-size: var(--fs-19);
+  font-size: var(--fs-22);
   font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
   color: var(--color-text);
   margin-bottom: var(--sp-8);
 }
-.spec-card-summary { color: var(--color-text-dim); margin-bottom: var(--sp-12); }
-.spec-card-tags { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-bottom: var(--sp-12); }
-.spec-card-body { margin-bottom: var(--sp-12); }
-.spec-card-body:empty { display: none; }
-.spec-card-body h5, .spec-card-body h6 {
-  font-family: var(--font-serif);
+.spec-card-summary {
   font-size: var(--fs-15);
+  line-height: var(--lh-base);
+  color: var(--color-text);
+  margin-bottom: var(--sp-14);
+}
+.spec-card-tags { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-bottom: var(--sp-16); }
+.spec-card-body {
+  margin-bottom: var(--sp-16);
+  color: var(--color-text-dim);
+  line-height: var(--lh-base);
+}
+.spec-card-body:empty { display: none; }
+.spec-card-body > :first-child { margin-top: 0; }
+.spec-card-body > :last-child  { margin-bottom: 0; }
+.spec-card-body h5, .spec-card-body h6 {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   font-weight: var(--fw-medium);
-  margin: var(--sp-16) 0 var(--sp-8);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: var(--sp-20) 0 var(--sp-8);
 }
 .spec-card-body p  { margin-bottom: var(--sp-10); }
 .spec-card-body ul { padding-left: var(--sp-20); margin-bottom: var(--sp-10); }
 .spec-card-body li { margin-bottom: var(--sp-4); }
+.spec-card-body strong { color: var(--color-text); font-weight: var(--fw-medium); }
+.spec-card-body a { color: var(--color-blue); }
+.spec-card-body a:hover { color: var(--color-blue-deep); }
 .spec-card-body code {
   font-family: var(--font-mono);
-  font-size: var(--fs-12);
+  font-size: 0.92em;
   background: var(--color-bg-soft);
   padding: 1px var(--sp-4);
   border-radius: 3px;
@@ -994,15 +1038,18 @@ body.ask-panel-open { overflow: hidden; }
 .spec-card-foot {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-12);
+  align-items: center;
+  gap: var(--sp-4) var(--sp-8);
   font-family: var(--font-mono);
   font-size: var(--fs-11);
   color: var(--color-text-faint);
-  margin-bottom: var(--sp-8);
+  margin-bottom: var(--sp-12);
 }
+.spec-card-sep { color: var(--color-line); }
 .spec-card-impact { color: var(--color-blue); }
-.spec-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-12); }
-.spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); }
+.spec-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-6) var(--sp-16); }
+.spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); white-space: nowrap; }
+.spec-card-links a:hover { color: var(--color-blue-deep); }
 
 /* ── Timeline view ────────────────────────────────────────────────────
    Roadmap → Timeline is an interactive timeline rendered by the vendored
