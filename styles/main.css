@@ -1628,6 +1628,18 @@ body.modal-open { overflow: hidden; }
 }
 .palette-result.is-selected .palette-result-icon { color: var(--color-text); }
 .palette-result.is-selected .palette-result-meta { color: var(--color-text-dim); }
+/* "Ask this portfolio" (AI) result — a warm left stripe + the ✨ icon set it apart;
+   selection still highlights it like any other row. */
+.palette-result.is-ask { box-shadow: inset 2px 0 0 var(--color-warn); }
+.palette-result.is-ask .palette-result-icon { color: var(--color-warn); }
+.palette-result-answer.is-thinking { font-style: italic; opacity: 0.65; }
+.palette-result-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wide);
+  margin-top: 4px;
+}
 
 .palette-empty {
   text-align: center;
