@@ -29,6 +29,6 @@
     "inputPosition": "bottom"
   },
   "qa": {
-    "workerUrl": ""
+    "workerUrl": "https://antares-qa.chenjy4.workers.dev"
   }
 }
