@@ -69,7 +69,7 @@ collections:
             fields:
               - { label: "Copyright", name: "copyright", widget: "string" }
               - { label: "Tagline",   name: "tagline",   widget: "string" }
-              - { label: "Last updated (YYYY-MM-DD)", name: "lastUpdated", widget: "string" }
+              - { label: "Last updated (YYYY-MM-DD)", name: "lastUpdated", widget: "string", required: false, hint: "Leave empty to auto-fill with the date of the last content change. Set a value to pin a specific date." }
           - label: "Cloudflare Web Analytics"
             name: "analytics"
             widget: "object"

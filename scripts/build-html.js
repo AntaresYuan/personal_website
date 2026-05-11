@@ -25,6 +25,11 @@ const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 const site    = read('content/site.json');
 const profile = read('content/profile.json');
 const board   = read('content/board.json');
+
+// "updated <date>" in the topnav — auto (last-commit date) unless pinned in
+// site.json. See scripts/last-updated.js. render.js leaves #last-updated alone
+// unless footer.lastUpdated is set.
+const lastUpdated = require('./last-updated');
 const lens    = read('content/lens.json');
 const contact = read('content/contact.json');
 
@@ -348,9 +353,7 @@ html = replaceInner(html, 'ld-person', JSON.stringify(personLd, null, 2));
 
 // Topnav brand + last-updated
 html = replaceInner(html, 'brand-name', escape(site.meta?.title?.split('—')[0]?.trim() ?? ''));
-html = replaceInner(html, 'last-updated',
-  site.footer?.lastUpdated ? `updated ${escape(site.footer.lastUpdated)}` : ''
-);
+html = replaceInner(html, 'last-updated', `updated ${escape(lastUpdated)}`);
 
 // Hero
 html = replaceInner(html, 'hero-name',   heroNameHtml());

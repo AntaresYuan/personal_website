@@ -20,7 +20,7 @@ const site  = read('content/site.json');
 const board = read('content/board.json');
 
 const SITE_URL = (site.meta?.url ?? 'https://antaresyuan.site').replace(/\/$/, '');
-const lastmod  = site.footer?.lastUpdated ?? new Date().toISOString().slice(0, 10);
+const lastmod  = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
 
 /* ── Build URLs ───────────────────────────────────────────────────────── */
 const ID_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
