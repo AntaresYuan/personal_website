@@ -39,12 +39,22 @@ site's volume — note each question is **two** model calls (generate + verify).
 ```
 POST /
 Content-Type: application/json
+
+# single turn:
 { "q": "what's the story behind Worth Fly?" }
+
+# multi-turn (the chat panel) — user/assistant turns, ending with the new user turn:
+{ "messages": [
+    { "role": "user", "content": "what's Worth Fly?" },
+    { "role": "assistant", "content": "Worth Fly is …" },
+    { "role": "user", "content": "what did you learn from it?" }
+] }
 
 → 200  { "answer": "Worth Fly is one of the things I shipped — …", "model": "@cf/meta/llama-3.1-8b-instruct-fast", "verified": true }
 → 4xx/5xx  { "error": "…", "detail"?: "…" }
 ```
 
+History is capped at the last few turns; each turn is also length-capped.
 `verified` is `true` when the fact-check pass ran (the usual case), `false` when
 it errored and the raw draft was returned.
 

@@ -939,56 +939,101 @@
      antares-qa Worker (site.json → qa.workerUrl) it answers inline with a
      grounded generation; otherwise (or if the Worker errors) it answers
      inline from the hand-authored FAQ / card retrieval in qa-faq.js. */
-  const wireHeroAsk = (site, board) => {
-    const form = document.getElementById('hero-ask-form');
-    const input = document.getElementById('hero-ask-input');
-    const ans = document.getElementById('hero-ask-answer');
-    if (!form || !input || !ans) return;
+  // The multi-turn "ask Antares" chat panel. Returns { open(seedQ?) } so the
+  // hero "ask" bar (wireHeroAsk) can pop it open with a question. Answers come
+  // from the antares-qa Worker (site.json → qa.workerUrl) with the running
+  // conversation; without a Worker, each turn falls back to the hand-authored
+  // FAQ/card retrieval in window.QA (one-shot, not really conversational).
+  const wireAskPanel = (site, board) => {
+    const backdrop = document.getElementById('ask-panel-backdrop');
+    const panel = document.getElementById('ask-panel');
+    const log = document.getElementById('ask-panel-log');
+    const form = document.getElementById('ask-panel-form');
+    const input = document.getElementById('ask-panel-input');
+    const sendBtn = document.getElementById('ask-panel-send');
+    if (!backdrop || !panel || !log || !form || !input) return null;
     const url = String((site && site.qa && site.qa.workerUrl) || '').trim();
     const cards = (board && board.cards) ? board.cards : [];
-    const show = (html, cls) => { ans.className = `hero-ask-answer${cls ? ' ' + cls : ''}`; ans.innerHTML = html; ans.hidden = false; };
-    const NOTE_AI = `<p class="hero-ask-note">✨ an AI answering in my voice — strictly from this site's content (not me typing)</p>`;
-    const NOTE_FAQ = `<p class="hero-ask-note">drawn from this site's content — the roadmap below has the full picture</p>`;
+    let convo = [];          // [{ role:'user'|'assistant', content }]
+    let busy = false;
 
-    // a "→ open SHIP-01" / "→ Lens" link for a matched FAQ/card target
-    const moreLink = (m) => {
-      if (!m) return '';
-      if (m.cardId)  return ` <button type="button" class="hero-ask-more" data-card-id="${escape(m.cardId)}">→ ${escape(m.cardId)}</button>`;
-      if (m.anchor)  { const n = ({ '#shipped': 'shipped', '#now': 'now', '#lens': 'lens', '#agents': 'agent surfaces', '#contact': 'contact', '#terminal': 'terminal', '#main-content': 'top' })[m.anchor] || m.anchor.replace('#', ''); return ` <a class="hero-ask-more" href="${escape(m.anchor)}">→ ${escape(n)}</a>`; }
-      if (m.href)    return ` <a class="hero-ask-more" href="${escape(m.href)}" ${/^https?:/.test(m.href) ? 'target="_blank" rel="noopener"' : ''}>→ ${escape(m.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`;
-      return '';
+    const renderLog = (pending) => {
+      if (!convo.length && !pending) { log.innerHTML = `<p class="ask-panel-empty">Ask me about a project, what I'm building, how I think, or how to reach me — and we can keep going from there.</p>`; return; }
+      let html = convo.map((m) => {
+        const you = m.role === 'user';
+        return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}"><div class="ask-msg-label">${you ? 'you' : 'antares'}</div><div class="ask-msg-text">${escape(m.content)}</div></div>`;
+      }).join('');
+      if (pending) html += `<div class="ask-msg ask-msg-bot is-thinking"><div class="ask-msg-label">antares</div><div class="ask-msg-text">thinking…</div></div>`;
+      log.innerHTML = html;
+      log.scrollTop = log.scrollHeight;
     };
-    const retrieve = (q) => (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
-    const showRetrieval = (q) => {
-      const m = retrieve(q);
-      if (m) show(`<p class="hero-ask-answer-text">${escape(m.answer)}${moreLink(m)}</p>${NOTE_FAQ}`);
-      else   show(`<p class="hero-ask-answer-text">I don't see that on the site.</p><p class="hero-ask-note">The roadmap below has what Antares has shipped and is building.</p>`);
+    const setBusy = (b) => { busy = b; input.disabled = b; if (sendBtn) sendBtn.disabled = b; };
+
+    const send = (raw) => {
+      const q = String(raw || '').trim().slice(0, 500);
+      if (!q || busy) return;
+      convo.push({ role: 'user', content: q });
+      renderLog(true);
+      setBusy(true);
+      const finish = (answer) => { convo.push({ role: 'assistant', content: answer }); renderLog(false); setBusy(false); input.focus(); };
+      if (!url) {
+        const m = (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
+        const ans = m ? m.answer : "I don't see that covered on the site — the roadmap below has what I've shipped and what I'm building.";
+        const firstAnswer = convo.filter((x) => x.role === 'assistant').length === 0;
+        setTimeout(() => finish(ans + (firstAnswer ? '\n\n(quick answer — the full conversational version turns on once the antares-qa Worker is deployed.)' : '')), 220);
+        return;
+      }
+      // Send both: `messages` for the multi-turn Worker, `q` so an older
+      // single-turn deployment still works (it ignores `messages`).
+      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo }) })
+        .then(async (r) => {
+          let d = {};
+          try { d = await r.json(); } catch (_) { /* non-JSON */ }
+          return (r.ok && d && d.answer)
+            ? String(d.answer)
+            : ("Sorry — I couldn't get an answer right now" + ((d && d.error) ? ` (${d.error})` : '') + '. Try again in a moment, or rephrase.');
+        })
+        .catch(() => "Sorry — I couldn't reach the answer service right now. Try again in a moment.")
+        .then(finish);
     };
 
+    const open = (seedQ) => {
+      if (!panel.classList.contains('is-open')) {
+        backdrop.hidden = false; panel.hidden = false;
+        void panel.offsetWidth;                              // reflow so the transition fires
+        backdrop.classList.add('is-open'); panel.classList.add('is-open');
+        document.body.classList.add('ask-panel-open');
+        renderLog(false);
+      }
+      setTimeout(() => { input.focus(); if (seedQ) send(seedQ); }, 50);
+    };
+    const close = () => {
+      backdrop.classList.remove('is-open'); panel.classList.remove('is-open');
+      document.body.classList.remove('ask-panel-open');
+      setTimeout(() => { if (!panel.classList.contains('is-open')) { backdrop.hidden = true; panel.hidden = true; } }, 220);
+    };
+    const clearConvo = () => { if (busy) return; convo = []; renderLog(false); input.value = ''; input.focus(); };
+
+    form.addEventListener('submit', (ev) => { ev.preventDefault(); const q = input.value.trim(); input.value = ''; if (q) send(q); });
+    document.getElementById('ask-panel-close')?.addEventListener('click', close);
+    document.getElementById('ask-panel-clear')?.addEventListener('click', clearConvo);
+    backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && panel.classList.contains('is-open')) close(); });
+
+    return { open };
+  };
+
+  // The hero "ask" bar → opens the chat panel, seeded with the question.
+  const wireHeroAsk = (askPanel) => {
+    const form = document.getElementById('hero-ask-form');
+    const input = document.getElementById('hero-ask-input');
+    if (!form || !input || !askPanel) return;
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const q = input.value.trim();
-      if (!q) return;
-      if (!url) { showRetrieval(q); return; }
-      show('thinking…', 'is-thinking');
-      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
-        .then(async (r) => {
-          let data = {};
-          try { data = await r.json(); } catch (_) { /* non-JSON */ }
-          if (r.ok && data && data.answer) {
-            show(`<p class="hero-ask-answer-text">${escape(String(data.answer)).replace(/\n+/g, '<br>')}</p>${NOTE_AI}`);
-          } else {
-            showRetrieval(q);   // Worker errored — fall back to the curated answer, still inline
-          }
-        })
-        .catch(() => showRetrieval(q));
+      input.value = '';
+      askPanel.open(q || undefined);   // empty → just open the panel
     });
-    // Clicking "→ SHIP-01" opens the card panel (reuses the cross-surface event).
-    ans.addEventListener('click', (ev) => {
-      const b = ev.target.closest('.hero-ask-more[data-card-id]');
-      if (b) { ev.preventDefault(); document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id: b.dataset.cardId } })); }
-    });
-    input.addEventListener('input', () => { if (!input.value.trim()) ans.hidden = true; });
   };
 
   const wireModal = () => {
@@ -1074,7 +1119,7 @@
       wireViewTabs();
       wireModal();
       wireTheme();
-      wireHeroAsk(site, board);
+      wireHeroAsk(wireAskPanel(site, board));
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');

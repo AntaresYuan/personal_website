@@ -94,7 +94,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=c8cc9f92">
+<link rel="stylesheet" href="styles/main.css?v=b9a0a678">
 </head>
 <body>
 
@@ -172,8 +172,7 @@
                aria-label="Ask this portfolio a question" maxlength="280">
         <button class="hero-ask-go" id="hero-ask-go" type="submit">ask</button>
       </form>
-      <p class="hero-ask-hint">answers are drawn straight from this site — it's the data talking, not a clone of me</p>
-      <div class="hero-ask-answer" id="hero-ask-answer" hidden></div>
+      <p class="hero-ask-hint">an AI answering in my voice, strictly from this site &amp; my notes — opens a conversation</p>
     </div>
   </header>
 
@@ -649,6 +648,26 @@
     </div>
   </div>
 
+  <!-- ── ASK ANTARES — multi-turn chat panel ─────────────────────────
+       Opened by the hero "ask" bar (typing there → this panel opens with
+       the question). Answers come from the antares-qa Worker (multi-turn);
+       behaviour in scripts/render.js (wireAskPanel). It's a transcript, not
+       a chatbot UI — and labelled as an AI answering in Antares's voice. -->
+  <div class="ask-panel-backdrop" id="ask-panel-backdrop" hidden></div>
+  <div class="ask-panel" id="ask-panel" role="dialog" aria-modal="true" aria-label="Ask Antares" hidden>
+    <header class="ask-panel-head">
+      <span class="ask-panel-title"><span class="ask-panel-dot" aria-hidden="true"></span>ask Antares</span>
+      <button class="ask-panel-clear" id="ask-panel-clear" type="button">new</button>
+      <button class="ask-panel-close" id="ask-panel-close" type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="ask-panel-log" id="ask-panel-log" tabindex="-1"></div>
+    <p class="ask-panel-note">an AI answering in my voice — strictly from this site &amp; my notes (not me typing)</p>
+    <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+      <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
+      <button class="ask-panel-send" id="ask-panel-send" type="submit">send</button>
+    </form>
+  </div>
+
   <!-- ── CARD DETAIL PANEL ──────────────────────────────────────────
        Slides in from the right when a card is clicked. Closes on ESC,
        backdrop click, or X. ↑/↓ navigates between cards. URL hash syncs
@@ -704,7 +723,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=f2143176"   defer></script>
+<script src="scripts/render.js?v=2efa60a0"   defer></script>
 <script src="scripts/terminal.js?v=63c49bd6" defer></script>
 <script src="scripts/palette.js?v=3182eecc"  defer></script>
 </body>
