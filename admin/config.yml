@@ -124,6 +124,7 @@ collections:
                 fields:
                   - { label: "Label", name: "label", widget: "string" }
                   - { label: "URL",   name: "href",  widget: "string" }
+              - { label: "Started (YYYY-MM-DD)", name: "started", widget: "string", required: false, hint: "Optional. If set (and earlier than Updated), the Timeline view draws this project as a span [Started → Updated]; leave blank to show it as a single point at the Updated date." }
               - { label: "Updated (YYYY-MM-DD)", name: "updated", widget: "string" }
               - { label: "Order within column", name: "order", widget: "number", default: 1 }
 
