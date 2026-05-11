@@ -30,6 +30,7 @@
 
   /* ── State ──────────────────────────────────────────────────────── */
   const state = { profile: null, board: null, lens: null, contact: null, qaUrl: '' };
+  let askBusy = false;     // an `ask` request is in flight — the input is disabled meanwhile
   const history = [];
   let historyIdx = -1;
 
@@ -304,20 +305,25 @@
   // is fire-and-forget — the "asking…" line is replaced in place when the
   // answer (or an error) arrives, so the terminal stays usable meanwhile.
   cmds.ask = (args) => {
+    if (askBusy) return print('<span class="term-dim">one moment — still working on the last question.</span>', 'term-dim');
     const q = (args || []).join(' ').trim();
     if (!q) return print('usage: ask &lt;your question&gt; — e.g. <span class="term-key">ask are you open to roles?</span>', 'term-err');
     const url = state.qaUrl;
     if (!url) {
       return print('<span class="term-dim">the </span><span class="term-key">ask</span><span class="term-dim"> command needs the antares-qa Worker deployed (see </span><span class="term-key">workers/qa/README.md</span><span class="term-dim">). For now try </span><span class="term-key">whoami</span><span class="term-dim"> · </span><span class="term-key">projects</span><span class="term-dim"> · </span><span class="term-key">cat &lt;ID&gt;</span><span class="term-dim"> · </span><span class="term-key">search</span><span class="term-dim">.</span>');
     }
-    print("<span class=\"term-dim\">asking this portfolio… (grounded in the site's content)</span>", 'term-dim');
-    const lineNode = promptLine.previousElementSibling;
+    print("<span class=\"term-dim\">asking this portfolio… (takes a few seconds — two passes)</span>", 'term-dim');
+    const lineNode = promptLine.previousElementSibling;          // the "asking…" line — replaced in place when the answer lands
     const setLine = (html, cls) => {
       if (lineNode) { lineNode.className = `terminal-line ${cls || 'term-out'}`; lineNode.innerHTML = html; }
       else { print(html, cls); }
       scrollToBottom();
     };
-    fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }) })
+    // Lock the prompt while we wait — so a second `ask` can't be fired and its
+    // answer can't land out of order. Re-enabled in .finally().
+    askBusy = true;
+    input.disabled = true;
+    fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }), signal: AbortSignal.timeout(30000) })
       .then(async (r) => {
         let data = {};
         try { data = await r.json(); } catch (_) { /* non-JSON response */ }
@@ -329,7 +335,8 @@
           setLine(`<span class="term-err">couldn’t get an answer right now${why}.</span> <span class="term-dim">try rephrasing, or </span><span class="term-key">search ${escape((q.split(/\s+/)[0] || '').toLowerCase())}</span>`, 'term-out');
         }
       })
-      .catch(() => setLine('<span class="term-err">couldn’t reach the answer service.</span> <span class="term-dim">try again in a moment.</span>', 'term-out'));
+      .catch((e) => setLine(`<span class="term-err">${(e && e.name === 'TimeoutError') ? 'no answer in time — try again.' : "couldn’t reach the answer service."}</span> <span class="term-dim">try again in a moment.</span>`, 'term-out'))
+      .finally(() => { askBusy = false; input.disabled = false; input.focus(); });
   };
 
   cmds.recent = (args, opts) => {
