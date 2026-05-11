@@ -525,6 +525,20 @@
     const toDate  = (iso) => new Date(`${iso}T12:00:00`);   // local noon — dodges DST edges
     const fmtFull = (iso) => { const [y, mo, da] = iso.split('-').map(Number); return `${MONTHS[mo - 1]} ${da}, ${y}`; };
 
+    // Colour-by-category: a card's "category" is its first tag (or "Other").
+    // Categories get a palette tone in first-seen order — the first 4 distinct
+    // ones get named tones 1–4, anything beyond shares the neutral tone 0.
+    // (Tone colours live in styles/main.css as `.vt-tone-N { --tone-fill/-stroke }`.)
+    const TONE_COUNT = 4;
+    const categoryOf = (c) => (c.tags && c.tags.length ? c.tags[0] : 'Other');
+    const toneOf = new Map();          // category → tone index (0…TONE_COUNT)
+    shipped.forEach((c) => {
+      const cat = categoryOf(c);
+      if (!toneOf.has(cat)) toneOf.set(cat, toneOf.size < TONE_COUNT ? toneOf.size + 1 : 0);
+    });
+    const legendItems = [...toneOf.entries()].filter(([, t]) => t >= 1).map(([cat, t]) => ({ tone: t, label: cat }));
+    if ([...toneOf.values()].includes(0)) legendItems.push({ tone: 0, label: 'Other' });
+
     // One vis item per shipped card. A `range` ([started, updated]) when
     // `started` is a real date strictly before `updated`; otherwise a `point`
     // at `updated` — a dot at the ship date, no invented duration.
@@ -542,7 +556,7 @@
         start: toDate(isRange ? start : end),
         ...(isRange ? { end: toDate(end) } : {}),
         type: isRange ? 'range' : 'point',
-        className: 'vt-item',
+        className: `vt-item vt-tone-${toneOf.get(categoryOf(c))}`,
       });
     });
 
@@ -552,17 +566,21 @@
       timelineBuilt = true;
       return;
     }
+    const legendHtml = legendItems.length >= 2
+      ? `<div class="vt-legend">${legendItems.map((L) => `<span class="vt-legend-item vt-tone-${L.tone}"><span class="vt-swatch" aria-hidden="true"></span>${escape(L.label)}</span>`).join('')}</div>`
+      : '';
 
-    host.innerHTML = `<div class="timeline-doc">${headHtml}<div class="vt-host" aria-label="Shipped projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
+    host.innerHTML = `<div class="timeline-doc">${headHtml}${legendHtml}<div class="vt-host" aria-label="Shipped projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
     timelineBuilt = true;   // claim it now so a second tab-click doesn't re-load the bundle
 
-    // Window bounds: snug around the data + today, with a month of pan room.
+    // Window bounds: around the data + today, with margin (so an item near the
+    // edge has room for its label spilling out) plus extra pan room beyond.
     const DAY = 86400000;
     const stamps = visItems.flatMap((it) => [it.start.getTime(), it.end ? it.end.getTime() : null]).filter((n) => n != null);
     stamps.push(Date.now());
     const lo = Math.min(...stamps), hi = Math.max(...stamps);
-    const winPad = Math.max(DAY * 10, (hi - lo) * 0.06);
-    const panPad = Math.max(DAY * 45, (hi - lo) * 0.25);
+    const winPad = Math.max(DAY * 14, (hi - lo) * 0.1);
+    const panPad = Math.max(DAY * 60, (hi - lo) * 0.35);
 
     loadVisTimeline().then((vis) => {
       const el = host.querySelector('.vt-host');
@@ -570,6 +588,7 @@
       el.textContent = '';
       if (timelineInstance) { try { timelineInstance.destroy(); } catch (_) { /* noop */ } timelineInstance = null; }
       timelineInstance = new vis.Timeline(el, new vis.DataSet(visItems), {
+        locale: 'en',                 // pin English month names — vis otherwise sniffs navigator.language
         orientation: { axis: 'top', item: 'top' },
         align: 'auto',
         stack: true,

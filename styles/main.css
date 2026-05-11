@@ -808,6 +808,30 @@ button:focus-visible,
   letter-spacing: var(--tracking-wide);
   color: var(--color-text-faint);
 }
+/* Category legend — one chip per palette tone (only shown when ≥2 categories).
+   The tone vars cascade down to .vt-swatch from `.vt-legend-item.vt-tone-N`. */
+.vt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8) var(--sp-16);
+  margin-bottom: var(--sp-12);
+}
+.vt-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+.vt-swatch {
+  flex: 0 0 auto;
+  width: 9px; height: 9px;
+  border-radius: 999px;
+  background: var(--tone-stroke, var(--color-yellow));
+}
 /* The element handed to vis.Timeline(). min-height keeps the layout from
    jumping while the ≈540 KB bundle loads ("loading…" sits here first). */
 .vt-host {
@@ -848,10 +872,19 @@ button:focus-visible,
 .vt-host .vis-time-axis .vis-grid.vis-major { border-color: var(--color-line); }
 /* the "today" line */
 .vt-host .vis-current-time { background-color: var(--color-blue); width: var(--bw-thick); opacity: 0.6; }
-/* items — range pills + point dots, in the warm accent */
+/* Category tones — set as CSS vars on `.vt-tone-N` so both the timeline items
+   (vis copies the item's className onto its dot too) and the legend swatches
+   read them. Tones 1–4 from the site palette; tone 0 = the neutral "everything
+   else" bucket. Assigned in first-seen order by scripts/render.js. */
+.vt-tone-1 { --tone-fill: var(--color-yellow-soft); --tone-stroke: var(--color-yellow);  }
+.vt-tone-2 { --tone-fill: var(--color-blue-soft);   --tone-stroke: var(--color-blue);    }
+.vt-tone-3 { --tone-fill: #DCEFE3;                  --tone-stroke: var(--color-success);  }   /* soft mint / shipped-green */
+.vt-tone-4 { --tone-fill: #FAE6CF;                  --tone-stroke: var(--color-warn);     }   /* soft amber / warn-orange  */
+.vt-tone-0 { --tone-fill: #ECE8DB;                  --tone-stroke: #9C9580;               }   /* warm neutral              */
+/* items — range pills + point dots, tinted per category */
 .vt-host .vis-item {
-  background-color: var(--color-yellow-soft);
-  border-color: var(--color-yellow);
+  background-color: var(--tone-fill, var(--color-yellow-soft));
+  border-color: var(--tone-stroke, var(--color-yellow));
   border-width: var(--bw);
   border-radius: var(--r-md);
   color: var(--color-text);
@@ -860,8 +893,8 @@ button:focus-visible,
 }
 .vt-host .vis-item.vis-range { border-radius: 999px; }
 .vt-host .vis-item.vis-dot {
-  background-color: var(--color-yellow);
-  border-color: var(--color-yellow);
+  background-color: var(--tone-stroke, var(--color-yellow));
+  border-color: var(--tone-stroke, var(--color-yellow));
   border-width: 5px;
 }
 .vt-host .vis-item:hover { box-shadow: var(--shadow-card); border-color: var(--color-blue); }
@@ -871,6 +904,9 @@ button:focus-visible,
   border-color: var(--color-blue);
   box-shadow: var(--shadow-card-hover);
 }
+/* let a narrow range bar's label spill out beside it instead of being clipped
+   to "SH…" (vis clips it to .vis-item-overflow by default) */
+.vt-host .vis-item .vis-item-overflow { overflow: visible; }
 .vt-host .vis-item .vis-item-content { padding: 4px var(--sp-10); }
 .vt-host .vis-item .vt-id {
   font-family: var(--font-mono);
