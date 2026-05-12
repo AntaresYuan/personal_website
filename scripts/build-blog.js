@@ -30,6 +30,8 @@ const abs = (p) => p ? `/${String(p).replace(/^\/+/, '')}` : '';   // root-absol
 const AUTHOR = [profile.name, profile.nameAccent].filter(Boolean).join(' ') || SITE_NAME;
 const AVATAR = abs(profile.avatar?.calm || 'media/avatar-calm.png');
 const OG_IMAGE = site.meta?.ogImage ? `${SITE_URL}${abs(site.meta.ogImage)}` : '';
+const FEED_TITLE = `Writing — ${SITE_NAME}`;
+const FEED_DESC = `Writeups and notes from building — by ${AUTHOR}.`;
 const cssV = crypto.createHash('sha1').update(fs.readFileSync(path.join(root, 'styles/main.css'))).digest('hex').slice(0, 8);
 
 // rough reading time, ~200 wpm — strip Markdown punctuation first.
@@ -37,6 +39,11 @@ const readMinutes = (md) => {
   const words = String(md).replace(/```[\s\S]*?```/g, ' ').replace(/[#>*_`~\-\[\]()!|]/g, ' ').split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 200));
 };
+// "2026-05-12" → "Tue, 12 May 2026 00:00:00 GMT"  (RSS pubDate)
+const rfc822 = (ymd) => { const d = new Date(`${ymd}T12:00:00Z`); return isNaN(d) ? new Date().toUTCString() : d.toUTCString(); };
+// root-relative URLs → absolute, for the feed's HTML payload
+const absUrls = (html) => String(html).replace(/(href|src)="\/(?!\/)/g, `$1="${SITE_URL}/`);
+const cdata = (s) => `<![CDATA[${String(s).replace(/]]>/g, ']]]]><![CDATA[>')}]]>`;
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap';
 
@@ -125,6 +132,7 @@ function pageShell({ title, description, canonical, ogType, bodyClass, main }) {
 <meta name="author" content="${e(site.meta?.author ?? SITE_NAME)}">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="${e(canonical)}">
+<link rel="alternate" type="application/rss+xml" title="${e(FEED_TITLE)}" href="/blog/feed.xml">
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -161,7 +169,7 @@ ${THEME_INIT}
 ${main}
   <footer class="site-footer">
     <span>${e(site.footer?.copyright ?? '')}${site.footer?.tagline ? ` · <em>${e(site.footer.tagline)}</em>` : ''}</span>
-    <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/admin/">edit</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
+    <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/blog/feed.xml">rss</a> · <a href="/admin/">edit</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
   </footer>
 </main>
 ${BLOG_JS}
@@ -247,4 +255,28 @@ for (const ent of fs.readdirSync(path.join(root, 'blog'), { withFileTypes: true 
   }
 }
 
-console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'})`);
+// /blog/feed.xml — RSS 2.0. Full post HTML in content:encoded (so readers and
+// Medium's "import from RSS" get the whole post), with absolute URLs.
+const feedItems = posts.map((p) => `    <item>
+      <title>${e(p.title)}</title>
+      <link>${SITE_URL}/blog/${e(p.slug)}/</link>
+      <guid isPermaLink="true">${SITE_URL}/blog/${e(p.slug)}/</guid>${p.date ? `\n      <pubDate>${rfc822(p.date)}</pubDate>` : ''}
+      <dc:creator>${e(AUTHOR)}</dc:creator>${p.summary ? `\n      <description>${e(p.summary)}</description>` : ''}
+      <content:encoded>${cdata(absUrls(mdToHtml(p.body)))}</content:encoded>
+    </item>`).join('\n');
+const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${e(FEED_TITLE)}</title>
+    <link>${SITE_URL}/blog/</link>
+    <atom:link href="${SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>${e(FEED_DESC)}</description>
+    <language>${e(LANG)}</language>${posts[0]?.date ? `\n    <lastBuildDate>${rfc822(posts[0].date)}</lastBuildDate>` : ''}
+    <generator>scripts/build-blog.js</generator>
+${feedItems}
+  </channel>
+</rss>
+`;
+fs.writeFileSync(path.join(root, 'blog', 'feed.xml'), feed);
+
+console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'} + feed.xml)`);

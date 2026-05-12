@@ -93,6 +93,19 @@ npx antares-cv
 
 Single-file Node CLI in `cli/` that fetches `content/*.json` from the live site and prints a colored resume. Same data as the website, terminal-shaped. See [`cli/README.md`](cli/README.md) for options (`--full`, `--json`, `--no-color`).
 
+## Blog
+
+Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date`, `summary`, `draft`), then the body. Edit them in `/admin/` → **Blog**, or by hand. `scripts/build-blog.js` renders `/blog/` (the index), `/blog/<slug>/` (one page each — byline, reading-progress bar, giscus comments), and an RSS feed at **`/blog/feed.xml`**. Posts with `draft: true` are skipped.
+
+### Syndicating to Medium / dev.to
+
+The blog is the canonical home for what you write — so syndicate *out*, don't pull *in*:
+
+- **Medium**: paste a published post's URL (`https://yoursite/blog/<slug>/`) into Medium's [Import tool](https://medium.com/p/import). It creates a draft with `rel=canonical` pointing back to your post and backdates it; review and publish. (Medium closed its write API to new integrations in Jan 2025 — there's no reliable auto-push. Medium can also watch `/blog/feed.xml` and drop new posts into your Drafts.)
+- **dev.to / Hashnode**: both have working APIs with a `canonical_url` field — a GitHub Action could auto-cross-post on publish. Not wired up yet ([issue #124](https://github.com/AntaresYuan/personal_website/issues/124)).
+
+Pulling Medium → site would be backwards: it canonicalizes those posts to Medium (so Medium, not you, gets the SEO) and drags in Medium's HTML + paywall stubs. Keep one source of truth.
+
 ## How agent-friendly is this?
 
 The site exposes three machine-readable surfaces backed by the same JSON:
