@@ -128,16 +128,33 @@ function mdToHtml(md) {
 }
 
 /* ── frontmatter ────────────────────────────────────────────────────────
-   --- \n key: value (quoted or bare; true/false) ... \n --- \n. A tiny
-   subset — enough for { title, date, summary, draft, slug }. */
+   --- \n key: value \n --- \n. A small YAML subset — enough for what the
+   CMS writes for a post: bare/quoted scalars, true/false, and `|` / `|-` /
+   `>` / `>-` block scalars (Sveltia serializes multi-line `text` fields that
+   way). Unknown shapes are kept as the raw remainder of the line. */
 function parseFrontmatter(raw) {
   const m = /^---[ \t]*\n([\s\S]*?)\n---[ \t]*\n?/.exec(String(raw));
   if (!m) return { data: {}, body: String(raw) };
   const data = {};
-  for (const ln of m[1].split('\n')) {
-    const mm = /^([A-Za-z0-9_-]+)[ \t]*:[ \t]*(.*)$/.exec(ln.trim());
+  const lines = m[1].split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const mm = /^([A-Za-z0-9_-]+)[ \t]*:[ \t]*(.*)$/.exec(lines[i]);
     if (!mm) continue;
     let v = mm[2].trim();
+    const block = /^([|>])[+-]?[ \t]*$/.exec(v);
+    if (block) {
+      const folded = block[1] === '>';
+      const buf = [];
+      let j = i + 1;
+      while (j < lines.length && (/^\s+\S/.test(lines[j]) || lines[j].trim() === '')) { buf.push(lines[j]); j++; }
+      i = j - 1;
+      while (buf.length && buf[0].trim() === '') buf.shift();
+      while (buf.length && buf[buf.length - 1].trim() === '') buf.pop();
+      const indent = (buf[0] || '').match(/^[ \t]*/)[0].length;
+      const text = buf.map((l) => l.slice(indent)).join(folded ? ' ' : '\n');
+      data[mm[1]] = (folded ? text.replace(/\s+/g, ' ') : text).trim();
+      continue;
+    }
     if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
     else if (v === 'true') v = true;
     else if (v === 'false') v = false;
@@ -148,7 +165,8 @@ function parseFrontmatter(raw) {
 
 /* ── loader ─────────────────────────────────────────────────────────────
    Returns [{ slug, title, date('YYYY-MM-DD'), summary, draft, body, file }],
-   newest first. Drafts excluded unless includeDrafts. */
+   newest first. `summary` is collapsed to one line. Drafts excluded unless
+   includeDrafts. */
 function loadPosts({ includeDrafts = false } = {}) {
   if (!fs.existsSync(BLOG_DIR)) return [];
   return fs.readdirSync(BLOG_DIR)
@@ -158,10 +176,10 @@ function loadPosts({ includeDrafts = false } = {}) {
       const slug = slugify(data.slug || f.replace(/\.md$/i, ''));
       return {
         slug,
-        title: String(data.title || slug),
-        date: String(data.date || '').slice(0, 10),
-        summary: String(data.summary || ''),
-        draft: data.draft === true,
+        title: String(data.title || slug).trim(),
+        date: String(data.date || '').trim().slice(0, 10),
+        summary: String(data.summary || '').replace(/\s+/g, ' ').trim(),
+        draft: data.draft === true || data.draft === 'true',
         body: String(body).trim(),
         file: f,
       };

@@ -206,6 +206,10 @@ ${posts.map((p) => `      <li class="blog-list-item">
   </section>`;
 
 fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
+// A compact post manifest — the ⌘K palette (scripts/palette.js) fetches this
+// to index posts; small + cacheable.
+fs.writeFileSync(path.join(root, 'blog', 'posts.json'),
+  JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date })), null, 2) + '\n');
 fs.writeFileSync(path.join(root, 'blog', 'index.html'), pageShell({
   title: 'Writing',
   description: `Writeups and notes from building — by ${AUTHOR}.`,
@@ -279,4 +283,4 @@ ${feedItems}
 `;
 fs.writeFileSync(path.join(root, 'blog', 'feed.xml'), feed);
 
-console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'} + feed.xml)`);
+console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'} + feed.xml + posts.json)`);

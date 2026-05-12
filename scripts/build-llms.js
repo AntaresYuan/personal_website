@@ -46,6 +46,22 @@ const allCards = () => {
 
 const stripTags = (s) => String(s ?? '').replace(/<\/?(em|strong|br)\s*\/?>/gi, '');
 
+// Markdown → plain text — for putting blog post bodies in llms-full.txt so the
+// "ask" assistant (which grounds on this file) can talk about what's been written.
+const stripMd = (s) => String(s ?? '')
+  .replace(/```[\s\S]*?```/g, '')                  // drop fenced code blocks
+  .replace(/`([^`]+)`/g, '$1')                     // inline code → text
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, '')            // images → gone
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')         // links → text
+  .replace(/^\s{0,3}#{1,6}\s+/gm, '')              // heading markers
+  .replace(/^\s*>\s?/gm, '')                       // blockquote markers
+  .replace(/^\s*[-*+]\s+/gm, '- ')                 // list bullets
+  .replace(/(\*\*|__|\*|_)/g, '')                  // bold / italic markers
+  .replace(/^\s*-{3,}\s*$/gm, '')                  // horizontal rules
+  .replace(/\\([\\`*_{}\[\]()#+.!|>~^=-])/g, '$1') // backslash escapes
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
+
 /* ── llms.txt — short summary (per llmstxt.org spec) ──────────────────── */
 const short = `# ${site.meta?.title ?? 'Personal site'}
 
@@ -122,9 +138,11 @@ ${(contact.items ?? []).map(it => `- ${it.key}: ${it.label} (${it.href})`).join(
 ${(() => {
   const posts = loadPosts();
   if (!posts.length) return '';
-  return `\n# Writing\n\n` + posts.map(p =>
-    `## ${p.title}\n${p.date ? `Published: ${p.date}\n` : ''}${p.summary ? `${p.summary}\n` : ''}URL: /blog/${p.slug}/`
-  ).join('\n\n') + '\n';
+  return `\n# Writing\n\n` + posts.map(p => {
+    const head = [`## ${p.title}`, `URL: /blog/${p.slug}/`, p.date ? `Published: ${p.date}` : '', p.summary ? `Summary: ${p.summary}` : ''].filter(Boolean).join('\n');
+    const body = stripMd(p.body);
+    return body ? `${head}\n\n${body}` : head;
+  }).join('\n\n---\n\n') + '\n';
 })()}
 ---
 Generated ${new Date().toISOString().slice(0, 10)} from content/*.json. Last site update: ${lastUpdated}
