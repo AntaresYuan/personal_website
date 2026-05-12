@@ -162,7 +162,7 @@ ${THEME_INIT}
 <a class="skip-link" href="#main-content">Skip to content</a>
 <main class="page" id="main-content">
   <nav class="topnav">
-    <div class="brand"><a class="brand-link" href="/"><span class="dot"></span><span>${e(SITE_NAME)}</span></a></div>
+    <div class="brand"><a class="brand-link" href="/"><span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span>${e(SITE_NAME)}</span></a></div>
     <div class="topnav-end">
       <a class="topnav-link" href="/blog/">blog</a>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">

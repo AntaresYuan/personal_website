@@ -255,15 +255,21 @@ button:focus-visible,
   color: var(--color-text);
   letter-spacing: var(--tracking-tight);
 }
+/* The brand mark — a crescent moon (celestial, like the name / "a star to ship
+   by"). It's an inline <svg> so colour comes from a token and it's trivial to
+   make phase-aware later; the glow follows the shape via drop-shadow. Moon
+   glyph adapted from Feather Icons (feathericons.com, MIT). */
 .topnav .brand .dot {
-  display: inline-block;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--color-yellow);
-  box-shadow: 0 0 0 4px var(--color-yellow-glow);
-  margin-right: var(--sp-10);
-  vertical-align: 1px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 15px; height: 15px;
+  margin-right: var(--sp-8);
+  vertical-align: -2px;
+  color: var(--color-yellow);
+  filter: drop-shadow(0 0 4px var(--color-yellow-glow));
+  transition: filter var(--dur-quick);
 }
+.topnav .brand .dot svg { display: block; width: 100%; height: 100%; }
 .topnav .meta { color: var(--color-text-faint); font-size: var(--fs-12); }
 .topnav-end { display: flex; align-items: center; gap: var(--sp-12); }
 /* Theme toggle — cycles auto → light → dark; the visible glyph (◐ ☀ ☾) is
@@ -1071,7 +1077,7 @@ body.ask-panel-open { overflow: hidden; }
 }
 .topnav-link:hover { color: var(--color-text); }
 .brand-link { color: inherit; text-decoration: none; }
-.brand-link:hover .dot { box-shadow: 0 0 0 5px var(--color-yellow-glow); }
+.brand-link:hover .dot { filter: drop-shadow(0 0 8px var(--color-yellow-glow)) brightness(1.12); }
 
 /* ── reading progress bar (post pages only) ───────────────────────────── */
 .blog-progress { display: none; }
