@@ -6,9 +6,12 @@ name: Rebuild artifacts
 # sitemap.xml, agent-brief.txt) so they stay in sync, then commits them
 # back to main.
 #
-# Loop safety: the bot commit only touches artifacts, never content/**,
-# scripts/** or styles/**, so it cannot re-trigger this workflow via the
-# paths filter. `[skip ci]` in the message is a belt-and-suspenders 2nd guard.
+# Loop safety: the bot commit only touches artifacts (index.html, blog/,
+# llms*.txt, sitemap.xml, agent-brief.txt) — never content/**, scripts/** or
+# styles/** — so the paths filter below stops it re-triggering this workflow.
+# (Do NOT put `[skip ci]` in the bot commit message: Cloudflare Pages honours
+# `[skip ci]` too and would skip *deploying* the rebuilt artifacts, leaving the
+# live site a rebuild behind every CMS edit.)
 #
 # styles/** is in the filter because index.html embeds a content-hash of
 # styles/main.css as a `?v=` cache-bust — a CSS-only edit must rebuild so the
@@ -54,5 +57,5 @@ jobs:
             exit 0
           fi
           git add -A
-          git commit -m "chore: rebuild artifacts from content [skip ci]"
+          git commit -m "chore: rebuild artifacts from content"
           git push origin HEAD:main
