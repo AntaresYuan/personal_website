@@ -116,6 +116,9 @@
     zongzi:      '<path fill="currentColor" d="M12 2.5 21.5 21H2.5L12 2.5Z"/>',
     leaf:        '<path fill="currentColor" d="M4 20C2 14 4 6 13 3c8 3 8 14-1 18-3 1.4-6 .5-8-1Z"/>',
     mooncake:    '<circle fill="currentColor" cx="12" cy="12" r="9.2"/>',
+    flag:        '<rect fill="currentColor" x="4.5" y="2" width="2.1" height="20" rx="1"/><path fill="currentColor" d="M6.6 3H18.5q-2.4 2.6 0 5.2T6.6 13.4V3Z"/>',
+    wrench:      '<path fill="currentColor" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9l-3.8 3.8Z"/>',
+    kite:        '<path fill="currentColor" d="M12 1.5 19 8.5 12 15.5 5 8.5 12 1.5Z"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" d="M12 15.5c-.6 1.6-2.2 2.2-2.7 4M12 15.5c.6 1.4 2.1 1.9 2.6 3.4"/>',
   };
 
   function applyOccasion(occ) {
