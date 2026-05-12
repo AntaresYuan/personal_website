@@ -133,6 +133,17 @@ write('content/contact.json', {
 
 write('content/agent-brief.json', { notes: [] });
 
+write('content/doodles.json', {
+  // The brand "moon" mark becomes one of these on the matching day; otherwise
+  // it shows tonight's lunar phase. Edit in /admin/ → Doodles. (Add your
+  // birthday with `on: "MM-DD"`, etc.)
+  doodles: [
+    { name: 'New Year’s Day', on: '01-01', emoji: '🎆', caption: 'Happy new year' },
+    { name: 'Halloween', on: '10-31', emoji: '🎃', caption: 'Happy Halloween' },
+    { name: 'Christmas', on: '12-25', emoji: '🎄', caption: 'Merry Christmas' },
+  ],
+});
+
 /* ── blog: clear posts, leave one example ─────────────────────────────── */
 const blogDir = path.join(root, 'content', 'blog');
 fs.mkdirSync(blogDir, { recursive: true });
