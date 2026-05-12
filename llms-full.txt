@@ -34,7 +34,15 @@ Replace this with the longer story. Two or three short paragraphs is plenty.
 
 What happened. What you'd do differently.
 
-## SHIP-02 · SHIPPED · Claude Credit Watchdog
+## SHIP-02 · SHIPPED · Gmail Plus Plus
+Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
+Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
+Updated: 2026-04-25
+Links:
+  - Try it: https://gmailplusplus.site
+  - GitHub: https://github.com/AntaresYuan/Gmailplusplus
+
+## SHIP-03 · SHIPPED · Claude Credit Watchdog
 A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
 Impact: saved me 10 hrs+ of sleep
 Tags: SIDE PROJECT, tool-use, AI PM, AI Native, Productivity
@@ -43,7 +51,7 @@ Links:
   - Download: https://claude-credit-watchdog.vercel.app
   - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
 
-## SHIP-03 · SHIPPED · SusBench
+## SHIP-04 · SHIPPED · SusBench
 Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.
 Impact: cited by 2 papers
 Tags: RESEARCH PROJECT, HCI, IUI 2025
@@ -62,18 +70,15 @@ Links:
   - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
   - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
 
-## NOW-02 · NOW · Gmail Plus Plus
-Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
-Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
-Updated: 2026-04-25
-Links:
-  - Try it: https://gmailplusplus.site
-  - GitHub: https://github.com/AntaresYuan/Gmailplusplus
-
-## NOW-03 · NOW · ApplyMint
+## NOW-02 · NOW · ApplyMint
 ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form
 Tags: SIDE PROJECT, Job Application, Chrome Extension
 Updated: 2026-05-09
+
+## NOW-03 · NOW · now-3
+Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
+Tags: RESEARCH PROJECT
+Updated: 2026-05-12
 # Next
 
 ## NEXT-01 · NEXT · From PM to Builder
