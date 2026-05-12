@@ -1,0 +1,38 @@
+name: Cross-post to dev.to
+
+# When a blog post lands on main, mirror new posts to DEV (dev.to) with
+# canonical_url pointing back to this site — the original keeps the SEO.
+# Stateless: scripts/sync-devto.js checks dev.to's API by canonical_url, so
+# re-runs are safe. No-op (exits 0) until the DEVTO_API_KEY secret is set, so
+# this workflow is harmless before then.
+#
+# Posts are created as DRAFTS on dev.to by default — review + publish there.
+# Set a repo variable DEVTO_PUBLISH=true to publish immediately instead.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-devto
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cross-post new blog posts to dev.to
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          DEVTO_PUBLISH: ${{ vars.DEVTO_PUBLISH }}
+        run: node scripts/sync-devto.js

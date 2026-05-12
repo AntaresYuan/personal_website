@@ -32,6 +32,8 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── build-agent-brief.js← build:   regen /agent-brief.txt from agent-brief.json
 │   ├── last-updated.js     ← build:   resolves the "last updated" date
 │   ├── build.js            ← build:   runs all the build-* steps
+│   ├── sync-devto.js       ← CI:      cross-post new posts to dev.to (canonical → home)
+│   ├── scaffold-reset.js   ← `npm run reset-content` — wipe personal content for a fork
 │   └── install-hooks.sh    ← installs the pre-commit hook (run once)
 ├── admin/
 │   ├── index.html          ← Sveltia CMS bootstrap (Decap kept as a vendored fallback)
@@ -101,8 +103,9 @@ Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date
 
 The blog is the canonical home for what you write — so syndicate *out*, don't pull *in*:
 
-- **Medium**: paste a published post's URL (`https://yoursite/blog/<slug>/`) into Medium's [Import tool](https://medium.com/p/import). It creates a draft with `rel=canonical` pointing back to your post and backdates it; review and publish. (Medium closed its write API to new integrations in Jan 2025 — there's no reliable auto-push. Medium can also watch `/blog/feed.xml` and drop new posts into your Drafts.)
-- **dev.to / Hashnode**: both have working APIs with a `canonical_url` field — a GitHub Action could auto-cross-post on publish. Not wired up yet ([issue #124](https://github.com/AntaresYuan/personal_website/issues/124)).
+- **dev.to** — wired up. Add a repo **secret `DEVTO_API_KEY`** (DEV → Settings → Extensions → DEV API Keys); then `.github/workflows/sync-devto.yml` mirrors new posts to dev.to on every push to `main`, with `canonical_url` pointing back to your post. Created as **drafts** by default (review + publish on dev.to); set a repo variable `DEVTO_PUBLISH=true` to publish immediately. Stateless — `scripts/sync-devto.js` checks dev.to's API by `canonical_url`, so re-runs are safe; no-op until the secret is set.
+- **Medium** — manual (Medium closed its write API to new integrations in Jan 2025). Paste a published post's URL (`https://yoursite/blog/<slug>/`) into Medium's [Import tool](https://medium.com/p/import): it creates a draft with `rel=canonical` → your post, backdated. (Medium can also watch `/blog/feed.xml` and drop new posts into your Drafts.)
+- **Hashnode** — not wired up; its GraphQL API has an `originalArticleURL` field, so the same pattern works ([issue #124](https://github.com/AntaresYuan/personal_website/issues/124)).
 
 Pulling Medium → site would be backwards: it canonicalizes those posts to Medium (so Medium, not you, gets the SEO) and drags in Medium's HTML + paywall stubs. Keep one source of truth.
 
