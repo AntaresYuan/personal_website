@@ -123,6 +123,11 @@ Currently open to: founder conversations in AI infra & agents, AI PM roles at to
 
 # Writing
 
+## Make your personal site agent-answerable
+Published: 2026-05-12
+Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.
+URL: /blog/agent-answerable-site/
+
 ## Hello — this is the blog
 Published: 2026-05-12
 A place for writeups: how this site is built, what I'm learning, the occasional teardown.

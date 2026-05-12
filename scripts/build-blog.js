@@ -20,12 +20,23 @@ const { loadPosts, mdToHtml, escapeHtml } = require('./lib/blog');
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 const site = read('content/site.json');
+const profile = read('content/profile.json');
 
 const e = escapeHtml;   // text & attribute escaping
 const SITE_NAME = site.meta?.siteName ?? site.meta?.title ?? 'Personal site';
 const LANG = site.meta?.lang ?? 'en';
 const SITE_URL = (site.meta?.url ?? 'https://example.com').replace(/\/$/, '');
+const abs = (p) => p ? `/${String(p).replace(/^\/+/, '')}` : '';   // root-absolute URL (blog pages aren't at the root)
+const AUTHOR = [profile.name, profile.nameAccent].filter(Boolean).join(' ') || SITE_NAME;
+const AVATAR = abs(profile.avatar?.calm || 'media/avatar-calm.png');
+const OG_IMAGE = site.meta?.ogImage ? `${SITE_URL}${abs(site.meta.ogImage)}` : '';
 const cssV = crypto.createHash('sha1').update(fs.readFileSync(path.join(root, 'styles/main.css'))).digest('hex').slice(0, 8);
+
+// rough reading time, ~200 wpm — strip Markdown punctuation first.
+const readMinutes = (md) => {
+  const words = String(md).replace(/```[\s\S]*?```/g, ' ').replace(/[#>*_`~\-\[\]()!|]/g, ' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+};
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap';
 
@@ -40,25 +51,40 @@ const THEME_INIT = `<script>
   })();
 </script>`;
 
-// Theme toggle interaction: auto → light → dark → auto. Kept tiny + inline so
-// blog pages don't pull in the dashboard's render.js.
-const THEME_TOGGLE_JS = `<script>
+// The blog pages' only JS — kept tiny + inline so they don't pull in the
+// dashboard's render.js: the theme toggle (auto → light → dark → auto) and the
+// reading-progress bar (post pages only).
+const BLOG_JS = `<script>
 (function () {
-  var d = document.documentElement, btn = document.getElementById('theme-toggle'); if (!btn) return;
-  var mq = window.matchMedia('(prefers-color-scheme: dark)');
-  function apply(mode) {
-    d.setAttribute('data-theme-mode', mode);
-    d.setAttribute('data-theme', mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode);
-    var gi = document.querySelector('iframe.giscus-frame');
-    if (gi) { try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: d.getAttribute('data-theme') } } }, 'https://giscus.app'); } catch (e) {} }
+  // ── theme toggle: auto → light → dark → auto ─────────────────────────
+  var d = document.documentElement, btn = document.getElementById('theme-toggle');
+  if (btn) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var apply = function (mode) {
+      d.setAttribute('data-theme-mode', mode);
+      d.setAttribute('data-theme', mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode);
+      var gi = document.querySelector('iframe.giscus-frame');
+      if (gi) { try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: d.getAttribute('data-theme') } } }, 'https://giscus.app'); } catch (e) {} }
+    };
+    btn.addEventListener('click', function () {
+      var cur = d.getAttribute('data-theme-mode') || 'auto';
+      var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+      try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
+      apply(next);
+    });
+    mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
   }
-  btn.addEventListener('click', function () {
-    var cur = d.getAttribute('data-theme-mode') || 'auto';
-    var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
-    try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
-    apply(next);
-  });
-  mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
+  // ── reading progress bar (post pages only) ───────────────────────────
+  var bar = document.querySelector('.blog-progress-bar');
+  if (bar && document.body.classList.contains('blog-post-page')) {
+    var update = function () {
+      var h = document.documentElement, max = (h.scrollHeight - h.clientHeight) || 1;
+      bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (h.scrollTop || window.pageYOffset) / max)) + ')';
+    };
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+  }
 })();
 </script>`;
 
@@ -106,10 +132,10 @@ function pageShell({ title, description, canonical, ogType, bodyClass, main }) {
 <meta property="og:url" content="${e(canonical)}">
 <meta property="og:site_name" content="${e(SITE_NAME)}">
 <meta property="og:title" content="${e(title)}">
-<meta property="og:description" content="${e(desc)}">
-<meta name="twitter:card" content="summary">
+<meta property="og:description" content="${e(desc)}">${OG_IMAGE ? `\n<meta property="og:image" content="${e(OG_IMAGE)}">` : ''}
+<meta name="twitter:card" content="${OG_IMAGE ? 'summary_large_image' : 'summary'}">
 <meta name="twitter:title" content="${e(title)}">
-<meta name="twitter:description" content="${e(desc)}">
+<meta name="twitter:description" content="${e(desc)}">${OG_IMAGE ? `\n<meta name="twitter:image" content="${e(OG_IMAGE)}">` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}" media="print" onload="this.media='all'">
@@ -118,6 +144,7 @@ ${THEME_INIT}
 <link rel="stylesheet" href="/styles/main.css?v=${cssV}">
 </head>
 <body class="${e(bodyClass)}">
+<div class="blog-progress" aria-hidden="true"><span class="blog-progress-bar"></span></div>
 <a class="skip-link" href="#main-content">Skip to content</a>
 <main class="page" id="main-content">
   <nav class="topnav">
@@ -137,31 +164,33 @@ ${main}
     <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/admin/">edit</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
   </footer>
 </main>
-${THEME_TOGGLE_JS}
+${BLOG_JS}
 </body>
 </html>
 `;
 }
 
 /* ── render ───────────────────────────────────────────────────────────── */
-const posts = loadPosts();
+const posts = loadPosts().map((p) => ({ ...p, readMin: readMinutes(p.body) }));
 
-// /blog/  — index
+const byline = (p, big) => `<div class="blog-byline${big ? ' blog-byline-lg' : ''}">
+        <img class="blog-byline-avatar" src="${e(AVATAR)}" alt="${e(AUTHOR)}" width="${big ? 40 : 24}" height="${big ? 40 : 24}" loading="lazy">
+        <span class="blog-byline-text"><span class="blog-byline-name">${e(AUTHOR)}</span><span class="blog-byline-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</span></span>
+      </div>`;
+
+// /blog/  — index ("publication" masthead + a roomy card per post)
 const indexMain = `  <section class="section blog-index">
-    <header class="sec-head">
-      <span class="sec-cmd">$ /blog</span>
-      <span class="sec-title">writing</span>
-      <span class="sec-meta">${posts.length} post${posts.length === 1 ? '' : 's'}</span>
+    <header class="blog-index-head">
+      <h1 class="blog-index-title">Writing</h1>
+      <p class="blog-index-sub">Writeups, teardowns, and notes from building — by ${e(AUTHOR)}.</p>
     </header>
     ${posts.length
     ? `<ul class="blog-list">
 ${posts.map((p) => `      <li class="blog-list-item">
         <a class="blog-list-link" href="/blog/${e(p.slug)}/">
-          <span class="blog-list-date">${e(p.date)}</span>
-          <span class="blog-list-text">
-            <span class="blog-list-title">${e(p.title)}</span>
-            ${p.summary ? `<span class="blog-list-summary">${e(p.summary)}</span>` : ''}
-          </span>
+          <h2 class="blog-list-title">${e(p.title)}</h2>
+          ${p.summary ? `<p class="blog-list-summary">${e(p.summary)}</p>` : ''}
+          <p class="blog-list-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</p>
         </a>
       </li>`).join('\n')}
     </ul>`
@@ -171,22 +200,23 @@ ${posts.map((p) => `      <li class="blog-list-item">
 fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
 fs.writeFileSync(path.join(root, 'blog', 'index.html'), pageShell({
   title: 'Writing',
-  description: `Writing by ${SITE_NAME}.`,
+  description: `Writeups and notes from building — by ${AUTHOR}.`,
   canonical: `${SITE_URL}/blog/`,
   ogType: 'website',
   bodyClass: 'blog-page blog-index-page',
   main: indexMain,
 }));
 
-// /blog/<slug>/  — one page per post
+// /blog/<slug>/  — one page per post (Medium-ish: big title, byline w/ avatar
+// + read time, progress bar, serif reading column, then comments)
 let postPages = 0;
 for (const p of posts) {
   const main = `  <article class="section blog-post">
     <p class="blog-post-back"><a href="/blog/">← all writing</a></p>
     <header class="blog-post-head">
-      ${p.date ? `<p class="blog-post-date">${e(p.date)}</p>` : ''}
       <h1 class="blog-post-title">${e(p.title)}</h1>
       ${p.summary ? `<p class="blog-post-lead">${e(p.summary)}</p>` : ''}
+      ${byline(p, true)}
     </header>
     <div class="blog-post-body prose">
 ${mdToHtml(p.body)}
