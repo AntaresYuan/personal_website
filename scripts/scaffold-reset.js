@@ -136,11 +136,12 @@ write('content/agent-brief.json', { notes: [] });
 write('content/doodles.json', {
   // The brand "moon" mark becomes one of these on the matching day; otherwise
   // it shows tonight's lunar phase. Edit in /admin/ → Doodles. (Add your
-  // birthday with `on: "MM-DD"`, etc.)
+  // birthday with `on: "MM-DD"`, etc. `icon` is a glyph name — see GLYPHS in
+  // scripts/doodle.js — or an emoji as a fallback.)
   doodles: [
-    { name: 'New Year’s Day', on: '01-01', emoji: '🎆', caption: 'Happy new year' },
-    { name: 'Halloween', on: '10-31', emoji: '🎃', caption: 'Happy Halloween' },
-    { name: 'Christmas', on: '12-25', emoji: '🎄', caption: 'Merry Christmas' },
+    { name: 'New Year’s Day', on: '01-01', icon: 'firework', caption: 'Happy new year' },
+    { name: 'Halloween', on: '10-31', icon: 'pumpkin', caption: 'Happy Halloween' },
+    { name: 'Christmas', on: '12-25', icon: 'tree', caption: 'Merry Christmas' },
   ],
 });
 
