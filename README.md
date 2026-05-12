@@ -17,12 +17,14 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── lens.json           ← short-form principles
 │   ├── contact.json        ← email + socials + "open to" line
 │   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
+│   ├── doodles.json        ← special-day "doodles" — the moon mark becomes an emoji
 │   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/draft + Markdown body)
 ├── styles/main.css         ← design tokens + dashboard styles
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates the page for interactive use
 │   ├── terminal.js         ← runtime: embedded Agent Terminal
 │   ├── palette.js          ← runtime: ⌘K command palette
+│   ├── doodle.js           ← runtime: the brand mark = tonight's moon phase (or a doodle)
 │   ├── qa-faq.js           ← runtime: shared FAQ + retrieval (palette + "ask")
 │   ├── lib/blog.js         ← shared: load + render content/blog/*.md (frontmatter + Markdown)
 │   ├── build-html.js       ← build:   pre-renders content into index.html
@@ -83,7 +85,7 @@ This adds a `pre-commit` hook that detects changes to `content/*.json`, runs `bu
 This repo is a GitHub **template** — hit **"Use this template"** at the top of [the repo page](https://github.com/AntaresYuan/personal_website) to get your own copy (a clean repo — no fork link, no commit history). Then:
 
 1. **Wipe my content** — `npm run reset-content`. Swaps `content/*.json` and `content/blog/*.md` for placeholders, clears the tokens in `content/site.json`, and prints the rest of the checklist. (Touches no code, styles, CMS config, or Workers. From the original repo it refuses unless you pass `--force` — a guard so it can't nuke the live site by accident.)
-2. **Make it yours** — edit `content/*.json` (directly or, once deployed, via `/admin/`): `site.json` (title, URL, footer), `profile.json` (name, slogan, tags, CTAs, résumé links), `board.json` (your projects), `lens.json`, `contact.json`. Replace `media/avatar-calm.png` / `avatar-talking.png` with your own images. Edit the FAQ array in `scripts/qa-faq.js` (the answers behind ⌘K and the "ask" bar). Write posts in `content/blog/*.md` (or `/admin/` → **Blog**).
+2. **Make it yours** — edit `content/*.json` (directly or, once deployed, via `/admin/`): `site.json` (title, URL, footer), `profile.json` (name, slogan, tags, CTAs, résumé links), `board.json` (your projects), `lens.json`, `contact.json`, `doodles.json` (special-day doodles — your birthday, holidays…). Replace `media/avatar-calm.png` / `avatar-talking.png` with your own images. Edit the FAQ array in `scripts/qa-faq.js` (the answers behind ⌘K and the "ask" bar). Write posts in `content/blog/*.md` (or `/admin/` → **Blog**).
 3. **Deploy** — point **Cloudflare Pages** at your repo, output directory `/`. Build command is optional: the artifacts are committed, so "no build command" works; or set it to `node scripts/build.js`. Two optional Workers (each deploys itself — see the README in its folder): `workers/decap-oauth/` makes `/admin/` sign-in work, `workers/qa/` powers the "ask" assistant (put its URL in `site.json → qa.workerUrl`). Both degrade gracefully if you skip them.
 4. **Keep artifacts in sync** — `npm run build` then commit; or install the pre-commit hook ([above](#dont-want-to-remember-install-the-hook-one-time)); or let the bundled GitHub Action (`.github/workflows/build.yml`) rebuild on push.
 

@@ -255,10 +255,12 @@ button:focus-visible,
   color: var(--color-text);
   letter-spacing: var(--tracking-tight);
 }
-/* The brand mark — a crescent moon (celestial, like the name / "a star to ship
-   by"). It's an inline <svg> so colour comes from a token and it's trivial to
-   make phase-aware later; the glow follows the shape via drop-shadow. Moon
-   glyph adapted from Feather Icons (feathericons.com, MIT). */
+/* The brand mark — a "doodle": a crescent moon by default (celestial, like the
+   name / "a star to ship by"), which scripts/doodle.js turns into tonight's
+   actual lunar phase, or a special-day emoji on holidays / a birthday / a
+   project ship-iversary. It's an inline <svg> so colour comes from a token and
+   the glow follows the shape via drop-shadow. Moon glyph (the no-JS default)
+   adapted from Feather Icons (feathericons.com, MIT). */
 .topnav .brand .dot {
   display: inline-flex;
   align-items: center; justify-content: center;
@@ -270,6 +272,8 @@ button:focus-visible,
   transition: filter var(--dur-quick);
 }
 .topnav .brand .dot svg { display: block; width: 100%; height: 100%; }
+/* on a special day the mark is an emoji (set by doodle.js) — no yellow glow */
+.topnav .brand .dot.doodle-on { filter: none; font-size: 13px; line-height: 1; }
 .topnav .meta { color: var(--color-text-faint); font-size: var(--fs-12); }
 .topnav-end { display: flex; align-items: center; gap: var(--sp-12); }
 /* Theme toggle — cycles auto → light → dark; the visible glyph (◐ ☀ ☾) is
