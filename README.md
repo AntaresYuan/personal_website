@@ -74,6 +74,17 @@ This adds a `pre-commit` hook that detects changes to `content/*.json`, runs `bu
 
 > Note: committing the artifacts is a "stay simple now" choice — see [Switching to deploy-time builds](#switching-to-deploy-time-builds-when-ready) below. Once the build runs on the host, the artifacts won't need to live in git.
 
+## Use this as a template
+
+This repo is a GitHub **template** — hit **"Use this template"** at the top of [the repo page](https://github.com/AntaresYuan/personal_website) to get your own copy (a clean repo — no fork link, no commit history). Then:
+
+1. **Wipe my content** — `npm run reset-content`. Swaps `content/*.json` and `content/blog/*.md` for placeholders, clears the tokens in `content/site.json`, and prints the rest of the checklist. (Touches no code, styles, CMS config, or Workers. From the original repo it refuses unless you pass `--force` — a guard so it can't nuke the live site by accident.)
+2. **Make it yours** — edit `content/*.json` (directly or, once deployed, via `/admin/`): `site.json` (title, URL, footer), `profile.json` (name, slogan, tags, CTAs, résumé links), `board.json` (your projects), `lens.json`, `contact.json`. Replace `media/avatar-calm.png` / `avatar-talking.png` with your own images. Edit the FAQ array in `scripts/qa-faq.js` (the answers behind ⌘K and the "ask" bar). Write posts in `content/blog/*.md` (or `/admin/` → **Blog**).
+3. **Deploy** — point **Cloudflare Pages** at your repo, output directory `/`. Build command is optional: the artifacts are committed, so "no build command" works; or set it to `node scripts/build.js`. Two optional Workers (each deploys itself — see the README in its folder): `workers/decap-oauth/` makes `/admin/` sign-in work, `workers/qa/` powers the "ask" assistant (put its URL in `site.json → qa.workerUrl`). Both degrade gracefully if you skip them.
+4. **Keep artifacts in sync** — `npm run build` then commit; or install the pre-commit hook ([above](#dont-want-to-remember-install-the-hook-one-time)); or let the bundled GitHub Action (`.github/workflows/build.yml`) rebuild on push.
+
+The **code** is MIT; the personal **content** (my bio, the project write-ups, the images) isn't part of that grant — that's what `reset-content` clears. See [License & attribution](#license--attribution). Built something on it? A link back is appreciated, and there's an [In the wild](#built-on-this) list you can PR yourself into.
+
 ## Resume in your terminal
 
 ```bash
