@@ -19,10 +19,10 @@ hallucinates. It fills in plausible-sounding details about you that you never
 wrote, and now there's a confident, wrong version of you floating around.
 
 This site is built the other way. Not "I bolted on a chatbot" — that's the
-shallow version. The deeper version is: \*\*the content exists in a form a
+shallow version. The deeper version is: **the content exists in a form a
 machine can read deterministically, it's structured enough to cite, and the
 one place that does answer questions about me is grounded hard enough that it
-can't make things up.\*\* Here's what that looks like, surface by surface.
+can't make things up.** Here's what that looks like, surface by surface.
 
 ## 1. `/llms.txt` and `/llms-full.txt`
 
