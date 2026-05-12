@@ -121,6 +121,13 @@ Currently open to: founder conversations in AI infra & agents, AI PM roles at to
 - linkedin: Chenjie (Antares) Yuan (#)
 - github: @AntaresYuan (https://github.com/AntaresYuan)
 
+# Writing
+
+## Hello — this is the blog
+Published: 2026-05-12
+A place for writeups: how this site is built, what I'm learning, the occasional teardown.
+URL: /blog/welcome/
+
 ---
 Generated 2026-05-12 from content/*.json. Last site update: 2026-05-12
 

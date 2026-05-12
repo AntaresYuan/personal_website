@@ -7,6 +7,7 @@
    Run:  node scripts/build.js
    ════════════════════════════════════════════════════════════════════════ */
 require('./build-html');
+require('./build-blog');
 require('./build-llms');
 require('./build-sitemap');
 require('./build-agent-brief');

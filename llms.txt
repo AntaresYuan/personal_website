@@ -15,11 +15,12 @@ A star to ship by.
 - [Roadmap board](/#shipped): four-column kanban — shipped, now, next, later
 - [Agent terminal](/#terminal): interactive CLI — same data as the board
 - [Lens](/#lens): how I think
+- [Writing](/blog/): longer-form posts (writeups, teardowns, notes)
 - [Contact](/#contact): how to reach me
-- [Full content](/llms-full.txt): every card + lens entry + contact, plain text
+- [Full content](/llms-full.txt): every card + lens entry + contact + post list, plain text
 
 ## Edit
-This site is content-managed via Decap CMS at /admin/. Source: github.com/AntaresYuan/personal_website
+This site is content-managed via Sveltia CMS at /admin/. Source: github.com/AntaresYuan/personal_website
 
 
 ---

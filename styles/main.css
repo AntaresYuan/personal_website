@@ -60,6 +60,7 @@
   --fs-13:      13px;
   --fs-14:      14px;
   --fs-15:      15px;
+  --fs-16:      16px;
   --fs-17:      17px;
   --fs-19:      19px;
   --fs-22:      22px;
@@ -1050,6 +1051,158 @@ body.ask-panel-open { overflow: hidden; }
 .spec-card-links { display: flex; flex-wrap: wrap; gap: var(--sp-6) var(--sp-16); }
 .spec-card-links a { color: var(--color-blue); font-size: var(--fs-13); white-space: nowrap; }
 .spec-card-links a:hover { color: var(--color-blue-deep); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   BLOG  —  /blog/ index + /blog/<slug>/ post pages
+   Standalone pages built by scripts/build-blog.js (from content/blog/*.md).
+   They reuse this stylesheet + the topnav/footer chrome but ship no
+   dashboard JS. .prose is the long-form typography (also reusable elsewhere).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* topnav: a text link (the blog) + the brand becomes a link on these pages */
+.topnav-link {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-dim);
+  text-decoration: none;
+}
+.topnav-link:hover { color: var(--color-text); }
+.brand-link { color: inherit; text-decoration: none; }
+.brand-link:hover .dot { box-shadow: 0 0 0 5px var(--color-yellow-glow); }
+
+/* ── /blog/ index ─────────────────────────────────────────────────────── */
+.blog-index { max-width: var(--w-prose); margin: 0 auto; }
+.blog-list { list-style: none; }
+.blog-list-item { border-bottom: var(--bw) solid var(--color-line-soft); }
+.blog-list-item:first-child { border-top: var(--bw) solid var(--color-line-soft); }
+.blog-list-link {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-16);
+  padding: var(--sp-20) var(--sp-4);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--dur-quick);
+}
+.blog-list-link:hover { background: var(--color-bg-soft); }
+.blog-list-date {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+  padding-top: 3px;
+}
+.blog-list-text { display: flex; flex-direction: column; gap: var(--sp-4); }
+.blog-list-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-19);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  line-height: var(--lh-snug);
+}
+.blog-list-link:hover .blog-list-title { color: var(--color-blue); }
+.blog-list-summary { color: var(--color-text-dim); font-size: var(--fs-14); line-height: var(--lh-base); }
+.blog-empty {
+  padding: var(--sp-32) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--color-text-faint);
+}
+
+/* ── /blog/<slug>/ post ───────────────────────────────────────────────── */
+.blog-post { max-width: var(--w-prose); margin: 0 auto; }
+.blog-post-back {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  margin-bottom: var(--sp-24);
+}
+.blog-post-back a { color: var(--color-text-faint); text-decoration: none; }
+.blog-post-back a:hover { color: var(--color-blue); }
+.blog-post-head {
+  padding-bottom: var(--sp-24);
+  margin-bottom: var(--sp-32);
+  border-bottom: var(--bw) solid var(--color-line-soft);
+}
+.blog-post-date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-8);
+}
+.blog-post-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-28);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+}
+.blog-post-lead {
+  margin-top: var(--sp-12);
+  font-size: var(--fs-17);
+  line-height: var(--lh-base);
+  color: var(--color-text-dim);
+}
+.blog-post-rule { margin: var(--sp-48) 0 var(--sp-24); border: none; border-top: var(--bw) solid var(--color-line-soft); }
+.blog-comments { margin-top: var(--sp-8); }
+.blog-comments-off { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--color-text-faint); }
+
+/* ── .prose — long-form typography (blog post bodies, and reusable) ───── */
+.prose { color: var(--color-text); line-height: var(--lh-relaxed); font-size: var(--fs-16); }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose p { margin: 0 0 var(--sp-16); }
+.prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-serif);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+  color: var(--color-text);
+}
+.prose h2 { font-size: var(--fs-22); margin: var(--sp-40) 0 var(--sp-12); }
+.prose h3 { font-size: var(--fs-19); margin: var(--sp-32) 0 var(--sp-10); }
+.prose h4 { font-size: var(--fs-17); margin: var(--sp-24) 0 var(--sp-8); }
+.prose ul, .prose ol { margin: 0 0 var(--sp-16); padding-left: var(--sp-24); }
+.prose li { margin-bottom: var(--sp-6); }
+.prose li > ul, .prose li > ol { margin: var(--sp-6) 0 0; }
+.prose blockquote {
+  margin: 0 0 var(--sp-16);
+  padding: var(--sp-4) 0 var(--sp-4) var(--sp-20);
+  border-left: 3px solid var(--color-line);
+  color: var(--color-text-dim);
+}
+.prose blockquote p:last-child { margin-bottom: 0; }
+.prose a { color: var(--color-blue); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.prose a:hover { color: var(--color-blue-deep); }
+.prose strong { font-weight: var(--fw-semibold); color: var(--color-text); }
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-bg-soft);
+  padding: 1px var(--sp-4);
+  border-radius: 3px;
+}
+.prose pre {
+  margin: 0 0 var(--sp-16);
+  padding: var(--sp-16) var(--sp-20);
+  background: var(--color-bg-soft);
+  border: var(--bw) solid var(--color-line-soft);
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  font-size: var(--fs-13);
+  line-height: var(--lh-base);
+}
+.prose pre code { background: none; padding: 0; font-size: inherit; }
+.prose hr { margin: var(--sp-32) 0; border: none; border-top: var(--bw) solid var(--color-line-soft); }
+.prose img { max-width: 100%; height: auto; border-radius: var(--r-md); margin: var(--sp-8) 0 var(--sp-16); }
+
+@media (max-width: 600px) {
+  .blog-list-link { flex-direction: column; gap: var(--sp-4); }
+  .blog-list-date { flex-basis: auto; padding-top: 0; }
+  .blog-post-title { font-size: var(--fs-22); }
+}
 
 /* ── Timeline view ────────────────────────────────────────────────────
    Roadmap → Timeline is an interactive timeline rendered by the vendored
