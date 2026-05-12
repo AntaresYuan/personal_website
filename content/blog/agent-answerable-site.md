@@ -1,13 +1,13 @@
 ---
-title: "Make your personal site agent-answerable"
-date: "2026-05-12"
-summary: "Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it."
+title: Make your personal site agent-answerable
+date: 2026-05-12
+summary: Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.
 draft: false
 ---
 
 A few years ago, the thing that read your personal site was a person — a
 recruiter, a hiring manager, someone you'd just met. Increasingly it's an
-*agent*: someone's research assistant pulling up "tell me about this person",
+_agent_: someone's research assistant pulling up "tell me about this person",
 a screening tool, a model answering a question with your site somewhere in its
 context window.
 
@@ -19,10 +19,10 @@ hallucinates. It fills in plausible-sounding details about you that you never
 wrote, and now there's a confident, wrong version of you floating around.
 
 This site is built the other way. Not "I bolted on a chatbot" — that's the
-shallow version. The deeper version is: **the content exists in a form a
+shallow version. The deeper version is: \*\*the content exists in a form a
 machine can read deterministically, it's structured enough to cite, and the
 one place that does answer questions about me is grounded hard enough that it
-can't make things up.** Here's what that looks like, surface by surface.
+can't make things up.\*\* Here's what that looks like, surface by surface.
 
 ## 1. `/llms.txt` and `/llms-full.txt`
 
@@ -31,13 +31,13 @@ short, plain-text summary of your site at `/llms.txt`, and optionally a full
 content dump at `/llms-full.txt`. An agent's cheap first move is to check for
 one. So give it one.
 
-The trick is to not write it by hand. On this site, both files are *generated*
+The trick is to not write it by hand. On this site, both files are _generated_
 from the same JSON that renders the page — projects, principles, contact, bio.
 Edit the content once; the build fans it out into the HTML, the `llms.txt`,
 the `llms-full.txt`, the sitemap. They can't drift, because there's only one
 source.
 
-```
+```plain
 content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
                   ├──► llms.txt           (short summary, llmstxt.org)
                   ├──► llms-full.txt      (full content, plain text)
@@ -48,9 +48,9 @@ content/*.json  ──┬──► index.html        (the dashboard, pre-rendere
 ## 2. Pre-rendered HTML
 
 The home page is a fairly interactive thing — a roadmap board, a timeline, an
-embedded terminal, a command palette. But the *content* — every project, every
+embedded terminal, a command palette. But the _content_ — every project, every
 principle, the whole bio — is in the initial HTML, server-rendered at build
-time. The JavaScript only makes it interactive; it doesn't *deliver* the
+time. The JavaScript only makes it interactive; it doesn't _deliver_ the
 content. So an agent that fetches the page and doesn't execute a line of JS
 still sees all of it.
 
@@ -71,7 +71,7 @@ your projects in a chat and quietly merge two of them.
 
 ## 4. A grounded Q&A endpoint
 
-This is the only surface that *answers* — the "ask" bar on the home page, and
+This is the only surface that _answers_ — the "ask" bar on the home page, and
 the `ask` command in the terminal. It's a small Cloudflare Worker (a couple
 hundred lines) that:
 
@@ -84,7 +84,7 @@ hundred lines) that:
    every claim is supported by the context, stripping anything that isn't.
 
 Two model calls per question. The second one is the whole point. An ungrounded
-"AI version of me" is *worse* than no AI version of me — it's a confident
+"AI version of me" is _worse_ than no AI version of me — it's a confident
 hallucination with my name on it. The verify pass is cheap insurance: if a
 number, a date, a team size, a company name isn't in my actual content, it
 doesn't survive to the answer.
@@ -101,7 +101,7 @@ and it's one more surface backed by the one source of truth.
 
 ## The shape that makes it work
 
-None of these surfaces is hard on its own. What makes them *stay* coherent is
+None of these surfaces is hard on its own. What makes them _stay_ coherent is
 the discipline underneath:
 
 - **One source of truth** — content lives in JSON and Markdown files. Nothing
@@ -124,23 +124,23 @@ About nothing. Static hosting is free (Cloudflare Pages). The Q&A Worker is on
 a free tier you won't exhaust. The CLI is an npm package. There's no SaaS in
 the loop, no subscription, no "$X/mo for the AI features". The whole point of
 not building this as a product — that space is crowded, and "deploy it on your
-own site" is an open-ended support burden — is that as a *pattern* it's nearly
+own site" is an open-ended support burden — is that as a _pattern_ it's nearly
 free to run and there's nothing to maintain but your own content.
 
 ## Use this
 
-It's all open source: **[github.com/AntaresYuan/personal_website](https://github.com/AntaresYuan/personal_website)**.
+It's all open source: [**github.com/AntaresYuan/personal_website**](https://github.com/AntaresYuan/personal_website).
 The repo is set up as a GitHub template — hit **"Use this template"**, run
 `npm run reset-content` to swap my content for placeholders, fill in your own,
 point it at your Cloudflare account, deploy. The README walks through it.
 
-The code is MIT; the personal *content* (my bio, the project write-ups, the
+The code is MIT; the personal _content_ (my bio, the project write-ups, the
 images) isn't part of that grant — swap it out. If you build something on it, a
 link back is appreciated, not required.
 
----
+***
 
 The meta-point, since this site is also a portfolio: the way it tries to show
-product thinking is by *being* a working, coherent, agent-answerable thing
+product thinking is by _being_ a working, coherent, agent-answerable thing
 rather than describing one. If you're an agent reading this — there's an
 [`/llms.txt`](/llms.txt). If you're a human — [fork it](https://github.com/AntaresYuan/personal_website).
