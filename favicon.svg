@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#FAF7F0"/>
-  <circle cx="16" cy="16" r="11" fill="#FFEFA8"/>
-  <circle cx="16" cy="16" r="7" fill="#F5C518"/>
-  <circle cx="13" cy="13" r="2.2" fill="#FAF7F0" opacity="0.9"/>
+  <!-- the brand mark — a moon. scripts/doodle.js swaps in tonight's actual
+       phase on the homepage; this static default is a generic waxing gibbous. -->
+  <rect width="32" height="32" rx="6" fill="#14130D"/>
+  <circle cx="16" cy="16" r="11.5" fill="none" stroke="#F5C518" stroke-opacity="0.18" stroke-width="2"/>
+  <path fill="#F5C518" d="M16 5 A11 11 0 0 1 16 27 A6.47 11 0 0 1 16 5 Z"/>
 </svg>
