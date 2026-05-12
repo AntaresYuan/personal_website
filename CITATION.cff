@@ -1,0 +1,27 @@
+# This file lets GitHub show a "Cite this repository" button and gives
+# anyone who forks or builds on this project a ready-made citation.
+# Spec: https://citation-file-format.github.io
+cff-version: 1.2.0
+title: "personal_website — a PM-style portfolio dashboard"
+abstract: >-
+  A living, PM-style portfolio dashboard: a working roadmap of what its author
+  has shipped, is building, and plans next — with a command palette, an
+  embedded agent terminal, an in-browser CMS, and agent-readable exports.
+message: >-
+  If you use this project, or build on a fork of it, please cite it and keep a
+  visible link back to the original repository.
+type: software
+authors:
+  - given-names: Antares
+    family-names: Yuan
+    alias: AntaresYuan
+url: "https://github.com/AntaresYuan/personal_website"
+repository-code: "https://github.com/AntaresYuan/personal_website"
+license: MIT
+date-released: "2026-05-08"
+keywords:
+  - portfolio
+  - personal-website
+  - dashboard
+  - template
+  - product-management

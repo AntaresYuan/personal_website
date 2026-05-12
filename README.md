@@ -150,3 +150,24 @@ See [Issue #39](https://github.com/AntaresYuan/personal_website/issues/39) for t
 - **Palette:** warm yellow (`#F5C518`) primary, cobalt blue (`#2347D9`) accent, cream (`#FAF7F0`) background.
 - **Type:** Inter (body) · Fraunces (display) · JetBrains Mono (accent).
 - All tokens live in `styles/main.css` `:root`. Edit there to retheme globally.
+
+## License & attribution
+
+The **code** — build scripts, CSS/JS, the HTML template, the CMS config, the Workers — is [MIT](LICENSE). Fork it, change it, ship it (commercially or not). No permission needed.
+
+The **content** is not part of that grant. The text in `content/*.json` (bio, project write-ups, principles, the "open to" line), the images in `media/`, and any résumés are © Antares Yuan, all rights reserved — they're in the repo so the site runs, not as a licence to republish them as your own. **Swap them for your own content** when you fork.
+
+If you build something on this template, you're not *required* to credit it — but a visible link back is genuinely appreciated, and it does something concrete: it keeps the lineage clear, so as more people use it the **original doesn't get mistaken for the copy**. Two easy ways:
+
+- a line in your site footer or README pointing to <https://github.com/AntaresYuan/personal_website>, and/or
+- keep the `<meta name="generator">` tag and the short attribution comment that `scripts/build-html.js` bakes into `index.html` (they cost you nothing).
+
+This is the canonical source — **github.com/AntaresYuan/personal_website**, first published May 2026. There's a [`CITATION.cff`](CITATION.cff) if you want a formal citation (GitHub renders a "Cite this repository" button from it).
+
+### Built on this?
+
+If you ship something using this template, open a PR adding it here — happy to list it:
+
+<!-- in-the-wild:start -->
+- _(yours could be here)_
+<!-- in-the-wild:end -->

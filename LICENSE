@@ -1,0 +1,42 @@
+MIT License
+
+Copyright (c) 2026 Antares Yuan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+NOTE — what the MIT grant above does and does NOT cover:
+
+* It covers the CODE and structure of this project: the build scripts, the
+  CSS/JS, the HTML template, the CMS config, the Workers. Fork it, change it,
+  ship it — commercially or not.
+
+* It does NOT cover the personal CONTENT this repo happens to carry: the text
+  in content/*.json (bio, project write-ups, principles, the "open to" line),
+  the avatar and other images in media/, and any résumés. That material is
+  © Antares Yuan, all rights reserved — it's here so the site runs, not as a
+  grant for you to republish it as your own. Swap it for your own content.
+
+* Attribution: the MIT terms only ask that this notice survive in source. If
+  you build something on this template, a visible link back to
+  https://github.com/AntaresYuan/personal_website (a line in your footer or
+  your README) isn't required — but it's genuinely appreciated, and it keeps
+  the lineage clear so the original doesn't get mistaken for the copy. See the
+  "License & attribution" section of the README.
