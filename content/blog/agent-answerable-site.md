@@ -1,6 +1,6 @@
 ---
 title: "Make your personal site agent-answerable"
-date: 2026-05-12
+date: "2026-05-12"
 summary: "Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it."
 draft: false
 ---
