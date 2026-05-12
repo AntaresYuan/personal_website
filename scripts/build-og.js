@@ -72,30 +72,33 @@ const card = ({ title, footer }) => {
 </svg>`;
 };
 
+// Never throws — OG cards are a nicety; if anything goes sideways (a quirky
+// build env, a font/WASM hiccup), log and move on. The HTML then falls back to
+// the avatar OG image. This must not be able to fail `scripts/build.js`.
 module.exports = async function buildOg() {
-  if (!fs.existsSync(FONT_BOLD) || !fs.existsSync(FONT_REG)) {
-    console.log('  (skip OG cards — vendor/fonts/JetBrainsMono-*.ttf missing)');
-    return;
+  try {
+    if (!fs.existsSync(FONT_BOLD) || !fs.existsSync(FONT_REG)) {
+      console.log('  (skip OG cards — vendor/fonts/JetBrainsMono-*.ttf missing)');
+      return;
+    }
+    const wasmPath = path.join(path.dirname(require.resolve('@resvg/resvg-wasm')), 'index_bg.wasm');
+    try { await initWasm(fs.readFileSync(wasmPath)); } catch (e) { /* "already initialised" is fine; anything else → bail out below */ if (!/already/i.test(String(e && e.message))) throw e; }
+    const fontBuffers = [fs.readFileSync(FONT_BOLD), fs.readFileSync(FONT_REG)];
+    const opts = { font: { fontBuffers, loadSystemFonts: false, defaultFontFamily: 'JetBrains Mono' }, fitTo: { mode: 'original' } };
+    const renderPng = (svg, out) => {
+      const png = new Resvg(svg, opts).render().asPng();
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      fs.writeFileSync(out, png);
+    };
+
+    const posts = loadPosts();
+    fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
+    renderPng(card({ title: 'Writing', footer: `${SITE_HOST}/blog · ${SITE_NAME}` }), path.join(root, 'blog', 'og.png'));
+    for (const p of posts) {
+      renderPng(card({ title: p.title, footer: `${SITE_HOST}/blog/${p.slug}${p.date ? ' · ' + p.date : ''}` }), path.join(root, 'blog', p.slug, 'og.png'));
+    }
+    console.log(`✓ wrote blog/          (${posts.length + 1} OG card${posts.length === 0 ? '' : 's'})`);
+  } catch (e) {
+    console.log('  (skip OG cards — ' + ((e && e.message) || e) + ')');
   }
-  const wasmPath = path.join(path.dirname(require.resolve('@resvg/resvg-wasm')), 'index_bg.wasm');
-  try { await initWasm(fs.readFileSync(wasmPath)); } catch (e) { /* already initialised in this process */ if (!/already/i.test(String(e && e.message))) throw e; }
-  const fontBuffers = [fs.readFileSync(FONT_BOLD), fs.readFileSync(FONT_REG)];
-  const opts = { font: { fontBuffers, loadSystemFonts: false, defaultFontFamily: 'JetBrains Mono' }, fitTo: { mode: 'original' } };
-  const renderPng = (svg, out) => {
-    const png = new Resvg(svg, opts).render().asPng();
-    fs.mkdirSync(path.dirname(out), { recursive: true });
-    fs.writeFileSync(out, png);
-  };
-
-  const posts = loadPosts();
-  fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
-
-  // index card
-  renderPng(card({ title: 'Writing', footer: `${SITE_HOST}/blog · ${SITE_NAME}` }), path.join(root, 'blog', 'og.png'));
-
-  // one per post
-  for (const p of posts) {
-    renderPng(card({ title: p.title, footer: `${SITE_HOST}/blog/${p.slug}${p.date ? ' · ' + p.date : ''}` }), path.join(root, 'blog', p.slug, 'og.png'));
-  }
-  console.log(`✓ wrote blog/          (${posts.length + 1} OG card${posts.length === 0 ? '' : 's'})`);
 };
