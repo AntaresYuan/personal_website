@@ -9,14 +9,14 @@
 'use strict';
 (async () => {
   // OG share cards first — so build-blog can point each post's <og:image> at
-  // the PNG it produced. (Async, and a no-op if @resvg/resvg-wasm isn't
-  // installed — the rest of the build still runs.)
-  try { await require('./build-og')(); }
-  catch (e) { console.error('  (OG cards failed:', (e && e.message) || e, '— continuing)'); process.exitCode = 1; }
+  // the PNG it produced. Best-effort: it never throws, and even if it somehow
+  // did we swallow it — a missing OG card must NOT fail the build (this script
+  // is also a deploy build command, so a non-zero exit here breaks the site).
+  try { await require('./build-og')(); } catch (e) { console.log('  (OG cards skipped: ' + ((e && e.message) || e) + ')'); }
 
   require('./build-html');
   require('./build-blog');
   require('./build-llms');
   require('./build-sitemap');
   require('./build-agent-brief');
-})();
+})().catch((e) => { console.error('[build]', e); process.exitCode = 1; });
