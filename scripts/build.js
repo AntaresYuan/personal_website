@@ -6,8 +6,17 @@
 
    Run:  node scripts/build.js
    ════════════════════════════════════════════════════════════════════════ */
-require('./build-html');
-require('./build-blog');
-require('./build-llms');
-require('./build-sitemap');
-require('./build-agent-brief');
+'use strict';
+(async () => {
+  // OG share cards first — so build-blog can point each post's <og:image> at
+  // the PNG it produced. (Async, and a no-op if @resvg/resvg-wasm isn't
+  // installed — the rest of the build still runs.)
+  try { await require('./build-og')(); }
+  catch (e) { console.error('  (OG cards failed:', (e && e.message) || e, '— continuing)'); process.exitCode = 1; }
+
+  require('./build-html');
+  require('./build-blog');
+  require('./build-llms');
+  require('./build-sitemap');
+  require('./build-agent-brief');
+})();

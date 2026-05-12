@@ -255,20 +255,6 @@ rather than describing one. If you're an agent reading this — there's an
 /llms.txt. If you're a human — fork it.
 
 ---
-
-## Hello — this is the blog
-URL: /blog/welcome/
-Published: 2026-05-12
-Summary: print("Hello, World") This is a placeholder blog: how this site is built, what I'm learning, the occasional teardown.
-
-This is where the longer-form stuff lives — writeups, teardowns, notes from
-building. The dashboard on the home page is the what; this is the how and
-the why.
-
-First real post is on its way. In the meantime: the rest of the site is at the
-home page, and there's an /agents section if you're a machine.
-
----
 Generated 2026-05-12 from content/*.json. Last site update: 2026-05-12
 
 

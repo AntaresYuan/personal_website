@@ -115,8 +115,14 @@ const giscusBlock = giscusReady
   : '<p class="blog-comments-off">Comments aren’t configured for this site yet.</p>';
 
 /* ── page shell — shared head/topnav/footer ───────────────────────────── */
-function pageShell({ title, description, canonical, ogType, bodyClass, main }) {
+function pageShell({ title, description, canonical, ogType, bodyClass, main, ogImage }) {
   const desc = (description || site.meta?.description || '').replace(/\s+/g, ' ').trim();
+  const img = ogImage || OG_IMAGE;                 // a 1200×630 card if given, else the square avatar
+  const card = !!ogImage;                          // (build-blog passes the per-page card URL when its PNG exists)
+  const imgTags = img
+    ? `\n<meta property="og:image" content="${e(img)}">${card ? `\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="${e(title)}">` : ''}`
+    : '';
+  const twitterImg = img ? `\n<meta name="twitter:image" content="${e(img)}">` : '';
   return `<!DOCTYPE html>
 <!--
   Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
@@ -140,10 +146,10 @@ function pageShell({ title, description, canonical, ogType, bodyClass, main }) {
 <meta property="og:url" content="${e(canonical)}">
 <meta property="og:site_name" content="${e(SITE_NAME)}">
 <meta property="og:title" content="${e(title)}">
-<meta property="og:description" content="${e(desc)}">${OG_IMAGE ? `\n<meta property="og:image" content="${e(OG_IMAGE)}">` : ''}
-<meta name="twitter:card" content="${OG_IMAGE ? 'summary_large_image' : 'summary'}">
+<meta property="og:description" content="${e(desc)}">${imgTags}
+<meta name="twitter:card" content="${card ? 'summary_large_image' : 'summary'}">
 <meta name="twitter:title" content="${e(title)}">
-<meta name="twitter:description" content="${e(desc)}">${OG_IMAGE ? `\n<meta name="twitter:image" content="${e(OG_IMAGE)}">` : ''}
+<meta name="twitter:description" content="${e(desc)}">${twitterImg}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}" media="print" onload="this.media='all'">
@@ -210,12 +216,14 @@ fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
 // to index posts; small + cacheable.
 fs.writeFileSync(path.join(root, 'blog', 'posts.json'),
   JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date })), null, 2) + '\n');
+const ogCard = (rel) => fs.existsSync(path.join(root, rel)) ? `${SITE_URL}/${rel}` : undefined;
 fs.writeFileSync(path.join(root, 'blog', 'index.html'), pageShell({
   title: 'Writing',
   description: `Writeups and notes from building — by ${AUTHOR}.`,
   canonical: `${SITE_URL}/blog/`,
   ogType: 'website',
   bodyClass: 'blog-page blog-index-page',
+  ogImage: ogCard('blog/og.png'),
   main: indexMain,
 }));
 
@@ -246,6 +254,7 @@ ${mdToHtml(p.body)}
     canonical: `${SITE_URL}/blog/${p.slug}/`,
     ogType: 'article',
     bodyClass: 'blog-page blog-post-page',
+    ogImage: ogCard(`blog/${p.slug}/og.png`),
     main,
   }));
   postPages++;

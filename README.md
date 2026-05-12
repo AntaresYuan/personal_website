@@ -27,6 +27,7 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── lib/blog.js         ← shared: load + render content/blog/*.md (frontmatter + Markdown)
 │   ├── build-html.js       ← build:   pre-renders content into index.html
 │   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ from content/blog/*.md
+│   ├── build-og.js         ← build:   renders a 1200×630 social card (PNG) per post
 │   ├── build-llms.js       ← build:   regen /llms.txt + /llms-full.txt
 │   ├── build-sitemap.js    ← build:   regen /sitemap.xml
 │   ├── build-agent-brief.js← build:   regen /agent-brief.txt from agent-brief.json
@@ -42,7 +43,8 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── decap-oauth/        ← Cloudflare Worker: GitHub OAuth proxy for /admin/
 │   └── qa/                 ← Cloudflare Worker: the "ask" assistant (Workers AI)
 ├── cli/                    ← `npx antares-cv` — the terminal résumé
-├── vendor/                 ← vendored libs (Sveltia CMS, vis-timeline)
+├── vendor/                 ← vendored: Sveltia CMS, vis-timeline, fonts/ (JetBrains Mono TTFs for OG cards)
+├── package.json            ← `npm run build` / `reset-content`; one dep: @resvg/resvg-wasm (OG cards)
 ├── media/                  ← avatars + other static images
 └── favicon.svg
 
@@ -97,7 +99,7 @@ Single-file Node CLI in `cli/` that fetches `content/*.json` from the live site 
 
 ## Blog
 
-Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date`, `summary`, `draft`), then the body. Edit them in `/admin/` → **Blog**, or by hand. `scripts/build-blog.js` renders `/blog/` (the index), `/blog/<slug>/` (one page each — byline, reading-progress bar, giscus comments), and an RSS feed at **`/blog/feed.xml`**. Posts with `draft: true` are skipped.
+Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date`, `summary`, `draft`), then the body. Edit them in `/admin/` → **Blog**, or by hand. `scripts/build-blog.js` renders `/blog/` (the index), `/blog/<slug>/` (one page each — byline, reading-progress bar, giscus comments), and an RSS feed at **`/blog/feed.xml`**. Each post also gets a 1200×630 **social-share card** at `/blog/<slug>/og.png` (`scripts/build-og.js`, via `@resvg/resvg-wasm` + the vendored JetBrains Mono TTFs — `npm install` once; if the dep is missing the build skips the cards and falls back to the avatar OG image). Posts with `draft: true` are skipped everywhere.
 
 ### Syndicating to Medium / dev.to
 
