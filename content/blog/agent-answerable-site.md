@@ -2,10 +2,8 @@
 title: "Make your personal site agent-answerable"
 date: 2026-05-12
 summary: "Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it."
-draft: true
+draft: false
 ---
-
-> Draft — Claude wrote the first cut from the repo; I'm reworking the voice.
 
 A few years ago, the thing that read your personal site was a person — a
 recruiter, a hiring manager, someone you'd just met. Increasingly it's an

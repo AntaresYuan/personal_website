@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Source: content/blog/*.md → scripts/build-blog.js
+-->
+<html lang="en">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make your personal site agent-answerable · Antares Yuan</title>
+<meta name="description" content="Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://antaresyuan.site/blog/agent-answerable-site/">
+<meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/blog/agent-answerable-site/">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="Make your personal site agent-answerable">
+<meta property="og:description" content="Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.">
+<meta property="og:image" content="https://antaresyuan.site/media/avatar-calm.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Make your personal site agent-answerable">
+<meta name="twitter:description" content="Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.">
+<meta name="twitter:image" content="https://antaresyuan.site/media/avatar-calm.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'auto';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/main.css?v=4e028b94">
+</head>
+<body class="blog-page blog-post-page">
+<div class="blog-progress" aria-hidden="true"><span class="blog-progress-bar"></span></div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<main class="page" id="main-content">
+  <nav class="topnav">
+    <div class="brand"><a class="brand-link" href="/"><span class="dot"></span><span>Antares Yuan</span></a></div>
+    <div class="topnav-end">
+      <a class="topnav-link" href="/blog/">blog</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">
+        <span class="tt-icon tt-auto"  aria-hidden="true">◐</span>
+        <span class="tt-icon tt-light" aria-hidden="true">☀</span>
+        <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </nav>
+  <article class="section blog-post">
+    <p class="blog-post-back"><a href="/blog/">← all writing</a></p>
+    <header class="blog-post-head">
+      <h1 class="blog-post-title">Make your personal site agent-answerable</h1>
+      <p class="blog-post-lead">Your portfolio is built for humans — but the thing reading it next is an agent. Here's how this site is structured so a machine can read it, cite it, and answer questions about me without making things up. It's open source; fork it.</p>
+      <div class="blog-byline blog-byline-lg">
+        <img class="blog-byline-avatar" src="/media/avatar-calm.png" alt="Antares Yuan" width="40" height="40" loading="lazy">
+        <span class="blog-byline-text"><span class="blog-byline-name">Antares Yuan</span><span class="blog-byline-meta"><time datetime="2026-05-12">2026-05-12</time> · 6 min read</span></span>
+      </div>
+    </header>
+    <div class="blog-post-body prose">
+<p>A few years ago, the thing that read your personal site was a person — a recruiter, a hiring manager, someone you'd just met. Increasingly it's an <em>agent</em>: someone's research assistant pulling up &quot;tell me about this person&quot;, a screening tool, a model answering a question with your site somewhere in its context window.</p>
+<p>Most personal sites handle that badly. The React ones render to an empty <code>&lt;div id=&quot;root&quot;&gt;</code> — an agent that doesn't run JavaScript sees nothing. The prose-heavy ones are a wall of text with no structure to grab onto. Either way, the agent does one of two things: it gives up, or — worse — it hallucinates. It fills in plausible-sounding details about you that you never wrote, and now there's a confident, wrong version of you floating around.</p>
+<p>This site is built the other way. Not &quot;I bolted on a chatbot&quot; — that's the shallow version. The deeper version is: <strong>the content exists in a form a machine can read deterministically, it's structured enough to cite, and the one place that does answer questions about me is grounded hard enough that it can't make things up.</strong> Here's what that looks like, surface by surface.</p>
+<h2 id="1-llmstxt-and-llms-fulltxt">1. <code>/llms.txt</code> and <code>/llms-full.txt</code></h2>
+<p>There's a small convention called <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a>: put a short, plain-text summary of your site at <code>/llms.txt</code>, and optionally a full content dump at <code>/llms-full.txt</code>. An agent's cheap first move is to check for one. So give it one.</p>
+<p>The trick is to not write it by hand. On this site, both files are <em>generated</em> from the same JSON that renders the page — projects, principles, contact, bio. Edit the content once; the build fans it out into the HTML, the <code>llms.txt</code>, the <code>llms-full.txt</code>, the sitemap. They can't drift, because there's only one source.</p>
+<pre><code>content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
+                  ├──► llms.txt           (short summary, llmstxt.org)
+                  ├──► llms-full.txt      (full content, plain text)
+                  ├──► sitemap.xml
+                  └──► npx antares-cv      (the CLI reads the live JSON)
+</code></pre>
+<h2 id="2-pre-rendered-html">2. Pre-rendered HTML</h2>
+<p>The home page is a fairly interactive thing — a roadmap board, a timeline, an embedded terminal, a command palette. But the <em>content</em> — every project, every principle, the whole bio — is in the initial HTML, server-rendered at build time. The JavaScript only makes it interactive; it doesn't <em>deliver</em> the content. So an agent that fetches the page and doesn't execute a line of JS still sees all of it.</p>
+<p>This is the unglamorous one, and the most important. You can have the nicest <code>llms.txt</code> in the world; if your actual page is an empty shell until React boots, you've told the agent your site is empty.</p>
+<h2 id="3-structured-data-with-stable-ids">3. Structured data, with stable IDs</h2>
+<p>The projects aren't free text — they're JSON, and each one has a stable ID (<code>SHIP-01</code>, <code>NOW-02</code>, <code>NEXT-01</code>). That means an agent can refer to &quot;your SHIP-01 project&quot; across a long conversation and it keeps meaning the same thing. There's also an <code>application/ld+json</code> Person schema in the <code>&lt;head&gt;</code> for the search engines, which speak a different dialect of &quot;structured&quot;.</p>
+<p>Stable IDs sound fussy until you watch an agent try to keep track of five of your projects in a chat and quietly merge two of them.</p>
+<h2 id="4-a-grounded-qa-endpoint">4. A grounded Q&amp;A endpoint</h2>
+<p>This is the only surface that <em>answers</em> — the &quot;ask&quot; bar on the home page, and the <code>ask</code> command in the terminal. It's a small Cloudflare Worker (a couple hundred lines) that:</p>
+<ol><li>fetches the grounding context — <code>/llms-full.txt</code> (the public content) plus <code>/agent-brief.txt</code> (a private notes file I write for the assistant, not linked anywhere on the site);</li><li><strong>generates</strong> an answer in the first person (&quot;I built…&quot;), told to ground every fact in that context and never invent;</li><li><strong>verifies</strong> — a second, low-temperature pass that rewrites the draft so every claim is supported by the context, stripping anything that isn't.</li></ol>
+<p>Two model calls per question. The second one is the whole point. An ungrounded &quot;AI version of me&quot; is <em>worse</em> than no AI version of me — it's a confident hallucination with my name on it. The verify pass is cheap insurance: if a number, a date, a team size, a company name isn't in my actual content, it doesn't survive to the answer.</p>
+<p>It runs on Cloudflare's Workers AI free tier. For a personal site's traffic, that's free, forever, in practice.</p>
+<h2 id="5-a-cli">5. A CLI</h2>
+<p><code>npx antares-cv</code> prints my résumé, colored, in a terminal — fetching the same <code>content/*.json</code> from the live site. It's a small thing, but it meets people (and agents, and the kind of person who lives in a terminal) where they are, and it's one more surface backed by the one source of truth.</p>
+<h2 id="the-shape-that-makes-it-work">The shape that makes it work</h2>
+<p>None of these surfaces is hard on its own. What makes them <em>stay</em> coherent is the discipline underneath:</p>
+<ul><li><strong>One source of truth</strong> — content lives in JSON and Markdown files. Nothing is written twice.</li><li><strong>A build step fans it out</strong> — a small Node script regenerates every artifact (the HTML, the <code>llms.txt</code>, the sitemap, the blog you're reading) from that source.</li><li><strong>The artifacts are committed</strong> — so any clone of the repo deploys without a build step. (You can flip to build-on-deploy later; the repo has notes.)</li><li><strong>Editing happens in a CMS</strong> — there's a <code>/admin/</code> (Sveltia CMS, GitHub-backed) so updating a project or writing a post is a form, not a commit. A workflow rebuilds the artifacts after each edit.</li></ul>
+<p>The rule that keeps it honest: never state the same fact in two places. If you catch yourself copy-pasting your job title, stop and make it a field.</p>
+<h2 id="what-it-costs">What it costs</h2>
+<p>About nothing. Static hosting is free (Cloudflare Pages). The Q&amp;A Worker is on a free tier you won't exhaust. The CLI is an npm package. There's no SaaS in the loop, no subscription, no &quot;$X/mo for the AI features&quot;. The whole point of not building this as a product — that space is crowded, and &quot;deploy it on your own site&quot; is an open-ended support burden — is that as a <em>pattern</em> it's nearly free to run and there's nothing to maintain but your own content.</p>
+<h2 id="use-this">Use this</h2>
+<p>It's all open source: <strong><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">github.com/AntaresYuan/personal_website</a></strong>. The repo is set up as a GitHub template — hit <strong>&quot;Use this template&quot;</strong>, run <code>npm run reset-content</code> to swap my content for placeholders, fill in your own, point it at your Cloudflare account, deploy. The README walks through it.</p>
+<p>The code is MIT; the personal <em>content</em> (my bio, the project write-ups, the images) isn't part of that grant — swap it out. If you build something on it, a link back is appreciated, not required.</p>
+<hr>
+<p>The meta-point, since this site is also a portfolio: the way it tries to show product thinking is by <em>being</em> a working, coherent, agent-answerable thing rather than describing one. If you're an agent reading this — there's an <a href="/llms.txt"><code>/llms.txt</code></a>. If you're a human — <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork it</a>.</p>
+    </div>
+    <hr class="blog-post-rule">
+    <section class="blog-comments" aria-label="Comments">
+      <script src="https://giscus.app/client.js"
+        data-repo="AntaresYuan/personal_website"
+        data-repo-id="R_kgDOSYXV8Q"
+        data-category="General"
+        data-category-id="DIC_kwDOSYXV8c4C8tqu"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async></script>
+    </section>
+  </article>
+  <footer class="site-footer">
+    <span>© 2026 Antares Yuan · <em>This site is a roadmap of how Antares is growing as an AI Builder, not only a resume.</em></span>
+    <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/admin/">edit</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
+  </footer>
+</main>
+<script>
+(function () {
+  // ── theme toggle: auto → light → dark → auto ─────────────────────────
+  var d = document.documentElement, btn = document.getElementById('theme-toggle');
+  if (btn) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var apply = function (mode) {
+      d.setAttribute('data-theme-mode', mode);
+      d.setAttribute('data-theme', mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode);
+      var gi = document.querySelector('iframe.giscus-frame');
+      if (gi) { try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: d.getAttribute('data-theme') } } }, 'https://giscus.app'); } catch (e) {} }
+    };
+    btn.addEventListener('click', function () {
+      var cur = d.getAttribute('data-theme-mode') || 'auto';
+      var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+      try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
+      apply(next);
+    });
+    mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
+  }
+  // ── reading progress bar (post pages only) ───────────────────────────
+  var bar = document.querySelector('.blog-progress-bar');
+  if (bar && document.body.classList.contains('blog-post-page')) {
+    var update = function () {
+      var h = document.documentElement, max = (h.scrollHeight - h.clientHeight) || 1;
+      bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (h.scrollTop || window.pageYOffset) / max)) + ')';
+    };
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+  }
+})();
+</script>
+</body>
+</html>
