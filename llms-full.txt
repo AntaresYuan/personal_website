@@ -130,7 +130,7 @@ URL: /blog/agent-answerable-site/
 
 ## Hello — this is the blog
 Published: 2026-05-12
-A place for writeups: how this site is built, what I'm learning, the occasional teardown.
+|-
 URL: /blog/welcome/
 
 ---
