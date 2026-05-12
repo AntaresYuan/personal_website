@@ -11,5 +11,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/AntaresYuan/personal_website"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2"
   }
 }

@@ -39,6 +39,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      # The one runtime dep is @resvg/resvg-wasm (build-og.js → social cards).
+      # Everything else is pure-Node stdlib; if `npm ci` ever fails, the build
+      # still runs and just skips the OG cards.
+      - name: Install deps
+        run: npm ci || npm install
 
       - name: Build
         run: node scripts/build.js
