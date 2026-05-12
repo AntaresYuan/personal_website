@@ -1,13 +1,39 @@
 {
   "cards": [
     {
-      "started": "2026-04-03",
-      "details": "## Context\n\nReplace this with the longer story. Two or three short paragraphs is plenty.\n\n## What I owned\n\n- Decision X\n- Decision Y\n- Trade-off Z\n-  I am very good.\n\n## Outcome\n\nWhat happened. What you'd do differently.",
+      "id": "shipped-1",
+      "status": "shipped",
+      "title": "Gmail Plus Plus",
+      "summary": "Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.",
+      "details": "",
+      "tags": [
+        "SIDE PROJECT",
+        "AI Builder",
+        "XGBoost",
+        "Productivity",
+        "Website"
+      ],
       "impact": "",
-      "summary": "WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.",
-      "order": 1,
+      "links": [
+        {
+          "label": "Try it",
+          "href": "https://gmailplusplus.site"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/Gmailplusplus"
+        }
+      ],
+      "started": "2026-03-10",
+      "updated": "2026-04-25",
+      "order": 2
+    },
+    {
+      "id": "shipped-2",
       "status": "shipped",
       "title": "Worth Fly",
+      "summary": "WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.",
+      "details": "## Context\n\nReplace this with the longer story. Two or three short paragraphs is plenty.\n\n## What I owned\n\n- Decision X\n- Decision Y\n- Trade-off Z\n-  I am very good.\n\n## Outcome\n\nWhat happened. What you'd do differently.",
       "tags": [
         "SIDE PROJECT",
         "AI PM",
@@ -15,6 +41,7 @@
         "Explainable AI",
         "Website"
       ],
+      "impact": "",
       "links": [
         {
           "label": "Demo",
@@ -25,17 +52,16 @@
           "href": "https://github.com/AntaresYuan/Worthfly"
         }
       ],
+      "started": "2026-04-03",
       "updated": "2026-04-10",
-      "id": "shipped-1"
+      "order": 1
     },
     {
-      "started": "2026-04-09",
-      "details": "",
-      "impact": "saved me 10 hrs+ of sleep",
-      "summary": "A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.",
-      "order": 2,
+      "id": "shipped-3",
       "status": "shipped",
       "title": "Claude Credit Watchdog",
+      "summary": "A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.",
+      "details": "",
       "tags": [
         "SIDE PROJECT",
         "tool-use",
@@ -43,6 +69,7 @@
         "AI Native",
         "Productivity"
       ],
+      "impact": "saved me 10 hrs+ of sleep",
       "links": [
         {
           "label": "Download",
@@ -53,22 +80,22 @@
           "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
+      "started": "2026-04-09",
       "updated": "2026-04-15",
-      "id": "shipped-2"
+      "order": 2
     },
     {
-      "started": "2025-08-21",
-      "details": "",
-      "impact": "cited by 2 papers",
-      "summary": "Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.",
-      "order": 3,
+      "id": "shipped-4",
       "status": "shipped",
       "title": "SusBench",
+      "summary": "Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.",
+      "details": "",
       "tags": [
         "RESEARCH PROJECT",
         "HCI",
         "IUI 2025"
       ],
+      "impact": "cited by 2 papers",
       "links": [
         {
           "label": "Paper",
@@ -83,17 +110,16 @@
           "href": "https://github.com/SusBench-creator/SusBench"
         }
       ],
+      "started": "2025-08-21",
       "updated": "2026-02-23",
-      "id": "shipped-3"
+      "order": 3
     },
     {
-      "started": "2026-04-17",
-      "details": "",
-      "impact": "",
-      "summary": "The collaborative AI Agent rooted  in the Lark ecosystem.",
-      "order": 1,
+      "id": "now-1",
       "status": "now",
       "title": "Lark Loom",
+      "summary": "The collaborative AI Agent rooted  in the Lark ecosystem.",
+      "details": "",
       "tags": [
         "Lark AI Challenge for College Students",
         "AI Agent PM",
@@ -101,6 +127,7 @@
         "Collaboration",
         "Lark"
       ],
+      "impact": "",
       "links": [
         {
           "label": "GitHub(in Chinese)",
@@ -111,135 +138,123 @@
           "href": "https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr"
         }
       ],
+      "started": "2026-04-17",
       "updated": "2026-05-11",
-      "id": "now-1"
+      "order": 1
     },
     {
-      "started": "2026-03-10",
-      "details": "",
-      "impact": "",
-      "summary": "Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.",
-      "order": 2,
-      "status": "now",
-      "title": "Gmail Plus Plus",
-      "tags": [
-        "SIDE PROJECT",
-        "AI Builder",
-        "XGBoost",
-        "Productivity",
-        "Website"
-      ],
-      "links": [
-        {
-          "label": "Try it",
-          "href": "https://gmailplusplus.site"
-        },
-        {
-          "label": "GitHub",
-          "href": "https://github.com/AntaresYuan/Gmailplusplus"
-        }
-      ],
-      "updated": "2026-04-25",
-      "id": "now-2"
-    },
-    {
-      "started": "2026-04-19",
-      "details": "",
-      "impact": "",
-      "summary": "ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form",
-      "order": 3,
+      "id": "now-2",
       "status": "now",
       "title": "ApplyMint",
+      "summary": "ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form",
+      "details": "",
       "tags": [
         "SIDE PROJECT",
         "Job Application",
         "Chrome Extension"
       ],
+      "impact": "",
       "links": [],
+      "started": "2026-04-19",
       "updated": "2026-05-09",
-      "id": "now-3"
+      "order": 2
     },
     {
+      "id": "SusFix",
+      "status": "now",
+      "title": "now-3",
+      "summary": "Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.",
       "details": "",
+      "tags": [
+        "RESEARCH PROJECT"
+      ],
       "impact": "",
-      "summary": "Stop briefing engineers — become one. Use solo builder loops to solve real business problems end-to-end, not just spec them.",
-      "order": 1,
+      "links": [],
+      "started": "2026-03-15",
+      "updated": "2026-05-12",
+      "order": 3
+    },
+    {
+      "id": "next-1",
       "status": "next",
       "title": "From PM to Builder",
+      "summary": "Stop briefing engineers — become one. Use solo builder loops to solve real business problems end-to-end, not just spec them.",
+      "details": "",
       "tags": [
         "Career Pivot",
         "AI Builder",
         "0→1"
       ],
+      "impact": "",
       "links": [],
       "updated": "2026-05-09",
-      "id": "next-1"
+      "order": 1
     },
     {
-      "details": "",
-      "impact": "",
-      "summary": "Most AI products inherit the model's flat default aesthetic. Explore distillation + skill composition to ship AI that's well-crafted, not just functional.",
-      "order": 2,
+      "id": "next-2",
       "status": "next",
       "title": "Make AI worth looking at",
+      "summary": "Most AI products inherit the model's flat default aesthetic. Explore distillation + skill composition to ship AI that's well-crafted, not just functional.",
+      "details": "",
       "tags": [
         "AI Aesthetic",
         "Distillation",
         "Skills",
         "Craft"
       ],
+      "impact": "",
       "links": [],
       "updated": "2026-05-09",
-      "id": "next-2"
+      "order": 2
     },
     {
-      "details": "",
-      "impact": "",
-      "summary": "Build operations + data analytics fluency so I own the full product lifecycle — not just the design-and-ship slice.",
-      "order": 3,
+      "id": "next-3",
       "status": "next",
       "title": "Close the product loop",
+      "summary": "Build operations + data analytics fluency so I own the full product lifecycle — not just the design-and-ship slice.",
+      "details": "",
       "tags": [
         "Product Ops",
         "Data Analysis",
         "Full-stack PM"
       ],
+      "impact": "",
       "links": [],
       "updated": "2026-05-09",
-      "id": "next-3"
+      "order": 3
     },
     {
-      "details": "",
-      "impact": "",
-      "summary": "The 1-3 year version of me: shipped AI products that ordinary people — not the early-adopter or AI-insider crowd — use daily to make their lives meaningfully better.",
-      "order": 1,
+      "id": "later-1",
       "status": "later",
       "title": "AI for people, not just AI people",
+      "summary": "The 1-3 year version of me: shipped AI products that ordinary people — not the early-adopter or AI-insider crowd — use daily to make their lives meaningfully better.",
+      "details": "",
       "tags": [
         "Mission",
         "Mass-impact AI",
         "Real-world AI"
       ],
+      "impact": "",
       "links": [],
       "updated": "2026-05-09",
-      "id": "later-1"
+      "order": 1
     },
     {
-      "details": "",
-      "impact": "",
-      "summary": "Human-centered design stays the foundation. But in the agent era, AI is also a user — and most products still ignore that. The 1-3 year version of me: deep enough AI fluency to design for both humans and the agents acting on their behalf, so the AI actually helps.",
-      "order": 2,
+      "id": "later-2",
       "status": "later",
       "title": "Human-centered, agent-aware",
+      "summary": "Human-centered design stays the foundation. But in the agent era, AI is also a user — and most products still ignore that. The 1-3 year version of me: deep enough AI fluency to design for both humans and the agents acting on their behalf, so the AI actually helps.",
+      "details": "",
       "tags": [
         "Human-centered Design",
         "Agent-friendly",
         "HCI × AI",
         "Pi-shaped"
       ],
+      "impact": "",
       "links": [],
       "updated": "2026-05-09",
-      "id": "later-2"
+      "order": 2
     }
   ]
 }
