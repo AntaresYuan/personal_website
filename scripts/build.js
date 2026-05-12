@@ -19,4 +19,5 @@
   require('./build-llms');
   require('./build-sitemap');
   require('./build-agent-brief');
+  require('./build-glyphs');
 })().catch((e) => { console.error('[build]', e); process.exitCode = 1; });

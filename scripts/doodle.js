@@ -9,8 +9,10 @@
    • Special days → it shows a hand-drawn glyph (in the brand yellow, like the
      moon) + a hover caption instead. The list lives in content/doodles.json
      (editable in /admin/ → Doodles): each entry has an `icon` (a glyph name —
-     see GLYPHS below; an emoji works as a fallback) + a `caption`. Plus any
-     shipped card whose anniversary is today (from content/board.json) gets the `rocket` glyph.
+     see GLYPHS below) or a `customIcon` (path to an uploaded SVG, which wins),
+     plus a `caption`. (`emoji` is still accepted as a last-resort fallback.)
+     Plus any shipped card whose anniversary is today (content/board.json) gets
+     the `rocket` glyph. There's a gallery of the glyphs at /glyphs.
 
    Runs on every page (home, blog, 404) so the mark + favicon are consistent.
    No deps; loaded `defer`. Falls back gracefully (the static crescent / the
@@ -121,22 +123,31 @@
     kite:        '<path fill="currentColor" d="M12 1.5 19 8.5 12 15.5 5 8.5 12 1.5Z"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" d="M12 15.5c-.6 1.6-2.2 2.2-2.7 4M12 15.5c.6 1.4 2.1 1.9 2.6 3.4"/>',
   };
 
-  function applyOccasion(occ) {
+  function setMark(html, viewBox) {           // put SVG inner-content (or a whole <svg>) into .dot
     if (!dot) return;
-    var glyph = GLYPHS[occ.icon];
-    if (glyph) {
-      // a crafted glyph — same yellow + glow as the moon
+    dot.classList.remove('doodle-on');
+    if (/^\s*<svg/i.test(html)) { dot.innerHTML = html; }   // a whole <svg> (uploaded file) — CSS sizes it
+    else {
       var svg = dot.querySelector('svg');
       if (!svg) { dot.innerHTML = '<svg></svg>'; svg = dot.querySelector('svg'); }
-      dot.classList.remove('doodle-on');
-      svg.setAttribute('viewBox', '0 0 24 24');
-      svg.innerHTML = glyph;
-    } else {
-      // fallback — render the literal value (an emoji) as text, no yellow glow
-      dot.classList.add('doodle-on');
-      dot.textContent = occ.icon || '';
+      svg.setAttribute('viewBox', viewBox || '0 0 24 24');
+      svg.innerHTML = html;
     }
-    dot.setAttribute('title', occ.caption || '');
+  }
+  function applyOccasion(occ) {
+    if (!dot) return;
+    if (occ.caption) dot.setAttribute('title', occ.caption);
+    if (occ.customIcon) {                     // an uploaded SVG — fetch + inline (overrides the glyph)
+      fetch(occ.customIcon).then(function (r) { return r.ok ? r.text() : ''; }).then(function (txt) {
+        txt = String(txt).replace(/<\?xml[\s\S]*?\?>/i, '').replace(/<!DOCTYPE[\s\S]*?>/i, '').trim();
+        if (txt) setMark(txt);
+        else if (GLYPHS[occ.icon]) setMark(GLYPHS[occ.icon]);
+      }).catch(function () { if (GLYPHS[occ.icon]) setMark(GLYPHS[occ.icon]); });
+      return;
+    }
+    var glyph = GLYPHS[occ.icon];
+    if (glyph) { setMark(glyph); }
+    else { dot.classList.add('doodle-on'); dot.textContent = occ.icon || ''; }   // last-resort: a literal emoji as text, no glow
   }
 
   /* ── go ────────────────────────────────────────────────────────────── */
@@ -151,7 +162,7 @@
     var list = (cfg && Array.isArray(cfg.doodles)) ? cfg.doodles : [];
     for (var i = 0; i < list.length; i++) {
       var e = list[i], icon = e && (e.icon || e.emoji);   // `emoji` kept for back-compat
-      if (e && icon && matchesOn(e.on, now)) { occ = { icon: icon, caption: e.caption || e.name || '' }; break; }
+      if (e && (icon || e.customIcon) && matchesOn(e.on, now)) { occ = { icon: icon, customIcon: e.customIcon, caption: e.caption || e.name || '' }; break; }
     }
     // 2) else — a shipped project's anniversary
     if (!occ && board && Array.isArray(board.cards)) {

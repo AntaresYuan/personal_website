@@ -286,10 +286,11 @@ collections:
       - { label: "Body", name: "body", widget: "markdown" }
 
   # ── Doodles ────────────────────────────────────────────────────────
-  # The brand "moon" mark in the topnav shows tonight's actual lunar phase by
-  # default; on a day matched here it becomes the emoji + a hover caption.
-  # scripts/doodle.js reads this file (and content/board.json — any shipped
-  # card whose ship date's day-of-year is today gets an auto 🚀 anniversary).
+  # The brand "moon" mark in the topnav (and the favicon) shows tonight's
+  # actual lunar phase by default; on a day matched here it becomes the chosen
+  # glyph + a hover caption. scripts/doodle.js reads this file (and
+  # content/board.json — any shipped card whose ship date's day-of-year is
+  # today gets an auto "N years since I shipped X" doodle).
   - name: "doodles"
     label: "Doodles"
     icon: brightness_2          # Sveltia: Material Symbols name; Decap ignores it
@@ -307,5 +308,11 @@ collections:
             fields:
               - { label: "Name", name: "name", widget: "string", hint: "Just a label for you." }
               - { label: "When", name: "on", widget: "string", hint: "MM-DD = every year (e.g. 12-25) · YYYY-MM-DD = one-off (e.g. 2027-06-12) · nth:N-W-M = Nth weekday (W: 0=Sun…6=Sat) of month M (e.g. nth:4-4-11 = 4th Thursday of November) · easter = Western Easter. For lunar holidays (春节/端午/中秋…) add a YYYY-MM-DD per year." }
-              - { label: "Icon", name: "icon", widget: "string", hint: "A glyph name (drawn in the brand yellow, like the moon): candle · mortarboard · rocket · sprout · firework · heart · pumpkin · leaf · tree · egg · redenvelope · lantern · zongzi · mooncake · star · flag · wrench · kite. Need one that isn't here? Ask — emoji clash with the site's look." }
+              - label: "Icon"
+                name: "icon"
+                widget: "select"
+                default: "star"
+                hint: "Pick a glyph — drawn in the brand yellow, like the moon. See all of them at /glyphs. Need a new one? Ask. (Or upload a custom SVG below.)"
+                options: ["candle", "mortarboard", "rocket", "sprout", "firework", "heart", "pumpkin", "leaf", "tree", "egg", "redenvelope", "lantern", "zongzi", "mooncake", "star", "flag", "wrench", "kite"]
+              - { label: "Custom SVG (optional)", name: "customIcon", widget: "file", required: false, hint: "Use *instead of* the glyph above. Give it a square viewBox (e.g. 0 0 24 24) and fill='currentColor' so it picks up the brand yellow + glow. Leave empty to use the glyph above." }
               - { label: "Caption", name: "caption", widget: "string", hint: "Tooltip when you hover the mark." }
