@@ -10,10 +10,11 @@
      moon) + a hover caption instead. The list lives in content/doodles.json
      (editable in /admin/ → Doodles): each entry has an `icon` (a glyph name —
      see GLYPHS below; an emoji works as a fallback) + a `caption`. Plus any
-     shipped card whose anniversary is today (from content/board.json) gets a 🚀.
+     shipped card whose anniversary is today (from content/board.json) gets the `rocket` glyph.
 
-   Homepage only for now; blog / 404 pages keep the static crescent + favicon.svg.
-   No deps; loaded `defer` from index.html.
+   Runs on every page (home, blog, 404) so the mark + favicon are consistent.
+   No deps; loaded `defer`. Falls back gracefully (the static crescent / the
+   stock favicon.svg) if it can't run or fetch.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -139,8 +140,8 @@
   renderMoon();   // default — happens immediately; overridden below if today's special
 
   Promise.all([
-    fetch('content/doodles.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-    fetch('content/board.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetch('/content/doodles.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+    fetch('/content/board.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
   ]).then(function (res) {
     var cfg = res[0], board = res[1], occ = null;
     // 1) a curated doodle — first match in the list wins (so order it how you like)

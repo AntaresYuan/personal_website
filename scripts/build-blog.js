@@ -32,7 +32,9 @@ const AVATAR = abs(profile.avatar?.calm || 'media/avatar-calm.png');
 const OG_IMAGE = site.meta?.ogImage ? `${SITE_URL}${abs(site.meta.ogImage)}` : '';
 const FEED_TITLE = `Writing — ${SITE_NAME}`;
 const FEED_DESC = `Writeups and notes from building — by ${AUTHOR}.`;
-const cssV = crypto.createHash('sha1').update(fs.readFileSync(path.join(root, 'styles/main.css'))).digest('hex').slice(0, 8);
+const hashOf = (rel) => crypto.createHash('sha1').update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
+const cssV = hashOf('styles/main.css');
+const doodleV = hashOf('scripts/doodle.js');   // the moon-phase / doodle mark — same on blog pages as on the home page
 
 // rough reading time, ~200 wpm — strip Markdown punctuation first.
 const readMinutes = (md) => {
@@ -179,6 +181,7 @@ ${main}
   </footer>
 </main>
 ${BLOG_JS}
+<script src="/scripts/doodle.js?v=${doodleV}" defer></script>
 </body>
 </html>
 `;
