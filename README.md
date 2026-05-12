@@ -45,8 +45,8 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── decap-oauth/        ← Cloudflare Worker: GitHub OAuth proxy for /admin/
 │   └── qa/                 ← Cloudflare Worker: the "ask" assistant (Workers AI)
 ├── cli/                    ← `npx antares-cv` — the terminal résumé
-├── vendor/                 ← vendored: Sveltia CMS, vis-timeline, fonts/ (JetBrains Mono TTFs for OG cards)
-├── package.json            ← `npm run build` / `reset-content`; one dep: @resvg/resvg-wasm (OG cards)
+├── vendor/                 ← vendored: Sveltia CMS, vis-timeline, resvg-wasm + fonts/ (for the OG cards)
+├── package.json            ← `npm run build` / `reset-content` / `serve` — no dependencies
 ├── media/                  ← avatars + other static images
 └── favicon.svg
 
@@ -101,7 +101,7 @@ Single-file Node CLI in `cli/` that fetches `content/*.json` from the live site 
 
 ## Blog
 
-Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date`, `summary`, `draft`), then the body. Edit them in `/admin/` → **Blog**, or by hand. `scripts/build-blog.js` renders `/blog/` (the index), `/blog/<slug>/` (one page each — byline, reading-progress bar, giscus comments), and an RSS feed at **`/blog/feed.xml`**. Each post also gets a 1200×630 **social-share card** at `/blog/<slug>/og.png` (`scripts/build-og.js`, via `@resvg/resvg-wasm` + the vendored JetBrains Mono TTFs — `npm install` once; if the dep is missing the build skips the cards and falls back to the avatar OG image). Posts with `draft: true` are skipped everywhere.
+Posts are Markdown files in `content/blog/` — YAML frontmatter (`title`, `date`, `summary`, `draft`), then the body. Edit them in `/admin/` → **Blog**, or by hand. `scripts/build-blog.js` renders `/blog/` (the index), `/blog/<slug>/` (one page each — byline, reading-progress bar, giscus comments), and an RSS feed at **`/blog/feed.xml`**. Each post also gets a 1200×630 **social-share card** at `/blog/<slug>/og.png` (`scripts/build-og.js`, rendered at build time with vendored `resvg-wasm` + JetBrains Mono — no npm install; if anything's missing the build just skips the cards and the HTML falls back to the avatar OG image). Posts with `draft: true` are skipped everywhere.
 
 ### Syndicating to Medium / dev.to
 

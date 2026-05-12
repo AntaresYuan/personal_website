@@ -5,20 +5,20 @@
      blog/<slug>/og.png    — one per published post (title + site name + url)
      blog/og.png           — the /blog/ index card ("Writing")
 
-   Build-time, via @resvg/resvg-wasm (WASM, no native build) + the vendored
-   JetBrains Mono TTFs in vendor/fonts/. Wired into scripts/build.js (runs
-   first, so build-blog.js can point each post's <og:image> at the PNG). If
-   the dep isn't installed it logs a note and skips — `node scripts/build.js`
-   still works; the HTML then falls back to the avatar OG image, and CI (which
-   runs `npm ci`) regenerates the cards.
+   Build-time, via resvg-wasm (vendored at vendor/resvg/ — WASM, no native
+   build, no npm dependency) + the vendored JetBrains Mono TTFs in vendor/fonts/.
+   Wired into scripts/build.js (runs first, so build-blog.js can point each
+   post's <og:image> at the PNG). Anything missing → it logs and skips; the
+   HTML then falls back to the avatar OG image. Never throws.
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
 const path = require('path');
 
+const RESVG_DIR = path.join(__dirname, '..', 'vendor', 'resvg');
 let Resvg, initWasm;
-try { ({ Resvg, initWasm } = require('@resvg/resvg-wasm')); }
-catch { console.log('  (skip OG cards — `npm install` to enable @resvg/resvg-wasm)'); module.exports = async () => {}; return; }
+try { ({ Resvg, initWasm } = require(path.join(RESVG_DIR, 'index.js'))); }
+catch (e) { console.log('  (skip OG cards — vendor/resvg not loadable: ' + ((e && e.message) || e) + ')'); module.exports = async () => {}; return; }
 
 const { loadPosts, escapeHtml } = require('./lib/blog');
 
@@ -81,8 +81,7 @@ module.exports = async function buildOg() {
       console.log('  (skip OG cards — vendor/fonts/JetBrainsMono-*.ttf missing)');
       return;
     }
-    const wasmPath = path.join(path.dirname(require.resolve('@resvg/resvg-wasm')), 'index_bg.wasm');
-    try { await initWasm(fs.readFileSync(wasmPath)); } catch (e) { /* "already initialised" is fine; anything else → bail out below */ if (!/already/i.test(String(e && e.message))) throw e; }
+    try { await initWasm(fs.readFileSync(path.join(RESVG_DIR, 'index_bg.wasm'))); } catch (e) { /* "already initialised" is fine; anything else → bail out below */ if (!/already/i.test(String(e && e.message))) throw e; }
     const fontBuffers = [fs.readFileSync(FONT_BOLD), fs.readFileSync(FONT_REG)];
     const opts = { font: { fontBuffers, loadSystemFonts: false, defaultFontFamily: 'JetBrains Mono' }, fitTo: { mode: 'original' } };
     const renderPng = (svg, out) => {
