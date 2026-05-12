@@ -209,4 +209,12 @@ ${mdToHtml(p.body)}
   postPages++;
 }
 
+// Drop stale post directories — a post that was deleted or flipped to draft.
+const keep = new Set(posts.map((p) => p.slug));
+for (const ent of fs.readdirSync(path.join(root, 'blog'), { withFileTypes: true })) {
+  if (ent.isDirectory() && !keep.has(ent.name)) {
+    fs.rmSync(path.join(root, 'blog', ent.name), { recursive: true, force: true });
+  }
+}
+
 console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'})`);
