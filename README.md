@@ -30,6 +30,7 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── build-html.js       ← build:   pre-renders content into index.html
 │   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ from content/blog/*.md
 │   ├── build-og.js         ← build:   renders a 1200×630 social card (PNG) per post
+│   ├── build-glyphs.js     ← build:   regen /glyphs (a gallery of the doodle glyphs)
 │   ├── build-llms.js       ← build:   regen /llms.txt + /llms-full.txt
 │   ├── build-sitemap.js    ← build:   regen /sitemap.xml
 │   ├── build-agent-brief.js← build:   regen /agent-brief.txt from agent-brief.json
@@ -53,6 +54,7 @@ SOURCE (edit these — directly or via /admin/)
 ARTIFACTS (generated — do not hand-edit)
 ├── index.html              ← built by scripts/build-html.js
 ├── blog/                   ← built by scripts/build-blog.js (index.html + <slug>/index.html)
+├── glyphs.html             ← built by scripts/build-glyphs.js (the doodle-glyph gallery, /glyphs)
 ├── llms.txt                ← built by scripts/build-llms.js
 ├── llms-full.txt           ← built by scripts/build-llms.js
 ├── sitemap.xml             ← built by scripts/build-sitemap.js
