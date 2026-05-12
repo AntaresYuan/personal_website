@@ -1,7 +1,7 @@
 {
   "doodles": [
-    { "name": "Birthday",             "on": "10-30",      "icon": "candle",      "caption": "It's my birthday 🎂" },
-    { "name": "Graduation",           "on": "2027-06-12", "icon": "mortarboard", "caption": "Graduating from UW 🎓" },
+    { "name": "Birthday",             "on": "10-30",      "icon": "candle",      "caption": "It's my birthday" },
+    { "name": "Graduation",           "on": "2027-06-12", "icon": "mortarboard", "caption": "Graduating from UW" },
     { "name": "New Year's Day",       "on": "01-01",      "icon": "firework",    "caption": "Happy new year" },
     { "name": "Lunar New Year",       "on": "2026-02-17", "icon": "redenvelope", "caption": "新年快乐 · Happy Lunar New Year" },
     { "name": "Lunar New Year",       "on": "2027-02-06", "icon": "redenvelope", "caption": "新年快乐 · Happy Lunar New Year" },
