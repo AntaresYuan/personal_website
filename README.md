@@ -17,7 +17,7 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── lens.json           ← short-form principles
 │   ├── contact.json        ← email + socials + "open to" line
 │   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
-│   ├── doodles.json        ← special-day "doodles" — the moon mark becomes an emoji
+│   ├── doodles.json        ← special-day "doodles" — the moon mark becomes a glyph (holidays, birthday…)
 │   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/draft + Markdown body)
 ├── styles/main.css         ← design tokens + dashboard styles
 ├── scripts/

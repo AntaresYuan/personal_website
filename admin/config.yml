@@ -303,9 +303,9 @@ collections:
             name: "doodles"
             widget: "list"
             collapsed: true
-            summary: "{{fields.on}} · {{fields.name}} {{fields.emoji}}"
+            summary: "{{fields.on}} · {{fields.name}} ({{fields.icon}})"
             fields:
               - { label: "Name", name: "name", widget: "string", hint: "Just a label for you." }
               - { label: "When", name: "on", widget: "string", hint: "MM-DD = every year (e.g. 12-25) · YYYY-MM-DD = one-off (e.g. 2027-06-12) · nth:N-W-M = Nth weekday (W: 0=Sun…6=Sat) of month M (e.g. nth:4-4-11 = 4th Thursday of November) · easter = Western Easter. For lunar holidays (春节/端午/中秋…) add a YYYY-MM-DD per year." }
-              - { label: "Emoji", name: "emoji", widget: "string", hint: "Shown in place of the moon that day. e.g. 🎂 🎄 🧧 🥮 🎃 🎓" }
+              - { label: "Icon", name: "icon", widget: "string", hint: "A glyph name (drawn in the brand yellow, like the moon): candle · mortarboard · rocket · sprout · firework · heart · pumpkin · leaf · tree · egg · redenvelope · lantern · zongzi · mooncake · star. Or just type an emoji as a fallback (e.g. 🎂)." }
               - { label: "Caption", name: "caption", widget: "string", hint: "Tooltip when you hover the mark." }
