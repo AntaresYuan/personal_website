@@ -1,9 +1,10 @@
 name: Rebuild artifacts
 
-# Decap CMS (via /admin/) commits edits to content/*.json — the source of
+# Sveltia CMS (via /admin/) commits edits to content/** — the source of
 # truth — but it does NOT run the build. This workflow regenerates the
-# committed artifacts (index.html, llms.txt, llms-full.txt, sitemap.xml) so
-# they stay in sync, then commits them back to main.
+# committed artifacts (index.html, blog/, llms.txt, llms-full.txt,
+# sitemap.xml, agent-brief.txt) so they stay in sync, then commits them
+# back to main.
 #
 # Loop safety: the bot commit only touches artifacts, never content/**,
 # scripts/** or styles/**, so it cannot re-trigger this workflow via the

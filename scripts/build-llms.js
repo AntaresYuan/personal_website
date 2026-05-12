@@ -21,6 +21,7 @@ const profile = read('content/profile.json');
 const board   = read('content/board.json');
 const lens    = read('content/lens.json');
 const contact = read('content/contact.json');
+const { loadPosts } = require('./lib/blog');     // published blog posts (content/blog/*.md)
 const lastUpdated = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
@@ -63,11 +64,12 @@ ${profile.slogan ?? ''}
 - [Roadmap board](/#shipped): four-column kanban — shipped, now, next, later
 - [Agent terminal](/#terminal): interactive CLI — same data as the board
 - [Lens](/#lens): how I think
+- [Writing](/blog/): longer-form posts (writeups, teardowns, notes)
 - [Contact](/#contact): how to reach me
-- [Full content](/llms-full.txt): every card + lens entry + contact, plain text
+- [Full content](/llms-full.txt): every card + lens entry + contact + post list, plain text
 
 ## Edit
-This site is content-managed via Decap CMS at /admin/. Source: github.com/AntaresYuan/personal_website
+This site is content-managed via Sveltia CMS at /admin/. Source: github.com/AntaresYuan/personal_website
 `;
 
 /* ── llms-full.txt — every card + lens + contact ──────────────────────── */
@@ -117,7 +119,13 @@ ${(lens.items ?? []).map(it => `- ${it.num ?? ''} ${it.main ?? ''}\n  ${it.aside
 ${stripTags(contact.intro ?? '')}
 
 ${(contact.items ?? []).map(it => `- ${it.key}: ${it.label} (${it.href})`).join('\n')}
-
+${(() => {
+  const posts = loadPosts();
+  if (!posts.length) return '';
+  return `\n# Writing\n\n` + posts.map(p =>
+    `## ${p.title}\n${p.date ? `Published: ${p.date}\n` : ''}${p.summary ? `${p.summary}\n` : ''}URL: /blog/${p.slug}/`
+  ).join('\n\n') + '\n';
+})()}
 ---
 Generated ${new Date().toISOString().slice(0, 10)} from content/*.json. Last site update: ${lastUpdated}
 `;

@@ -16,14 +16,17 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── board.json          ← project cards (status: shipped/now/next/later)
 │   ├── lens.json           ← short-form principles
 │   ├── contact.json        ← email + socials + "open to" line
-│   └── agent-brief.json    ← off-site notes that feed the "ask" assistant
+│   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
+│   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/draft + Markdown body)
 ├── styles/main.css         ← design tokens + dashboard styles
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates the page for interactive use
 │   ├── terminal.js         ← runtime: embedded Agent Terminal
 │   ├── palette.js          ← runtime: ⌘K command palette
 │   ├── qa-faq.js           ← runtime: shared FAQ + retrieval (palette + "ask")
+│   ├── lib/blog.js         ← shared: load + render content/blog/*.md (frontmatter + Markdown)
 │   ├── build-html.js       ← build:   pre-renders content into index.html
+│   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ from content/blog/*.md
 │   ├── build-llms.js       ← build:   regen /llms.txt + /llms-full.txt
 │   ├── build-sitemap.js    ← build:   regen /sitemap.xml
 │   ├── build-agent-brief.js← build:   regen /agent-brief.txt from agent-brief.json
@@ -43,6 +46,7 @@ SOURCE (edit these — directly or via /admin/)
 
 ARTIFACTS (generated — do not hand-edit)
 ├── index.html              ← built by scripts/build-html.js
+├── blog/                   ← built by scripts/build-blog.js (index.html + <slug>/index.html)
 ├── llms.txt                ← built by scripts/build-llms.js
 ├── llms-full.txt           ← built by scripts/build-llms.js
 ├── sitemap.xml             ← built by scripts/build-sitemap.js

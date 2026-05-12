@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadPosts } = require('./lib/blog');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -44,10 +45,18 @@ const cardLinks = [];
   });
 });
 
+// Blog: the index + one URL per published post.
+const posts = loadPosts();
+const blogLinks = [
+  ...(posts.length ? [{ loc: `${SITE_URL}/blog/`, lastmod: posts[0].date || lastmod, priority: '0.7' }] : []),
+  ...posts.map((p) => ({ loc: `${SITE_URL}/blog/${p.slug}/`, lastmod: p.date || lastmod, priority: '0.7' })),
+];
+
 const urls = [
   { loc: `${SITE_URL}/`,             lastmod, priority: '1.0' },
   { loc: `${SITE_URL}/llms.txt`,     lastmod, priority: '0.5' },
   { loc: `${SITE_URL}/llms-full.txt`,lastmod, priority: '0.5' },
+  ...blogLinks,
   ...cardLinks,
 ];
 
