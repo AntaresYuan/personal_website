@@ -266,21 +266,21 @@ collections:
   # Each post is one Markdown file in content/blog/ with YAML frontmatter
   # (title, date, summary, draft); the `body` field is the Markdown below.
   # scripts/build-blog.js renders them into /blog/ (index) and /blog/<slug>/
-  # (one page each); drafts are skipped. Filename = slugified title.
+  # (one page each); drafts are skipped. Filename = slugified title. Keep this
+  # block minimal — folder collections are fussier than file ones; `format`
+  # auto-detects the `.md` + `---`-frontmatter shape.
   - name: "blog"
     label: "Blog"
     label_singular: "Post"
     icon: edit_note           # Sveltia: Material Symbols name; Decap ignores it
     folder: "content/blog"
     create: true
-    slug: "{{slug}}"
     extension: "md"
-    format: "yaml-frontmatter"
-    summary: "{{fields.date}} · {{fields.title}}"
-    sortable_fields: ["date", "title"]
+    sortable_fields: ["title", "date"]
+    summary: "{{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, picker_utc: true }
-      - { label: "Summary", name: "summary", widget: "text", hint: "One-line teaser shown on /blog/ — also used as the page’s meta description." }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Summary", name: "summary", widget: "text", hint: "One-line teaser shown on /blog/ — also the page’s meta description." }
       - { label: "Draft", name: "draft", widget: "boolean", default: false, hint: "Drafts don’t appear on the site." }
       - { label: "Body", name: "body", widget: "markdown" }

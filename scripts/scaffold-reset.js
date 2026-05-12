@@ -140,7 +140,7 @@ for (const f of fs.readdirSync(blogDir)) {
   if (f.endsWith('.md')) { fs.rmSync(path.join(blogDir, f)); console.log('  remove content/blog/' + f); }
 }
 fs.writeFileSync(path.join(blogDir, 'hello-world.md'),
-  '---\ntitle: "Hello, world"\ndate: ' + new Date().toISOString().slice(0, 10) + '\nsummary: "Your first post. Write what this blog is for."\ndraft: false\n---\n\nThis is your first post. Edit it in `/admin/` (the **Blog** collection) or by\nhand at `content/blog/hello-world.md`, then run `npm run build`.\n\nMarkdown works: headings, lists, `code`, ```fenced``` blocks, > quotes,\n[links](https://example.com), and images.\n');
+  '---\ntitle: "Hello, world"\ndate: "' + new Date().toISOString().slice(0, 10) + '"\nsummary: "Your first post. Write what this blog is for."\ndraft: false\n---\n\nThis is your first post. Edit it in `/admin/` (the **Blog** collection) or by\nhand at `content/blog/hello-world.md`, then run `npm run build`.\n\nMarkdown works: headings, lists, `code`, ```fenced``` blocks, > quotes,\n[links](https://example.com), and images.\n');
 console.log('  reset  content/blog/hello-world.md');
 
 /* ── done — what’s left to do by hand ─────────────────────────────── */

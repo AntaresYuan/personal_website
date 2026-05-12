@@ -1,6 +1,6 @@
 ---
 title: "Hello — this is the blog"
-date: 2026-05-12
+date: "2026-05-12"
 summary: "A place for writeups: how this site is built, what I'm learning, the occasional teardown."
 draft: false
 ---
