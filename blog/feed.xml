@@ -58,7 +58,7 @@
       <guid isPermaLink="true">https://antaresyuan.site/blog/welcome/</guid>
       <pubDate>Tue, 12 May 2026 12:00:00 GMT</pubDate>
       <dc:creator>Antares Yuan</dc:creator>
-      <description>|-</description>
+      <description>print(&quot;Hello, World&quot;) This is a placeholder blog: how this site is built, what I'm learning, the occasional teardown.</description>
       <content:encoded><![CDATA[<p>This is where the longer-form stuff lives — writeups, teardowns, notes from building. The dashboard on the home page is the <em>what</em>; this is the <em>how</em> and the <em>why</em>.</p>
 <p>First real post is on its way. In the meantime: the rest of the site is at the <a href="https://antaresyuan.site/">home page</a>, and there's an <a href="https://antaresyuan.site/#agents">/agents</a> section if you're a machine.</p>]]></content:encoded>
     </item>

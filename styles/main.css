@@ -1256,6 +1256,33 @@ body.blog-post-page .blog-progress {
   .prose h2 { font-size: var(--fs-19); }
 }
 
+/* ── 404 page (static 404.html) ───────────────────────────────────────── */
+.notfound {
+  max-width: var(--w-prose);
+  margin: 0 auto;
+  padding: var(--sp-80) 0;
+  text-align: center;
+}
+.notfound-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-16);
+}
+.notfound-title {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+  margin-bottom: var(--sp-12);
+}
+.notfound-msg { color: var(--color-text-dim); margin-bottom: var(--sp-24); }
+.notfound-links { font-family: var(--font-mono); font-size: var(--fs-13); }
+.notfound-links a { color: var(--color-blue); }
+.notfound-links a:hover { color: var(--color-blue-deep); }
+
 /* ── Timeline view ────────────────────────────────────────────────────
    Roadmap → Timeline is an interactive timeline rendered by the vendored
    vis-timeline library (vendor/vis-timeline/, lazy-loaded by scripts/render.js

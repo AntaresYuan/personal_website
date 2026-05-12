@@ -85,7 +85,7 @@
   const idPrefix = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
   const pad2 = (n) => String(n).padStart(2, '0');
 
-  const buildItems = (board, lens) => {
+  const buildItems = (board, lens, posts = []) => {
     const out = [];
 
     // Sections
@@ -98,6 +98,24 @@
         meta:  'jump',
         search: `${s.label} ${s.desc}`.toLowerCase(),
         action: () => scrollToAnchor(s.anchor),
+      });
+    });
+
+    // Blog — the index + each post. These navigate (a different page), not
+    // an in-page anchor.
+    out.push({
+      kind: 'post', icon: '✎', label: 'Writing', desc: 'blog — posts & writeups', meta: 'open',
+      search: 'writing blog posts writeups',
+      action: () => { window.location.href = '/blog/'; },
+    });
+    (posts ?? []).forEach((p) => {
+      out.push({
+        kind: 'post', icon: '✎',
+        label: p.title,
+        desc: `post${p.date ? ' · ' + p.date : ''}`,
+        meta: 'open',
+        search: `${p.title} ${p.summary ?? ''} blog post writing`.toLowerCase(),
+        action: () => { window.location.href = `/blog/${p.slug}/`; },
       });
     });
 
@@ -250,11 +268,12 @@
       const sections = items.filter((it) =>
         it.kind === 'section' && order.includes(it.label)
       ).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+      const writing = items.filter((it) => it.kind === 'post' && it.label === 'Writing').slice(0, 1);
       const topShipped = items.filter((it) => it.kind === 'card' && it.desc === 'shipped').slice(0, 2);
       const cv = items.filter((it) => it.kind === 'cmd' && it.label === 'cv');
       const faq = items.filter((it) => it.kind === 'faq').slice(0, 1);   // first FAQ ("are you looking for a job")
       const ext = items.filter((it) => it.kind === 'ext' && it.label.startsWith('Source')).slice(0, 1);
-      return [...sections, ...topShipped, ...faq, ...cv, ...ext];
+      return [...sections, ...writing, ...topShipped, ...faq, ...cv, ...ext];
     }
     return items
       .map((it) => ({ it, s: score(q, it) }))
@@ -389,14 +408,15 @@
   /* ── Boot ──────────────────────────────────────────────────────── */
   (async () => {
     try {
-      const [board, lens] = await Promise.all([
+      const [board, lens, posts] = await Promise.all([
         json('content/board.json'),
         json('content/lens.json'),
+        json('blog/posts.json').catch(() => []),   // best-effort — empty if the blog isn't built
       ]);
-      items = buildItems(board, lens);
+      items = buildItems(board, lens, posts);
     } catch (e) {
       // Even if content fails to load, sections + commands + ext links still work
-      items = buildItems({ cards: [] }, { items: [] });
+      items = buildItems({ cards: [] }, { items: [] }, []);
       console.error('[palette]', e);
     }
   })();
