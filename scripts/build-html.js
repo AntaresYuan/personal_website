@@ -240,6 +240,15 @@ const skillsSorted = () => (skills.items ?? []).slice().sort((a, b) =>
 const skillDisplayId = (idx) => `SKILL-${pad2(idx + 1)}`;
 const skillRowHtml = (s, idx) => {
   const id = skillDisplayId(idx);
+  // External links live OUTSIDE the modal-opening button so they're real <a>
+  // hit targets (an <a> inside a <button> is invalid HTML and would either
+  // fail or steal the click). The arrow is a sibling of the links — it's a
+  // pure visual cue that the row also opens a modal; the click goes via the
+  // .skill-link button next to it.
+  const linksHtml = (s.links ?? [])
+    .filter((l) => l && l.href && l.href !== '#')
+    .map((l) => `<a class="skill-extlink" href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label ?? l.href)} ↗</a>`)
+    .join('');
   return `
         <li class="skill-row">
           <button type="button" class="skill-link" data-card-id="${escape(id)}" aria-label="Open details for ${escape(s.name ?? '')}">
@@ -247,8 +256,11 @@ const skillRowHtml = (s, idx) => {
             <span class="skill-name">${escape(s.name ?? '')}</span>
             ${s.category ? `<span class="skill-cat">${escape(s.category)}</span>` : ''}
             <span class="skill-summary">${escape(s.summary ?? '')}</span>
-            <span class="skill-arrow" aria-hidden="true">→</span>
           </button>
+          <div class="skill-row-side">
+            ${linksHtml}
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
         </li>`;
 };
 const skillsListHtml = () => skillsSorted().map(skillRowHtml).join('');
