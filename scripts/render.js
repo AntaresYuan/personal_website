@@ -117,6 +117,16 @@
   // emitted heading levels down (clamped to h6) so `details` headings can sit
   // *below* the surrounding title's level — e.g. the spec view's <h4> card
   // titles want their `details` headings at <h5>+.
+  // Video auto-embed (YouTube / Vimeo / Bilibili). Returns the embed URL for
+  // a recognised video URL, else null. IDs are tight so the iframe src is safe.
+  const videoEmbedUrl = (url) => {
+    let m;
+    if ((m = /(?:youtube\.com\/(?:watch\?(?:[^"]*&)?v=|shorts\/|embed\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(url))) return 'https://www.youtube-nocookie.com/embed/' + m[1];
+    if ((m = /vimeo\.com\/(?:video\/)?(\d{6,12})/.exec(url))) return 'https://player.vimeo.com/video/' + m[1];
+    if ((m = /bilibili\.com\/video\/(BV[A-Za-z0-9]{8,12})/.exec(url))) return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1';
+    return null;
+  };
+  const videoEmbedHtml = (src) => `<div class="video-embed"><iframe src="${src}" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
   const mini = (md, opts) => {
     if (!md) return '';
     const demote = (opts && opts.demote) || 0;
@@ -140,6 +150,10 @@
         continue;
       }
       closeList();
+      // a line that's *just* a recognised video URL → an inline player.
+      // Gated to "one token" so an inline URL inside prose stays a hyperlink.
+      const vsrc = /^\S+$/.test(line) && videoEmbedUrl(line.replace(/&amp;/g, '&'));
+      if (vsrc) { html += videoEmbedHtml(vsrc); continue; }
       html += `<p>${line}</p>`;
     }
     closeList();

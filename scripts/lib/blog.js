@@ -122,9 +122,30 @@ function mdToHtml(md) {
     // paragraph — gather lines until a blank or a block start
     const buf = [];
     while (i < lines.length && !blank(lines[i]) && !startsBlock(lines[i])) { buf.push(lines[i]); i++; }
-    out.push(`<p>${inline(buf.join(' ').trim())}</p>`);
+    const text = buf.join(' ').trim();
+    // Auto-embed: a paragraph that's *just* a video URL (or a single [..](url)
+    // wrapping one) becomes an inline player. Catches YouTube / Vimeo / Bilibili.
+    // Gated to "the paragraph is one token" so an inline URL in prose stays text.
+    const linkOnly = /^\[[^\]]*\]\(([^)\s]+)\)$/.exec(text);
+    const vsrc = (/^\S+$/.test(text) && videoEmbedUrl(text)) || (linkOnly && videoEmbedUrl(linkOnly[1]));
+    if (vsrc) { out.push(videoEmbedHtml(vsrc)); continue; }
+    out.push(`<p>${inline(text)}</p>`);
   }
   return out.join('\n');
+}
+
+// — Video auto-embed (YouTube / Vimeo / Bilibili). Returns the embed URL for a
+//   recognised video URL, else null. ID patterns are tight, so the resulting
+//   <iframe src> is safe to interpolate.
+function videoEmbedUrl(url) {
+  let m;
+  if ((m = /(?:youtube\.com\/(?:watch\?(?:[^"]*&)?v=|shorts\/|embed\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(url))) return 'https://www.youtube-nocookie.com/embed/' + m[1];
+  if ((m = /vimeo\.com\/(?:video\/)?(\d{6,12})/.exec(url))) return 'https://player.vimeo.com/video/' + m[1];
+  if ((m = /bilibili\.com\/video\/(BV[A-Za-z0-9]{8,12})/.exec(url))) return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1';
+  return null;
+}
+function videoEmbedHtml(src) {
+  return '<div class="video-embed"><iframe src="' + src + '" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
 }
 
 /* ── frontmatter ────────────────────────────────────────────────────────

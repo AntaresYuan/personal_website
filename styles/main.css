@@ -1260,6 +1260,18 @@ body.blog-post-page .blog-progress {
   border-radius: var(--r-md);
 }
 
+/* Auto-embedded video (YouTube / Vimeo / Bilibili) — a paragraph that's just a
+   recognised video URL becomes one of these. Used in blog posts (.prose) and
+   in card-detail markdown (.spec-card-body / .modal-body). */
+.video-embed {
+  aspect-ratio: 16 / 9;
+  margin: var(--sp-24) 0;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--color-bg-soft);
+}
+.video-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+
 @media (max-width: 600px) {
   .blog-list-link { padding: var(--sp-24) 0; }
   .prose { font-size: var(--fs-17); }
