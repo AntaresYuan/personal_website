@@ -1938,7 +1938,9 @@ body.modal-open { overflow: hidden; }
   white-space: nowrap;
 }
 .skill-name {
-  color: var(--color-yellow);
+  /* Mono + medium-weight already reads as a CLI command; the yellow accent
+     was loud on cream — text-color stays high-contrast in both modes. */
+  color: var(--color-text);
   font-weight: var(--fw-medium);
   letter-spacing: var(--tracking-tight);
 }
@@ -1946,8 +1948,11 @@ body.modal-open { overflow: hidden; }
   font-size: var(--fs-11);
   letter-spacing: var(--tracking-wide);
   padding: 2px 8px;
-  background: var(--color-yellow-soft);
-  color: var(--color-text);
+  /* Neutral chip — yellow-soft fought the cream bg in light mode. A subtle
+     bg-soft + thin border reads as metadata, not a callout. */
+  background: var(--color-bg-soft);
+  color: var(--color-text-dim);
+  border: var(--bw) solid var(--color-line);
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -1987,10 +1992,11 @@ body.modal-open { overflow: hidden; }
   }
 }
 
-/* Modal status pill for /skills entries — matches the chip used on row */
+/* Modal status pill for /skills entries — matches the row chip's neutral tone */
 .modal-status.s-skill {
-  background: var(--color-yellow-soft);
-  color: var(--color-text);
+  background: var(--color-bg-soft);
+  color: var(--color-text-dim);
+  border: var(--bw) solid var(--color-line);
 }
 
 .lens {
