@@ -53,6 +53,85 @@
 <p>The meta-point, since this site is also a portfolio: the way it tries to show product thinking is by <em>being</em> a working, coherent, agent-answerable thing rather than describing one. If you're an agent reading this — there's an <a href="https://antaresyuan.site/llms.txt"><code>/llms.txt</code></a>. If you're a human — <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork it</a>.</p>]]></content:encoded>
     </item>
     <item>
+      <title>HCDE 351 | A3: Laser Cut Prototype: Smartphone Paper Prototyping Frame</title>
+      <link>https://antaresyuan.site/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/</link>
+      <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/</guid>
+      <pubDate>Sun, 01 Feb 2026 12:00:00 GMT</pubDate>
+      <dc:creator>Antares Yuan</dc:creator>
+      <description>This process log documents the design of a smartphone paper prototyping frame where the users can use the product as a showcase and test frame for their sketched-out wireframe for their participants.</description>
+      <category>Laser Cutting</category>
+      <category>Wireframe User Testing</category>
+      <category>Two Point Five D model</category>
+      <content:encoded><![CDATA[<h2 id="product-overview">Product Overview:</h2>
+<p>This process log documents the design of a smartphone paper prototyping frame where the users can use the product as a showcase and test frame for their sketched-out wireframe for their participants. The goal of this design is to enhance functionality and usability, on the basis of helping user to test out their wireframe’s user flow, I also reached the part that helps the user to conduct the user testing with this product seamlessly and intuitively. In this project, I explored how to utilize my design to better respond to the user’s wireframe testing needs (or I should say I am a user of this product myself since I often conduct the user testing myself) and practiced my skills of building a 2.5 dimensional product with technics of designing a product by parts which can be used to assemble the strong enough 3 dimensional product using inserting and other structure without any glue or other material that can stick them together.</p>
+<p>In this log, I will describe how I brainstormed based on defined user needs, made design decisions based on the evaluation criteria I made to determine if my product works, gathered feedback from users and peers, and identified parts that should be improved. I also document the reasoning behind key decisions and how these choices work better in supporting my target users.</p>
+<h2 id="ideation">Ideation:</h2>
+<p>The goal of this design is to make a frame for smartphone wireframe prototype which can be used in early phase user testing with build an intuitive user flow for both the interviewer who conduct the testing and the interviewee who is doing the testing. In this section, I will explain how I iterate throughout these different ideas to better align with my design goal.</p>
+<p>I started with thinking of my own pain point while conducting user testing or being an interviewee doing the testing. I came up with these in my head.</p>
+<p><strong>For being an INTERVIEWER:</strong></p>
+<ul><li><strong>I can not show my participants the user flow (or say I can not get good feedback on my user flow since they are not pretty clear what the flow is like by staring at my wireframes with bounding boxes and messy arrows). They have to spend a lot of time interpreting my user flow in wireframe.</strong></li><li><strong>User can see all the wireframe at the same time which is not true in real applications. By knowing which step is the next step, users can easily reversely infer the step they should do to reach the next step which made me really hard to test out if all the interactions are intuitive enough for user to operate in real life.</strong></li></ul>
+<p><strong>For being an INTERVIEWEE:</strong></p>
+<ul><li><strong>The instructions during the user testing of a wireframe is always unclear. The interviewer might give me some clue but what I got most is their unclear and messy sentences on the wireframe which made me hard to follow.</strong></li><li><strong>I don’t have a sense of holding a smartphone while doing user testing. They always just give me several piece of paper with wireframe on it.</strong></li><li><strong>When I want to give feedback on the wireframe, I seldom find the part I am looking for due to the fact that it is always not that structured.</strong></li></ul>
+<p>Before finding some ideas by gathering inspiration from Pinterest and thinking about how I can also stress these satisfaction points using my design as a solution, I first came up with prototype evaluation criteria and follow these criteria to make some design decisions.</p>
+<p><strong>Prototype Evaluation Criteria：</strong></p>
+<blockquote><p><strong>1. Feasibility</strong>The paper prototyping frame should be able to hold with only one hand and conceal a 5-inch-wide paper screens without bending or collapsing during handheld use.<strong>2. Usability</strong>Users should be able to insert, remove, and swap paper screens within 3 seconds per screen without instructions.<strong>3. Desirability</strong>When holding the frame, users should report that it feels more like using a real device compared to viewing loose paper on a table.<strong>4. Impact</strong>The frame should allow usability tests to be conducted with minimal facilitator intervention (no need to explain orientation or where to look).</p></blockquote>
+<p><strong>Design Decisions:</strong></p>
+<blockquote><p>The frame is designed for <strong>one handed, portrait orientation use</strong>, mimicking typical smartphone interaction.The frame targets <strong>6-inch-wide paper screens</strong>, consistent with modern phone dimensions.The overall appearance should resemble a <strong>real mobile device with minimal bezels</strong>, while maintaining sufficient material thickness to ensure structural stability.<strong>Screen insertion and removal mechanisms</strong> (top, side, or back access) will be explored through sketching to evaluate speed and stability trade-offs.<strong>Hand placement and grip affordances</strong> will be investigated during sketching to support comfortable one-handed use.The primary testing context is <strong>facilitator led demo testing</strong>, prioritizing fast screen swapping and minimal explanation during use.</p></blockquote>
+<p>After having sense of what product I will be designing. I started my sketches.</p>
+<p><strong>Sketch 1–4, 7:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*yMOBpt1EL7r7JRjolkhlag@2x.jpeg" alt="" loading="lazy"></p>
+<p>Sketch 1</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*iJNlzK0PTnMmOcA1KwiWoQ@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*56lt-OqOhSEx_TkxjcF0FA@2x.jpeg" alt="" loading="lazy"></p>
+<p>Sketch 2, 3</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*Ow7AU6l66ah85QogBo9hyg@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*XHUz3vVLdLG7nE420ZUlpA@2x.jpeg" alt="" loading="lazy"></p>
+<p>Sketch 4, 7</p>
+<p>From sketch 1–2, I tried to test out my answer for my third design decision. The main difference here is the edge of the frame: prototype frame in sketch 1 has a much thinner edge compared to that of sketch 2. Although the thicker edge in sketch 2 might reduce the possibility of accidentally touching the middle frame (but to be honest, it doesn’t matter since it is just a piece of paper), and can hold it easily, it still can not cancel out the defect which is that it decrease the size of the wireframe a lot and make it less like a phone (cell phone recently don’t have a edge that wide). So I decided to apply thinner edge on the following sketches. For sketch 3, it is a different opening mechanism compared to the first two, where it has an opening to insert the wireframe from the top, and also an opening to drop the wireframe when all things is done. This is a testing of fourth design decision, and I like how fast it can switch between wireframe by wireframe. Prototype in sketch 4 and 7 has a different type of wireframes, which in these two sketches, wireframes are like a old-school cartoon books where all the frames are connected together in a storytelling way. Prototype in sketch 4 is like a film camera, where the wireframes are the “film”, and the frame showing wireframes is the place where film got exposed. The drawbacks of this is I can not make sure that the participant can turn to the “right” angle that show the wireframe completely. Prototype in sketch 7 has a folded paper wireframe which the user have to pull the paper on the bottom, and unfold only one piece of paper while other remains folded. This is way to complicated compared to others.</p>
+<p><strong>Sketch 5–6, 8–11:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*vHvpFDhzyx-99SkFF_cwKw@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*ei45Gl2dPxRsfPLqa05Qgg@2x.jpeg" alt="" loading="lazy"></p>
+<p>Sketch 5–6, 8–11</p>
+<p>These sketches are the lab space where I tried out different ways of inserting papers and pulling papers out, as well as ways of holding the product. I choose to do the low-fidelity paper prototype using sketches back in sketch 1 and 3 because looking back to my pain points, evaluation criteria and design decisions, I think these two are the one that align with my design goal the most. (yeah so not always picking up the last version huh?)</p>
+<h2 id="prototype">Prototype:</h2>
+<p>In the sections above, I explained how I established my evaluation criteria and made sure I know what product I am making, then I explored different ideas and then made decisions on the two I should go for making a paper prototype by following the design goal. In this section, I will briefly talk about the process of making two testable low-fidelity paper prototypes, and then use it to iterate to a better prototype in fidelity level (with vector editor and laser cutting machines), and showcase how it looks.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*lRnla_9J18ianfItv8va3Q@2x.jpeg" alt="" loading="lazy"></p>
+<p>Left: Paper prototype for sketch 1; Right: Paper prototype for sketch 3</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:3024/1*PSfxsNCQUg_vJEpZ5MB5fg@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*6Vy75TxO9fbUuagpty33iA@2x.jpeg" alt="" loading="lazy"></p>
+<p>Left: Paper prototype for sketch 1; Right: Paper prototype for sketch 3</p>
+<p>In the paper prototype for sketch 1, I made some subtle changes: I changed the way different parts are connecting to see if this is more stable. The paper prototype of sketch 1 has problem in structure since there is no parts connecting the middle of the front part of the frame and the back part of the frame, the frame is moving left and right when I held it in my hands. he paper prototype for sketch 3 has similar problem where it had connection in the middle but not four corners so these corners are movable which made it less stable. I also got inspiration from my second sketch, and decided to make multiple inserts board in the middle, and place them on the table to switch easily between different wireframes. I kept that in my mind, combined the structure of connection in these two paper prototypes, and made my final one.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*q2kag8b0WvFeY8o-TqANSw@2x.jpeg" alt="" loading="lazy"></p>
+<p>Vectorized design on Inkscape</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*sOI78MAE0v4iZtQK4l7U-g@2x.jpeg" alt="" loading="lazy"></p>
+<p>Laser cutting</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*yWG2M6qbwrf6IaIRLkWLLA@2x.jpeg" alt="" loading="lazy"></p>
+<p>Final design</p>
+<p>This is my final design, aligned with my design goal, passed the evaluation criteria, and satisfy my design decisions. There are two cut slot on the insert board. The one on the bottom is for stabilizing the wireframe. And the smaller on the top of that is the one that can leave tips and instructions for participants. The interviewer first stabilize the wireframe, and leave some comments on it such as “You can move to this page if you click on XXX” or instructions of how to operate the page. Interviewer should make sure that these two are in opposite side of the board. Then the interviewer flip the board to hide the wireframe from the user, and allow user to remove the board from the middle of the cell phone prototype frame, with the flipped next frame waiting to be inserted. By doing this, all the pain points I listed are solved while maintaining an easy way of operating this.</p>
+<h2 id="feedback">Feedback:</h2>
+<p>In class, my peer and I worked in groups of three for one round of critique. In my round of critique, I gave them my prototype and let them figure out how to use it while I remained silent. This is the feedback I received:</p>
+<p>What works well?</p>
+<ul><li>The prototype is <strong>stable and structurally strong</strong>, and it can stand upright without external support.</li><li>The main component can be <strong>easily inserted and removed</strong>, making the basic interaction smooth and low-effort.</li><li>The overall physical construction feels <strong>robust and reliable</strong>, which gives users confidence when handling the object.</li></ul>
+<p>What could be better?</p>
+<ul><li>The <strong>comment sticky notes part may get stuck</strong> when being pulled out, which creates friction in repeated use and could affect long-term usability.</li><li>The <strong>small cut out for comment sitcky notes is confusing</strong> in terms of its function and how it should be used.</li><li>Some users <strong>initially misunderstood the direction of interaction</strong>, suggesting that the affordance is not immediately clear.</li><li>The form feels like it consists of <strong>multiple frames or layers</strong>, which may increase cognitive load if the structure is not clearly communicated.</li></ul>
+<h2 id="takeaways">Takeaways:</h2>
+<p>Feedback from both my peers and my TA reveal that my design did successfully align with my design goals and stress on the pain points as well as passing my criteria based on design decisions. But there this design have some minor issue that may or may not impact it functionality. It could be better if I,</p>
+<ul><li><strong>Clarify the affordance</strong> to make the direction of interaction more intuitive.</li><li><strong>Redesign the comment sticky notes part</strong> to reduce friction and prevent it from getting stuck.</li><li><strong>Simplify the small components</strong> so their functions are easier to understand.</li></ul>
+<h2 id="acknowledgment">Acknowledgment:</h2>
+<p>Special thanks to my group members, TA Nichole Sams and Instructer Brock Craft for their valuable feedback.</p>
+<p><strong>Thanks for reading! : )</strong></p>
+<h2 id="technological-appendix">Technological Appendix:</h2>
+<p><strong>AI usage:</strong></p>
+<ul><li>I used ChatGPT in correcting my grammar and typo;</li><li>I used NotebookLM to help me organize user feedbacks;</li><li>I discussed with ChatGPT of parts I should improve with the feedback I got.</li></ul>
+<p><strong>Writing reference:</strong></p>
+<ul><li>I used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</a></li></ul>
+<p><strong>Inspirational reference:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*stajSu2T2dASQIPhHHvgEw.png" alt="" loading="lazy"></p>
+<p><a href="https://www.pinterest.com/pin/833869687282567882/" target="_blank" rel="noopener">https://www.pinterest.com/pin/833869687282567882/</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*bxR3E1PJw_pOwEkLfb4S8A.png" alt="" loading="lazy"></p>
+<p><a href="https://www.pinterest.com/pin/1151091986036608640/" target="_blank" rel="noopener">https://www.pinterest.com/pin/1151091986036608640/</a></p>]]></content:encoded>
+    </item>
+    <item>
       <title>HCDE 351 | A2: Soft Goods Prototype: Shoulder Bag Design</title>
       <link>https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</link>
       <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</guid>
