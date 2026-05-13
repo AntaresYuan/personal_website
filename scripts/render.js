@@ -1077,9 +1077,12 @@
   };
 
   const wireModal = () => {
-    // Card click → open
+    // Card / skill click → open the same side-panel modal. The two surfaces
+    // (kanban .card buttons + /skills .skill-link buttons) share displayIds
+    // by namespace (SHIP-NN / NOW-NN / NEXT-NN / LATER-NN / SKILL-NN), so
+    // one handler + one cardIndex Map is enough.
     document.addEventListener('click', (ev) => {
-      const card = ev.target.closest('.card[data-card-id]');
+      const card = ev.target.closest('.card[data-card-id], .skill-link[data-card-id]');
       if (!card) return;
       ev.preventDefault();
       openCardModal(card.dataset.cardId);
@@ -1115,15 +1118,38 @@
     });
   };
 
+  // Hydrate the /skills section into cardIndex — the section is always
+  // prerendered (build-html.js writes the markup); JS just needs the Map
+  // populated so a click on a .skill-link opens the same side-panel modal
+  // the board cards use. Skill rows carry data-card-id="SKILL-NN".
+  const hydrateSkills = (skills) => {
+    const items = (skills && skills.items) || [];
+    const sorted = items.slice().sort((a, b) =>
+      (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
+    sorted.forEach((s, idx) => {
+      const displayId = `SKILL-${pad2(idx + 1)}`;
+      cardIndex.set(displayId, {
+        displayId,
+        status: 'skill',
+        title: s.name ?? '',
+        summary: s.summary ?? '',
+        details: s.details ?? '',
+        tags: s.category ? [s.category] : [],
+        links: Array.isArray(s.links) ? s.links : [],
+      });
+    });
+  };
+
   /* ── Boot ───────────────────────────────────────────────────────── */
   (async () => {
     try {
-      const [site, profile, board, lens, contact] = await Promise.all([
+      const [site, profile, board, lens, contact, skills] = await Promise.all([
         json('content/site.json'),
         json('content/profile.json'),
         json('content/board.json'),
         json('content/lens.json'),
         json('content/contact.json'),
+        json('content/skills.json').catch(() => ({ items: [] })),  // optional — empty if absent
       ]);
       // If the page was pre-rendered by scripts/build-html.js, the DOM is
       // already populated with identical content. Skip the populate pass so
@@ -1153,6 +1179,10 @@
         renderLens(lens);
         renderContact(contact);
       }
+      // Skills hydrate the same Map regardless of prerender state — the
+      // section is SSR-rendered by build-html.js, runtime just needs the
+      // index for click-to-open and for the cross-surface open-card event.
+      hydrateSkills(skills);
       // Wire interactive behavior — needed in both prerendered and runtime
       // modes since build-html.js only emits markup, not event listeners.
       wireFilterChipClicks();

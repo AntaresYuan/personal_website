@@ -21,6 +21,12 @@ const profile = read('content/profile.json');
 const board   = read('content/board.json');
 const lens    = read('content/lens.json');
 const contact = read('content/contact.json');
+// /skills — "dotfiles for AI" entries. Optional: an empty file just yields
+// no Skills section in llms-full.txt.
+const skills = (() => {
+  try { return read('content/skills.json'); }
+  catch { return { items: [] }; }
+})();
 const { loadPosts } = require('./lib/blog');     // published blog posts (content/blog/*.md)
 const lastUpdated = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
 
@@ -125,7 +131,23 @@ Role: ${profile.role}
 Location: ${profile.location}
 Tags: ${(profile.tags ?? []).join(', ')}
 ${sectionFor('Shipped', 'shipped')}${sectionFor('Now', 'now')}${sectionFor('Next', 'next')}${sectionFor('Later', 'later')}
-
+${(() => {
+  const items = (skills.items ?? []).slice().sort((a, b) =>
+    (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
+  if (!items.length) return '';
+  const fmt = (s, idx) => {
+    const id = `SKILL-${pad2(idx + 1)}`;
+    const lines = [`## ${id} · ${s.name ?? ''}${s.category ? ` · ${s.category}` : ''}`];
+    if (s.summary) lines.push(s.summary);
+    if ((s.links ?? []).length) {
+      lines.push('Links:');
+      s.links.filter(l => l.href && l.href !== '#').forEach((l) => lines.push(`  - ${l.label}: ${l.href}`));
+    }
+    if (s.details) { lines.push(''); lines.push(String(s.details).trim()); }
+    return lines.join('\n');
+  };
+  return `\n# Skills — dotfiles for AI\n\nWhat I built to multiply my own AI work.\n\n${items.map(fmt).join('\n\n')}\n`;
+})()}
 # Lens — how I think
 
 ${(lens.items ?? []).map(it => `- ${it.num ?? ''} ${it.main ?? ''}\n  ${it.aside ?? ''}`).join('\n')}

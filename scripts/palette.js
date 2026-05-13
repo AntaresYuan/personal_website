@@ -85,7 +85,7 @@
   const idPrefix = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
   const pad2 = (n) => String(n).padStart(2, '0');
 
-  const buildItems = (board, lens, posts = []) => {
+  const buildItems = (board, lens, posts = [], skills = { items: [] }) => {
     const out = [];
 
     // Sections
@@ -142,6 +142,24 @@
             document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id } }));
           },
         });
+      });
+    });
+
+    // Skills (/skills section). Same modal open path as cards — dispatch
+    // agent:open-card with the SKILL-NN id and render.js opens the panel.
+    const skillItems = (skills && skills.items) || [];
+    skillItems.slice().sort((a, b) =>
+      (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? ''))
+    ).forEach((s, idx) => {
+      const id = `SKILL-${pad2(idx + 1)}`;
+      out.push({
+        kind: 'skill',
+        icon: '⌘',
+        label: `${id}  ${s.name ?? ''}`,
+        desc: s.category ? `skill · ${s.category}` : 'skill',
+        meta: '',
+        search: `${id} ${s.name ?? ''} ${s.category ?? ''} ${s.summary ?? ''} skill dotfile ai workflow`.toLowerCase(),
+        action: () => { document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id } })); },
       });
     });
 
@@ -408,15 +426,16 @@
   /* ── Boot ──────────────────────────────────────────────────────── */
   (async () => {
     try {
-      const [board, lens, posts] = await Promise.all([
+      const [board, lens, posts, skills] = await Promise.all([
         json('content/board.json'),
         json('content/lens.json'),
-        json('blog/posts.json').catch(() => []),   // best-effort — empty if the blog isn't built
+        json('blog/posts.json').catch(() => []),         // best-effort — empty if the blog isn't built
+        json('content/skills.json').catch(() => ({ items: [] })),  // optional file
       ]);
-      items = buildItems(board, lens, posts);
+      items = buildItems(board, lens, posts, skills);
     } catch (e) {
       // Even if content fails to load, sections + commands + ext links still work
-      items = buildItems({ cards: [] }, { items: [] }, []);
+      items = buildItems({ cards: [] }, { items: [] }, [], { items: [] });
       console.error('[palette]', e);
     }
   })();

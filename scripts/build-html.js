@@ -32,6 +32,13 @@ const board   = read('content/board.json');
 const lastUpdated = require('./last-updated');
 const lens    = read('content/lens.json');
 const contact = read('content/contact.json');
+// /skills — the "dotfiles for AI" section (between #terminal and #lens).
+// Optional file: if a fork drops content/skills.json, the section quietly
+// stays empty; the source-of-truth for that fallback is here.
+const skills = (() => {
+  try { return read('content/skills.json'); }
+  catch { return { head: {}, items: [] }; }
+})();
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 const escape = (s) =>
@@ -223,6 +230,29 @@ const lensListHtml = () =>
         </div>`;
   }).join('');
 
+// Skills — one alias-style row per item. Sort by `order` (then by name) so
+// the SKILL-NN ids stay stable. Each row is a real <button> carrying the
+// data-card-id render.js's modal click handler listens for. Empty state =
+// nothing renders (the section header still shows, intentionally — it's a
+// signal to a fork-er that this slot exists and where to fill it).
+const skillsSorted = () => (skills.items ?? []).slice().sort((a, b) =>
+  (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
+const skillDisplayId = (idx) => `SKILL-${pad2(idx + 1)}`;
+const skillRowHtml = (s, idx) => {
+  const id = skillDisplayId(idx);
+  return `
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="${escape(id)}" aria-label="Open details for ${escape(s.name ?? '')}">
+            <span class="skill-id">${escape(id)}</span>
+            <span class="skill-name">${escape(s.name ?? '')}</span>
+            ${s.category ? `<span class="skill-cat">${escape(s.category)}</span>` : ''}
+            <span class="skill-summary">${escape(s.summary ?? '')}</span>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </button>
+        </li>`;
+};
+const skillsListHtml = () => skillsSorted().map(skillRowHtml).join('');
+
 // Contact list
 const contactListHtml = () =>
   (contact.items ?? []).map((it) => {
@@ -408,6 +438,16 @@ html = replaceInner(html, 'board-shipped-count',
 
 // Filter chips: replace the children inside #board-filters
 html = replaceInner(html, 'board-filters', filterChipsHtml());
+
+// Skills header + list (between #terminal and #lens). Header uses the same
+// fallback strings the template ships with, so an empty file still renders
+// a tasteful header pointing the reader at /admin/.
+if (skills.head) {
+  if (skills.head.cmd   != null) html = replaceInner(html, 'skills-cmd',   escape(skills.head.cmd));
+  if (skills.head.title != null) html = replaceInner(html, 'skills-title', escape(skills.head.title));
+  if (skills.head.meta  != null) html = replaceInner(html, 'skills-meta',  escape(skills.head.meta));
+}
+html = replaceInner(html, 'skills-list', skillsListHtml());
 
 // Lens header + list
 if (lens.head) {
