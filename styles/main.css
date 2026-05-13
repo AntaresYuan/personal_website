@@ -1888,6 +1888,111 @@ body.modal-open { overflow: hidden; }
   font-size: var(--fs-11);
 }
 
+/* ── /skills — terminal alias list, "dotfiles for AI" ─────────────────
+   Each row is a real <button> (.skill-link) carrying data-card-id; the
+   document-level click handler in render.js opens the same side-panel
+   modal the kanban cards use. Row layout:
+     [name]  [category-pill]  [summary, dim, fills]  [→]
+   Mono throughout; on narrow viewports it stacks. The .skill-id span
+   is in the DOM for a11y but visually hidden. */
+.skills-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+}
+.skill-row {
+  border-top: var(--bw) solid var(--color-line-soft);
+}
+.skill-row:last-child {
+  border-bottom: var(--bw) solid var(--color-line-soft);
+}
+.skill-link {
+  display: grid;
+  grid-template-columns: minmax(150px, max-content) max-content 1fr auto;
+  align-items: baseline;
+  column-gap: var(--sp-16);
+  width: 100%;
+  padding: var(--sp-14) var(--sp-4);
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.skill-link:hover,
+.skill-link:focus-visible {
+  background: var(--color-bg-soft);
+  outline: none;
+}
+.skill-id {
+  /* internal SKILL-NN id — useful for agents / a11y, hidden visually */
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skill-name {
+  color: var(--color-yellow);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-tight);
+}
+.skill-cat {
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-wide);
+  padding: 2px 8px;
+  background: var(--color-yellow-soft);
+  color: var(--color-text);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.skill-summary {
+  color: var(--color-text-dim);
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  line-height: var(--lh-snug);
+}
+.skill-arrow {
+  color: var(--color-text-faint);
+  transition: transform 120ms ease, color 120ms ease;
+}
+.skill-link:hover .skill-arrow,
+.skill-link:focus-visible .skill-arrow {
+  color: var(--color-text);
+  transform: translateX(2px);
+}
+@media (max-width: 640px) {
+  .skill-link {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-6);
+    padding-right: var(--sp-32);
+    position: relative;
+  }
+  .skill-arrow {
+    position: absolute;
+    right: var(--sp-4);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .skill-link:hover .skill-arrow,
+  .skill-link:focus-visible .skill-arrow {
+    transform: translateY(-50%) translateX(2px);
+  }
+}
+
+/* Modal status pill for /skills entries — matches the chip used on row */
+.modal-status.s-skill {
+  background: var(--color-yellow-soft);
+  color: var(--color-text);
+}
+
 .lens {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

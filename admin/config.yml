@@ -183,6 +183,50 @@ collections:
               - { label: "Updated (YYYY-MM-DD)", name: "updated", widget: "string" }
               - { label: "Order within column", name: "order", widget: "number", default: 1 }
 
+  # ── Skills: dotfiles for AI ────────────────────────────────────────
+  # The receipts for the hero "AI Agent Native" pill — Claude Code skills,
+  # configs, and agent-infra Antares built to multiply his own AI work.
+  # Renders as a terminal alias list on the home page (between Roadmap and
+  # Lens); each row opens the same side-panel modal the board cards use.
+  # Also flows into /llms-full.txt and the ⌘K palette.
+  - name: "skills"
+    label: "Skills (dotfiles for AI)"
+    icon: terminal
+    files:
+      - file: "content/skills.json"
+        label: "Skills"
+        name: "skills"
+        format: "json"
+        fields:
+          - label: "Section header"
+            name: "head"
+            widget: "object"
+            fields:
+              - { label: "Command", name: "cmd",   widget: "string" }
+              - { label: "Title",   name: "title", widget: "string" }
+              - { label: "Meta",    name: "meta",  widget: "string", required: false }
+          - label: "Items"
+            name: "items"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.name}} — {{fields.summary}}"
+            fields:
+              - { label: "Slug (URL-safe id)", name: "slug",     widget: "string" }
+              - { label: "Display name (e.g. /devloop, agent-brief.txt)", name: "name", widget: "string" }
+              - { label: "Category (e.g. “Claude Code skill”, “agent infra”, “hook”)", name: "category", widget: "string" }
+              - { label: "Summary (one line — shows on the row)",       name: "summary",  widget: "text" }
+              - { label: "Details (markdown — shows in the side panel)", name: "details", widget: "text", required: false }
+              - label: "Links"
+                name: "links"
+                widget: "list"
+                required: false
+                collapsed: true
+                summary: "{{fields.label}} — {{fields.href}}"
+                fields:
+                  - { label: "Label", name: "label", widget: "string" }
+                  - { label: "URL",   name: "href",  widget: "string" }
+              - { label: "Order (lower = higher up)", name: "order", widget: "number", default: 1 }
+
   # ── Lens: principles ───────────────────────────────────────────────
   - name: "lens"
     label: "Lens (how I think)"

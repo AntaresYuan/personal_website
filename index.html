@@ -109,7 +109,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=210120f5">
+<link rel="stylesheet" href="styles/main.css?v=c588518a">
 </head>
 <body>
 
@@ -536,6 +536,49 @@
     </div>
   </section>
 
+  <!-- ── SKILLS: dotfiles for AI ─────────────────────────────────
+       The receipts for the "AI Agent Native" pill — Claude Code skills,
+       configs, and agent-infra Antares built to multiply his own AI work.
+       Header + list are filled by build-html.js from content/skills.json.
+       Each row is a real <button> with data-card-id="SKILL-NN"; clicking
+       opens the same side-panel modal the board cards use (render.js
+       hydrates skills into cardIndex on boot). -->
+  <section class="section skills-section rise rise-3" id="skills">
+    <header class="sec-head">
+      <span class="sec-cmd"   id="skills-cmd">$ ls ~/skills</span>
+      <span class="sec-title" id="skills-title">/skills</span>
+      <span class="sec-meta"  id="skills-meta">dotfiles for AI — what I built to multiply my own AI work</span>
+    </header>
+    <ul class="skills-list" id="skills-list">
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-01" aria-label="Open details for /devloop">
+            <span class="skill-id">SKILL-01</span>
+            <span class="skill-name">/devloop</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</span>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </button>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-02" aria-label="Open details for /ai-pm-resume">
+            <span class="skill-id">SKILL-02</span>
+            <span class="skill-name">/ai-pm-resume</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</span>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </button>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-03" aria-label="Open details for agent-brief.txt">
+            <span class="skill-id">SKILL-03</span>
+            <span class="skill-name">agent-brief.txt</span>
+            <span class="skill-cat">agent infra</span>
+            <span class="skill-summary">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</span>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </button>
+        </li></ul>
+  </section>
+
   <!-- ── LENS: how I think ───────────────────────────────────────── -->
   <section class="section rise rise-3" id="lens">
     <header class="sec-head">
@@ -774,9 +817,9 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=fe17424f"   defer></script>
+<script src="scripts/render.js?v=4e60d4eb"   defer></script>
 <script src="scripts/terminal.js?v=220438c1" defer></script>
-<script src="scripts/palette.js?v=bb9d0a6d"  defer></script>
+<script src="scripts/palette.js?v=7a43d41d"  defer></script>
 <script src="scripts/doodle.js?v=08a1995d"   defer></script>
 </body>
 </html>
