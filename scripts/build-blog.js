@@ -195,6 +195,12 @@ const byline = (p, big) => `<div class="blog-byline${big ? ' blog-byline-lg' : '
         <span class="blog-byline-text"><span class="blog-byline-name">${e(AUTHOR)}</span><span class="blog-byline-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</span></span>
       </div>`;
 
+// A row of tag chips for a post — empty string if the post carries no tags so
+// the surrounding template can drop the row cleanly.
+const tagRow = (tags) => (tags && tags.length)
+  ? `<ul class="blog-tags" aria-label="Tags">${tags.map((t) => `<li class="blog-tag">${e(t)}</li>`).join('')}</ul>`
+  : '';
+
 // /blog/  — index ("publication" masthead + a roomy card per post)
 const indexMain = `  <section class="section blog-index">
     <header class="blog-index-head">
@@ -208,6 +214,7 @@ ${posts.map((p) => `      <li class="blog-list-item">
           <h2 class="blog-list-title">${e(p.title)}</h2>
           ${p.summary ? `<p class="blog-list-summary">${e(p.summary)}</p>` : ''}
           <p class="blog-list-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</p>
+          ${tagRow(p.tags)}
         </a>
       </li>`).join('\n')}
     </ul>`
@@ -218,7 +225,7 @@ fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
 // A compact post manifest — the ⌘K palette (scripts/palette.js) fetches this
 // to index posts; small + cacheable.
 fs.writeFileSync(path.join(root, 'blog', 'posts.json'),
-  JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date })), null, 2) + '\n');
+  JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date, tags: p.tags })), null, 2) + '\n');
 const ogCard = (rel) => fs.existsSync(path.join(root, rel)) ? `${SITE_URL}/${rel}` : undefined;
 fs.writeFileSync(path.join(root, 'blog', 'index.html'), pageShell({
   title: 'Writing',
@@ -240,6 +247,7 @@ for (const p of posts) {
       <h1 class="blog-post-title">${e(p.title)}</h1>
       ${p.summary ? `<p class="blog-post-lead">${e(p.summary)}</p>` : ''}
       ${byline(p, true)}
+      ${tagRow(p.tags)}
     </header>
     <div class="blog-post-body prose">
 ${mdToHtml(p.body)}
@@ -277,7 +285,7 @@ const feedItems = posts.map((p) => `    <item>
       <title>${e(p.title)}</title>
       <link>${SITE_URL}/blog/${e(p.slug)}/</link>
       <guid isPermaLink="true">${SITE_URL}/blog/${e(p.slug)}/</guid>${p.date ? `\n      <pubDate>${rfc822(p.date)}</pubDate>` : ''}
-      <dc:creator>${e(AUTHOR)}</dc:creator>${p.summary ? `\n      <description>${e(p.summary)}</description>` : ''}
+      <dc:creator>${e(AUTHOR)}</dc:creator>${p.summary ? `\n      <description>${e(p.summary)}</description>` : ''}${(p.tags || []).map((t) => `\n      <category>${e(t)}</category>`).join('')}
       <content:encoded>${cdata(absUrls(mdToHtml(p.body)))}</content:encoded>
     </item>`).join('\n');
 const feed = `<?xml version="1.0" encoding="UTF-8"?>

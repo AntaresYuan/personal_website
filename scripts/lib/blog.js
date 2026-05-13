@@ -150,10 +150,30 @@ function videoEmbedHtml(src) {
 
 /* ── frontmatter ────────────────────────────────────────────────────────
    --- \n key: value \n --- \n. A small YAML subset — enough for what the
-   CMS writes for a post: bare/quoted scalars, true/false, and `|` / `|-` /
-   `>` / `>-` block scalars (Sveltia serializes multi-line `text` fields that
-   way). Unknown shapes are kept as the raw remainder of the line. */
+   CMS writes for a post: bare/quoted scalars, true/false, `|` / `|-` / `>` /
+   `>-` block scalars (Sveltia serializes multi-line `text` fields that way),
+   and flow `[a, b]` / block `- a` arrays (for the Tags list widget).
+   Unknown shapes are kept as the raw remainder of the line. */
 function parseFrontmatter(raw) {
+  // strip one layer of YAML/JSON quoting from a scalar token in a flow list
+  const unquote = (s) => {
+    const t = String(s).trim();
+    if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) return t.slice(1, -1);
+    return t;
+  };
+  // split "a, \"b, c\", 'd'" on top-level commas only (respecting quotes)
+  const splitFlow = (s) => {
+    const out = []; let buf = '', q = '';
+    for (const ch of s) {
+      if (q) { buf += ch; if (ch === q) q = ''; }
+      else if (ch === '"' || ch === "'") { q = ch; buf += ch; }
+      else if (ch === ',') { out.push(buf); buf = ''; }
+      else buf += ch;
+    }
+    if (buf.trim()) out.push(buf);
+    return out.map(unquote).filter(Boolean);
+  };
+
   const m = /^---[ \t]*\n([\s\S]*?)\n---[ \t]*\n?/.exec(String(raw));
   if (!m) return { data: {}, body: String(raw) };
   const data = {};
@@ -162,6 +182,7 @@ function parseFrontmatter(raw) {
     const mm = /^([A-Za-z0-9_-]+)[ \t]*:[ \t]*(.*)$/.exec(lines[i]);
     if (!mm) continue;
     let v = mm[2].trim();
+    // block scalar: `|` / `|-` / `>` / `>-`
     const block = /^([|>])[+-]?[ \t]*$/.exec(v);
     if (block) {
       const folded = block[1] === '>';
@@ -175,6 +196,17 @@ function parseFrontmatter(raw) {
       const text = buf.map((l) => l.slice(indent)).join(folded ? ' ' : '\n');
       data[mm[1]] = (folded ? text.replace(/\s+/g, ' ') : text).trim();
       continue;
+    }
+    // flow array on the same line: `[a, b, c]`
+    if (v.startsWith('[') && v.endsWith(']')) { data[mm[1]] = splitFlow(v.slice(1, -1)); continue; }
+    // block sequence: empty value, then indented `- item` lines
+    if (v === '') {
+      const arr = []; let j = i + 1;
+      while (j < lines.length && /^[ \t]+-\s/.test(lines[j])) {
+        arr.push(unquote(lines[j].replace(/^[ \t]+-\s+/, '')));
+        j++;
+      }
+      if (arr.length) { data[mm[1]] = arr.filter(Boolean); i = j - 1; continue; }
     }
     if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
     else if (v === 'true') v = true;
@@ -195,11 +227,25 @@ function loadPosts({ includeDrafts = false } = {}) {
     .map((f) => {
       const { data, body } = parseFrontmatter(fs.readFileSync(path.join(BLOG_DIR, f), 'utf8'));
       const slug = slugify(data.slug || f.replace(/\.md$/i, ''));
+      // tags — accept an array (the only shape the YAML parser hands us for a
+      // sequence) or a string fallback (comma-separated, for the rare case
+      // someone hand-edits a single line). Trimmed, de-duped, lowercased
+      // only-for-uniqueness (preserve the author's casing on the page).
+      const rawTags = Array.isArray(data.tags) ? data.tags
+        : typeof data.tags === 'string' ? data.tags.split(',')
+        : [];
+      const tags = []; const seen = new Set();
+      for (const t of rawTags) {
+        const s = String(t).trim();
+        const k = s.toLowerCase();
+        if (s && !seen.has(k)) { seen.add(k); tags.push(s); }
+      }
       return {
         slug,
         title: String(data.title || slug).trim(),
         date: String(data.date || '').trim().slice(0, 10),
         summary: String(data.summary || '').replace(/\s+/g, ' ').trim(),
+        tags,
         draft: data.draft === true || data.draft === 'true',
         body: String(body).trim(),
         file: f,

@@ -282,6 +282,7 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
       - { label: "Summary", name: "summary", widget: "text", hint: "One-line teaser shown on /blog/ — also the page’s meta description." }
+      - { label: "Tags", name: "tags", widget: "list", required: false, default: [], hint: "Optional. Add a few topic tags — they show as chips on /blog/ and the post page, and become <category> entries in the RSS feed." }
       - { label: "Draft", name: "draft", widget: "boolean", default: false, hint: "Drafts don’t appear on the site." }
       - { label: "Body", name: "body", widget: "markdown" }
 
