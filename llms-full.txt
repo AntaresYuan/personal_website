@@ -81,6 +81,15 @@ Updated: 2026-05-09
 Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
 Tags: RESEARCH PROJECT
 Updated: 2026-05-12
+
+## NOW-04 · NOW · SleepStreak
+Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults
+Tags: RESEARCH PROJECT
+Updated: 2025-05-10
+
+• Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults
+• Studies found this crisis has been caused in part by smartphones and digital devices
+• This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this
 # Next
 
 ## NEXT-01 · NEXT · From PM to Builder
