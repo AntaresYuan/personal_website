@@ -6,8 +6,25 @@
   },
   "intro": "Currently open to: founder conversations in AI infra & agents, AI PM roles at top product orgs, and contractor work on 0→1 features. <em>Tell me what you're building.</em>",
   "items": [
-    { "key": "email",    "label": "chenjy4@uw.edu", "href": "mailto:chenjy4@uw.edu" },
-    { "key": "linkedin", "label": "Chenjie (Antares) Yuan",       "href": "#" },
-    { "key": "github",   "label": "@AntaresYuan",       "href": "https://github.com/AntaresYuan" }
+    {
+      "key": "email",
+      "label": "chenjy4@uw.edu",
+      "href": "mailto:chenjy4@uw.edu"
+    },
+    {
+      "key": "linkedin",
+      "label": "Chenjie (Antares) Yuan",
+      "href": "https://www.linkedin.com/in/chenjie-yuan-682b93298/"
+    },
+    {
+      "key": "github",
+      "label": "@AntaresYuan",
+      "href": "https://github.com/AntaresYuan"
+    },
+    {
+      "key": "Dribbblle",
+      "label": "Antares Yuan",
+      "href": "https://dribbble.com/AntaresYuan"
+    }
   ]
 }
