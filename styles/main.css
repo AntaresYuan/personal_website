@@ -5,6 +5,14 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Restore the `hidden` HTML attribute. Without `!important`, a normal author
+   rule like `.ask-panel { display: flex }` beats the UA's `[hidden]
+   { display: none }` (author origin > UA origin in the cascade) — so panels
+   marked `hidden` in the markup still get laid out, and on mobile their
+   `width: 100vw; height: 100dvh` variant covers the viewport invisibly and
+   swallows every tap. */
+[hidden] { display: none !important; }
+
 /* ════════════════════════════════════════════════════════════════════════
    DESIGN TOKENS — single source of truth.
    Palette: warm yellow primary + cobalt blue accent on cream bg.
