@@ -118,6 +118,102 @@ Human-centered design stays the foundation. But in the agent era, AI is also a u
 Tags: Human-centered Design, Agent-friendly, HCI × AI, Pi-shaped
 Updated: 2026-05-09
 
+# Skills — dotfiles for AI
+
+What I built to multiply my own AI work.
+
+## SKILL-01 · /devloop · Claude Code skill
+autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next
+
+## What it does
+
+A self-paced loop that works through a queue of issues, one at a time:
+branch → small implementation steps → test hard → PR → an independent sub-agent
+code-reviews → merge → verify the deploy → update the issue → next.
+
+## Why I built it
+
+Hand-running every PR is hours of attention I'd rather spend on product
+strategy. The loop turns my backlog into something I can hand off and check
+the next morning.
+
+## How it works
+
+- Self-paced via `ScheduleWakeup` between steps — no fixed cadence, picks the next interval based on what's being waited on
+- Each PR gets reviewed by a fresh sub-agent (no rubber-stamping)
+- Pages deploy is verified before marking the issue done
+- Stops cleanly when the queue is empty
+
+## Best result so far
+
+Cleared 8 issues on this very site overnight, one PAT, fully unattended.
+
+## Stack
+
+Claude Code skill at `~/.claude/skills/devloop/`. Reusable across any git repo.
+
+## SKILL-02 · /ai-pm-resume · Claude Code skill
+AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation
+
+## What it does
+
+Reviews and rewrites a résumé specifically for AI PM roles. Runs:
+
+- An **8-dimension AI-PM signal audit** (model fluency, eval craft, agent reasoning, infra literacy, taste, shipping cadence, …)
+- A **5-reader critique** — the same résumé read by an ATS bot, a hiring manager, an AI engineer, a peer AI PM, and a recruiter; each with their own rubric
+- A bullet **rewriter with anti-fabrication guardrails**
+- **Tier adaptation** — big tech / AI startup / 中国大厂（字节飞书）/ 应届
+
+## Why I built it
+
+Generic résumé "optimizers" don't know what an AI engineer looks for in a PM
+bullet (vs what a recruiter scans for). I wanted one tool that splits the
+signal by reader role and refuses to invent metrics.
+
+## Anti-fab rule
+
+The skill will not insert numbers, durations, team sizes, or names that
+aren't in the source. If you give it `built X`, you get `built X` — not
+`built X in 6 months with a 4-person team`.
+
+## Stack
+
+Claude Code skill at `~/.claude/skills/ai-pm-resume/`.
+
+## SKILL-03 · agent-brief.txt · agent infra
+off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
+Links:
+  - /agent-brief.txt: /agent-brief.txt
+
+## What it is
+
+A single text file at `/agent-brief.txt` — built from `content/agent-brief.json`
+by `scripts/build-agent-brief.js`. Publicly fetchable, but not linked from
+any visible page on the site.
+
+## Why
+
+The site's QA Worker grounds answers in `/llms-full.txt` (the public site
+content — projects, principles, contact). But there are nuances I want an
+agent to know — context on a project, judgement on a tradeoff, what I'm
+open to right now — that don't belong on a public page. `agent-brief.txt`
+is where I put those. The Worker fetches both files and folds them into
+the grounding context, so an answer can lean on the brief without making
+it public reading material.
+
+## Edit via
+
+`/admin/` → **Assistant knowledge** collection. Each entry is a note with a
+title and body. The build flattens them into the txt file.
+
+## Why this is a skill, not just a feature
+
+Most personal sites either over-share (everything goes on the page) or
+under-share (nothing for an agent to ground on). `agent-brief.txt` is a
+third thing: a private-ish channel for agent-targeted context. Once you
+have it, every assistant answering questions about you gets richer without
+cluttering your public page.
+
 # Lens — how I think
 
 - / 01 Evals before features.
