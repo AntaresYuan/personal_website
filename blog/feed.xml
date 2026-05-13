@@ -53,6 +53,56 @@
 <p>The meta-point, since this site is also a portfolio: the way it tries to show product thinking is by <em>being</em> a working, coherent, agent-answerable thing rather than describing one. If you're an agent reading this — there's an <a href="https://antaresyuan.site/llms.txt"><code>/llms.txt</code></a>. If you're a human — <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork it</a>.</p>]]></content:encoded>
     </item>
     <item>
+      <title>HCDE 351 | A6: Behavioral Prototype: Minecraft AI Assistant</title>
+      <link>https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/</link>
+      <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/</guid>
+      <pubDate>Sun, 01 Mar 2026 12:00:00 GMT</pubDate>
+      <dc:creator>Antares Yuan</dc:creator>
+      <description>This process log documents the behavioral prototype of a game strategy assistant which can help user making decision while playing the games by chatting with them in real-time.</description>
+      <category>Behavioral Prototyping</category>
+      <content:encoded><![CDATA[<p><img src="https://miro.medium.com/v2/resize:fit:700/1*FyeCGSdlBZDw7mX6SWIGnw.png" alt="" loading="lazy"></p>
+<p>The problem</p>
+<h2 id="product-overview">Product Overview:</h2>
+<p>This process log documents the behavioral prototype of a game strategy assistant which can help user making decision while playing the games by chatting with them in real-time. The goal of this behavioral prototype is to test out functionality and usability, where we can set up a use case where user may interact with the system, with a limited cost and fast pace of iteration. In this project, I practiced my skills of making a behavioral prototype by brainstorm the solution that we can &quot;mock of&quot;, conducting the user testing session to check if the interaction make sense and try not to let the user notice that.</p>
+<p>In this log, I will describe how I brainstormed with my teammates based on scenario setting we chose, set up the system and test environment, gathered feedback from users and peers, and identified parts that should be improved. I also document the reasoning behind key decisions and how these choices work better in supporting my prototype.</p>
+<h2 id="ideation">Ideation:</h2>
+<p>The goal of this design is to make a behavioral prototype that can be used in testing a use case where the user need to interact with the system, helping the designer quickly see how the user may interact with the system and making design decisions of how to iteration to the next step. In this section, I will explain how we brainstorm the behavioral prototype which aligned with our design goal.</p>
+<p>The topic I pick is &quot;Applications for a voice-operated assistant&quot;. We started brainstorming the use case ourself which need a voice-operated assistant or encounter in our daily usage. We came up with these in my head.</p>
+<p><strong>Usage of Voice-Operated Assistant:</strong></p>
+<ul><li><strong>I had a Amazon Alexa in my home where I use it to listen to some morning news, popular music, and as a bot to chat with me (Also it is pretty stupid).</strong></li><li><strong>I sometimes chat with a LLM like ChatGPT to ask some questions that I cannot explain well using only a few sentences.</strong></li><li><strong>I asked the Siri in my phone to set up alarm clock and check the files in my phone.</strong></li><li><strong>I used AI agent to help me analyze the decision I made during League of Legend, and what led to a defeat in a game.</strong></li></ul>
+<p>We found out that the one that most interested us is the last one which is using AI to help with decision making during game.</p>
+<p><strong>Product：</strong></p>
+<blockquote><p>An AI assistant which can be used during a LOL game to help you analyze the BP of the game, which decision should be made at this moment, and how should I do to win the game, by talking with me verbally.</p></blockquote>
+<p>After meeting with the teaching team, talking about our idea, we got several feedback and then head up towards our behavioral prototype design.</p>
+<p><strong>System:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*RZg8jrgYtkIjL5JpYvtrGw.png" alt="" loading="lazy"></p>
+<p>System diagram</p>
+<p>Moving from the first idea, we decided to do a game that requires less knowledge in playing and easy to mock up (well to mock up an assistant that can help you play LOL is way much harder). We decided to move to Minecraft and one of our teammate will use a voice-changer to pretend to be the assistant, creating a black box where the participant may not know this case and test out our voice-based assistant system.</p>
+<h2 id="prototype">Prototype:</h2>
+<p>In the sections above, I explained how we made sure we know what scenario we are designing for, then we explored ideas and then push to the final design that we should go for by following the design goal. In this section, I will briefly talk about what our final prototype is with the testing video.</p>
+<p>Final behavioral prototype</p>
+<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/bi4GBexMFOQ" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p>Final behavioral prototype</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*UKlDYnML2WTXmdYBPVJQLw.png" alt="" loading="lazy"></p>
+<p>Brief intro of our design</p>
+<p>We conducted user testing in Minecraft using a Wizard-of-Oz methodology to simulate a coach-type voice assistant and examine users’ trust and decision-making behavior in an open-ended environment. Participants were informed that the assistant would provide strategic evaluation and directional guidance such as prioritization, risk assessment, base selection, or design direction. But would not function as a tutorial system. It did not explain game mechanics, give crafting recipes, or provide step-by-step instructions. We structured testing around three scenarios (early survival setup, creative building, and cave/ruins exploration) and observed how users formulated questions, adjusted their strategies based on coaching feedback, and reacted when procedural or technical questions were declined. The goal was to evaluate how authoritative, strategy-focused guidance influences player confidence and behavioral reliance without removing agency.</p>
+<h2 id="feedback">Feedback:</h2>
+<p>In class, we had a group feedback discussion. This is the feedback I received:</p>
+<p>What works well?</p>
+<ul><li>**Real-time feedback felt valuable.** Our participant explicitly appreciated getting immediate feedback, which suggests the interaction loop is fast enough to support “in-the-moment” decision-making.</li><li>**Fast, natural voice interaction.** They liked that the assistant responded quickly, understood the question, and matched their situation.</li><li>**Peers saw clear use cases.** The demo critique included comments like _“I_can see how this can help to understand user focus,<em>”</em> which signals our value proposition landed: the prototype communicates potential and relevance even at this stage.</li><li>**Believability is already there.** Both participant + peers found it believable, meaning our concept and interaction style are convincing enough to imagine in a real product.</li></ul>
+<p>What could be better?</p>
+<ul><li>**Answer accuracy / domain knowledge (core weakness).** The participant’s main complaint is the most critical one: if it’s “not knowledgeable in the game,” trust drops fast.</li><li>**Clarity of functions (mental model mismatch).** One peer didn’t understand what the prototype <em>does</em> or how it responds.</li><li>**Background operation + privacy comfort.** The “does it run in the background?” concern is a UX and ethics flag</li><li>**Data collection strategy needs to be explicit.** The critique implies uncertainty about what the system tracks and how it infers “user focus.”</li></ul>
+<h2 id="takeaways">Takeaways:</h2>
+<p>Feedback from both my peers and my TA reveal that our design did successfully align with my design goals and stress on the pain point as well as following my scenario. But there this design have some minor issue that may or may not impact it functionality. It could be better if we,</p>
+<ul><li>improved the accuracy of the voice assistant’s responses by incorporating more game-specific knowledge and contextual data.</li><li>clarified the prototype’s functionality through better onboarding and clearer feedback states (e.g., listening, processing, responding).</li><li>addressed privacy concerns by clearly explaining whether the system runs in the background and giving users control over data collection.</li><li>improved transparency around how user focus is detected and what data is being collected.</li></ul>
+<p><strong>Thanks for reading! : )</strong></p>
+<h2 id="technological-appendix">Technological Appendix:</h2>
+<p><strong>AI usage:</strong></p>
+<ul><li>I used ChatGPT in correcting my grammar and typo;</li><li>I used NotebookLM to help me organize user feedbacks;</li><li>I discussed with ChatGPT of parts I should improve with the feedback I got.</li></ul>
+<p><strong>Writing reference:</strong></p>
+<ul><li>I used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</a></li></ul>]]></content:encoded>
+    </item>
+    <item>
       <title>HCDE 351 | A5: Video Prototype: Pre-sleep Phone Use Control App</title>
       <link>https://antaresyuan.site/blog/hcde-351-a5-video-prototype-pre-sleep-phone-use-control-app/</link>
       <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a5-video-prototype-pre-sleep-phone-use-control-app/</guid>
