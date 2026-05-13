@@ -160,9 +160,9 @@
       "order": 2
     },
     {
-      "id": "SusFix",
+      "id": "now-3",
       "status": "now",
-      "title": "now-3",
+      "title": "SusFix",
       "summary": "Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.",
       "details": "",
       "tags": [
