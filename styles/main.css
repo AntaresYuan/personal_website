@@ -1153,7 +1153,8 @@ body.blog-post-page .blog-progress {
 
 /* ── tags — small pills below a blog-list card and on the post header ──
    Distinct from the kanban .tag (9.5px ALL-CAPS) — blogs want them at
-   reading scale and not shouting. */
+   reading scale and not shouting. Static — no hover state: the chip is
+   metadata, not a target. The card's title already turns blue on hover. */
 .blog-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1167,15 +1168,10 @@ body.blog-post-page .blog-progress {
   font-size: var(--fs-11);
   letter-spacing: var(--tracking-wide);
   padding: 2px 8px;
-  background: var(--color-yellow-glow);
+  background: var(--color-yellow-soft);
   color: var(--color-text);
   border-radius: 999px;
 }
-.blog-list-link .blog-tag {
-  /* keep the chip clickable-looking even though the whole card is the link */
-  transition: background-color 120ms ease;
-}
-.blog-list-link:hover .blog-tag { background: var(--color-yellow); }
 
 /* ── byline — avatar + name + (date · read time) ──────────────────────── */
 .blog-byline { display: flex; align-items: center; gap: var(--sp-10); }
