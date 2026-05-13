@@ -53,6 +53,95 @@
 <p>The meta-point, since this site is also a portfolio: the way it tries to show product thinking is by <em>being</em> a working, coherent, agent-answerable thing rather than describing one. If you're an agent reading this — there's an <a href="https://antaresyuan.site/llms.txt"><code>/llms.txt</code></a>. If you're a human — <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork it</a>.</p>]]></content:encoded>
     </item>
     <item>
+      <title>HCDE 351 | A2: Soft Goods Prototype: Shoulder Bag Design</title>
+      <link>https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</link>
+      <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</guid>
+      <pubDate>Sun, 25 Jan 2026 12:00:00 GMT</pubDate>
+      <dc:creator>Antares Yuan</dc:creator>
+      <description>This process log documents the design of a cotton cloth shoulder bag where the users can use the main part of the bag to hold a laptop, put a keyboard, mouse and an adapter and charging line in the front pocket, and an additional velcro holder as a closing mechanism to avoid laptop falling off.</description>
+      <content:encoded><![CDATA[<h2 id="product-overview">Product Overview:</h2>
+<p>This process log documents the design of a cotton cloth shoulder bag where the users can use the main part of the bag to hold a laptop, put a keyboard, mouse and an adapter and charging line in the front pocket, and an additional velcro holder as a closing mechanism to avoid laptop falling off. The goal of this design is to enhance reliability and functionality, to make a product that I would like to use in my daily routine. In this project, I explored how to utilize my design to better respond to the my own need of having a shoulder bag for my daily routine and practiced my soft good prototype skills (using sewing machine/cutting materials/planning on how to resemble different parts of the prototype) to respond to future need of soft good prototype.</p>
+<p>In this log, I will describe how I brainstormed based on defined user needs, made decisions on which final design I should go for, gathered feedback from users and peers, and identified parts that should be improved. I also document the reasoning behind key decisions and how these choices work better in supporting my target users.</p>
+<h2 id="ideation">Ideation:</h2>
+<p>The goal of this design is to make a “bag-shaped” soft good that stress on simplicity, and can hold stuff inside it and have a closing mechanism that can avoid stuff from falling off the container, using a sewing machine to connect different part together. In this section, I will explain how I iterate throughout these three ideas to better align with my design goal.</p>
+<p>I started with thinking of which part in this design description will make it better than the product we are already using now. I tried to list out the satisfaction points (my own need of using a bag with soft material).</p>
+<ul><li><strong>I would always bring my laptop with me to deal with some unexpected need of using my laptop to work/study/working on homework assignment, so I would be very happy if I have my laptop with me wherever I go.</strong></li><li><strong>My laptop’ battery drops very quickly so I would feel more safe if I can bring my charging line and adapter with me so that I can use my laptop without feeling a sense of insecure.</strong></li><li><strong>I get thirsty really quickly so that I have to drink water frequently. That’s been said, I have to bring a water bottle along with me in order to consume some water if needed.</strong></li><li><strong>I wish I can use a easy way to grab out stuff from my bag along with me. For now, every time I want to take out stuff from my backpack, I have to take off it then unzip if to do so, so that part could be better.</strong></li></ul>
+<p>While finding some ideas by gathering inspiration from Pinterest, I thought about how I can also stress these satisfaction points using my design as a solution.</p>
+<p><strong>Idea 1:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*s09HQ24JHlHApFq-d2Q8xA.png" alt="" loading="lazy"></p>
+<p>Idea 1: Shoulder bag with two straps</p>
+<p>My first idea is kinda random from the references (see technical appendix part). I chose to design the shoulder bag sewing outside to outside because I want to enhance the texture of sewing line on the bag. This is a common design of shoulder bag. I chose to do the sip as the closing mechanism because this is the first closing mechanism jump into my mind. The volume of the bag is big enough for me to put my laptop, adapter, charging line, and a water bottle in it. There is no strong connection with iteration on three of the design, they are pretty parallel in ideation phase.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*MBe-YEfdE0iZMTsRYt1g_g.png" alt="" loading="lazy"></p>
+<p>Idea 2: A wave shape shoulder bag</p>
+<p>After that, I soon had a second idea on having a better (or say more complicated) body shape of the bag. I chose to design a upside down “U” shaped on the edge of the shoulder bag because in this idea, I use two buttons as the closing mechanism which will decrease the volume of the shoulder bag. I chose to do the sewing outside to outside for the same reason. And still, this is big enough for me to put all my belongings in my satisfaction point in it. I changed the strap to the other side and then reduce it to become only one.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*t1hwJnZ8y4GDVHrwuTWzqw.png" alt="" loading="lazy"></p>
+<p>Idea 3: Connected strap and body shoulder bag</p>
+<p>For the idea 3, I decided to explore the possibility of cutting the strap as I cut the main body. This simplify my way of making this bag, as well as enhance more aspects in aesthetics. I chose to step a way back to use zip as the closing mechanism because this bag has a flat edge. Also, I choose to sew the bag inside to inside in order to hide the messy sewing lines and better align with my goal of design a bag with simplicity. I also added a pocket in the front of the bag so that the storage of my laptop and other stuff separately can be seen as an additional align on simplicity. <strong>With all those been taken into consideration, the idea 3 is the best align with my goal of having a simple shoulder bag achieving my satisfaction points among three of these ideas. So I decided to go with this idea and started my first low-fidelity iteration prototype.</strong></p>
+<h2 id="prototype">Prototype:</h2>
+<p>In the sections above, I explained how I explored different ideas and then made decisions on the one I should go for making a prototype by following the design goal and stressing the satisfaction points. In this section, I will briefly talk about the process of making a testable low-fidelity soft good prototype, and then use it to iterate to a better prototype in fidelity level, and showcase how it looks.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*-ZPqyebgEUz306GR8TsGsA.png" alt="" loading="lazy"></p>
+<p>Sketching on the soft material</p>
+<p>First of all, I used my idea 3 as a reference and sketched out the cutting lines and sewing lines on the soft material using my markers.</p>
+<p>After that I went to the McCarty Innovation &amp; Learning Lab (MILL) to cut out my sketch on the soft material using scissors and then use pins to make further adjustments on edges. Then I use the sewing machine to connect two part together (front and back).</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*kaFlQDWgrJyMsy6OC8pWag.png" alt="" loading="lazy"></p>
+<p>Sewing inside to inside</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*5LjONFjwMmckIQaDyFo1DQ.png" alt="" loading="lazy"></p>
+<p>Using sewing machine to sew</p>
+<p>Then when I tried to sew the zip to the edge of the opening of the bag, there came the difficulty. I found that it is way too late for me to sew the zip and the edge of the top. It made me super hard to do this sewing afterwards. It took me about half an hour to fixed this problem, and here is how the first low fidelity prototype looks like.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*cM1Tovr4e1WqJz8z8nyJZA.png" alt="" loading="lazy"></p>
+<p>Low-fidelity prototype on soft material</p>
+<p>After seeing the first low fidelity prototype, I identified several parts for improvement:</p>
+<ul><li><strong>One layer of this kind of material is to thin, or say not strong enough for me to hold something relatively heavy like a laptop, so I should use double layer at least in my next prototype.</strong></li><li><strong>Choosing to build the straps and the body together (cutting them out together without further enhancement on connection point) lead to the weakness in holding heavy items as well.</strong></li><li><strong>Sew the front and back part together should placed in front of the process of sewing of small component on the main part, in the whole process.</strong></li><li><strong>I should do a velcro as the closing mechanism instead of doing a zip because when I hold this shoulder bag, it would be easier for me to open it and take things out with a velcro but not a zip.</strong></li></ul>
+<p>Keeping these in mind, I did my higher fidelity prototype.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*QH1hRRiQF9EHARM0MSXaXA.png" alt="" loading="lazy"></p>
+<p>Higher-fidelity prototype on soft material</p>
+<p>And here are some detailed showcase.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*7IrRdFYThyWpSwNR758afw.png" alt="" loading="lazy"></p>
+<p>Front pocket and velcro</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*mpDQgYqExTrkyHARVR3NQQ.png" alt="" loading="lazy"></p>
+<p>Velcro closing mechanism</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*Uj_haB8GtKzUylmCINUG4w.png" alt="" loading="lazy"></p>
+<p>Sewing line on velcro</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*tSfmqmXxLSNux2QhFjP6gA.png" alt="" loading="lazy"></p>
+<p>Inside of the bag (showing sewing inside to inside)</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*9NsHIIDKUvWF1sqmlLSP3w.png" alt="" loading="lazy"></p>
+<p>Velcro structure back</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*g2eyP2vLBcruetKIU8OwSQ.png" alt="" loading="lazy"></p>
+<p>Enhanced connection of strap and main part</p>
+<p>I also tested the reliability and functionality of the shoulder bag. I can put my laptop with a water bottle on the front so it does align with my design goal and stresses on my satisfaction point.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*m4WSjrTVF4EAgKc1VRCXhQ.png" alt="" loading="lazy"></p>
+<p>Testing functionality</p>
+<h2 id="feedback">Feedback:</h2>
+<p>In class, my peer and I worked in groups of four for one rounds of critique. Then we moved out for presenting our prototype to our TA and receicving feedback as well. In the first round of critique, I introduced my design in one sentence and talked about how I iterated through prototypes. I also talked about the key decision I made and future question on my prototype. In the second round of critique, I presented my work as well as saying the key decision I made, as the further question I had. This is the feedback I received:</p>
+<p><strong>Key decision I made:</strong> Choose to do double layer on the all the parts in this prototype.</p>
+<p><strong>Further question I had:</strong> Which part in this design makes you feel unsafe (In what situation, this might be broke)</p>
+<p><strong>Round 1:</strong></p>
+<p>What works well?</p>
+<ul><li>They liked <strong>the front pocket</strong>, finding it useful and well-placed.</li><li>They appreciated the use of an <strong>“X-box stitch”</strong> to reinforce the connection between the strap and the body of the bag, noting that it enhanced structural stability.</li><li>They liked that the <strong>closure is designed as a separate component</strong>, rather than being directly integrated into the bag body.</li><li>They liked how I switch the closure from a <strong>zipper to velcro.</strong> It was seen as a positive improvement, making the bag <strong>easier and faster to use</strong>.</li></ul>
+<p>What could be better?</p>
+<ul><li>They thought that the bag is <strong>a little tight when fitting a laptop (although all of them successfully fit their laptop in)</strong>, suggesting that the internal space could be slightly increased for better usability.</li></ul>
+<p><strong>Round 2:</strong></p>
+<ul><li>TA said that the <strong>straps should be stitched together</strong>, as this would improve strength and durability.</li><li>TA mentioned I should consider <strong>adding a third layer to the pocket</strong>, which could improve organization or functionality.</li><li>For the straps, it was suggested to <strong>fold the fabric along the cut line and iron it before stitching</strong>, which may result in cleaner edges and a more polished finish.</li></ul>
+<h2 id="takeaways">Takeaways:</h2>
+<p>Feedback from both my peers and my TA reveal that my design did successfully align with my design goals and stress on the satisfaction points. But there this design have some minor issue that may or may not impact it functionality. It could be better if I,</p>
+<ul><li>Slightly increasing internal capacity for laptops</li><li>Improve strap construction techniques</li><li>Exploring additional pocket layering for better organization</li></ul>
+<h2 id="acknowledgment">Acknowledgment:</h2>
+<p>Special thanks to my group member Batuhan Celebioglu, Ashley Ma, and Josue Salgado, TA Nichole Sams and Instructer Brock Craft for their valuable feedback. Special thanks to Peitong Qi for her help with organizing materials and actionable feedback.</p>
+<p><strong>Thanks for reading! : )</strong></p>
+<h2 id="technological-appendix">Technological Appendix:</h2>
+<p><strong>AI usage:</strong></p>
+<ul><li>I used ChatGPT in correcting my grammar and typo;</li><li>I used NotebookLM to help me organize user feedbacks;</li><li>I discussed with ChatGPT of parts I should improve with the feedback I got.</li></ul>
+<p><strong>Writing reference:</strong></p>
+<ul><li>I used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://medium.com/@chenjy4/hcde-351-a1-oxo-shower-control-interface-142da89d4355" target="_blank" rel="noopener">https://medium.com/@chenjy4/hcde-351-a1-oxo-shower-control-interface-142da89d4355</a></li></ul>
+<p><strong>Inspirational reference:</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*f2IjoCZJmsxijblbvFlfsA.png" alt="" loading="lazy"></p>
+<p><a href="https://www.gap.com/browse/product.do?pid=6819760720000&amp;tid=gpsm567927&amp;utm_campaign=626757375924&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088639047&amp;pp=0&amp;epik=dj0yJnU9eHBUajBieDJPSHloaVd6Rm5JWXByZDI5RVIxbHNvR2YmcD0xJm49a0pJRGFKNzloT0xtYmc2d1kxakw1ZyZ0PUFBQUFBR2x3Zk9V&amp;vid=1#pdp-page-content" target="_blank" rel="noopener">https://www.gap.com/browse/product.do?pid=6819760720000&amp;tid=gpsm567927&amp;utm_campaign=626757375924&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088639047&amp;pp=0&amp;epik=dj0yJnU9eHBUajBieDJPSHloaVd6Rm5JWXByZDI5RVIxbHNvR2YmcD0xJm49a0pJRGFKNzloT0xtYmc2d1kxakw1ZyZ0PUFBQUFBR2x3Zk9V&amp;vid=1#pdp-page-content</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*mOqY2YxHkq46ScVk_Nn2Xw.png" alt="" loading="lazy"></p>
+<p><a href="https://florence-leatherhandbags.com/products/elara-leather-tote-bag?variant=51740849144118&amp;pins_campaign_id=626757457011&amp;utm_campaign=626757457011&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088739648&amp;pp=0&amp;epik=dj0yJnU9VURaNzBNeklCQUU4V0d6NnczaHlkamNEdjlrbjRuaWomcD0xJm49ajFqVFA4RGdpVzlGUk5iNVNUZFFWUSZ0PUFBQUFBR2x3Zk80" target="_blank" rel="noopener">https://florence-leatherhandbags.com/products/elara-leather-tote-bag?variant=51740849144118&amp;pins_campaign_id=626757457011&amp;utm_campaign=626757457011&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088739648&amp;pp=0&amp;epik=dj0yJnU9VURaNzBNeklCQUU4V0d6NnczaHlkamNEdjlrbjRuaWomcD0xJm49ajFqVFA4RGdpVzlGUk5iNVNUZFFWUSZ0PUFBQUFBR2x3Zk80</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*DdDNGMbOPRnMURdPdEsglQ.png" alt="" loading="lazy"></p>
+<p><a href="https://www.amazon.com/dp/B07DZBJ5RP/ref=sspa_dk_offsite_pinterest_search_1?aaxitk=7c0863bdabf7e038f0e294aa58555c0e&amp;tqtoken=AgR4k4EN7v9O7EELABjVPh7ibTeNOaAjImt5-GoZfHtc5VcAGgABAAlyZWNpcGllbnQAC0FtYXpvbkFkc1RRAAEAEWF3cy1rbXMtaGllcmFyY2h5ACRiM2NlMjE3OS0wMzJhLTQ5NTAtOWFlZC00MTczZDMxZmNhMmEAXJREgdMFNbPLEEw8lFGOdGudX0JPBrDHDML1GtztK8nXMwFE6ZdgvB9GW5UIxGQYMe49Z8AHhziD0wejv11ZwgoKdpk5J_L6j817HA5N0QDJ9pq_3KxCRVPfiM1QAgAAEABS3cS9L4DxAyu0sCvYLoOAbPq819WNcq8ZRqGLrFj3XwlOTA1udbRXFSOWMYvkKtD_____AAAAAQAAAAAAAAAAAAAAAQAAABskN0yo_1EuqM7I4k0AV8AnRf2N1HDYcOjCcCNCY8M-edKczl9-DYbEX4of&amp;offsiteFlag=1&amp;tag=cashpadpinde-20&amp;hvexpln=apex6&amp;th=1" target="_blank" rel="noopener">https://www.amazon.com/dp/B07DZBJ5RP/ref=sspa_dk_offsite_pinterest_search_1?aaxitk=7c0863bdabf7e038f0e294aa58555c0e&amp;tqtoken=AgR4k4EN7v9O7EELABjVPh7ibTeNOaAjImt5-GoZfHtc5VcAGgABAAlyZWNpcGllbnQAC0FtYXpvbkFkc1RRAAEAEWF3cy1rbXMtaGllcmFyY2h5ACRiM2NlMjE3OS0wMzJhLTQ5NTAtOWFlZC00MTczZDMxZmNhMmEAXJREgdMFNbPLEEw8lFGOdGudX0JPBrDHDML1GtztK8nXMwFE6ZdgvB9GW5UIxGQYMe49Z8AHhziD0wejv11ZwgoKdpk5J_L6j817HA5N0QDJ9pq_3KxCRVPfiM1QAgAAEABS3cS9L4DxAyu0sCvYLoOAbPq819WNcq8ZRqGLrFj3XwlOTA1udbRXFSOWMYvkKtD_____AAAAAQAAAAAAAAAAAAAAAQAAABskN0yo_1EuqM7I4k0AV8AnRf2N1HDYcOjCcCNCY8M-edKczl9-DYbEX4of&amp;offsiteFlag=1&amp;tag=cashpadpinde-20&amp;hvexpln=apex6&amp;th=1</a></p>]]></content:encoded>
+    </item>
+    <item>
       <title>HCDE 351 | A1: OXO Shower Control Interface</title>
       <link>https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/</link>
       <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/</guid>
