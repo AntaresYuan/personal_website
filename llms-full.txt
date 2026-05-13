@@ -352,9 +352,9 @@ Feedback:
 
 In class, my peer and I worked in groups of four for one rounds of critique. Then we moved out for presenting our prototype to our TA and receicving feedback as well. In the first round of critique, I introduced my design in one sentence and talked about how I iterated through prototypes. I also talked about the key decision I made and future question on my prototype. In the second round of critique, I presented my work as well as saying the key decision I made, as the further question I had. This is the feedback I received:
 
-Key decision I made: Choose to do double layer on the all the parts in this prototype.
+\Key decision I made:\ Choose to do double layer on the all the parts in this prototype.
 
-Further question I had: Which part in this design makes you feel unsafe (In what situation, this might be broke)
+\Further question I had:\ Which part in this design makes you feel unsafe (In what situation, this might be broke)
 
 Round 1:
 
