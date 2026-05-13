@@ -991,6 +991,27 @@
     };
     const setBusy = (b) => { busy = b; input.disabled = b; if (sendBtn) sendBtn.disabled = b; };
 
+    // Offline / network-degraded fallback: serve the hand-authored FAQ match
+    // (or a card-retrieval hit) so a visitor whose network can't reach the
+    // Worker — common on mainland-China connections vs *.workers.dev, which
+    // has DNS-poisoning + SNI-reset issues — still gets a useful answer
+    // instead of "try again in a moment". The first such answer carries a
+    // language-aware tag explaining why this is the short form.
+    const isZh = /^zh/i.test((navigator.language || navigator.userLanguage || ''));
+    const offlineAnswer = (q) => {
+      const m = (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
+      const firstAnswer = convo.filter((x) => x.role === 'assistant').length === 0;
+      const tag = firstAnswer
+        ? (isZh
+            ? '\n\n（这是离线 FAQ 的简短回答——网络受限，连不上对话式 AI 服务。完整功能请稍后再试，或邮件联系 chenjy4@uw.edu。）'
+            : "\n\n(quick FAQ answer — couldn't reach the live answer service from your network. Try again later, or email chenjy4@uw.edu.)")
+        : '';
+      if (m) return m.answer + tag;
+      return (isZh
+        ? '抱歉，这个问题我没有在这里写过——可以看看下面的 roadmap 或者邮件 chenjy4@uw.edu。'
+        : "I don't see that covered here — the roadmap below has what I've shipped and what I'm building.") + tag;
+    };
+
     const send = (raw) => {
       const q = String(raw || '').trim().slice(0, 500);
       if (!q || busy) return;
@@ -998,26 +1019,21 @@
       renderLog(true);
       setBusy(true);
       const finish = (answer) => { convo.push({ role: 'assistant', content: answer }); renderLog(false); setBusy(false); input.focus(); };
-      if (!url) {
-        const m = (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
-        const ans = m ? m.answer : "I don't see that covered on the site — the roadmap below has what I've shipped and what I'm building.";
-        const firstAnswer = convo.filter((x) => x.role === 'assistant').length === 0;
-        setTimeout(() => finish(ans + (firstAnswer ? '\n\n(quick answer — the full conversational version turns on once the antares-qa Worker is deployed.)' : '')), 220);
-        return;
-      }
+      if (!url) { setTimeout(() => finish(offlineAnswer(q)), 220); return; }
       // Send both: `messages` for the multi-turn Worker, `q` so an older
       // single-turn deployment still works (it ignores `messages`).
       fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo }), signal: AbortSignal.timeout(30000) })
         .then(async (r) => {
           let d = {};
           try { d = await r.json(); } catch (_) { /* non-JSON */ }
-          return (r.ok && d && d.answer)
-            ? String(d.answer)
-            : ("Sorry — I couldn't get an answer right now" + ((d && d.error) ? ` (${d.error})` : '') + '. Try again in a moment, or rephrase.');
+          // Happy path: a real model answer.
+          if (r.ok && d && d.answer) return String(d.answer);
+          // Worker reachable but errored (rate-limit, upstream model failure,
+          // grounding fetch failure). Fall back to the offline FAQ retrieval —
+          // it almost always beats showing a raw error to a visitor.
+          return offlineAnswer(q);
         })
-        .catch((e) => (e && e.name === 'TimeoutError')
-          ? "Sorry — that took too long. Try again in a moment."
-          : "Sorry — I couldn't reach the answer service right now. Try again in a moment.")
+        .catch(() => offlineAnswer(q))
         .then(finish);
     };
 
