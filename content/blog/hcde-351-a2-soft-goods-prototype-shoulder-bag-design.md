@@ -2,6 +2,10 @@
 title: 'HCDE 351 | A2: Soft Goods Prototype: Shoulder Bag Design'
 date: 2026-01-25
 summary: This process log documents the design of a cotton cloth shoulder bag where the users can use the main part of the bag to hold a laptop, put a keyboard, mouse and an adapter and charging line in the front pocket, and an additional velcro holder as a closing mechanism to avoid laptop falling off.
+tags:
+  - Handmade
+  - Bag Design
+  - Best Design Blog
 draft: false
 ---
 
@@ -119,9 +123,9 @@ Testing functionality
 
 In class, my peer and I worked in groups of four for one rounds of critique. Then we moved out for presenting our prototype to our TA and receicving feedback as well. In the first round of critique, I introduced my design in one sentence and talked about how I iterated through prototypes. I also talked about the key decision I made and future question on my prototype. In the second round of critique, I presented my work as well as saying the key decision I made, as the further question I had. This is the feedback I received:
 
-**Key decision I made:** Choose to do double layer on the all the parts in this prototype.
+\*\*Key decision I made:\*\* Choose to do double layer on the all the parts in this prototype.
 
-**Further question I had:** Which part in this design makes you feel unsafe (In what situation, this might be broke)
+\*\*Further question I had:\*\* Which part in this design makes you feel unsafe (In what situation, this might be broke)
 
 **Round 1:**
 
@@ -130,7 +134,7 @@ What works well?
 - They liked **the front pocket**, finding it useful and well-placed.
 - They appreciated the use of an **“X-box stitch”** to reinforce the connection between the strap and the body of the bag, noting that it enhanced structural stability.
 - They liked that the **closure is designed as a separate component**, rather than being directly integrated into the bag body.
-- They liked how I switch the closure from a **zipper to velcro.** It was seen as a positive improvement, making the bag **easier and faster to use**.
+- They liked how I switch the closure from a **zipper to velcro. It was seen as a positive improvement, making the bag easier and faster to use**.
 
 What could be better?
 
