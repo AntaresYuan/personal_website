@@ -255,6 +255,21 @@
       "links": [],
       "updated": "2026-05-09",
       "order": 2
+    },
+    {
+      "id": "now-4",
+      "status": "now",
+      "title": "SleepStreak",
+      "summary": "Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults",
+      "details": "• Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults\n• Studies found this crisis has been caused in part by smartphones and digital devices\n• This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this",
+      "tags": [
+        "RESEARCH PROJECT"
+      ],
+      "impact": "",
+      "links": [],
+      "started": "2024-12-10",
+      "updated": "2025-05-10",
+      "order": 4
     }
   ]
 }
