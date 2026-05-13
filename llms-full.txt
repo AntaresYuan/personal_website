@@ -124,6 +124,8 @@ What I built to multiply my own AI work.
 
 ## SKILL-01 · /devloop · Claude Code skill
 autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next
+Links:
+  - github: https://github.com/AntaresYuan/claude-devloop
 
 ## What it does
 
@@ -154,6 +156,8 @@ Claude Code skill at `~/.claude/skills/devloop/`. Reusable across any git repo.
 
 ## SKILL-02 · /ai-pm-resume · Claude Code skill
 AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation
+Links:
+  - github: https://github.com/AntaresYuan/ai-pm-resume
 
 ## What it does
 
@@ -180,7 +184,44 @@ aren't in the source. If you give it `built X`, you get `built X` — not
 
 Claude Code skill at `~/.claude/skills/ai-pm-resume/`.
 
-## SKILL-03 · agent-brief.txt · agent infra
+## SKILL-03 · /interview-sim · Claude Code skill
+synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output
+Links:
+  - github: https://github.com/AntaresYuan/claude-skill-interview-sim
+
+## What it does
+
+Takes an **interview protocol** + a **受访者画像** (real person or fictional persona) and produces a **transcript that reads like a real recording transcription**, not an LLM Q&A. The bar isn't "answer well" — it's **"sound like that person"**: hits their knowledge edges, gets stuck, self-corrects, asks the interviewer back, occasionally goes off-topic.
+
+## Use cases
+
+- **UX research synthetic interviews** — HCDE / product research, protocol + user persona → a transcript you can code
+- **Expert / journalist-style interviews** of public figures (research-backed, not invented)
+- **Mock interviews — interviewee side** — you write the questions, the agent plays the candidate
+- Any context that wants a plausible interview transcript as research / writing material
+
+## How it works
+
+- **Kickoff intake-clarify** — an `AskUserQuestion` round to align on protocol / persona / duration / language / setting / disfluency level / interviewer style / how strictly to stay in character — *before* it goes off researching
+- **Real persona** → parallel `WebSearch` + `WebFetch` across LinkedIn / podcasts / talks / articles / posts; builds a dossier that strictly separates **verified** vs **inferred** facts
+- **Fictional persona** → cohort-representative research: searches for how this kind of person actually talks, anchors the synthesis in real-world data, refuses to invent from thin air
+- **Duration calibration** — English ≈150 wpm, Chinese ≈220 字/min, Japanese ≈300 字/min; word-count budget allocated across questions by weight
+- **High-realism disfluency toolbox** — bilingual filler / self-correction / questioning-back / pause templates, **clustered at thought transitions** (not sprinkled evenly — that's caricature, not realism)
+- **Real-respondent cognitive patterns** — struggling to find words, talking around the question, hedging, stated-vs-actual mismatches, admitting they don't know — at least 1–2 visible cognitive struggles per session
+- **Anti-fabrication red lines** — no inventing biographical facts for real people, no quietly upgrading a fictional persona mid-interview, no fabricated numbers / quotes ever
+- **Interviewer half-structured probing** — protocol's main questions + natural follow-ups ("can you say more about that", "can you give a specific example"), **never leading questions**
+- **Output dual channel** — saves `interview_<persona-slug>_<YYYY-MM-DD>.md` AND prints the full transcript inline
+- **Self-check before delivery** — 8-item checklist (identity drift, cognitive struggle, filler distribution, leading Qs, biographical sourcing, fabricated numbers, word-count drift, language consistency)
+
+## Why I built it
+
+UX-research synthetic interviews are everywhere now, but most of them read like LLM Q&A — the fictional user is suspiciously articulate, never stuck, never wrong, and the dialogue feels written. That's useless as research material. This skill bakes in disfluency, knowledge edges, and anti-fabrication so the transcript is plausible enough to actually code.
+
+## Stack
+
+Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
+
+## SKILL-04 · agent-brief.txt · agent infra
 off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
 Links:
   - /agent-brief.txt: /agent-brief.txt
