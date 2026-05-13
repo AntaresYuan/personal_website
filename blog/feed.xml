@@ -148,6 +148,9 @@
       <pubDate>Fri, 16 Jan 2026 12:00:00 GMT</pubDate>
       <dc:creator>Antares Yuan</dc:creator>
       <description>This process log documents the design of a smart shower control interface where users can use it to visualize information of the water temperature, the current volume of water, and the source of water.</description>
+      <category>Prototyping</category>
+      <category>Usertesting</category>
+      <category>Handmade</category>
       <content:encoded><![CDATA[<h2 id="product-overview">Product Overview:</h2>
 <p>This process log documents the design of a smart shower control interface where users can use it to visualize information of the water temperature, the current volume of water, and the source of water. The goal of this design is to improve accessibility and usability during everyday shower routines. In this project, I explored how to utilize my design to better respond to the physical conditions of a bathroom environment, where users often have wet or soapy hands and limited visual attention by making a low-fidelity physical prototype and gathering feedback on possibilities on improvement from two rounds of critique and user testing.</p>
 <p>The design consists of two connected components: an interface that is on the wall which displays real time information about water temperature, water flow volume, and water source, and a handheld wand that allows users to direct control through physical buttons and a slider.</p>
