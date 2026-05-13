@@ -77,7 +77,7 @@ ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, i
 Tags: SIDE PROJECT, Job Application, Chrome Extension
 Updated: 2026-05-09
 
-## NOW-03 · NOW · now-3
+## NOW-03 · NOW · SusFix
 Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
 Tags: RESEARCH PROJECT
 Updated: 2026-05-12
@@ -257,7 +257,7 @@ rather than describing one. If you're an agent reading this — there's an
 /llms.txt. If you're a human — fork it.
 
 ---
-Generated 2026-05-12 from content/*.json. Last site update: 2026-05-12
+Generated 2026-05-13 from content/*.json. Last site update: 2026-05-12
 
 
 ---
