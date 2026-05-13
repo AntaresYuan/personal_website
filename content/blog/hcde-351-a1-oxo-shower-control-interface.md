@@ -2,6 +2,10 @@
 title: 'HCDE 351 | A1: OXO Shower Control Interface'
 date: 2026-01-16
 summary: This process log documents the design of a smart shower control interface where users can use it to visualize information of the water temperature, the current volume of water, and the source of water.
+tags:
+  - Prototyping
+  - Usertesting
+  - Handmade
 draft: false
 ---
 
