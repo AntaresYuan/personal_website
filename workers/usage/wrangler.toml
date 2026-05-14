@@ -24,6 +24,16 @@ name = "antares-usage"
 main = "src/index.js"
 compatibility_date = "2026-05-13"
 
+# Custom domain on the same zone as the main site. Same-zone Anycast =
+# same endpoints that serve antaresyuan.site, so CN-reachable. The
+# *.workers.dev URL stays off (workers_dev = false) — that fallback is
+# intermittently DNS-poisoned in mainland China and we don't want it as
+# the public surface. The Cloudflare dashboard mirrors this binding.
+workers_dev = false
+routes = [
+  { pattern = "usage.antaresyuan.site", custom_domain = true },
+]
+
 [observability]
 enabled = true
 
