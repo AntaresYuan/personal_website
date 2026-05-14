@@ -215,7 +215,7 @@ Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-ski
 ## SKILL-04 · Claude Credit Watchdog · Claude Code Plugin
 A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
 Links:
-  - Download: https://claude-credit-watchdog.vercel.app
+  - Download: https://claude-credit-watchdog.netlify.app
   - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
 
 ## SKILL-05 · agent-brief.txt · agent infra
