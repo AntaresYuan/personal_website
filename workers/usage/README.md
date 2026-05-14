@@ -14,12 +14,19 @@ The GET response is **only**:
 ```json
 {
   "days": [
-    { "date": "2026-05-13", "tokens": 1234567, "sessions": 8 }
+    { "date": "2026-05-13", "tokens": 1234567, "sessions": 8, "costCents": 7340 }
   ],
   "since": "2025-05-15",
   "updated": "2026-05-13T11:18:09Z"
 }
 ```
+
+`costCents` is a **precomputed scalar** — the sync agent applies a per-model
+pricing table locally (`scripts/sync-usage.js` → `MODEL_PRICING`) and ships
+just the final dollar-amount integer. The per-model token split that feeds it
+stays on the agent's device; the Worker only ever sees the aggregate cents.
+Cost shown publicly is the sum across sources for the day, no different in
+shape from `tokens` or `sessions`.
 
 Never on the wire:
 
@@ -27,14 +34,17 @@ Never on the wire:
   stays in KV; GET sums and drops the source map.
 - ⛔ Per-hour distribution (presence inference, security risk)
 - ⛔ Project / repo names
-- ⛔ Model breakdown
+- ⛔ Model breakdown (`{opus: ..., sonnet: ..., haiku: ...}` token splits)
+- ⛔ Input vs output token split
+- ⛔ Cache-read vs cache-write split
 - ⛔ Message contents or counts
 - ⛔ Streak / "days in a row"
 - ⛔ Any device hostname, IP, user, or PII
 
 Enforcement points:
 
-1. Local sync agents POST only the allowlisted shape.
+1. Local sync agents POST only the allowlisted shape (`date`, `source`,
+   `tokens`, `sessions`, `costCents`).
 2. Worker **re-validates** the POST schema; any extra key → `400`.
 3. Worker GET handler builds the response from the allowlisted projection;
    no path emits the source slot.
@@ -47,12 +57,12 @@ during deploy) but **never** the body. Don't add request-body logging.
 ```
 KV key: usage:2026-05-13
 value : {
-  "claude-mbp":  { "tokens":  800000, "sessions": 5, "updated": "2026-05-13T03:42:11Z" },
-  "claude-imac": { "tokens": 1200000, "sessions": 3, "updated": "2026-05-13T11:18:09Z" }
+  "claude-mbp":  { "tokens":  800000, "sessions": 5, "costCents": 4210, "updated": "2026-05-13T03:42:11Z" },
+  "claude-imac": { "tokens": 1200000, "sessions": 3, "costCents": 3130, "updated": "2026-05-13T11:18:09Z" }
 }
 ```
 
-POST = read this map, set `[source] = { tokens, sessions, updated }`,
+POST = read this map, set `[source] = { tokens, sessions, costCents, updated }`,
 write back. Each source owns its own slot in the JSON value so two
 sources' data never overwrite each other in normal operation. The parent
 KV key is shared, so concurrent same-date writes CAN race at the KV
@@ -63,9 +73,9 @@ by design.
 
 GET = read the last 365 days in parallel (one calendar year, matches the
 GitHub-style year strip the frontend renders), sum each day across slots,
-drop the slot map, return `{date, tokens, sessions}` per day plus the
-global `updated` watermark. Window is controlled by `WINDOW_DAYS` in
-`src/index.js`.
+drop the slot map, return `{date, tokens, sessions, costCents}` per day
+plus the global `updated` watermark. Window is controlled by `WINDOW_DAYS`
+in `src/index.js`.
 
 ## Deploy (one-time)
 
