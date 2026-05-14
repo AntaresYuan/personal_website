@@ -1,0 +1,39 @@
+# ─────────────────────────────────────────────────────────────────────
+# Cloudflare Worker config for the "/usage" public dashboard endpoint.
+#
+# It receives per-day, per-source usage from one or more sync agents
+# (the local jsonl reader, future API-based pollers) via authenticated
+# POST, stores per-source slots in KV, and exposes only the SUM across
+# sources via a public GET. See README.md for the privacy contract.
+#
+# One-time deploy:
+#   cd workers/usage
+#   npx wrangler login                                # browser auth
+#   npx wrangler kv:namespace create USAGE_KV         # copy the id below
+#   # paste the returned id into the [[kv_namespaces]] block, then:
+#   npx wrangler secret put SHARED_SECRET             # paste bearer
+#   npx wrangler deploy
+#
+# After deploy, bind the custom domain in the Cloudflare dashboard:
+#   Worker → Settings → Domains & Routes → Add Custom Domain →
+#   usage.antaresyuan.site
+# (Same-zone Anycast endpoints = mainland-CN reachable.)
+# ─────────────────────────────────────────────────────────────────────
+
+name = "antares-usage"
+main = "src/index.js"
+compatibility_date = "2026-05-13"
+
+[observability]
+enabled = true
+
+# KV — per-day map keyed by source slot. Created via:
+#   npx wrangler kv:namespace create USAGE_KV
+# then paste the returned id below (replace the placeholder).
+[[kv_namespaces]]
+binding = "USAGE_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# SHARED_SECRET is bound at deploy time via:
+#   npx wrangler secret put SHARED_SECRET
+# Never committed.
