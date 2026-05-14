@@ -37,10 +37,56 @@ Autonomous devloop run on 2026-05-13. Queue: #151 → #150 → #152, in strict d
 
 ---
 
-## #150 — Local sync agent 🚧 in progress
+## #150 — Local sync agent ✅ merged, verified live, closed
 
-Endpoint is live, secret is in keychain — resuming the loop. Writing `scripts/sync-usage.js` (zero-deps Node, `--dry-run` mode), config example, LaunchAgent plist + Stop hook, and `docs/usage-sync.md`.
+- **Branch**: `feat/usage-sync-agent`
+- **PR**: [#155](https://github.com/AntaresYuan/personal_website/pull/155) — merged as [19be022](https://github.com/AntaresYuan/personal_website/commit/19be022)
+- **Files**: `scripts/sync-usage.js`, `scripts/sync-usage.config.example.json`, `ops/launchagent/{plist.template, install.sh}`, `ops/claude-hook/sync-usage-on-stop.sh`, `docs/usage-sync.md`
+- **Privacy gate**: 4-field allowlist constructed at the boundary in `payloadsFor()` — extra fields can't slip through by construction
+- **Secret resolution**: macOS keychain first (account=$USER, service=antares-sync-usage), config fallback
+- **Live verification**: 14 days POSTed (`14 ok, 0 failed`), idempotent re-run consistent, public GET reflects synced totals, leftover smoke-test slots zeroed
+- **Independent code review** ([sub-agent](https://github.com/AntaresYuan/personal_website/pull/155)): clean privacy, clean allowlist enforcement, clean secret handling. 3 operational fixes applied pre-merge: install.sh chmods Stop hook, hard-fails on version-manager Node (nvm/asdf/fnm/volta), guards macOS-only
+- **Operator install** (when ready): `./ops/launchagent/install.sh` for hourly + Stop hook snippet in `~/.claude/settings.json`
 
-## #152 — `/usage` section ⏳ queued (blocked on #150 → real data)
+## #152 — `/usage` frontend ✅ merged, deploy polling, closed
 
-Will add SSR shell + 12×7 hand-SVG heatmap + 60s refetch + fun-fact rotator + `usage.endpoint`/`usage.enabled` in `content/site.json`. Section silently hides on GET error so a fork without the Worker doesn't see a broken widget.
+- **Branch**: `feat/usage-section`
+- **PR**: [#156](https://github.com/AntaresYuan/personal_website/pull/156) — merged as [2f9a1b4](https://github.com/AntaresYuan/personal_website/commit/2f9a1b4)
+- **Files**: `content/site.json` (+ usage block), `index.html`, `scripts/build-html.js`, `scripts/render.js`, `styles/main.css`
+- **What shipped**: above-the-fold section with 12×7 hand-SVG heatmap (calendar-aligned, 4-yellow-shade quartile), 4-number stats row (tokens · sessions · 7-day active · since), rotating fun-fact (4 book references, 7s cycle), pulsing "live · Ns ago" indicator, 60s setInterval + visibilitychange handling, silent-hide on Worker error
+- **SSR shell**: build-html.js emits the 84-cell empty heatmap + em-dash stat skeletons (including "since —" so the row width is stable from SSR → first paint)
+- **Heatmap math**: 4 test cases passed (today=Wed/Thu/Sun/Sat) — Sunday-edge now produces 84 cells with 6 future placeholders (prior algorithm silently dropped ~2 oldest cells)
+- **Independent code review** ([sub-agent](https://github.com/AntaresYuan/personal_website/pull/156#issuecomment-4447205506)): privacy contract clean (no leak vectors), 4 bugs flagged + fixed in [3f774e9](https://github.com/AntaresYuan/personal_website/commit/3f774e9) — Sunday-edge cells, stats-row reflow on first fetch, missing fetch timeout, spammy aria-live on 60s/7s update cadences
+- **Deploy verification**: background curl-poll on `https://antaresyuan.site/` for the `id="usage"` marker — see this loop's exit message
+
+## Loop complete
+
+3 PRs (`#154`, `#155`, `#156`), 3 squash-merges via `--admin`, 1 follow-up commit (`f83a5f0`) for the Worker's wrangler routes config. End-to-end pipeline live:
+
+```
+Local Mac (claude-mbp)
+  ~/.claude/projects/*/SESSION.jsonl
+  └─ scripts/sync-usage.js (zero-deps, --dry-run, allowlist gate)
+     │
+     ▼ POST {date, source, tokens, sessions}  +  Bearer (keychain)
+        usage.antaresyuan.site  (custom domain on the same Cloudflare zone)
+     ├─ schema re-validate (extra field → 400)
+     ├─ KV: usage:YYYY-MM-DD  ← per-source slot map
+     └─ GET /  →  {days: [{date, tokens, sessions}], since, updated}  (sum across sources, no slot data ever on the wire)
+                    │
+                    ▼ scripts/render.js wireUsage(site)
+                       index.html #usage  ← 12×7 hand-SVG heatmap + 4 stats + rotating fun-fact
+```
+
+### Friction events logged for /iterate
+
+1. `retry` — wrangler v2 vs v3 `kv:namespace` syntax (operator-side, caught + fixed in docs + main during loop)
+2. `stop_condition_hit` — wrangler-bind handoff after #151 PR merge (system worked as designed)
+
+Both events are in `LOOP-FRICTION.jsonl` for the next /iterate retro.
+
+### What's left on the operator
+
+- (Tomorrow morning) visual smoke on `https://antaresyuan.site/` — heatmap shading, stat numbers, live counter ticking, fun-fact rotating
+- (Optional, for continuous data) install the LaunchAgent (`./ops/launchagent/install.sh`) + Stop hook (snippet in `docs/usage-sync.md`)
+- (Future, if adding iMac) repeat the sync-agent setup with `source: "claude-imac"` — Worker sums slots automatically
