@@ -1906,19 +1906,30 @@ body.modal-open { overflow: hidden; }
   margin-top: var(--sp-32);
   margin-bottom: calc(-1 * var(--sp-32));
 }
-/* Centered "● updated Nm ago" indicator below the fun-fact. Replaces
-   the old .sec-head row — the heatmap is self-explanatory; the live
-   indicator now sits where freshness info naturally belongs (right
-   after the data, not before it). */
-.usage-foot {
+/* Flourish row = funfact + freshness indicator on a single line below
+   the stats. Pairing them collapses what used to be four vertical lines
+   (stats / cost / funfact / updated) into two — cost now slots inline
+   with stats, and the freshness-tick joins the rotating funfact as the
+   section's "tail". Mono + faint to read as secondary. Wraps on narrow
+   viewports thanks to flex-wrap. */
+.usage-flourish {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
-  gap: var(--sp-6);
-  margin-top: var(--sp-8);
+  align-items: baseline;
+  gap: var(--sp-8);
+  margin-top: var(--sp-6);
   font-family: var(--font-mono);
-  font-size: var(--fs-11);
+  font-size: var(--fs-12);
   color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wide);
+}
+.usage-foot {
+  /* Legacy class, now a span inside .usage-flourish — keep the inline
+     flex so the contained #usage-live-text aligns with siblings. */
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-6);
 }
 /* Section title: Antares's Token Consumption. Centered, serif, with the
    second half ("Token Consumption") in italic blue — mirrors the hero name
@@ -2049,31 +2060,16 @@ body.modal-open { overflow: hidden; }
 .usage-stat-sep { color: var(--color-line); }
 .usage-stat-since { font-style: normal; }
 
-/* "≈ $X.XX spent on Claude" — total spend across the visible window,
-   computed locally by the sync agent (per-model rates × i/o/cache tokens)
-   and shipped to the Worker as a scalar `costCents`. Slightly louder than
-   the stats line above (the headline metric of this section, per the
-   "Token Consumption" title), but still mono + faint to live in the same
-   typographic family. The strong-tagged dollar amount picks up the
-   default body color for emphasis. */
-.usage-cost {
-  font-family: var(--font-mono);
-  font-size: var(--fs-13);
-  color: var(--color-text-faint);
-  text-align: center;
-  margin-bottom: var(--sp-6);
-}
-.usage-cost strong {
-  color: var(--color-text);
-  font-weight: var(--fw-semibold);
-}
+/* .usage-funfact is now a span inside .usage-flourish — strong is the
+   span's bolded multiple ("310×"). Min-height reserves space so the
+   4-second rotation doesn't reflow the row. */
 .usage-funfact {
-  font-family: var(--font-mono);
-  font-size: var(--fs-12);
-  color: var(--color-text-faint);
-  letter-spacing: var(--tracking-wide);
-  text-align: center;
-  min-height: 1.4em;   /* reserve space so rotation doesn't reflow */
+  min-height: 1.4em;
+}
+.usage-flourish-sep {
+  /* Hidden via JS when the funfact is empty (early in the month with
+     no data yet) so the row doesn't render as "· updated 2s ago". */
+  color: var(--color-line);
 }
 
 /* Mobile — the 52-week strip is 620px wide intrinsic. Scale to viewport;
