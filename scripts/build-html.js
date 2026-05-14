@@ -114,6 +114,30 @@ const setAttr = (html, id, attr, value) => {
   });
 };
 
+/* ── /usage heatmap — empty SSR shell ─────────────────────────────────
+   12 cols × 7 rows × 12px cells with 2px gaps. render.js builds the
+   live version with the same viewBox + cell math, so there's no layout
+   shift when data lands. Empty cells use a CSS class instead of a fill
+   attribute, so theme tokens drive the color (dark mode just works).
+   ────────────────────────────────────────────────────────────────── */
+const HEATMAP_COLS = 12;
+const HEATMAP_ROWS = 7;
+const HEATMAP_CELL = 12;
+const HEATMAP_GAP  = 2;
+function emptyHeatmapSvg() {
+  const w = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
+  const h = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+  const rects = [];
+  for (let c = 0; c < HEATMAP_COLS; c++) {
+    for (let r = 0; r < HEATMAP_ROWS; r++) {
+      const x = c * (HEATMAP_CELL + HEATMAP_GAP);
+      const y = r * (HEATMAP_CELL + HEATMAP_GAP);
+      rects.push(`<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell usage-cell-empty"/>`);
+    }
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects.join('')}</svg>`;
+}
+
 /* ── Card index (mirrors render.js) ───────────────────────────────────── */
 const ID_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -476,6 +500,32 @@ if (contact.head) {
 }
 html = replaceInner(html, 'contact-intro', safeRich(contact.intro ?? ''));
 html = replaceInner(html, 'contact-list',  contactListHtml());
+
+// /usage — live AI usage dashboard (#149/#152). SSR shell renders the
+// header + empty heatmap grid so first paint has no FOUC and a no-JS
+// reader sees the section's structure without a broken widget.
+// render.js fills the live data on boot, then refetches every 60s. If
+// site.usage.enabled is false (a fork without the Worker bound), hide
+// the section entirely — the structure stays in the markup for grep but
+// nothing renders.
+if (site.usage?.enabled === false) {
+  html = setAttr(html, 'usage', 'hidden', '');
+} else {
+  // Empty 12×7 SVG grid — render.js replaces this innerHTML with the
+  // shaded version on first fetch success. Same viewBox + cell math so
+  // there's no layout shift.
+  html = replaceInner(html, 'usage-heatmap', emptyHeatmapSvg());
+  // Skeleton stats — em-dashes that match the post-fetch layout so the
+  // row doesn't jump when real numbers land.
+  html = replaceInner(html, 'usage-stats',
+    [
+      `<span class="usage-stat"><strong>—</strong> tokens</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat"><strong>—</strong> sessions</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat"><strong>—</strong> days active</span>`,
+    ].join(''));
+}
 
 // Footer
 html = replaceInner(html, 'footer-copyright', footerHtml());

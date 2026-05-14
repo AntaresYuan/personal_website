@@ -956,6 +956,261 @@
     syncGiscus(resolvedTheme(themeStored()));   // in case the iframe is already up
   };
 
+  /* ── /usage — live AI usage dashboard ──────────────────────────────
+     Fetches site.usage.endpoint (the antares-usage Worker), renders a
+     12-week hand-SVG heatmap + 4 stat numbers + a rotating fun-fact
+     line, refetches every 60s while the tab is visible. The Worker's
+     privacy contract is what's on the wire — this side only consumes
+     {date, tokens, sessions} per day.
+
+     SSR shell already drew an empty 12×7 grid + em-dash stats so the
+     section doesn't reflow when data lands. On fetch failure the
+     section silently hides — a fork without the Worker doesn't see a
+     broken widget; disabling via site.usage.enabled = false hides the
+     section even before the first fetch.
+
+     Heatmap layout matches GitHub's calendar grid: rightmost column =
+     this calendar week (Sun..today UTC), each prior column = full prior
+     week. 84 cells visible. Shade = quartile of NON-zero token totals
+     across the window, so a light week of activity isn't drowned out
+     by one big day. Empty days use the soft-line theme color. */
+  const HEATMAP_COLS = 12;
+  const HEATMAP_ROWS = 7;
+  const HEATMAP_CELL = 12;
+  const HEATMAP_GAP  = 2;
+  const FUNFACT_ROTATE_MS = 7000;
+
+  // Comparison set for the fun-fact rotator. Token estimates are deliberately
+  // round so visitors get a relatable "≈ Nx" intuition, not a precise count.
+  const FUNFACT_REFS = [
+    { tokens:  63000, label: 'The Great Gatsby' },
+    { tokens:  63000, label: "The Hitchhiker's Guide to the Galaxy" },
+    { tokens: 640000, label: 'the Lord of the Rings trilogy' },
+    { tokens:   6500, label: 'the U.S. Constitution' },
+  ];
+
+  const fmtCompact = (n) => {
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    if (n >= 1e9)  return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (n >= 1e6)  return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1e3)  return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(Math.round(n));
+  };
+
+  // Quartile bin (0..3) for a non-zero value against a sorted list of
+  // non-zero values. Returns -1 for zero/missing so the caller can
+  // render the "empty" class instead of a yellow shade.
+  const quartileBin = (val, sortedNonZero) => {
+    if (!Number.isFinite(val) || val <= 0) return -1;
+    const n = sortedNonZero.length;
+    if (n === 0) return 0;
+    if (n === 1) return 3;   // single non-zero day: max shade
+    // pick 3 thresholds at 25/50/75 percentiles of the non-zero distribution
+    const q = [0.25, 0.5, 0.75].map(p => sortedNonZero[Math.min(n - 1, Math.floor(p * n))]);
+    if (val <= q[0]) return 0;
+    if (val <= q[1]) return 1;
+    if (val <= q[2]) return 2;
+    return 3;
+  };
+
+  // Build the {col, row} grid coordinates for a day, given its weekday
+  // (0=Sun..6=Sat) and how many days back it is from today. Today is at
+  // (cols-1, todayDow); walking back, each prior day moves up in the row
+  // (with wrap to prior column at row 0).
+  const buildHeatmapGrid = (days, todayUTC) => {
+    const todayDow = new Date(todayUTC + 'T00:00:00Z').getUTCDay();
+    const total = HEATMAP_COLS * HEATMAP_ROWS;       // 84
+    // Map date → entry
+    const byDate = new Map();
+    for (const d of days) byDate.set(d.date, d);
+    // Build cells, oldest → newest, length = total. Cell i corresponds to
+    // (total - 1 - i) days before today.
+    const cells = [];
+    for (let i = 0; i < total; i++) {
+      const daysAgo = total - 1 - i;
+      const t = new Date(todayUTC + 'T00:00:00Z').getTime() - daysAgo * 86400000;
+      const date = new Date(t).toISOString().slice(0, 10);
+      const e = byDate.get(date) || { date, tokens: 0, sessions: 0 };
+      const dow = (new Date(date + 'T00:00:00Z')).getUTCDay();
+      // GitHub-style: the rightmost column is the current week, days
+      // arranged Sun (top) → Sat (bottom). Column index counts back by week.
+      const weeksAgo = Math.floor((daysAgo - todayDow + dow) / 7);
+      const col = HEATMAP_COLS - 1 - weeksAgo;
+      const row = dow;
+      if (col >= 0 && col < HEATMAP_COLS) {
+        cells.push({ col, row, ...e });
+      }
+    }
+    return cells;
+  };
+
+  const renderHeatmap = (cells) => {
+    const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
+    const w = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
+    const h = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+    // Initialize an empty grid; then fill from cells (a date may be missing
+    // from `days` if the API skipped — we still want the cell rendered).
+    const grid = [];
+    for (let c = 0; c < HEATMAP_COLS; c++) {
+      for (let r = 0; r < HEATMAP_ROWS; r++) {
+        grid.push({ col: c, row: r, tokens: 0, sessions: 0, date: '' });
+      }
+    }
+    for (const cell of cells) {
+      const idx = cell.col * HEATMAP_ROWS + cell.row;
+      if (idx >= 0 && idx < grid.length) grid[idx] = cell;
+    }
+    const rects = grid.map(cell => {
+      const x = cell.col * (HEATMAP_CELL + HEATMAP_GAP);
+      const y = cell.row * (HEATMAP_CELL + HEATMAP_GAP);
+      const bin = quartileBin(cell.tokens, nonZero);
+      const cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
+      const title = cell.date
+        ? `${cell.date}: ${cell.tokens.toLocaleString()} tokens, ${cell.sessions} session${cell.sessions === 1 ? '' : 's'}`
+        : '';
+      return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}"><title>${title}</title></rect>`;
+    }).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects}</svg>`;
+  };
+
+  const renderUsageStats = (cells) => {
+    let totalTokens = 0, totalSessions = 0, daysActive = 0;
+    let oldestActive = '';
+    for (const cell of cells) {
+      totalTokens += cell.tokens;
+      totalSessions += cell.sessions;
+      if (cell.tokens > 0) {
+        daysActive++;
+        if (!oldestActive || cell.date < oldestActive) oldestActive = cell.date;
+      }
+    }
+    // Recent activity = days active in the last 7 cells (calendar order)
+    // — same window the section's header sells ("/usage live"), reads
+    // more naturally than the rolling-90-day rate.
+    const last7 = cells.slice(-7);
+    const last7Active = last7.filter(c => c.tokens > 0).length;
+    return [
+      `<span class="usage-stat"><strong>${fmtCompact(totalTokens)}</strong> tokens</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat"><strong>${totalSessions}</strong> sessions</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat"><strong>${last7Active}/7</strong> days active</span>`,
+      oldestActive
+        ? `<span class="usage-stat-sep">·</span><span class="usage-stat usage-stat-since">since ${oldestActive}</span>`
+        : '',
+    ].join('');
+  };
+
+  // Sum tokens for this calendar month (UTC). Used by the fun-fact line.
+  const tokensThisMonth = (cells) => {
+    const monthPrefix = new Date().toISOString().slice(0, 7);   // YYYY-MM
+    return cells
+      .filter(c => c.date && c.date.startsWith(monthPrefix))
+      .reduce((a, c) => a + c.tokens, 0);
+  };
+
+  let funFactIdx = 0;
+  const renderFunFact = (cells) => {
+    const monthly = tokensThisMonth(cells);
+    if (monthly <= 0) return '';
+    const ref = FUNFACT_REFS[funFactIdx % FUNFACT_REFS.length];
+    funFactIdx++;
+    const multiple = Math.round(monthly / ref.tokens);
+    if (multiple < 1) return `~ a fraction of ${ref.label} this month`;
+    return `&asymp; ${multiple.toLocaleString()}&times; ${ref.label} this month`;
+  };
+
+  const wireUsage = (site) => {
+    const section  = document.getElementById('usage');
+    if (!section) return;
+    const cfg = site && site.usage;
+    if (!cfg || cfg.enabled === false || !cfg.endpoint) {
+      section.hidden = true;
+      return;
+    }
+    const heatmapEl = document.getElementById('usage-heatmap');
+    const statsEl   = document.getElementById('usage-stats');
+    const factEl    = document.getElementById('usage-funfact');
+    const liveEl    = document.getElementById('usage-live-text');
+    if (!heatmapEl || !statsEl || !factEl || !liveEl) {
+      section.hidden = true;
+      return;
+    }
+
+    let lastSuccessAt = 0;
+    let lastCells = null;
+    let refetchTimer = null;
+    let liveTickTimer = null;
+    let factRotateTimer = null;
+    let inFlight = false;
+
+    const updateLiveLabel = () => {
+      if (!lastSuccessAt) { liveEl.textContent = 'live'; return; }
+      const sec = Math.max(0, Math.round((Date.now() - lastSuccessAt) / 1000));
+      liveEl.textContent = `live · ${sec}s ago`;
+    };
+
+    const refetch = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const res = await fetch(cfg.endpoint.replace(/\/+$/, '') + '/', { cache: 'no-store' });
+        if (!res.ok) throw new Error('http ' + res.status);
+        const data = await res.json();
+        if (!data || !Array.isArray(data.days)) throw new Error('bad shape');
+        // Worker returns 90 days; trim to the most recent 84 for the 12-week grid.
+        const trimmed = data.days.slice(-(HEATMAP_COLS * HEATMAP_ROWS));
+        const todayUTC = trimmed[trimmed.length - 1]?.date || new Date().toISOString().slice(0, 10);
+        const cells = buildHeatmapGrid(trimmed, todayUTC);
+        lastCells = cells;
+        heatmapEl.innerHTML = renderHeatmap(cells);
+        statsEl.innerHTML   = renderUsageStats(cells);
+        const fact = renderFunFact(cells);
+        factEl.innerHTML    = fact;
+        section.classList.add('usage-loaded');
+        lastSuccessAt = Date.now();
+        updateLiveLabel();
+      } catch (e) {
+        // Silent hide on failure — fork without Worker, network blip, CORS,
+        // CN-block, any reason. Don't show a broken widget. console for ops.
+        console.warn('[usage] fetch failed:', e.message);
+        section.hidden = true;
+        stopTimers();
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    const startTimers = () => {
+      stopTimers();
+      refetchTimer = setInterval(refetch, 60_000);
+      liveTickTimer = setInterval(updateLiveLabel, 1000);
+      // Fun-fact rotates locally without refetching the API.
+      factRotateTimer = setInterval(() => {
+        if (lastCells) factEl.innerHTML = renderFunFact(lastCells);
+      }, FUNFACT_ROTATE_MS);
+    };
+    const stopTimers = () => {
+      if (refetchTimer)    { clearInterval(refetchTimer);    refetchTimer = null; }
+      if (liveTickTimer)   { clearInterval(liveTickTimer);   liveTickTimer = null; }
+      if (factRotateTimer) { clearInterval(factRotateTimer); factRotateTimer = null; }
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopTimers();
+      } else if (!section.hidden) {
+        refetch();
+        startTimers();
+      }
+    });
+
+    // First fetch + start the loop.
+    refetch().then(() => {
+      if (!section.hidden) startTimers();
+    });
+  };
+
   /* ── Hero "ask this portfolio" bar ──────────────────────────────────
      Self-contained — it never bounces the visitor into ⌘K. With the
      antares-qa Worker (site.json → qa.workerUrl) it answers inline with a
@@ -1190,6 +1445,7 @@
       wireModal();
       wireTheme();
       wireHeroAsk(wireAskPanel(site, board));
+      wireUsage(site);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');
