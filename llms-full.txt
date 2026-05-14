@@ -221,7 +221,13 @@ UX-research synthetic interviews are everywhere now, but most of them read like 
 
 Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
 
-## SKILL-04 · agent-brief.txt · agent infra
+## SKILL-04 · Claude Credit Watchdog · Claude Code Plugin
+A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
+Links:
+  - Download: https://claude-credit-watchdog.vercel.app
+  - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
+
+## SKILL-05 · agent-brief.txt · agent infra
 off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
 Links:
   - /agent-brief.txt: /agent-brief.txt
@@ -1045,7 +1051,7 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-05-13 from content/*.json. Last site update: 2026-05-13
+Generated 2026-05-14 from content/*.json. Last site update: 2026-05-13
 
 
 ---
