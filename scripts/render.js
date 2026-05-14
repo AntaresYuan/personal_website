@@ -104,6 +104,18 @@
   const idPrefix = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
   const pad2 = (n) => String(n).padStart(2, '0');
 
+  // Card "end date" — formerly always `c.updated` (a YYYY-MM-DD); now also
+  // honours `c.present: true` which means "no fixed end date, still active".
+  // Present cards sort like today, display as 'ongoing', and on the timeline
+  // get an open-ended range like a `now`-status card. Existing cards without
+  // the field continue to behave exactly as before (falsy `present`).
+  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const cardEndKey  = (c) => (c && c.present) ? todayISO()        : (c?.updated ?? '');
+  const cardEndText = (c) => (c && c.present) ? 'ongoing'          : (c?.updated ?? '');
+  const cardEndFootLabel = (c) =>
+    (c && c.present) ? 'ongoing'
+    : (c && c.updated) ? `until ${c.updated}` : '';
+
   // Card index keyed by display ID (e.g. SHIP-01) — populated during render,
   // consumed by the panel/hash router. Map preserves insertion order, which
   // is the visual board order (Shipped → Now → Next → Later, by render order
@@ -167,7 +179,8 @@
     const cards = (board.cards ?? []).slice().sort((a, b) => {
       const ao = a.order ?? 99, bo = b.order ?? 99;
       if (ao !== bo) return ao - bo;
-      return (b.updated ?? '').localeCompare(a.updated ?? '');
+      // Sort by end-date desc; `present` cards sort like today (top).
+      return cardEndKey(b).localeCompare(cardEndKey(a));
     });
 
     const cols = ['shipped', 'now', 'next', 'later'];
@@ -215,7 +228,7 @@
             ${tags ? `<div class="card-tags">${tags}</div>` : ''}
             <div class="card-footer">
               <span class="card-footer-left">
-                <span>${escape(c.updated ?? '')}</span>
+                <span>${escape(cardEndText(c))}</span>
                 <span class="card-comments">0</span>
               </span>
               ${c.impact ? `<span class="card-impact">${escape(c.impact)}</span>` : ''}
@@ -349,7 +362,7 @@
       case 'status':  return STATUS_RANK[c.status] ?? 9;
       case 'tags':    return (c.tags ?? []).join(' ').toLowerCase();
       case 'impact':  return (c.impact ?? '').toLowerCase();
-      case 'updated': return c.updated ?? '';                       // YYYY-MM-DD sorts lexically
+      case 'updated': return cardEndKey(c);                         // YYYY-MM-DD; `present` sorts as today
       case 'links':   return (c.links ?? []).filter(l => l.href && l.href !== '#').length;
       default:        return '';
     }
@@ -404,7 +417,7 @@
       { key: 'status',  label: 'Status' },
       { key: 'tags',    label: 'Tags' },
       { key: 'impact',  label: 'Impact' },
-      { key: 'updated', label: 'Updated' },
+      { key: 'updated', label: 'Until' },
       { key: 'links',   label: 'Links' },
     ];
     const headHtml = COLS.map((col) =>
@@ -425,7 +438,7 @@
         <td class="tt-status">${escape(STATUS_LABEL[c.status] ?? c.status ?? '')}</td>
         <td class="tt-tags">${escape((c.tags ?? []).join(' · '))}</td>
         <td class="tt-impact">${escape(c.impact ?? '')}</td>
-        <td class="tt-updated">${escape(c.updated ?? '')}</td>
+        <td class="tt-updated">${escape(cardEndText(c))}</td>
         <td class="tt-links">${links}</td>
       </tr>`;
     };
@@ -464,8 +477,9 @@
       const links = (c.links ?? []).filter(l => l.href && l.href !== '#')
         .map(l => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`).join('');
       const details = mini(c.details, { demote: 3 });   // spec-card titles are <h4> → headings here at <h5>/<h6>
+      const endLabel = cardEndFootLabel(c);
       const foot = [
-        c.updated ? `<span class="spec-card-updated">updated ${escape(c.updated)}</span>` : '',
+        endLabel ? `<span class="spec-card-updated">${escape(endLabel)}</span>` : '',
         c.impact ? `<span class="spec-card-impact">${escape(c.impact)}</span>` : '',
       ].filter(Boolean).join('<span class="spec-card-sep" aria-hidden="true">·</span>');
       return `<section class="spec-card" data-status="${escape(c.status ?? '')}" aria-labelledby="spec-${escape(c.displayId)}">
@@ -557,24 +571,29 @@
     const legendItems = [...toneOf.entries()].filter(([, t]) => t >= 1).map(([cat, t]) => ({ tone: t, label: cat }));
     if ([...toneOf.values()].includes(0)) legendItems.push({ tone: 0, label: 'Other' });
 
-    // One vis item per card. Shipped → a `range` [started, updated] (if a
-    // `started` date is given and is earlier), else a `point` at `updated`.
-    // Now → a `range` [started, today] (open-ended, marked `vt-now`), or a
-    // `point` at `updated`/today if there's no `started`.
+    // One vis item per card. Two regimes:
+    //   ongoing  (status="now" OR card.present=true) → open-ended:
+    //              range [started, today] if `started`, else point at today.
+    //              `c.updated` is ignored when present=true (no fixed end).
+    //   closed   (status="shipped" with present=false) → range [started, updated]
+    //              when both dates exist and started < updated, else point at updated.
+    // `present` lets a shipped card declare "still active under maintenance"
+    // and a now-status card pin a specific until-date if it had one.
     const visItems = [];
     let nShipped = 0, nNow = 0;
     cards.forEach((c) => {
+      const isOngoing = c.present === true || c.status === 'now';
       const start = isoDate(c.started);
       const end   = isoDate(c.updated);
       const tone  = `vt-tone-${toneOf.get(categoryOf(c))}`;
       let span, dateText, cls;
-      if (c.status === 'now') {
+      if (isOngoing) {
         nNow++;
         cls = `vt-item ${tone} vt-now`;
-        if (start)    { span = { start: toDate(start), end: NOW, type: 'range' }; dateText = `in progress · since ${fmtFull(start)}`; }
-        else if (end) { span = { start: toDate(end), type: 'point' };             dateText = `in progress · updated ${fmtFull(end)}`; }
-        else          { span = { start: NOW, type: 'point' };                     dateText = 'in progress'; }
-      } else {                                   // shipped
+        if (start)              { span = { start: toDate(start), end: NOW, type: 'range' }; dateText = `ongoing · since ${fmtFull(start)}`; }
+        else if (end && !c.present) { span = { start: toDate(end), type: 'point' };          dateText = `ongoing · updated ${fmtFull(end)}`; }
+        else                    { span = { start: NOW, type: 'point' };                     dateText = 'ongoing'; }
+      } else {                                   // closed (shipped)
         if (!end) return;
         nShipped++;
         cls = `vt-item ${tone}`;
@@ -590,7 +609,7 @@
       });
     });
 
-    const headMain = nNow > 0 ? 'Shipped &amp; in&nbsp;progress' : 'Shipped';
+    const headMain = nNow > 0 ? 'Shipped &amp; ongoing' : 'Shipped';
     const headHtml = `<h3 class="timeline-head">${headMain} <span class="timeline-head-note">— a project timeline, by date</span></h3>`;
     if (visItems.length === 0) {
       host.innerHTML = `<div class="timeline-doc"><h3 class="timeline-head">Timeline <span class="timeline-head-note">— a project timeline, by date</span></h3><p class="timeline-empty">nothing on the timeline yet</p></div>`;
@@ -598,8 +617,8 @@
       return;
     }
     const legendHtml = legendItems.length >= 2
-      ? `<div class="vt-legend">${legendItems.map((L) => `<span class="vt-legend-item vt-tone-${L.tone}"><span class="vt-swatch" aria-hidden="true"></span>${escape(L.label)}</span>`).join('')}${nNow > 0 ? `<span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>in progress</span>` : ''}</div>`
-      : (nNow > 0 ? `<div class="vt-legend"><span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>in progress</span></div>` : '');
+      ? `<div class="vt-legend">${legendItems.map((L) => `<span class="vt-legend-item vt-tone-${L.tone}"><span class="vt-swatch" aria-hidden="true"></span>${escape(L.label)}</span>`).join('')}${nNow > 0 ? `<span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>ongoing</span>` : ''}</div>`
+      : (nNow > 0 ? `<div class="vt-legend"><span class="vt-legend-item vt-legend-now"><span class="vt-swatch" aria-hidden="true"></span>ongoing</span></div>` : '');
 
     host.innerHTML = `<div class="timeline-doc">${headHtml}${legendHtml}<div class="vt-host" aria-label="Shipped and in-progress projects on a timeline">loading…</div><p class="tl-hint">drag to pan · Ctrl-scroll to zoom · click an item to open the project</p></div>`;
     timelineBuilt = true;   // claim it now so a second tab-click doesn't re-load the bundle
@@ -855,7 +874,7 @@
       <div class="modal-tags" id="modal-tags">${tagsHtml}</div>
       <div class="modal-details" id="modal-details">${detailsHtml}</div>
       <div class="modal-foot">
-        <span class="modal-updated" id="modal-updated">${c.updated ? `updated ${escape(c.updated)}` : ''}</span>
+        <span class="modal-updated" id="modal-updated">${escape(cardEndFootLabel(c))}</span>
         <span class="modal-impact" id="modal-impact">${escape(c.impact ?? '')}</span>
       </div>
       <div class="modal-links" id="modal-links">${linksHtml}</div>`;

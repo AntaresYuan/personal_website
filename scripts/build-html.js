@@ -157,11 +157,18 @@ function emptyHeatmapSvg() {
 const ID_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
 const pad2 = (n) => String(n).padStart(2, '0');
 
+// Card end-date helper: mirrors render.js. `present: true` means "no fixed
+// end date, still active" — for sort and display purposes the card behaves
+// like today; for the chip text it shows 'ongoing' instead of a date.
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const cardEndKey  = (c) => (c && c.present) ? todayISO() : (c?.updated ?? '');
+const cardEndText = (c) => (c && c.present) ? 'ongoing'   : (c?.updated ?? '');
+
 const allCards = () => {
   const cards = (board.cards ?? []).slice().sort((a, b) => {
     const ao = a.order ?? 99, bo = b.order ?? 99;
     if (ao !== bo) return ao - bo;
-    return (b.updated ?? '').localeCompare(a.updated ?? '');
+    return cardEndKey(b).localeCompare(cardEndKey(a));
   });
   const cols = ['shipped', 'now', 'next', 'later'];
   const out = [];
@@ -234,7 +241,7 @@ const cardHtml = (c) => {
               ${tags ? `<div class="card-tags">${tags}</div>` : ''}
               <div class="card-footer">
                 <span class="card-footer-left">
-                  <span>${escape(c.updated ?? '')}</span>
+                  <span>${escape(cardEndText(c))}</span>
                   <span class="card-comments">0</span>
                 </span>
                 ${c.impact ? `<span class="card-impact">${escape(c.impact)}</span>` : ''}
