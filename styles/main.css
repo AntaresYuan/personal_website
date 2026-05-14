@@ -1924,11 +1924,12 @@ body.modal-open { overflow: hidden; }
 }
 
 .usage-heatmap-wrap {
-  /* Don't let the SVG width cap the section's height — it's intrinsic, no
-     padding. Center on mobile so it doesn't squat to the left of a narrow
-     viewport. */
+  /* Center the heatmap inside the section. The SVG is intrinsically
+     narrow (166px) so left-aligning it leaves a giant empty band to the
+     right — centering visually balances against the stats/fun-fact rows
+     below, which now also center on their content width. */
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   margin-bottom: var(--sp-12);
 }
 .usage-heatmap {
@@ -1983,6 +1984,7 @@ body.modal-open { overflow: hidden; }
   flex-wrap: wrap;
   gap: var(--sp-8);
   align-items: baseline;
+  justify-content: center;
   margin-bottom: var(--sp-6);
 }
 .usage-stat strong {
@@ -1997,6 +1999,7 @@ body.modal-open { overflow: hidden; }
   font-size: var(--fs-12);
   color: var(--color-text-faint);
   letter-spacing: var(--tracking-wide);
+  text-align: center;
   min-height: 1.4em;   /* reserve space so rotation doesn't reflow */
 }
 
