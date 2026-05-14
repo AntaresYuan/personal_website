@@ -14,9 +14,13 @@
 
      Stores at KV key `usage:YYYY-MM-DD` an object:
        { "<source>": { "tokens": int, "sessions": int, "updated": "<iso>" } }
-     Per-source read-modify-write — different sources never collide. Same
-     source concurrent writes are last-wins; counters are absolute, sync
-     runs hourly, so practical loss is zero.
+     Read-modify-write the per-day map: each source owns its own slot in
+     the JSON value, so concurrent writes from different sources don't
+     overwrite each other's data. The parent KV key itself is shared, so
+     two near-simultaneous writes CAN race at the KV level (last-write
+     wins on the whole object); each carries absolute counters and sync
+     cadence is hourly per source, so realistic loss is zero. Same-source
+     concurrent writes are last-wins by design.
 
    GET /
      Public, CORS-locked to https://antaresyuan.site (+ localhost dev).

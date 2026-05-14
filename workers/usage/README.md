@@ -52,11 +52,14 @@ value : {
 }
 ```
 
-POST = read this map, set `[source] = { tokens, sessions, updated }`, write
-back. Different sources occupy independent slots ⇒ no contention. Same
-source from concurrent writes is last-wins; each write carries the
-**absolute** counter (not a delta), so practical loss with hourly sync
-cadence is zero.
+POST = read this map, set `[source] = { tokens, sessions, updated }`,
+write back. Each source owns its own slot in the JSON value so two
+sources' data never overwrite each other in normal operation. The parent
+KV key is shared, so concurrent same-date writes CAN race at the KV
+level (last-write wins on the whole object) — each write carries
+**absolute** counters (not deltas) and sync cadence is hourly per source,
+so realistic loss is zero. Same-source concurrent writes are last-wins
+by design.
 
 GET = read the last 90 days in parallel, sum each day across slots, drop
 the slot map, return `{date, tokens, sessions}` per day plus the global
