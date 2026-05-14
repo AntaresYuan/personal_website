@@ -58,7 +58,6 @@ Links:
 ## NOW-01 · NOW · Lark Loom
 The collaborative AI Agent rooted  in the Lark ecosystem.
 Tags: Lark AI Challenge for College Students, AI Agent PM, Delivery Layer Developer, Collaboration, Lark
-Updated: 2026-05-11
 Links:
   - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
   - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
@@ -66,12 +65,10 @@ Links:
 ## NOW-02 · NOW · ApplyMint
 ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form
 Tags: SIDE PROJECT, Job Application, Chrome Extension
-Updated: 2026-05-09
 
 ## NOW-03 · NOW · SusFix
 Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
 Tags: RESEARCH PROJECT
-Updated: 2026-05-12
 
 ## NOW-04 · NOW · SleepStreak
 Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults
