@@ -20,6 +20,16 @@
     ]
   },
   {
+    "slug": "hcde-351-final-reflection",
+    "title": "HCDE 351 | Final Reflection",
+    "summary": "This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter.",
+    "date": "2026-03-15",
+    "tags": [
+      "Final Reflection",
+      "Class Reflection"
+    ]
+  },
+  {
     "slug": "hcde-351-a6-behavioral-prototype-minecraft-ai-assistant",
     "title": "HCDE 351 | A6: Behavioral Prototype: Minecraft AI Assistant",
     "summary": "This process log documents the behavioral prototype of a game strategy assistant which can help user making decision while playing the games by chatting with them in real-time.",
