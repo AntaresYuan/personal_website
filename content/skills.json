@@ -48,6 +48,20 @@
       "order": 3
     },
     {
+      "slug": "logger",
+      "name": "/log",
+      "category": "Claude Code Skill",
+      "summary": "When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.",
+      "details": "What this thing actually does\n\n  While you're working on a project in Claude Code, it keeps a journal in the background. When the project ends, that\n  journal turns into a blog draft with one command.\n\n  ---\n  The three files\n  \n  Stream (stream.md) — every time you hit enter, one line lands here (timestamp + first 300 chars of your prompt). When\n  the session ends (/clear or terminal close), a summary block is appended: how many prompts you sent, which tools got\n  used, what files git shows changed. You don't read this one — it's noisy, it's source material.\n\n  ▎ Why log in real-time instead of only at session end: if Claude Code runs for 4 hours and then crashes, at least your\n  ▎  prompts survive.\n\n  Digest (digest.md) — this is the file you actually read. Fourteen sections (Decisions / Failures / AI-trust-broke /\n  Assumptions / Reversals / Surprises / Quotes / Lucky breaks / ...). Two ways stuff gets in:\n  - You drop a thought: /log note \"that call was emotional, I didn't run the numbers\" — agent decides which section(s)\n  it belongs to and writes it in\n  - You want to clean up: /log digest — agent scans whatever's new in the stream and sorts it into the right sections\n  \n  Blog draft (blog-draft.md) — at project end, /log blog runs. Agent only reads the digest (never the stream), spits out\n   a ~1000-word draft, leaning hard on Reversals / AI-trust-broke / Surprises / Quotes for narrative tension.\n\n  ---\n  Starting a new project\n  \n  Inside the project directory, type /log start <name>. From then on, any Claude Code session launched from that\n  directory (or any subdirectory) auto-logs to that project's files.\n\n  Joining a project that's already in flight: add --backfill. The agent goes through your Claude Code transcript history\n   + git log + README + ~/research/<name>/, picks out high-signal events, and writes them into the digest with\n  [backfilled] tags. (Stream doesn't get backfilled — backfilled raw data is just noise.) Your yitang project was\n  already done this way.\n\n  ---\n  Multiple terminals don't cross-contaminate\n  \n  Terminal A in ~/Downloads/一堂, Terminal B in ~/projects/lark-loom — each logs to its own project. The agent looks at\n  the launch directory to figure out which journal to write to. Unbound directories log nothing — which is why this \n  current session (launched from your home dir) won't end up in any journal.\n\n  ---\n  Filter\n  \n  Prompts shorter than 5 visible characters get skipped (好 / 继续 / ok / yes / y / n) — pure filler that would just\n  dilute the signal. If you genuinely want a short instruction captured, use /log note \"...\" — that bypasses the filter\n  and goes straight into the digest. Threshold is tunable via export LOG_STREAM_MIN_CHARS=N.\n\n  ---\n  The rest of the commands\n  \n Command           │    What it does                             │\n /log list                  │ List all projects with state (active / paused / archived)            │\n/log open <name>           │ Open a project's digest in your editor                               │\n /log pause / /log resume   │ Stop or resume recording for the current directory                   │\n/log archive <name>        │ Mark a project finished (data stays, just status flips)              │\n/log ingest <path-or-text> │ Pull external material (advisor emails, Figma notes) into the digest │\n/log status                │ Show which project is bound to the current directory                 │\n  \n  ---\n  What it doesn't do\n  \n  - Doesn't read private files, doesn't upload anything — fully local\n  - The background hook never calls an LLM (it's fast, costs nothing, and no API key has to live in the hook\n  environment)\n  - All LLM-powered work (classification, blog drafting) happens inside your interactive Claude Code session — you see\n  it happen\n  - Doesn't make decisions for you, doesn't write code for you\n\n  ---\n  One diagram\n  \n  You working normally\n     │\n     │   each prompt ─────────────► Stream  (raw, you don't read)\n     │                                  │\n     │                                  │ /log digest\n     │                                  ▼\n     │   /log note \"...\" ─────────► Digest  (14 sections, you read)\n     │                                  │\n     │   project ends                   │ /log blog\n     │   ↓                              ▼\n     └───────────────────────────► Blog draft  (you edit)",
+      "links": [
+        {
+          "label": "/agent-brief.txt",
+          "href": "/agent-brief.txt"
+        }
+      ],
+      "order": 4
+    },
+    {
       "slug": "agent-brief",
       "name": "agent-brief.txt",
       "category": "agent infra",
@@ -57,6 +71,10 @@
         {
           "label": "/agent-brief.txt",
           "href": "/agent-brief.txt"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
       "order": 4
