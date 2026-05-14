@@ -1908,10 +1908,19 @@ body.modal-open { overflow: hidden; }
   margin-top: var(--sp-32);
   margin-bottom: 0;
 }
-.usage-section .sec-meta {
-  display: inline-flex;
+/* Centered "● updated Nm ago" indicator below the fun-fact. Replaces
+   the old .sec-head row — the heatmap is self-explanatory; the live
+   indicator now sits where freshness info naturally belongs (right
+   after the data, not before it). */
+.usage-foot {
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: var(--sp-6);
+  margin-top: var(--sp-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
 }
 .usage-live-dot {
   display: inline-block;
