@@ -132,17 +132,19 @@ function priceFor(model) {
   return DEFAULT_PRICING;
 }
 
-// Cost of a single assistant turn in USD. Includes cache_creation +
-// cache_read at their real billing rates — these are charged by Anthropic
-// even though they don't count as "fresh work" in the tokens metric. On
-// 1M-context Opus sessions cache_read can be the dominant cost line.
+// Cost of a single assistant turn in USD = input × p_in + output × p_out.
+// Cache_creation and cache_read tokens are NOT counted here — they're
+// part of Anthropic's real billing but on 1M-context Opus they dwarf the
+// fresh-work cost (one re-served 500K-token cache turn at $0.50/MTok =
+// $0.25, multiplied across hundreds of turns per session), inflating the
+// dashboard number 30-50× above what the user thinks of as "what the
+// work cost". This matches the `tokens` metric definition above (input
+// + output only) — the two stats stay coherent.
 function eventCostUsd(u, model) {
-  const [pi, po, pcw, pcr] = priceFor(model);
+  const [pi, po] = priceFor(model);
   return (
-    (u.input_tokens                || 0) / 1e6 * pi  +
-    (u.output_tokens               || 0) / 1e6 * po  +
-    (u.cache_creation_input_tokens || 0) / 1e6 * pcw +
-    (u.cache_read_input_tokens     || 0) / 1e6 * pcr
+    (u.input_tokens  || 0) / 1e6 * pi +
+    (u.output_tokens || 0) / 1e6 * po
   );
 }
 
