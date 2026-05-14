@@ -126,9 +126,9 @@ const setAttr = (html, id, attr, value) => {
 // shell and the client-rendered version mismatch on first paint.
 const HEATMAP_COLS = 52;
 const HEATMAP_ROWS = 7;
-const HEATMAP_CELL = 10;
-const HEATMAP_GAP  = 2;
-const HEATMAP_LABEL_BAND = 14;   // month-label strip height above the grid
+const HEATMAP_CELL = 12;
+const HEATMAP_GAP  = 3;
+const HEATMAP_LABEL_BAND = 18;   // month-label strip height above the grid
 function emptyHeatmapSvg() {
   const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
   const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;

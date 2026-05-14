@@ -1981,10 +1981,11 @@ body.modal-open { overflow: hidden; }
 }
 .usage-heatmap svg { display: block; }
 /* Month labels live as SVG <text> inside the heatmap SVG. Mono, faint,
-   small — they sit in a 14px-tall band above the cell grid. */
+   matching the fun-fact's font-size (fs-12) so the section's typography
+   reads as a single family — not a tiny disconnected microcopy band. */
 .usage-month-label {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-12);
   fill: var(--color-text-faint);
 }
 
