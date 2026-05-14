@@ -4,7 +4,7 @@
 
    Walks `~/.claude/projects/<project-slug>/<session-uuid>.jsonl`, sums per
    day per session, and POSTs the last 14 days to the Worker as
-     { date, source, tokens, sessions }
+     { date, source, tokens, sessions, costCents }
 
    Source identifier comes from config so multi-device aggregation works
    (claude-mbp, claude-imac, ...). The Worker stores each source as its
@@ -16,9 +16,11 @@
    summed total per day. Per-source data never leaves the Worker.
 
    Privacy gate on THIS side: the script's POST body is built from a
-   hardcoded allowlist of 4 fields. No message content, no project name,
+   hardcoded allowlist of 5 fields. No message content, no project name,
    no model id, no session ids, no event counts, no hourly distribution
-   ever leaves the machine — by construction, not just by trust.
+   ever leaves the machine — by construction, not just by trust. costCents
+   is a SCALAR aggregate computed locally using the model-pricing table
+   below — the per-model token split that feeds it stays on this device.
 
    Config: ~/.config/antares-sync-usage.json  (per machine, untracked)
    Example: scripts/sync-usage.config.example.json
@@ -96,8 +98,58 @@ function loadSecret(cfg) {
       '  security add-generic-password -a "$USER" -s "antares-sync-usage" -w "<bearer>"');
 }
 
+// ── model pricing (USD per million tokens) ────────────────────────
+// [input, output, cache_write_5min, cache_read]. Match by substring of
+// `ev.message.model` so we don't have to enumerate every dated snapshot
+// ("claude-opus-4-7-20251101" etc.). Source of truth:
+// https://platform.claude.com/docs/en/about-claude/pricing
+// Opus 4.5+ dropped 3× from Opus 4.1 ($15/$75 → $5/$25); Haiku 4.5 is
+// also up from Haiku 3.5. Re-verify when Anthropic ships a new family.
+//
+// 1h-cache-write is 2× input, NOT used here — Claude Code's default
+// caching mode is 5-minute. If the JSONL ever surfaces a 1h-cache field,
+// add it; until then assume 5m write rates.
+//
+// Default fallback = Sonnet rates: safe middle ground for an unknown
+// model id. Over-quotes a Haiku miss (acceptable), under-quotes an Opus
+// miss (acceptable as a conservative floor).
+const MODEL_PRICING = {
+  'opus-4-7':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-6':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-5':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-1':   [15.00, 75.00, 18.75, 1.50],
+  'sonnet-4-6': [3.00, 15.00, 3.75, 0.30],
+  'sonnet-4-5': [3.00, 15.00, 3.75, 0.30],
+  'haiku-4-5':  [1.00,  5.00, 1.25, 0.10],
+};
+const DEFAULT_PRICING = [3.00, 15.00, 3.75, 0.30];
+
+function priceFor(model) {
+  if (typeof model !== 'string') return DEFAULT_PRICING;
+  for (const key of Object.keys(MODEL_PRICING)) {
+    if (model.includes(key)) return MODEL_PRICING[key];
+  }
+  return DEFAULT_PRICING;
+}
+
+// Cost of a single assistant turn in USD = input × p_in + output × p_out.
+// Cache_creation and cache_read tokens are NOT counted here — they're
+// part of Anthropic's real billing but on 1M-context Opus they dwarf the
+// fresh-work cost (one re-served 500K-token cache turn at $0.50/MTok =
+// $0.25, multiplied across hundreds of turns per session), inflating the
+// dashboard number 30-50× above what the user thinks of as "what the
+// work cost". This matches the `tokens` metric definition above (input
+// + output only) — the two stats stay coherent.
+function eventCostUsd(u, model) {
+  const [pi, po] = priceFor(model);
+  return (
+    (u.input_tokens  || 0) / 1e6 * pi +
+    (u.output_tokens || 0) / 1e6 * po
+  );
+}
+
 // ── walk jsonl + aggregate ────────────────────────────────────────
-// Returns Map<dateYYYYMMDD, { tokens: int, sessions: Set<sessionId> }>
+// Returns Map<dateYYYYMMDD, { tokens: int, sessions: Set<sessionId>, costUsd: number }>
 function aggregate(projectsDir) {
   const buckets = new Map();
   let projects;
@@ -145,9 +197,15 @@ function aggregate(projectsDir) {
           (u.input_tokens  || 0) +
           (u.output_tokens || 0);
         if (!Number.isFinite(tokens) || tokens <= 0) continue;
+        // Cost uses real Anthropic billing — input + output + cache_creation
+        // + cache_read at per-model rates. Diverges from `tokens` on purpose:
+        // tokens = "fresh work this turn", costUsd = "what Anthropic charged".
+        const model = ev.message && ev.message.model;
+        const cost = eventCostUsd(u, model);
         let b = buckets.get(date);
-        if (!b) { b = { tokens: 0, sessions: new Set() }; buckets.set(date, b); }
+        if (!b) { b = { tokens: 0, sessions: new Set(), costUsd: 0 }; buckets.set(date, b); }
         b.tokens += tokens;
+        b.costUsd += cost;
         if (ev.sessionId) b.sessions.add(ev.sessionId);
       }
     }
@@ -174,13 +232,19 @@ function payloadsFor(buckets, source, window) {
   const dates = lastNDates(window);
   return dates.map(date => {
     const b = buckets.get(date);
+    // costCents = integer USD-cents. Wire as int (not float) so KV
+    // round-trips are exact and Worker validation can use Number.isInteger.
+    // Capped at the Worker's MAX_INT just in case a bug fed a daily bucket
+    // that exploded.
+    const costCents = b ? Math.round(b.costUsd * 100) : 0;
     return {
       date,
       source,
-      tokens:   b ? b.tokens          : 0,
-      sessions: b ? b.sessions.size   : 0,
+      tokens:    b ? b.tokens        : 0,
+      sessions:  b ? b.sessions.size : 0,
+      costCents,
     };
-  }).filter(p => p.tokens > 0 || p.sessions > 0);
+  }).filter(p => p.tokens > 0 || p.sessions > 0 || p.costCents > 0);
   // Skip empty days — they're zero on the Worker anyway, and posting them
   // would just churn KV writes. The Worker's lastNDays(90) fills zero-days
   // back in on GET for heatmap continuity.
@@ -229,7 +293,7 @@ async function post(endpoint, secret, payload) {
   for (const p of payloads) {
     try {
       const r = await post(cfg.endpoint, secret, p);
-      if (r.status === 200) { ok++; log(`  POST ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions)`); }
+      if (r.status === 200) { ok++; log(`  POST ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions, $${(p.costCents/100).toFixed(2)})`); }
       else {
         // Worker error bodies are terse, schema-validator strings ('unexpected
         // field: foo' or 'date must be YYYY-MM-DD') — never echoes the payload.
