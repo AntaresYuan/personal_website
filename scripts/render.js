@@ -1058,8 +1058,20 @@
     const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
     const w = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
     const h = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+
+    // First active date in the window = the "since" boundary. Cells
+    // before this date have no data on the Worker (the sync agent simply
+    // didn't see that history), so we render them as transparent — not
+    // grey "zero-activity" cells, which would falsely imply "you didn't
+    // use Claude that day." Cells after today (future days of the
+    // current calendar week) are also transparent for the same reason.
+    let firstActiveDate = '';
+    for (const c of cells) {
+      if (c.tokens > 0 && (!firstActiveDate || c.date < firstActiveDate)) firstActiveDate = c.date;
+    }
+
     // Initialize an empty grid; then fill from cells (a date may be missing
-    // from `days` if the API skipped — we still want the cell rendered).
+    // from `days` if the API skipped — we still want the cell positioned).
     const grid = [];
     for (let c = 0; c < HEATMAP_COLS; c++) {
       for (let r = 0; r < HEATMAP_ROWS; r++) {
@@ -1070,18 +1082,25 @@
       const idx = cell.col * HEATMAP_ROWS + cell.row;
       if (idx >= 0 && idx < grid.length) grid[idx] = cell;
     }
+
     // Each rect carries its data in data-* attributes; wireUsage attaches
     // a single delegated mouseover handler that positions the custom
-    // tooltip. Native <title> is left out — browsers fire it after ~1s and
-    // it's not stylable; the custom one is instant and matches the site.
+    // tooltip. Outside-window cells get no data-* attributes so they're
+    // non-interactive (no tooltip on a "we don't know" cell).
     const rects = grid.map(cell => {
       const x = cell.col * (HEATMAP_CELL + HEATMAP_GAP);
       const y = cell.row * (HEATMAP_CELL + HEATMAP_GAP);
-      const bin = quartileBin(cell.tokens, nonZero);
-      const cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
-      const dataAttrs = cell.date
-        ? `data-date="${cell.date}" data-tokens="${cell.tokens}" data-sessions="${cell.sessions}"`
-        : '';
+      const isOutside = !cell.date                                  // future days (placeholder)
+                     || (firstActiveDate && cell.date < firstActiveDate);  // before data started
+      let cls, dataAttrs;
+      if (isOutside) {
+        cls = 'usage-cell-outside';
+        dataAttrs = '';
+      } else {
+        const bin = quartileBin(cell.tokens, nonZero);
+        cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
+        dataAttrs = `data-date="${cell.date}" data-tokens="${cell.tokens}" data-sessions="${cell.sessions}"`;
+      }
       return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
     return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects}</svg>`;

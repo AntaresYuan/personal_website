@@ -1965,11 +1965,15 @@ body.modal-open { overflow: hidden; }
 .usage-heatmap svg { display: block; }
 
 .usage-cell { transition: fill 200ms ease; }
-.usage-cell-empty { fill: var(--color-line-soft); }
-.usage-cell-q0    { fill: color-mix(in srgb, var(--color-yellow) 25%, var(--color-bg)); }
-.usage-cell-q1    { fill: color-mix(in srgb, var(--color-yellow) 50%, var(--color-bg)); }
-.usage-cell-q2    { fill: color-mix(in srgb, var(--color-yellow) 75%, var(--color-bg)); }
-.usage-cell-q3    { fill: var(--color-yellow); }
+.usage-cell-empty   { fill: var(--color-line-soft); }
+/* Outside the data window — before the first day the sync agent has data
+   for, or future days of the current calendar week. Transparent so the
+   heatmap visually represents only the window where activity is known. */
+.usage-cell-outside { fill: transparent; }
+.usage-cell-q0      { fill: color-mix(in srgb, var(--color-yellow) 25%, var(--color-bg)); }
+.usage-cell-q1      { fill: color-mix(in srgb, var(--color-yellow) 50%, var(--color-bg)); }
+.usage-cell-q2      { fill: color-mix(in srgb, var(--color-yellow) 75%, var(--color-bg)); }
+.usage-cell-q3      { fill: var(--color-yellow); }
 
 .usage-stats {
   font-family: var(--font-mono);
