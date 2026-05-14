@@ -120,18 +120,25 @@ const setAttr = (html, id, attr, value) => {
    shift when data lands. Empty cells use a CSS class instead of a fill
    attribute, so theme tokens drive the color (dark mode just works).
    ────────────────────────────────────────────────────────────────── */
-const HEATMAP_COLS = 12;
+// GitHub-style year strip: 52 weeks × 7 days. Cells 10px with 2px gap →
+// ~620px wide × 82px tall, plus a 12px top band for month labels. Same
+// constants as scripts/render.js, in lockstep — must match or the SSR
+// shell and the client-rendered version mismatch on first paint.
+const HEATMAP_COLS = 52;
 const HEATMAP_ROWS = 7;
-const HEATMAP_CELL = 12;
+const HEATMAP_CELL = 10;
 const HEATMAP_GAP  = 2;
+const HEATMAP_LABEL_BAND = 14;   // month-label strip height above the grid
 function emptyHeatmapSvg() {
-  const w = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
-  const h = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+  const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
+  const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+  const w = gridW;
+  const h = gridH + HEATMAP_LABEL_BAND;
   const rects = [];
   for (let c = 0; c < HEATMAP_COLS; c++) {
     for (let r = 0; r < HEATMAP_ROWS; r++) {
       const x = c * (HEATMAP_CELL + HEATMAP_GAP);
-      const y = r * (HEATMAP_CELL + HEATMAP_GAP);
+      const y = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP);
       rects.push(`<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell usage-cell-empty"/>`);
     }
   }

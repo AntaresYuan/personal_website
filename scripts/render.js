@@ -974,10 +974,14 @@
      week. 84 cells visible. Shade = quartile of NON-zero token totals
      across the window, so a light week of activity isn't drowned out
      by one big day. Empty days use the soft-line theme color. */
-  const HEATMAP_COLS = 12;
+  // GitHub-style year strip: 52 weeks × 7 days. Keep in lockstep with
+  // scripts/build-html.js (same names + values), otherwise SSR shell and
+  // client-rendered version mismatch on first paint.
+  const HEATMAP_COLS = 52;
   const HEATMAP_ROWS = 7;
-  const HEATMAP_CELL = 12;
+  const HEATMAP_CELL = 10;
   const HEATMAP_GAP  = 2;
+  const HEATMAP_LABEL_BAND = 14;
   const FUNFACT_ROTATE_MS = 7000;
   // Refetch hourly. The data only updates on the local sync agent's
   // hourly LaunchAgent tick or a Claude Code Stop-hook, so anything more
@@ -1054,24 +1058,23 @@
     return cells;
   };
 
+  const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const renderHeatmap = (cells) => {
     const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
-    const w = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
-    const h = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+    const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
+    const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+    const w = gridW;
+    const h = gridH + HEATMAP_LABEL_BAND;
 
-    // First active date in the window = the "since" boundary. Cells
-    // before this date have no data on the Worker (the sync agent simply
-    // didn't see that history), so we render them as transparent — not
-    // grey "zero-activity" cells, which would falsely imply "you didn't
-    // use Claude that day." Cells after today (future days of the
-    // current calendar week) are also transparent for the same reason.
+    // First active date in the window — outside-window cells render as
+    // transparent (semantics: "we don't have data here," distinct from
+    // "you didn't use Claude that day"). Future days of the current
+    // week also outside-window.
     let firstActiveDate = '';
     for (const c of cells) {
       if (c.tokens > 0 && (!firstActiveDate || c.date < firstActiveDate)) firstActiveDate = c.date;
     }
 
-    // Initialize an empty grid; then fill from cells (a date may be missing
-    // from `days` if the API skipped — we still want the cell positioned).
     const grid = [];
     for (let c = 0; c < HEATMAP_COLS; c++) {
       for (let r = 0; r < HEATMAP_ROWS; r++) {
@@ -1083,15 +1086,29 @@
       if (idx >= 0 && idx < grid.length) grid[idx] = cell;
     }
 
-    // Each rect carries its data in data-* attributes; wireUsage attaches
-    // a single delegated mouseover handler that positions the custom
-    // tooltip. Outside-window cells get no data-* attributes so they're
-    // non-interactive (no tooltip on a "we don't know" cell).
+    // Month labels: for each column, look at the row-0 (Sunday) date; if
+    // it's the first Sunday of a new month, drop a label at that column.
+    // Skip labels too close to each other on narrow viewports — but
+    // since they're SVG <text>, we let them overflow naturally; CSS
+    // controls visibility on mobile.
+    const monthLabels = [];
+    let prevMonth = -1;
+    for (let c = 0; c < HEATMAP_COLS; c++) {
+      const sunday = grid[c * HEATMAP_ROWS];   // row 0 of column c
+      if (!sunday.date) continue;
+      const m = new Date(sunday.date + 'T00:00:00Z').getUTCMonth();
+      if (m !== prevMonth) {
+        const x = c * (HEATMAP_CELL + HEATMAP_GAP);
+        monthLabels.push(`<text x="${x}" y="10" class="usage-month-label">${MONTH_ABBR[m]}</text>`);
+        prevMonth = m;
+      }
+    }
+
     const rects = grid.map(cell => {
       const x = cell.col * (HEATMAP_CELL + HEATMAP_GAP);
-      const y = cell.row * (HEATMAP_CELL + HEATMAP_GAP);
-      const isOutside = !cell.date                                  // future days (placeholder)
-                     || (firstActiveDate && cell.date < firstActiveDate);  // before data started
+      const y = HEATMAP_LABEL_BAND + cell.row * (HEATMAP_CELL + HEATMAP_GAP);
+      const isOutside = !cell.date
+                     || (firstActiveDate && cell.date < firstActiveDate);
       let cls, dataAttrs;
       if (isOutside) {
         cls = 'usage-cell-outside';
@@ -1103,7 +1120,7 @@
       }
       return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
-    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects}</svg>`;
+    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${rects}</svg>`;
   };
 
   const renderUsageStats = (cells) => {

@@ -1901,6 +1901,13 @@ body.modal-open { overflow: hidden; }
   margin-bottom: var(--sp-40);
   position: relative;   /* anchor for the absolutely-positioned hover tooltip */
 }
+/* When nested inside the .hero grid (sits between ctas and the ask bar),
+   span both columns like .hero-ask does. */
+.hero > .usage-section {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-32);
+  margin-bottom: 0;
+}
 .usage-section .sec-meta {
   display: inline-flex;
   align-items: center;
@@ -1964,6 +1971,13 @@ body.modal-open { overflow: hidden; }
   font-weight: var(--fw-semibold);
 }
 .usage-heatmap svg { display: block; }
+/* Month labels live as SVG <text> inside the heatmap SVG. Mono, faint,
+   small — they sit in a 14px-tall band above the cell grid. */
+.usage-month-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--color-text-faint);
+}
 
 .usage-cell { transition: fill 200ms ease; }
 .usage-cell-empty   { fill: var(--color-line-soft); }
@@ -2003,13 +2017,14 @@ body.modal-open { overflow: hidden; }
   min-height: 1.4em;   /* reserve space so rotation doesn't reflow */
 }
 
-/* Mobile — drop cell + gap so 12 weeks fit on a 375px viewport with
-   page padding. 8px cell + 2px gap = 12*8 + 11*2 = 118px wide. */
-@media (max-width: 540px) {
+/* Mobile — the 52-week strip is 620px wide intrinsic. Scale to viewport;
+   on a 375px iPhone that brings cells to ~6px which is still readable
+   for the "shape of activity," even if individual day clicks get fiddly. */
+@media (max-width: 720px) {
   .usage-heatmap svg {
     width: 100%;
     height: auto;
-    max-width: 240px;
+    max-width: 100%;
   }
 }
 
