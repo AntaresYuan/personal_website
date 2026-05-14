@@ -18,7 +18,8 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── contact.json        ← email + socials + "open to" line
 │   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
 │   ├── doodles.json        ← special-day "doodles" — the moon mark becomes a glyph (holidays, birthday…)
-│   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/draft + Markdown body)
+│   ├── skills.json         ← /skills section ("dotfiles for AI") — Claude Code skills, agent infra, configs I use
+│   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/tags/draft + Markdown body)
 ├── styles/main.css         ← design tokens + dashboard styles
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates the page for interactive use
@@ -123,7 +124,7 @@ The site exposes three machine-readable surfaces backed by the same JSON:
 - **`/llms-full.txt`** — full content dump in plain text
 - **`/content/*.json`** — typed structured data
 
-Plus: cards have stable IDs (`SHIP-01`, `NOW-01`, …) so agents can cite them across conversations, and the home HTML is **pre-rendered** — agents that don't execute JavaScript still see all content.
+Plus: project cards (`SHIP-01`, `NOW-01`, …) and `/skills` entries (`SKILL-01`, …) have stable IDs so agents can cite them across conversations, and the home HTML is **pre-rendered** — agents that don't execute JavaScript still see all content.
 
 ## Local preview
 
