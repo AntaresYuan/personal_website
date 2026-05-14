@@ -1899,6 +1899,7 @@ body.modal-open { overflow: hidden; }
    [hidden]) — never show a broken widget. */
 .usage-section {
   margin-bottom: var(--sp-40);
+  position: relative;   /* anchor for the absolutely-positioned hover tooltip */
 }
 .usage-section .sec-meta {
   display: inline-flex;
@@ -1931,9 +1932,8 @@ body.modal-open { overflow: hidden; }
   margin-bottom: var(--sp-12);
 }
 .usage-heatmap {
-  /* SVG sits flush; the hover tooltip is JS-driven (.usage-tip) and
-     position:absolute against this container. */
-  position: relative;
+  /* SVG sits flush. The hover tooltip lives on .usage-section (a sibling
+     wrapper higher up), so SVG innerHTML replacements don't wipe it. */
   font-family: var(--font-mono);
   line-height: 0;
 }

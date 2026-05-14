@@ -1247,53 +1247,50 @@
     });
 
     // ── Custom hover tooltip on heatmap cells ──────────────────────
-    // Instant + stylable (unlike SVG <title> which fires after ~1s and
-    // can't be themed). Each rect carries data-date / data-tokens /
-    // data-sessions; we delegate pointer events at the heatmap level so
-    // there's only one listener and innerHTML replacements (every 60s)
-    // don't strand event handlers.
+    // The tooltip lives as a child of `section` (NOT heatmapEl), because
+    // refetch() does `heatmapEl.innerHTML = …` which would otherwise wipe
+    // the tooltip on every cycle. Each rect carries data-date / data-tokens;
+    // one delegated mouseover handler positions the tooltip absolutely
+    // against the section. Content stays minimal — just `Month D — N` —
+    // since the stats row below already shows aggregate sessions.
     let tipEl = document.getElementById('usage-tip');
     if (!tipEl) {
       tipEl = document.createElement('div');
       tipEl.id = 'usage-tip';
       tipEl.className = 'usage-tip';
       tipEl.hidden = true;
-      heatmapEl.appendChild(tipEl);
+      section.appendChild(tipEl);
     }
     const formatDate = (iso) => {
       const d = new Date(iso + 'T00:00:00Z');
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
     };
-    const showTip = (rect, clientX) => {
+    const showTip = (rect) => {
       const date = rect.getAttribute('data-date');
       if (!date) { tipEl.hidden = true; return; }
       const tokens = parseInt(rect.getAttribute('data-tokens'), 10) || 0;
-      const sessions = parseInt(rect.getAttribute('data-sessions'), 10) || 0;
       tipEl.innerHTML =
         `<span class="usage-tip-date">${formatDate(date)}</span>` +
-        ` &middot; <strong>${tokens.toLocaleString()}</strong> tokens` +
-        (sessions > 0 ? ` &middot; ${sessions} session${sessions === 1 ? '' : 's'}` : '');
-      // Position relative to the heatmap container. Center horizontally on
-      // the hovered cell, push above it. The container is position:relative
-      // (set in CSS) so left/top use container coords.
-      const containerBox = heatmapEl.getBoundingClientRect();
+        ` &mdash; <strong>${tokens.toLocaleString()}</strong>`;
+      // Position relative to .usage-section (its CSS sets position:relative).
+      const sectionBox = section.getBoundingClientRect();
       const cellBox = rect.getBoundingClientRect();
-      const x = cellBox.left + cellBox.width / 2 - containerBox.left;
-      const y = cellBox.top - containerBox.top;
+      const xCenter = cellBox.left + cellBox.width / 2 - sectionBox.left;
+      const cellTopInSection = cellBox.top - sectionBox.top;
       tipEl.hidden = false;
       // Measure after un-hiding so width is real
       const tipW = tipEl.offsetWidth;
       const tipH = tipEl.offsetHeight;
-      const containerW = containerBox.width;
-      // Clamp so the tooltip doesn't overflow the container edges
-      const left = Math.max(0, Math.min(containerW - tipW, x - tipW / 2));
+      const sectionW = sectionBox.width;
+      // Clamp so the tooltip doesn't overflow section edges
+      const left = Math.max(0, Math.min(sectionW - tipW, xCenter - tipW / 2));
       tipEl.style.left = `${left}px`;
-      tipEl.style.top  = `${Math.max(-tipH - 6, y - tipH - 6)}px`;
+      tipEl.style.top  = `${Math.max(0, cellTopInSection - tipH - 6)}px`;
     };
     heatmapEl.addEventListener('mouseover', (ev) => {
       const r = ev.target.closest('rect.usage-cell');
-      if (r) showTip(r, ev.clientX);
+      if (r) showTip(r);
     });
     heatmapEl.addEventListener('mouseout', (ev) => {
       // Only hide when leaving the heatmap entirely; cell→cell shouldn't flicker.
