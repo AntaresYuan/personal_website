@@ -78,7 +78,7 @@
     }
     if (profile.status) {
       meta.insertAdjacentHTML('beforeend',
-        `<span class="sep">·</span><span class="now-pill"><span class="pulse"></span>${escape(profile.status)}</span>`);
+        `<span class="sep">·</span><span class="now-pill">${escape(profile.status)}</span>`);
     }
     (profile.tags ?? []).forEach((t) => {
       meta.insertAdjacentHTML('beforeend', `<span class="pill">${escape(t)}</span>`);
