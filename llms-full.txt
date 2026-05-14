@@ -509,7 +509,7 @@ In this project, I practiced my skills in rapid prototyping and user-centered de
 In this log, I will describe how our team developed the concept based on the sustainability problem we identified, designed and constructed the prototypes, and conducted testing sessions to gather feedback from users. I will also reflect on key design decisions, the reasoning behind them, and how these choices support the overall goal of reducing textile waste while providing a convenient and engaging clothing rental experience.
 Ideation:
 
-The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns. Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.
+The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. \Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns.\ Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.
 
 During our brainstorming process, we focused on the problem of clothing overconsumption in everyday life. Many garments are purchased for specific occasions but worn only once or twice before being stored or discarded. Although solutions such as thrifting or donation exist, large amounts of textile waste still end up in landfills each year.
 

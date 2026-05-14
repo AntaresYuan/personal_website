@@ -11,7 +11,13 @@
     "title": "HCDE 351 | Final Project: Textile Waste Management: Community Closet",
     "summary": "This process log documents the design of a Community Closet system, a clothing rental platform that helps reduce textile waste by allowing users to rent clothing from others in their community rather than purchasing new garments.",
     "date": "2026-03-15",
-    "tags": []
+    "tags": [
+      "Kiosk Software",
+      "Cardboard Prototype",
+      "Mobile App Development",
+      "Video Prototype",
+      "Behavioral Prototyping"
+    ]
   },
   {
     "slug": "hcde-351-a6-behavioral-prototype-minecraft-ai-assistant",

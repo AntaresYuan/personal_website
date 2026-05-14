@@ -59,6 +59,11 @@
       <pubDate>Sun, 15 Mar 2026 12:00:00 GMT</pubDate>
       <dc:creator>Antares Yuan</dc:creator>
       <description>This process log documents the design of a Community Closet system, a clothing rental platform that helps reduce textile waste by allowing users to rent clothing from others in their community rather than purchasing new garments.</description>
+      <category>Kiosk Software</category>
+      <category>Cardboard Prototype</category>
+      <category>Mobile App Development</category>
+      <category>Video Prototype</category>
+      <category>Behavioral Prototyping</category>
       <content:encoded><![CDATA[<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*WFYUxOBNyOwOHyJnPqCuoQ.png" alt="" loading="lazy"></p>
 <h2 id="product-overview">Product Overview:</h2>
 <p>This process log documents the design of a Community Closet system, a clothing rental platform that helps reduce textile waste by allowing users to rent clothing from others in their community rather than purchasing new garments. The system combines a mobile application, physical kiosks, and a delivery system to enable users to easily rent, list, pick up, and return clothing.</p>
@@ -66,7 +71,7 @@
 <p>In this project, I practiced my skills in rapid prototyping and user-centered design by collaborating with teammates to define key scenarios, building prototypes across different mediums (video, mobile, and physical), and conducting user testing to evaluate how people interact with the system. These prototypes allowed us to test our ideas quickly and at a relatively low cost while still simulating realistic user experiences.</p>
 <p>In this log, I will describe how our team developed the concept based on the sustainability problem we identified, designed and constructed the prototypes, and conducted testing sessions to gather feedback from users. I will also reflect on key design decisions, the reasoning behind them, and how these choices support the overall goal of reducing textile waste while providing a convenient and engaging clothing rental experience.</p>
 <h2 id="ideation">Ideation:</h2>
-<p>The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. <strong>Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns.</strong> Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.</p>
+<p>The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. **Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns.** Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.</p>
 <p>During our brainstorming process, we focused on the problem of clothing overconsumption in everyday life. Many garments are purchased for specific occasions but worn only once or twice before being stored or discarded. Although solutions such as thrifting or donation exist, large amounts of textile waste still end up in landfills each year.</p>
 <p>We explored several possible approaches to address this issue, including clothing swap events, community donation networks, and online resale platforms. However, we identified two main limitations in existing solutions: many platforms still rely on repeated purchasing and resale, and logistics such as shipping can introduce additional environmental costs.</p>
 <p><strong>Product:</strong></p>
