@@ -52,6 +52,14 @@ const MAX_BODY_BYTES = 1024;        // generous for {date,source,tokens,sessions
 const MAX_SOURCE_LEN = 32;          // a source label can't exceed 32 chars
 const MAX_INT = 1e12;               // absurd ceiling so a bug can't write garbage
 
+// Edge-cache the assembled GET body for this long. Each cache miss costs
+// WINDOW_DAYS (=365) KV reads — without caching, a handful of visitors with
+// the page open (frontend refetches every 60s) blew through the 100k/day
+// free-tier KV read quota in under an hour on 2026-05-14. With s-maxage=60
+// each PoP does at most ~1 fan-out per minute regardless of traffic.
+const GET_CACHE_TTL_S = 60;
+const GET_CACHE_KEY = 'https://usage.antaresyuan.site/__cache/days';
+
 // ── CORS ────────────────────────────────────────────────────────────
 // GET is locked to the public site origin (+ localhost for dev).
 // POST is machine-to-machine, bearer-auth, not browser-driven — CORS
@@ -187,6 +195,12 @@ async function handlePost(request, env) {
     return reply({ error: 'kv' }, 500);
   }
 
+  // Invalidate the GET cache so a sync agent's POST shows up on the next
+  // GET, not after the 60s TTL expires. Local-PoP only — other PoPs may
+  // still serve a 60s-stale response, which we accept (matches frontend
+  // refetch cadence).
+  try { await caches.default.delete(GET_CACHE_KEY); } catch { /* noop */ }
+
   // Ops log: date + source label only. Never the body, never PII.
   console.log(`POST ok date=${body.date} source=${body.source}`);
   return reply({ ok: true }, 200);
@@ -196,6 +210,22 @@ async function handleGet(request, env) {
   const origin = request.headers.get('origin') || '';
   const headers = corsForGet(origin);
 
+  // Edge-cache hit path: shared body across origins; CORS headers per request.
+  const cache = caches.default;
+  const cached = await cache.match(GET_CACHE_KEY);
+  if (cached) {
+    const body = await cached.text();
+    return new Response(body, {
+      status: 200,
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'no-store',
+        ...headers,
+      },
+    });
+  }
+
+  // Cache miss: do the WINDOW_DAYS fan-out, assemble, stash for 60s.
   const dates = lastNDays(WINDOW_DAYS);
   const reads = await Promise.all(
     dates.map(d => env.USAGE_KV.get(KV_PREFIX + d))
@@ -227,11 +257,24 @@ async function handleGet(request, env) {
     return { date, tokens, sessions, costCents };
   });
 
-  return reply(
-    { days, since: dates[0], updated },
-    200,
-    headers,
-  );
+  const body = JSON.stringify({ days, since: dates[0], updated });
+  // Stash with s-maxage so this PoP's edge cache holds it for GET_CACHE_TTL_S.
+  // No await needed — fire-and-forget so we don't block the response.
+  cache.put(GET_CACHE_KEY, new Response(body, {
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': `public, s-maxage=${GET_CACHE_TTL_S}`,
+    },
+  })).catch(() => { /* cache stash failure is non-fatal */ });
+
+  return new Response(body, {
+    status: 200,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      ...headers,
+    },
+  });
 }
 
 // ── Router ──────────────────────────────────────────────────────────
