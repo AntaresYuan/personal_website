@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent template — runs the local Claude Code usage sync every hour.
+
+  This is a template. Don't edit and copy it directly to ~/Library/LaunchAgents/.
+  Use the installer:  ops/launchagent/install.sh
+  which substitutes the __PLACEHOLDERS__ for your machine's absolute paths.
+
+  Cadence: hourly. The script is idempotent (re-running mid-day overwrites
+  the same source slot with the latest counters) so missing a tick is fine
+  — the next tick picks it back up.
+
+  Logs land in ~/Library/Logs/antares-sync-usage.log.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.antaresyuan.sync-usage</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__NODE__</string>
+    <string>__SCRIPT__</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>3600</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>__LOG__</string>
+
+  <key>StandardErrorPath</key>
+  <string>__LOG__</string>
+
+  <!-- Don't restart on failure; the next hourly tick is fine. -->
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>
