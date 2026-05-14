@@ -1931,9 +1931,36 @@ body.modal-open { overflow: hidden; }
   margin-bottom: var(--sp-12);
 }
 .usage-heatmap {
-  /* SVG sits flush; tooltips on hover come from <title> elements inside. */
+  /* SVG sits flush; the hover tooltip is JS-driven (.usage-tip) and
+     position:absolute against this container. */
+  position: relative;
   font-family: var(--font-mono);
   line-height: 0;
+}
+.usage-tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  pointer-events: none;
+  white-space: nowrap;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--bw) solid var(--color-line);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.usage-tip-date {
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+}
+.usage-tip strong {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
 }
 .usage-heatmap svg { display: block; }
 

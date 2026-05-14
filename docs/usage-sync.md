@@ -21,16 +21,23 @@ See `workers/usage/README.md` for the Worker side + privacy contract.
 
 Each event in `~/.claude/projects/<project-slug>/<session-uuid>.jsonl`
 with `type: "assistant"` has a `message.usage` object. The agent sums
-`input_tokens + output_tokens + cache_creation_input_tokens` per event
-and groups by the event's `timestamp`'s UTC date. A "session" is a
-distinct `sessionId` that had any activity on that day.
+`input_tokens + output_tokens` per event and groups by the event's
+`timestamp`'s UTC date. A "session" is a distinct `sessionId` that had
+any activity on that day.
 
-**`cache_read_input_tokens` is deliberately excluded** — those are cached
-prompt bytes re-served at each turn, and on a 1M-context Claude Code
-session they can be 500K+ "tokens" per turn of already-paid-for content.
-Counting them inflates daily totals by 50–100× and turns the dashboard
-into a meaningless billions-of-tokens number. We track "fresh work the
-model did" instead.
+**Why only input + output**, not the cache fields:
+
+- `cache_read_input_tokens` is the cached prompt being **re-served** each
+  turn. On a 1M-context session a single re-read is 500K+ already-paid-for
+  tokens — counting it inflated dailies 50–100×.
+- `cache_creation_input_tokens` is Claude Code writing its tools schema
+  + system prompt **to cache once per new session** (~hundreds of K tokens
+  of fixed overhead per session). Treating that as "work" makes session
+  count drive the chart instead of actual usage.
+
+`input + output` matches the convention used by the Anthropic dashboard
+and the popular `ccusage`-style CLIs, so the number is directly
+comparable to other tools the visitor might be using.
 
 That's it — no message content, no project names, no model ids, no
 hourly distribution, no individual event details ever leave the machine.
