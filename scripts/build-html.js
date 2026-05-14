@@ -186,7 +186,7 @@ const heroMetaHtml = () => {
   if (profile.location)  parts.push(`<span class="sep">·</span><span>${escape(profile.location)}</span>`);
   if (profile.resumeEn)  parts.push(resumeLink(profile.resumeEn, 'résumé'));
   if (profile.resumeZh)  parts.push(resumeLink(profile.resumeZh, '简历', 'zh'));
-  if (profile.status)    parts.push(`<span class="sep">·</span><span class="now-pill"><span class="pulse"></span>${escape(profile.status)}</span>`);
+  if (profile.status)    parts.push(`<span class="sep">·</span><span class="now-pill">${escape(profile.status)}</span>`);
   (profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
   return parts.join('');
 };
