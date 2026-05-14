@@ -99,18 +99,28 @@ function loadSecret(cfg) {
 }
 
 // ── model pricing (USD per million tokens) ────────────────────────
-// [input, output, cache_write, cache_read]. Match by substring of the
-// `ev.message.model` field so we don't have to enumerate every dated
-// snapshot id ("claude-opus-4-7-20251101" etc.). Fallback to Sonnet
-// rates (safe middle ground — Opus would over-quote, Haiku would
-// under-quote). Edit when Anthropic publishes a new tier or when a new
-// family ships; the dashboard rebuilds on next sync.
+// [input, output, cache_write_5min, cache_read]. Match by substring of
+// `ev.message.model` so we don't have to enumerate every dated snapshot
+// ("claude-opus-4-7-20251101" etc.). Source of truth:
+// https://platform.claude.com/docs/en/about-claude/pricing
+// Opus 4.5+ dropped 3× from Opus 4.1 ($15/$75 → $5/$25); Haiku 4.5 is
+// also up from Haiku 3.5. Re-verify when Anthropic ships a new family.
+//
+// 1h-cache-write is 2× input, NOT used here — Claude Code's default
+// caching mode is 5-minute. If the JSONL ever surfaces a 1h-cache field,
+// add it; until then assume 5m write rates.
+//
+// Default fallback = Sonnet rates: safe middle ground for an unknown
+// model id. Over-quotes a Haiku miss (acceptable), under-quotes an Opus
+// miss (acceptable as a conservative floor).
 const MODEL_PRICING = {
-  'opus-4-7':   [15.00, 75.00, 18.75, 1.50],
-  'opus-4-6':   [15.00, 75.00, 18.75, 1.50],
-  'sonnet-4-6': [ 3.00, 15.00,  3.75, 0.30],
-  'sonnet-4-5': [ 3.00, 15.00,  3.75, 0.30],
-  'haiku-4-5':  [ 0.80,  4.00,  1.00, 0.08],
+  'opus-4-7':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-6':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-5':   [5.00, 25.00, 6.25, 0.50],
+  'opus-4-1':   [15.00, 75.00, 18.75, 1.50],
+  'sonnet-4-6': [3.00, 15.00, 3.75, 0.30],
+  'sonnet-4-5': [3.00, 15.00, 3.75, 0.30],
+  'haiku-4-5':  [1.00,  5.00, 1.25, 0.10],
 };
 const DEFAULT_PRICING = [3.00, 15.00, 3.75, 0.30];
 
