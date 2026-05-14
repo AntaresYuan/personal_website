@@ -163,4 +163,4 @@ Special thanks to my group member Rachel Berg, Stephanie Nguyen, TA Nichole Sams
 **Writing reference:**
 
 - We used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).
-- Here is my reference blog: [https://medium.com/@chenjy4/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant-7c29620c71f7](https://medium.com/@chenjy4/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant-7c29620c71f7)
+- Here is my reference blog: [https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/](https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/)
