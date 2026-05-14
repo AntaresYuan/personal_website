@@ -977,14 +977,7 @@
   // GitHub-style year strip: 52 weeks × 7 days. Keep in lockstep with
   // scripts/build-html.js (same names + values), otherwise SSR shell and
   // client-rendered version mismatch on first paint.
-  // Heatmap width grows with the data window: floor at 4 weeks (so a brand-
-  // new user with one day of data still gets a recognizable strip, not a
-  // single isolated cell), cap at 52 weeks (one calendar year, the GitHub
-  // contribution-graph maximum). Between those: one column per calendar
-  // week from the first active day to today, so empty-grey weeks don't
-  // dominate when there's only a fortnight of data on the wire.
-  const HEATMAP_COLS_MIN = 4;
-  const HEATMAP_COLS_MAX = 52;
+  const HEATMAP_COLS = 52;
   const HEATMAP_ROWS = 7;
   const HEATMAP_CELL = 16;
   const HEATMAP_GAP  = 3;
@@ -1036,42 +1029,30 @@
     return 3;
   };
 
-  // Calendar-week distance from `fromDate` to `toDate`, inclusive of both
-  // endpoints' weeks. Aligns each date to its Sunday so the result counts
-  // grid columns (not raw days). `2026-05-01` (Fri) → `2026-05-14` (Thu)
-  // = 3 columns: week of Apr 26, May 3, May 10.
-  const weeksSpanInclusive = (fromDate, toDate) => {
-    const f = new Date(fromDate + 'T00:00:00Z');
-    const t = new Date(toDate   + 'T00:00:00Z');
-    const fSun = f.getTime() - f.getUTCDay() * 86400000;
-    const tSun = t.getTime() - t.getUTCDay() * 86400000;
-    return Math.round((tSun - fSun) / (7 * 86400000)) + 1;
-  };
-
-  // Build the {col, row} grid coordinates for every cell in a `cols`×7
+  // Build the {col, row} grid coordinates for every cell in the 12×7
   // window. GitHub-style calendar alignment: rightmost column = current
   // week (Sun..today filled, todayDow+1..Sat as future-day placeholders),
-  // each prior column = a full Sun..Sat week. `cols` is data-driven —
-  // the smallest grid that contains every active day, clamped to
-  // [HEATMAP_COLS_MIN, HEATMAP_COLS_MAX] — so weeks-of-zeros to the left
-  // don't pad out an otherwise short window into a year-wide strip.
-  const buildHeatmapGrid = (days, todayUTC, cols) => {
+  // each prior column = a full Sun..Sat week. Iterates over grid slots
+  // (not over the input days), so the count is always exactly 84 and the
+  // math has no edge case when today is Sunday (the prior approach
+  // dropped cells via a col<0 guard).
+  const buildHeatmapGrid = (days, todayUTC) => {
     const todayDow = new Date(todayUTC + 'T00:00:00Z').getUTCDay();
     const todayMs = new Date(todayUTC + 'T00:00:00Z').getTime();
     const byDate = new Map();
     for (const d of days) byDate.set(d.date, d);
     const cells = [];
-    for (let col = 0; col < cols; col++) {
+    for (let col = 0; col < HEATMAP_COLS; col++) {
       for (let row = 0; row < HEATMAP_ROWS; row++) {
-        const weeksBack = cols - 1 - col;
+        const weeksBack = HEATMAP_COLS - 1 - col;
         const daysAgo = todayDow - row + 7 * weeksBack;
         if (daysAgo < 0) {
           // Future day of the current week — empty placeholder, no real date.
-          cells.push({ col, row, tokens: 0, sessions: 0, costCents: 0, date: '' });
+          cells.push({ col, row, tokens: 0, sessions: 0, date: '' });
           continue;
         }
         const date = new Date(todayMs - daysAgo * 86400000).toISOString().slice(0, 10);
-        const e = byDate.get(date) || { date, tokens: 0, sessions: 0, costCents: 0 };
+        const e = byDate.get(date) || { date, tokens: 0, sessions: 0 };
         cells.push({ col, row, ...e });
       }
     }
@@ -1080,9 +1061,9 @@
 
   const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];   // alternating, GitHub-style
-  const renderHeatmap = (cells, cols) => {
+  const renderHeatmap = (cells) => {
     const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
-    const gridW = cols * HEATMAP_CELL + (cols - 1) * HEATMAP_GAP;
+    const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
     const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
     const w = HEATMAP_LEFT_LABEL + gridW;
     const h = HEATMAP_LABEL_BAND + gridH;
@@ -1093,7 +1074,7 @@
     }
 
     const grid = [];
-    for (let c = 0; c < cols; c++) {
+    for (let c = 0; c < HEATMAP_COLS; c++) {
       for (let r = 0; r < HEATMAP_ROWS; r++) {
         grid.push({ col: c, row: r, tokens: 0, sessions: 0, date: '' });
       }
@@ -1109,7 +1090,7 @@
     // the cell grid, not the row-label band.
     const monthLabels = [];
     let prevMonth = -1;
-    for (let c = 0; c < cols; c++) {
+    for (let c = 0; c < HEATMAP_COLS; c++) {
       const sunday = grid[c * HEATMAP_ROWS];
       if (!sunday.date) continue;
       const m = new Date(sunday.date + 'T00:00:00Z').getUTCMonth();
@@ -1146,35 +1127,6 @@
       return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
     return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${dayLabels.join('')}${rects}</svg>`;
-  };
-
-  // Sum costCents across all cells, format as `$xx.xx` or `$xx,xxx.xx`.
-  // Returns '' when no cost data has reached the wire yet (older sync
-  // agents not upgraded) — render.js then hides the cost row entirely
-  // instead of showing "$0.00", which would read as "I haven't spent
-  // anything" rather than "I don't have the data."
-  const formatCostUsd = (cells) => {
-    let totalCents = 0;
-    let any = false;
-    for (const cell of cells) {
-      if (Number.isFinite(cell.costCents) && cell.costCents > 0) {
-        totalCents += cell.costCents;
-        any = true;
-      }
-    }
-    if (!any) return '';
-    const usd = totalCents / 100;
-    return usd >= 1000
-      ? '$' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      : '$' + usd.toFixed(2);
-  };
-
-  const renderUsageCost = (cells) => {
-    const s = formatCostUsd(cells);
-    if (!s) return '';
-    // "≈" because Anthropic pricing has tier-rules (e.g., 1M-context Opus
-    // doubles above 200K input) and we use base rates. Honest framing.
-    return `&asymp; <strong>${s}</strong> spent on Claude`;
   };
 
   const renderUsageStats = (cells) => {
@@ -1235,10 +1187,9 @@
     }
     const heatmapEl = document.getElementById('usage-heatmap');
     const statsEl   = document.getElementById('usage-stats');
-    const costEl    = document.getElementById('usage-cost');
     const factEl    = document.getElementById('usage-funfact');
     const liveEl    = document.getElementById('usage-live-text');
-    if (!heatmapEl || !statsEl || !costEl || !factEl || !liveEl) {
+    if (!heatmapEl || !statsEl || !factEl || !liveEl) {
       section.hidden = true;
       return;
     }
@@ -1284,26 +1235,13 @@
         if (!res.ok) throw new Error('http ' + res.status);
         const data = await res.json();
         if (!data || !Array.isArray(data.days)) throw new Error('bad shape');
-        // Worker returns up to 365 days; keep them all so the cols-computer
-        // below can find the true first active day even after a year of use.
-        const trimmed = data.days.slice(-(HEATMAP_COLS_MAX * HEATMAP_ROWS));
+        // Worker returns 90 days; trim to the most recent 84 for the 12-week grid.
+        const trimmed = data.days.slice(-(HEATMAP_COLS * HEATMAP_ROWS));
         const todayUTC = trimmed[trimmed.length - 1]?.date || new Date().toISOString().slice(0, 10);
-        // Data-driven grid width: from first active day → today, clamped.
-        // No active data yet → smallest defensible strip (MIN cols).
-        const firstActive = (trimmed.find(d => d.tokens > 0) || {}).date;
-        const cols = firstActive
-          ? Math.max(HEATMAP_COLS_MIN,
-              Math.min(HEATMAP_COLS_MAX, weeksSpanInclusive(firstActive, todayUTC)))
-          : HEATMAP_COLS_MIN;
-        const cells = buildHeatmapGrid(trimmed, todayUTC, cols);
+        const cells = buildHeatmapGrid(trimmed, todayUTC);
         lastCells = cells;
-        heatmapEl.innerHTML = renderHeatmap(cells, cols);
+        heatmapEl.innerHTML = renderHeatmap(cells);
         statsEl.innerHTML   = renderUsageStats(cells);
-        const cost = renderUsageCost(cells);
-        costEl.innerHTML    = cost;
-        // Hide the cost row entirely when there's no data yet (pre-upgrade
-        // sync agents still in flight). Show otherwise.
-        costEl.hidden       = !cost;
         const fact = renderFunFact(cells);
         factEl.innerHTML    = fact;
         section.classList.add('usage-loaded');

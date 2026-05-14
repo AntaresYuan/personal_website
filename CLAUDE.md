@@ -97,16 +97,12 @@ hashes.
 
 ### Privacy contract — `/usage`
 
-The public POST/GET payload is **only** `{ date, tokens, sessions, costCents }`.
-`costCents` is a precomputed scalar — the sync agent applies a per-model
-pricing table locally (`scripts/sync-usage.js` → `MODEL_PRICING`) and ships
-just the final dollar-amount integer. The per-model token split that feeds it
-**never reaches the Worker.** Never expose: source / device labels, hourly
-distribution, project names, model breakdowns, streak counters, or any device
-identifiers. The Worker enforces the schema server-side; the local sync agent
-enforces it client-side; the GET response strips anything but the daily total.
-Full hard-line list lives in `workers/usage/README.md` § "Privacy contract — read
-first, do not bend".
+The public POST/GET payload is **only** `{ date, tokens, sessions }`. Never
+expose: source / device labels, hourly distribution, project names, model
+breakdowns, streak counters, or any device identifiers. The Worker enforces
+the schema server-side; the local sync agent enforces it client-side; the GET
+response strips anything but the daily total. Full hard-line list lives in
+`workers/usage/README.md` § "Privacy contract — read first, do not bend".
 
 The `/usage` section sits **inside the `.hero` grid** (between `.hero-ctas`
 and `.hero-ask`) with `grid-column: 1 / -1` spanning both columns. Heatmap
