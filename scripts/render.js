@@ -979,9 +979,9 @@
   // client-rendered version mismatch on first paint.
   const HEATMAP_COLS = 52;
   const HEATMAP_ROWS = 7;
-  const HEATMAP_CELL = 10;
-  const HEATMAP_GAP  = 2;
-  const HEATMAP_LABEL_BAND = 14;
+  const HEATMAP_CELL = 12;
+  const HEATMAP_GAP  = 3;
+  const HEATMAP_LABEL_BAND = 18;
   const FUNFACT_ROTATE_MS = 7000;
   // Refetch hourly. The data only updates on the local sync agent's
   // hourly LaunchAgent tick or a Claude Code Stop-hook, so anything more
@@ -1099,7 +1099,7 @@
       const m = new Date(sunday.date + 'T00:00:00Z').getUTCMonth();
       if (m !== prevMonth) {
         const x = c * (HEATMAP_CELL + HEATMAP_GAP);
-        monthLabels.push(`<text x="${x}" y="10" class="usage-month-label">${MONTH_ABBR[m]}</text>`);
+        monthLabels.push(`<text x="${x}" y="13" class="usage-month-label">${MONTH_ABBR[m]}</text>`);
         prevMonth = m;
       }
     }
