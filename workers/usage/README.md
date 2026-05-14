@@ -16,7 +16,7 @@ The GET response is **only**:
   "days": [
     { "date": "2026-05-13", "tokens": 1234567, "sessions": 8 }
   ],
-  "since": "2026-02-13",
+  "since": "2025-05-15",
   "updated": "2026-05-13T11:18:09Z"
 }
 ```
@@ -61,9 +61,11 @@ level (last-write wins on the whole object) — each write carries
 so realistic loss is zero. Same-source concurrent writes are last-wins
 by design.
 
-GET = read the last 90 days in parallel, sum each day across slots, drop
-the slot map, return `{date, tokens, sessions}` per day plus the global
-`updated` watermark.
+GET = read the last 365 days in parallel (one calendar year, matches the
+GitHub-style year strip the frontend renders), sum each day across slots,
+drop the slot map, return `{date, tokens, sessions}` per day plus the
+global `updated` watermark. Window is controlled by `WINDOW_DAYS` in
+`src/index.js`.
 
 ## Deploy (one-time)
 

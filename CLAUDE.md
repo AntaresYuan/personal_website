@@ -61,7 +61,7 @@ mainland-China networks. **Every Worker URL stored in `content/site.json`
 must be a custom subdomain on the same zone as the main site.** Currently:
 
 - `qa.antaresyuan.site` — the "ask" assistant
-- `usage.antaresyuan.site` — `/usage` dashboard (when it ships, see #149)
+- `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
 
 Bind via Cloudflare dashboard → Worker → Settings → Domains & Routes → Add
 Custom Domain. Same-zone = same Anycast endpoints that serve `antaresyuan.site`,
@@ -95,14 +95,20 @@ The build also bumps the `?v=<hash>` cache-bust on `<link rel="stylesheet">`
 and `<script>` tags from the file's content hash. Don't hand-edit those
 hashes.
 
-### Privacy contract — `/usage` (when it ships, #149)
+### Privacy contract — `/usage`
 
 The public POST/GET payload is **only** `{ date, tokens, sessions }`. Never
 expose: source / device labels, hourly distribution, project names, model
 breakdowns, streak counters, or any device identifiers. The Worker enforces
 the schema server-side; the local sync agent enforces it client-side; the GET
-response strips anything but the daily total. See issue #149's privacy
-contract for the full hard-line list.
+response strips anything but the daily total. Full hard-line list lives in
+`workers/usage/README.md` § "Privacy contract — read first, do not bend".
+
+The `/usage` section sits **inside the `.hero` grid** (between `.hero-ctas`
+and `.hero-ask`) with `grid-column: 1 / -1` spanning both columns. Heatmap
+constants (`HEATMAP_COLS=52`, `HEATMAP_CELL=16`, etc.) are duplicated in
+`scripts/build-html.js` and `scripts/render.js` — keep them in lockstep
+or the SSR shell and client render mismatch on first paint.
 
 ### Public OSS repos: pure English
 

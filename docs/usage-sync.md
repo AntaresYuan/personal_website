@@ -195,7 +195,7 @@ log will tell you which one needs the new value.
 ## Reading the live data
 
 ```sh
-# the full GET response (last 90 days, summed across sources)
+# the full GET response (last 365 days, summed across sources)
 curl -s -H 'origin: https://antaresyuan.site' https://usage.antaresyuan.site/
 
 # just today's number
@@ -214,4 +214,72 @@ curl -s -H 'origin: https://antaresyuan.site' https://usage.antaresyuan.site/ \
 | `can't read claudeProjectsDir` | wrong path in config; default `~/.claude/projects` works on a stock Claude Code install |
 | every day shows 0 | no `type: "assistant"` events with `usage` in your jsonls — happens on a fresh install before any session has run |
 | LaunchAgent log says "no secret available" every hour | macOS keychain is locked at LaunchAgent fire time (rare; usually only after a fresh boot before login). Unlock the keychain or move the secret to the `secret` field in the config. |
+
+## Common pitfalls (multi-device)
+
+### Source label collisions silently overwrite
+
+If two devices use the **same** `source` label, the second device
+doesn't add to the first — it overwrites that source's KV slot.
+Whoever POSTs last wins; the public total shrinks to that device's
+value. **Always pick a unique `<ai>-<device>` label per machine.**
+
+`setup-sync.sh` auto-suggests `claude-<hostname-short>`, which is
+usually unique. But macOS hostnames default to "Mac" on multiple
+machines — verify after install:
+
+```sh
+grep source ~/.config/antares-sync-usage.json   # on each machine
+```
+
+Two slots with the same label = collision. Pick distinct labels (e.g.
+`claude-imac`, `claude-mbp`, `claude-work`) and re-run
+`./ops/setup-sync.sh --source claude-NEW-LABEL` on the misnamed
+machine. The old slot's value freezes; you can zero it out by POSTing
+`{date, source: OLD, tokens: 0, sessions: 0}` for each day in the
+window.
+
+### Shared `~/.claude/projects/` across devices = real double-counting
+
+If iCloud Drive syncs your `~/.claude` folder, or you restored a Time
+Machine backup of one Mac onto another, both devices' sync agents
+read the **same** jsonl files. Even with distinct source labels, the
+Worker stores both → public total is 2× the same activity.
+
+**Symptom**: two devices' daily totals are suspiciously close —
+within minutes of the same `updated` timestamp, and within a few
+percent of each other day after day. Independent devices should
+naturally diverge.
+
+**Fix**: either un-share `~/.claude` between devices (move out of
+iCloud Drive), or install the LaunchAgent on only ONE device.
+
+### `setup-sync.sh` keeps the old keychain secret by default
+
+If you previously set up this device, or partially attempted setup,
+the keychain may already hold a stale secret. After rotating on the
+Worker side (`wrangler secret put SHARED_SECRET`), that stale value
+will 401 on every POST. The default flow **keeps the existing secret**
+unless you pass `--rotate-secret`:
+
+```sh
+./ops/setup-sync.sh --source claude-X --rotate-secret
+```
+
+Always use `--rotate-secret` immediately after a Worker-side rotation.
+
+### Inspecting the KV directly
+
+When numbers look wrong, read the raw per-slot map (requires the
+wrangler CLI logged into the right account):
+
+```sh
+npx wrangler kv key get --binding USAGE_KV --remote "usage:2026-05-14" \
+  --config workers/usage/wrangler.toml
+```
+
+Output is `{ "claude-mbp": {...}, "claude-imac": {...}, ... }`. Sum
+across slots = the public GET total. Slots you don't recognise
+(orphans from earlier mislabelled installs) can be zeroed via a
+small POST script — see the source-collision fix above.
 | `install: 'node' resolves under a version manager` | nvm/asdf/fnm/volta shims aren't on launchd's PATH. Install a system Node (`brew install node`) and re-run, or hardcode an absolute path in the installer. |
