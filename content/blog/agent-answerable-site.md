@@ -41,6 +41,7 @@ source.
 content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
                   ├──► llms.txt           (short summary, llmstxt.org)
                   ├──► llms-full.txt      (full content, plain text)
+                  ├──► agent-brief.txt    (private notes the "ask" Worker grounds on)
                   ├──► sitemap.xml
                   └──► npx antares-cv      (the CLI reads the live JSON)
 ```
@@ -98,6 +99,40 @@ that's free, forever, in practice.
 `content/*.json` from the live site. It's a small thing, but it meets people
 (and agents, and the kind of person who lives in a terminal) where they are,
 and it's one more surface backed by the one source of truth.
+
+## 6. A live usage signal
+
+There's a heatmap on the home page — `/usage` — that's a year of my Claude
+Code activity, plus a few aggregate numbers (tokens, sessions, days active,
+and a `≈ $X.XX` spent-on-Claude figure). It's fed by a Cloudflare Worker at
+`usage.antaresyuan.site`, which any agent can GET directly:
+
+```json
+GET https://usage.antaresyuan.site/
+→ { "days": [
+      { "date": "2026-05-14", "tokens": 2891880, "sessions": 10, "costCents": 34630 },
+      ...
+    ],
+    "since": "2025-05-15", "updated": "..." }
+```
+
+Why surface this at all? Two reasons. First, it's an honest signal — "how
+much is this person actually building right now" is the kind of question an
+agent gets asked, and a year of activity answers it better than any About
+paragraph. Second, the **privacy contract** is the interesting part: the wire
+shape is exactly `{date, tokens, sessions, costCents}` and nothing else.
+Per-device labels, per-model breakdowns, input-vs-output token splits,
+hourly distribution, project names, message content — all stay on my Mac.
+The cost figure is computed locally by a small sync agent
+(`input × p_in + output × p_out` against the published Anthropic per-model
+rates); only the final dollar-amount integer ever reaches the Worker. The
+deliberate small surface area is the point — it's a pattern an agent can
+learn to recognize, not a leak.
+
+Both Workers run on custom subdomains (`usage.antaresyuan.site`,
+`qa.antaresyuan.site`), not `*.workers.dev` — that hostname is intermittently
+DNS-poisoned on mainland-China networks. A signal isn't useful if agents can
+only reach it from some countries.
 
 ## The shape that makes it work
 
