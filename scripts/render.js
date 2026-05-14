@@ -979,9 +979,10 @@
   // client-rendered version mismatch on first paint.
   const HEATMAP_COLS = 52;
   const HEATMAP_ROWS = 7;
-  const HEATMAP_CELL = 12;
+  const HEATMAP_CELL = 16;
   const HEATMAP_GAP  = 3;
-  const HEATMAP_LABEL_BAND = 18;
+  const HEATMAP_LABEL_BAND = 18;    // top: month-name strip
+  const HEATMAP_LEFT_LABEL = 30;    // left: Mon/Wed/Fri row labels (GitHub-style)
   const FUNFACT_ROTATE_MS = 7000;
   // Refetch hourly. The data only updates on the local sync agent's
   // hourly LaunchAgent tick or a Claude Code Stop-hook, so anything more
@@ -1059,17 +1060,14 @@
   };
 
   const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];   // alternating, GitHub-style
   const renderHeatmap = (cells) => {
     const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
     const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
     const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
-    const w = gridW;
-    const h = gridH + HEATMAP_LABEL_BAND;
+    const w = HEATMAP_LEFT_LABEL + gridW;
+    const h = HEATMAP_LABEL_BAND + gridH;
 
-    // First active date in the window — outside-window cells render as
-    // transparent (semantics: "we don't have data here," distinct from
-    // "you didn't use Claude that day"). Future days of the current
-    // week also outside-window.
     let firstActiveDate = '';
     for (const c of cells) {
       if (c.tokens > 0 && (!firstActiveDate || c.date < firstActiveDate)) firstActiveDate = c.date;
@@ -1086,26 +1084,34 @@
       if (idx >= 0 && idx < grid.length) grid[idx] = cell;
     }
 
-    // Month labels: for each column, look at the row-0 (Sunday) date; if
-    // it's the first Sunday of a new month, drop a label at that column.
-    // Skip labels too close to each other on narrow viewports — but
-    // since they're SVG <text>, we let them overflow naturally; CSS
-    // controls visibility on mobile.
+    // Month labels along the top — drop a label the first time a new
+    // calendar month appears in the column sequence (read off row-0
+    // Sundays). x is shifted by HEATMAP_LEFT_LABEL so labels land above
+    // the cell grid, not the row-label band.
     const monthLabels = [];
     let prevMonth = -1;
     for (let c = 0; c < HEATMAP_COLS; c++) {
-      const sunday = grid[c * HEATMAP_ROWS];   // row 0 of column c
+      const sunday = grid[c * HEATMAP_ROWS];
       if (!sunday.date) continue;
       const m = new Date(sunday.date + 'T00:00:00Z').getUTCMonth();
       if (m !== prevMonth) {
-        const x = c * (HEATMAP_CELL + HEATMAP_GAP);
+        const x = HEATMAP_LEFT_LABEL + c * (HEATMAP_CELL + HEATMAP_GAP);
         monthLabels.push(`<text x="${x}" y="13" class="usage-month-label">${MONTH_ABBR[m]}</text>`);
         prevMonth = m;
       }
     }
 
+    // Day-of-week labels on the left — Mon / Wed / Fri only (GitHub
+    // convention). Each text is vertically centered on its row.
+    const dayLabels = [];
+    for (let r = 0; r < HEATMAP_ROWS; r++) {
+      if (!DAY_LABELS[r]) continue;
+      const yRow = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP) + HEATMAP_CELL / 2;
+      dayLabels.push(`<text x="${HEATMAP_LEFT_LABEL - 6}" y="${yRow}" class="usage-day-label" text-anchor="end" dominant-baseline="middle">${DAY_LABELS[r]}</text>`);
+    }
+
     const rects = grid.map(cell => {
-      const x = cell.col * (HEATMAP_CELL + HEATMAP_GAP);
+      const x = HEATMAP_LEFT_LABEL + cell.col * (HEATMAP_CELL + HEATMAP_GAP);
       const y = HEATMAP_LABEL_BAND + cell.row * (HEATMAP_CELL + HEATMAP_GAP);
       const isOutside = !cell.date
                      || (firstActiveDate && cell.date < firstActiveDate);
@@ -1120,7 +1126,7 @@
       }
       return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
-    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${rects}</svg>`;
+    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${dayLabels.join('')}${rects}</svg>`;
   };
 
   const renderUsageStats = (cells) => {
