@@ -21,10 +21,16 @@ See `workers/usage/README.md` for the Worker side + privacy contract.
 
 Each event in `~/.claude/projects/<project-slug>/<session-uuid>.jsonl`
 with `type: "assistant"` has a `message.usage` object. The agent sums
-`input_tokens + output_tokens + cache_creation_input_tokens +
-cache_read_input_tokens` per event and groups by the event's
-`timestamp`'s UTC date. A "session" is a distinct `sessionId` that had
-any activity on that day.
+`input_tokens + output_tokens + cache_creation_input_tokens` per event
+and groups by the event's `timestamp`'s UTC date. A "session" is a
+distinct `sessionId` that had any activity on that day.
+
+**`cache_read_input_tokens` is deliberately excluded** — those are cached
+prompt bytes re-served at each turn, and on a 1M-context Claude Code
+session they can be 500K+ "tokens" per turn of already-paid-for content.
+Counting them inflates daily totals by 50–100× and turns the dashboard
+into a meaningless billions-of-tokens number. We track "fresh work the
+model did" instead.
 
 That's it — no message content, no project names, no model ids, no
 hourly distribution, no individual event details ever leave the machine.
