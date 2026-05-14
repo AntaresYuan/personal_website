@@ -1895,11 +1895,16 @@ body.modal-open { overflow: hidden; }
   position: relative;   /* anchor for the absolutely-positioned hover tooltip */
 }
 /* When nested inside the .hero grid (sits between ctas and the ask bar),
-   span both columns like .hero-ask does. */
+   span both columns like .hero-ask does. Negative margin-bottom claws back
+   most of the .hero row-gap below this section so the heatmap reads as
+   visually connected to the ask bar — they're one composite "live activity"
+   block, not two unrelated widgets separated by a 48px void. The gap above
+   (ctas → heatmap) keeps the full row-gap because those two ARE separate
+   ideas. */
 .hero > .usage-section {
   grid-column: 1 / -1;
   margin-top: var(--sp-32);
-  margin-bottom: 0;
+  margin-bottom: calc(-1 * var(--sp-32));
 }
 /* Centered "● updated Nm ago" indicator below the fun-fact. Replaces
    the old .sec-head row — the heatmap is self-explanatory; the live
@@ -1914,6 +1919,26 @@ body.modal-open { overflow: hidden; }
   font-family: var(--font-mono);
   font-size: var(--fs-11);
   color: var(--color-text-faint);
+}
+/* Section title: Antares's Token Consumption. Centered, serif, with the
+   second half ("Token Consumption") in italic blue — mirrors the hero name
+   treatment ("Antares Yuan") at a smaller scale so the section reads as a
+   first-class block, not an unlabelled widget. Smaller than .hero-name
+   (display) and larger than .sec-title (fs-22) — sits between them
+   visually. */
+.usage-title {
+  font-family: var(--font-serif);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-22);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  text-align: center;
+  margin: 0 0 var(--sp-16);
+}
+.usage-title em {
+  font-style: italic;
+  color: var(--color-blue);
+  font-weight: var(--fw-regular);
 }
 .usage-heatmap-wrap {
   /* Center the heatmap inside the section. The SVG is intrinsically
@@ -2024,6 +2049,24 @@ body.modal-open { overflow: hidden; }
 .usage-stat-sep { color: var(--color-line); }
 .usage-stat-since { font-style: normal; }
 
+/* "≈ $X.XX spent on Claude" — total spend across the visible window,
+   computed locally by the sync agent (per-model rates × i/o/cache tokens)
+   and shipped to the Worker as a scalar `costCents`. Slightly louder than
+   the stats line above (the headline metric of this section, per the
+   "Token Consumption" title), but still mono + faint to live in the same
+   typographic family. The strong-tagged dollar amount picks up the
+   default body color for emphasis. */
+.usage-cost {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--color-text-faint);
+  text-align: center;
+  margin-bottom: var(--sp-6);
+}
+.usage-cost strong {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+}
 .usage-funfact {
   font-family: var(--font-mono);
   font-size: var(--fs-12);
