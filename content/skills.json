@@ -62,24 +62,6 @@
       "order": 4
     },
     {
-      "slug": "agent-brief",
-      "name": "agent-brief.txt",
-      "category": "agent infra",
-      "summary": "off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page",
-      "details": "## What it is\n\nA single text file at `/agent-brief.txt` — built from `content/agent-brief.json`\nby `scripts/build-agent-brief.js`. Publicly fetchable, but not linked from\nany visible page on the site.\n\n## Why\n\nThe site's QA Worker grounds answers in `/llms-full.txt` (the public site\ncontent — projects, principles, contact). But there are nuances I want an\nagent to know — context on a project, judgement on a tradeoff, what I'm\nopen to right now — that don't belong on a public page. `agent-brief.txt`\nis where I put those. The Worker fetches both files and folds them into\nthe grounding context, so an answer can lean on the brief without making\nit public reading material.\n\n## Edit via\n\n`/admin/` → **Assistant knowledge** collection. Each entry is a note with a\ntitle and body. The build flattens them into the txt file.\n\n## Why this is a skill, not just a feature\n\nMost personal sites either over-share (everything goes on the page) or\nunder-share (nothing for an agent to ground on). `agent-brief.txt` is a\nthird thing: a private-ish channel for agent-targeted context. Once you\nhave it, every assistant answering questions about you gets richer without\ncluttering your public page.",
-      "links": [
-        {
-          "label": "/agent-brief.txt",
-          "href": "/agent-brief.txt"
-        },
-        {
-          "label": "GitHub",
-          "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
-        }
-      ],
-      "order": 4
-    },
-    {
       "slug": "Claude Credit Watchdog",
       "name": "Claude Credit Watchdog",
       "category": "Claude Code Plugin",
@@ -95,7 +77,25 @@
           "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
-      "order": 3
+      "order": 5
+    },
+    {
+      "slug": "agent-brief",
+      "name": "agent-brief.txt",
+      "category": "agent infra",
+      "summary": "off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page",
+      "details": "## What it is\n\nA single text file at `/agent-brief.txt` — built from `content/agent-brief.json`\nby `scripts/build-agent-brief.js`. Publicly fetchable, but not linked from\nany visible page on the site.\n\n## Why\n\nThe site's QA Worker grounds answers in `/llms-full.txt` (the public site\ncontent — projects, principles, contact). But there are nuances I want an\nagent to know — context on a project, judgement on a tradeoff, what I'm\nopen to right now — that don't belong on a public page. `agent-brief.txt`\nis where I put those. The Worker fetches both files and folds them into\nthe grounding context, so an answer can lean on the brief without making\nit public reading material.\n\n## Edit via\n\n`/admin/` → **Assistant knowledge** collection. Each entry is a note with a\ntitle and body. The build flattens them into the txt file.\n\n## Why this is a skill, not just a feature\n\nMost personal sites either over-share (everything goes on the page) or\nunder-share (nothing for an agent to ground on). `agent-brief.txt` is a\nthird thing: a private-ish channel for agent-targeted context. Once you\nhave it, every assistant answering questions about you gets richer without\ncluttering your public page.",
+      "links": [
+        {
+          "label": "/agent-brief.txt",
+          "href": "/agent-brief.txt"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
+        }
+      ],
+      "order": 6
     }
   ]
 }
