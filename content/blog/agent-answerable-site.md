@@ -134,6 +134,20 @@ Both Workers run on custom subdomains (`usage.antaresyuan.site`,
 DNS-poisoned on mainland-China networks. A signal isn't useful if agents can
 only reach it from some countries.
 
+### Cost of being public
+
+Making a signal agent-readable means agents will hit it. The GET handler
+originally did one KV read per day in the window — **365 reads per request**.
+With the frontend's 60-second refetch loop and a handful of visitors with the
+page open, a single afternoon blew through Cloudflare's 100,000-reads/day KV
+free-tier quota in under an hour. The fix was a fire-and-forget edge cache
+(`caches.default`, `s-maxage=60`) so each PoP does at most one KV fan-out
+per minute regardless of traffic; POSTs from the sync agent invalidate the
+cache so newer data shows up promptly. The shape of the lesson is general:
+**an agent-readable surface is still a surface — budget for traffic the same
+way you would a human-facing one**, or your first wave of agent traffic will
+rate-limit your second wave's into 429s.
+
 ## The shape that makes it work
 
 None of these surfaces is hard on its own. What makes them _stay_ coherent is
