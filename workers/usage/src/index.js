@@ -39,7 +39,11 @@
    ════════════════════════════════════════════════════════════════════════ */
 
 const SITE = 'https://antaresyuan.site';
-const WINDOW_DAYS = 90;
+// 365 = one year, matches GitHub-contribution-graph layout the public
+// dashboard renders. KV stores all daily keys regardless, so this is
+// purely a public-projection window — extend or shrink without losing
+// older data.
+const WINDOW_DAYS = 365;
 const KV_PREFIX = 'usage:';
 const MAX_BODY_BYTES = 1024;        // generous for {date,source,tokens,sessions}
 const MAX_SOURCE_LEN = 32;          // a source label can't exceed 32 chars
