@@ -1,6 +1,6 @@
 ---
 title: HCDE 351 | Final Reflection
-date: 2026-03-15
+date: 2026-03-16
 summary: This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter.
 tags:
   - Final Reflection
