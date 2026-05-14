@@ -59,34 +59,6 @@
     {
       "id": "shipped-3",
       "status": "shipped",
-      "title": "Claude Credit Watchdog",
-      "summary": "A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.",
-      "details": "",
-      "tags": [
-        "SIDE PROJECT",
-        "tool-use",
-        "AI PM",
-        "AI Native",
-        "Productivity"
-      ],
-      "impact": "saved me 10 hrs+ of sleep",
-      "links": [
-        {
-          "label": "Download",
-          "href": "https://claude-credit-watchdog.vercel.app"
-        },
-        {
-          "label": "GitHub",
-          "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
-        }
-      ],
-      "started": "2026-04-09",
-      "updated": "2026-04-15",
-      "order": 2
-    },
-    {
-      "id": "shipped-4",
-      "status": "shipped",
       "title": "SusBench",
       "summary": "Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.",
       "details": "",
