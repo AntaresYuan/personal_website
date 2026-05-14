@@ -1,8 +1,8 @@
 # `/usage` — local sync agent install
 
 The agent reads Claude Code session jsonl files, aggregates daily totals
-(tokens + sessions), and POSTs the trailing window to the
-`usage.antaresyuan.site` Worker so the public `/usage` heatmap stays
+(tokens + sessions + cost-in-cents), and POSTs the trailing window to
+the `usage.antaresyuan.site` Worker so the public `/usage` heatmap stays
 current. Source-aware: each machine identifies as `<ai>-<device>` so
 multiple Macs aggregate cleanly on the Worker side without overwriting
 each other.
@@ -39,8 +39,22 @@ any activity on that day.
 and the popular `ccusage`-style CLIs, so the number is directly
 comparable to other tools the visitor might be using.
 
+### Cost computation (same i/o, model-aware rate)
+
+The dashboard's `≈ $X.XX` figure uses the **same** input + output token
+counts (no cache fields) multiplied by a per-model rate table
+(`MODEL_PRICING` in `scripts/sync-usage.js`, sourced from
+`platform.claude.com/docs/en/about-claude/pricing`). The agent reads
+each event's `message.model` locally to pick the right row of the
+table; the **model id never leaves the device** — only the final
+integer `costCents` (sum across all events for the day) is POSTed.
+Edit the table when Anthropic publishes new pricing; the dashboard
+refreshes on the next sync.
+
 That's it — no message content, no project names, no model ids, no
-hourly distribution, no individual event details ever leave the machine.
+hourly distribution, no individual event details ever leave the
+machine. Model ids are read locally for the pricing lookup but stay
+on the device; only the aggregated `costCents` scalar is on the wire.
 
 ## What the agent sends
 
@@ -51,11 +65,11 @@ POST https://usage.antaresyuan.site/
 Authorization: Bearer <SHARED_SECRET>
 Content-Type: application/json
 
-{ "date": "2026-05-14", "source": "claude-mbp", "tokens": 1234567, "sessions": 4 }
+{ "date": "2026-05-14", "source": "claude-mbp", "tokens": 1234567, "sessions": 4, "costCents": 1234 }
 ```
 
 The shape is hardcoded in the agent's `payloadsFor()` function — a
-4-field allowlist. The Worker re-validates server-side; any extra key
+5-field allowlist. The Worker re-validates server-side; any extra key
 → 400. Two layers of defense, one privacy contract.
 
 ## Install — recommended (one command)
