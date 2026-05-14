@@ -2,7 +2,12 @@
 title: 'HCDE 351 | Final Project: Textile Waste Management: Community Closet'
 date: 2026-03-15
 summary: This process log documents the design of a Community Closet system, a clothing rental platform that helps reduce textile waste by allowing users to rent clothing from others in their community rather than purchasing new garments.
-tags: []
+tags:
+  - Kiosk Software
+  - Cardboard Prototype
+  - Mobile App Development
+  - Video Prototype
+  - Behavioral Prototyping
 draft: false
 ---
 
@@ -20,7 +25,7 @@ In this log, I will describe how our team developed the concept based on the sus
 
 ## Ideation:
 
-The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. **Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns.** Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.
+The goal of this design is to develop a system-level concept that addresses the issue of textile overconsumption. \*\*Our project follows United Nations Sustainable Development Goal 12: Ensure sustainable consumption and production patterns.\*\* Specifically, our design goal is to reduce textile waste by enabling clothing to be shared and reused within a community instead of being purchased and discarded after limited use.
 
 During our brainstorming process, we focused on the problem of clothing overconsumption in everyday life. Many garments are purchased for specific occasions but worn only once or twice before being stored or discarded. Although solutions such as thrifting or donation exist, large amounts of textile waste still end up in landfills each year.
 
