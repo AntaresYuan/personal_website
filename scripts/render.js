@@ -1013,31 +1013,30 @@
     return 3;
   };
 
-  // Build the {col, row} grid coordinates for a day, given its weekday
-  // (0=Sun..6=Sat) and how many days back it is from today. Today is at
-  // (cols-1, todayDow); walking back, each prior day moves up in the row
-  // (with wrap to prior column at row 0).
+  // Build the {col, row} grid coordinates for every cell in the 12×7
+  // window. GitHub-style calendar alignment: rightmost column = current
+  // week (Sun..today filled, todayDow+1..Sat as future-day placeholders),
+  // each prior column = a full Sun..Sat week. Iterates over grid slots
+  // (not over the input days), so the count is always exactly 84 and the
+  // math has no edge case when today is Sunday (the prior approach
+  // dropped cells via a col<0 guard).
   const buildHeatmapGrid = (days, todayUTC) => {
     const todayDow = new Date(todayUTC + 'T00:00:00Z').getUTCDay();
-    const total = HEATMAP_COLS * HEATMAP_ROWS;       // 84
-    // Map date → entry
+    const todayMs = new Date(todayUTC + 'T00:00:00Z').getTime();
     const byDate = new Map();
     for (const d of days) byDate.set(d.date, d);
-    // Build cells, oldest → newest, length = total. Cell i corresponds to
-    // (total - 1 - i) days before today.
     const cells = [];
-    for (let i = 0; i < total; i++) {
-      const daysAgo = total - 1 - i;
-      const t = new Date(todayUTC + 'T00:00:00Z').getTime() - daysAgo * 86400000;
-      const date = new Date(t).toISOString().slice(0, 10);
-      const e = byDate.get(date) || { date, tokens: 0, sessions: 0 };
-      const dow = (new Date(date + 'T00:00:00Z')).getUTCDay();
-      // GitHub-style: the rightmost column is the current week, days
-      // arranged Sun (top) → Sat (bottom). Column index counts back by week.
-      const weeksAgo = Math.floor((daysAgo - todayDow + dow) / 7);
-      const col = HEATMAP_COLS - 1 - weeksAgo;
-      const row = dow;
-      if (col >= 0 && col < HEATMAP_COLS) {
+    for (let col = 0; col < HEATMAP_COLS; col++) {
+      for (let row = 0; row < HEATMAP_ROWS; row++) {
+        const weeksBack = HEATMAP_COLS - 1 - col;
+        const daysAgo = todayDow - row + 7 * weeksBack;
+        if (daysAgo < 0) {
+          // Future day of the current week — empty placeholder, no real date.
+          cells.push({ col, row, tokens: 0, sessions: 0, date: '' });
+          continue;
+        }
+        const date = new Date(todayMs - daysAgo * 86400000).toISOString().slice(0, 10);
+        const e = byDate.get(date) || { date, tokens: 0, sessions: 0 };
         cells.push({ col, row, ...e });
       }
     }
@@ -1089,15 +1088,16 @@
     // more naturally than the rolling-90-day rate.
     const last7 = cells.slice(-7);
     const last7Active = last7.filter(c => c.tokens > 0).length;
+    // Always emit the "since" slot — even when empty — so the row's width
+    // matches the SSR shell and the layout doesn't shift on first fetch.
     return [
       `<span class="usage-stat"><strong>${fmtCompact(totalTokens)}</strong> tokens</span>`,
       `<span class="usage-stat-sep">·</span>`,
       `<span class="usage-stat"><strong>${totalSessions}</strong> sessions</span>`,
       `<span class="usage-stat-sep">·</span>`,
       `<span class="usage-stat"><strong>${last7Active}/7</strong> days active</span>`,
-      oldestActive
-        ? `<span class="usage-stat-sep">·</span><span class="usage-stat usage-stat-since">since ${oldestActive}</span>`
-        : '',
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat usage-stat-since">since ${oldestActive || '—'}</span>`,
     ].join('');
   };
 
@@ -1151,10 +1151,19 @@
     };
 
     const refetch = async () => {
+      // Don't fire while hidden — visibilitychange will kick a refetch when
+      // we come back. Avoids a stale tick from chewing through bytes on
+      // a backgrounded tab.
+      if (document.hidden) return;
       if (inFlight) return;
       inFlight = true;
       try {
-        const res = await fetch(cfg.endpoint.replace(/\/+$/, '') + '/', { cache: 'no-store' });
+        // 8s timeout so a hung Worker doesn't leave us sitting on the
+        // skeleton em-dashes forever. Falls into the silent-hide path.
+        const signal = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout)
+          ? AbortSignal.timeout(8000) : undefined;
+        const res = await fetch(cfg.endpoint.replace(/\/+$/, '') + '/',
+          signal ? { cache: 'no-store', signal } : { cache: 'no-store' });
         if (!res.ok) throw new Error('http ' + res.status);
         const data = await res.json();
         if (!data || !Array.isArray(data.days)) throw new Error('bad shape');

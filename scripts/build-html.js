@@ -524,6 +524,8 @@ if (site.usage?.enabled === false) {
       `<span class="usage-stat"><strong>—</strong> sessions</span>`,
       `<span class="usage-stat-sep">·</span>`,
       `<span class="usage-stat"><strong>—</strong> days active</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat usage-stat-since">since —</span>`,
     ].join(''));
 }
 
