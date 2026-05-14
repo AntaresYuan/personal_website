@@ -44,16 +44,7 @@ Links:
 
 11111
 
-## SHIP-03 · SHIPPED · Claude Credit Watchdog
-A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
-Impact: saved me 10 hrs+ of sleep
-Tags: SIDE PROJECT, tool-use, AI PM, AI Native, Productivity
-Updated: 2026-04-15
-Links:
-  - Download: https://claude-credit-watchdog.vercel.app
-  - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
-
-## SHIP-04 · SHIPPED · SusBench
+## SHIP-03 · SHIPPED · SusBench
 Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.
 Impact: cited by 2 papers
 Tags: RESEARCH PROJECT, HCI, IUI 2025
