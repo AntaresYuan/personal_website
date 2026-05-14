@@ -179,8 +179,9 @@ collections:
                 fields:
                   - { label: "Label", name: "label", widget: "string" }
                   - { label: "URL",   name: "href",  widget: "string" }
-              - { label: "Started (YYYY-MM-DD)", name: "started", widget: "string", required: false, hint: "Optional. If set (and earlier than Updated), the Timeline view draws this project as a span [Started → Updated]; leave blank to show it as a single point at the Updated date." }
-              - { label: "Updated (YYYY-MM-DD)", name: "updated", widget: "string" }
+              - { label: "Started (YYYY-MM-DD)", name: "started", widget: "string", required: false, hint: "Optional. If set (and earlier than Until), the Timeline view draws this project as a span [Started → Until]; leave blank to show it as a single point at the Until date." }
+              - { label: "Until (YYYY-MM-DD)", name: "updated", widget: "string", required: false, hint: "End / cutoff date. Leave blank if 'Ongoing' is checked. (Field name stays 'updated' for back-compat with existing cards — semantically this is now the end date.)" }
+              - { label: "Ongoing — until present", name: "present", widget: "boolean", default: false, required: false, hint: "Check if the project is still active. Overrides Until: the card displays as 'ongoing', sorts to the top, and on the Timeline draws as an open range from Started → today." }
               - { label: "Order within column", name: "order", widget: "number", default: 1 }
 
   # ── Skills: dotfiles for AI ────────────────────────────────────────
