@@ -126,23 +126,31 @@ const setAttr = (html, id, attr, value) => {
 // shell and the client-rendered version mismatch on first paint.
 const HEATMAP_COLS = 52;
 const HEATMAP_ROWS = 7;
-const HEATMAP_CELL = 12;
+const HEATMAP_CELL = 16;
 const HEATMAP_GAP  = 3;
-const HEATMAP_LABEL_BAND = 18;   // month-label strip height above the grid
+const HEATMAP_LABEL_BAND = 18;   // top: month-name strip
+const HEATMAP_LEFT_LABEL = 30;   // left: Mon/Wed/Fri row labels
+const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];
 function emptyHeatmapSvg() {
   const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
   const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
-  const w = gridW;
-  const h = gridH + HEATMAP_LABEL_BAND;
+  const w = HEATMAP_LEFT_LABEL + gridW;
+  const h = HEATMAP_LABEL_BAND + gridH;
   const rects = [];
   for (let c = 0; c < HEATMAP_COLS; c++) {
     for (let r = 0; r < HEATMAP_ROWS; r++) {
-      const x = c * (HEATMAP_CELL + HEATMAP_GAP);
+      const x = HEATMAP_LEFT_LABEL + c * (HEATMAP_CELL + HEATMAP_GAP);
       const y = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP);
       rects.push(`<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell usage-cell-empty"/>`);
     }
   }
-  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects.join('')}</svg>`;
+  const dayLabels = [];
+  for (let r = 0; r < HEATMAP_ROWS; r++) {
+    if (!DAY_LABELS[r]) continue;
+    const yRow = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP) + HEATMAP_CELL / 2;
+    dayLabels.push(`<text x="${HEATMAP_LEFT_LABEL - 6}" y="${yRow}" class="usage-day-label" text-anchor="end" dominant-baseline="middle">${DAY_LABELS[r]}</text>`);
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${dayLabels.join('')}${rects.join('')}</svg>`;
 }
 
 /* ── Card index (mirrors render.js) ───────────────────────────────────── */
