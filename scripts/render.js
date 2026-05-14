@@ -1059,15 +1059,19 @@
       const idx = cell.col * HEATMAP_ROWS + cell.row;
       if (idx >= 0 && idx < grid.length) grid[idx] = cell;
     }
+    // Each rect carries its data in data-* attributes; wireUsage attaches
+    // a single delegated mouseover handler that positions the custom
+    // tooltip. Native <title> is left out — browsers fire it after ~1s and
+    // it's not stylable; the custom one is instant and matches the site.
     const rects = grid.map(cell => {
       const x = cell.col * (HEATMAP_CELL + HEATMAP_GAP);
       const y = cell.row * (HEATMAP_CELL + HEATMAP_GAP);
       const bin = quartileBin(cell.tokens, nonZero);
       const cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
-      const title = cell.date
-        ? `${cell.date}: ${cell.tokens.toLocaleString()} tokens, ${cell.sessions} session${cell.sessions === 1 ? '' : 's'}`
+      const dataAttrs = cell.date
+        ? `data-date="${cell.date}" data-tokens="${cell.tokens}" data-sessions="${cell.sessions}"`
         : '';
-      return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}"><title>${title}</title></rect>`;
+      return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
     return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${rects}</svg>`;
   };
@@ -1211,6 +1215,62 @@
       } else if (!section.hidden) {
         refetch();
         startTimers();
+      }
+    });
+
+    // ── Custom hover tooltip on heatmap cells ──────────────────────
+    // Instant + stylable (unlike SVG <title> which fires after ~1s and
+    // can't be themed). Each rect carries data-date / data-tokens /
+    // data-sessions; we delegate pointer events at the heatmap level so
+    // there's only one listener and innerHTML replacements (every 60s)
+    // don't strand event handlers.
+    let tipEl = document.getElementById('usage-tip');
+    if (!tipEl) {
+      tipEl = document.createElement('div');
+      tipEl.id = 'usage-tip';
+      tipEl.className = 'usage-tip';
+      tipEl.hidden = true;
+      heatmapEl.appendChild(tipEl);
+    }
+    const formatDate = (iso) => {
+      const d = new Date(iso + 'T00:00:00Z');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+    };
+    const showTip = (rect, clientX) => {
+      const date = rect.getAttribute('data-date');
+      if (!date) { tipEl.hidden = true; return; }
+      const tokens = parseInt(rect.getAttribute('data-tokens'), 10) || 0;
+      const sessions = parseInt(rect.getAttribute('data-sessions'), 10) || 0;
+      tipEl.innerHTML =
+        `<span class="usage-tip-date">${formatDate(date)}</span>` +
+        ` &middot; <strong>${tokens.toLocaleString()}</strong> tokens` +
+        (sessions > 0 ? ` &middot; ${sessions} session${sessions === 1 ? '' : 's'}` : '');
+      // Position relative to the heatmap container. Center horizontally on
+      // the hovered cell, push above it. The container is position:relative
+      // (set in CSS) so left/top use container coords.
+      const containerBox = heatmapEl.getBoundingClientRect();
+      const cellBox = rect.getBoundingClientRect();
+      const x = cellBox.left + cellBox.width / 2 - containerBox.left;
+      const y = cellBox.top - containerBox.top;
+      tipEl.hidden = false;
+      // Measure after un-hiding so width is real
+      const tipW = tipEl.offsetWidth;
+      const tipH = tipEl.offsetHeight;
+      const containerW = containerBox.width;
+      // Clamp so the tooltip doesn't overflow the container edges
+      const left = Math.max(0, Math.min(containerW - tipW, x - tipW / 2));
+      tipEl.style.left = `${left}px`;
+      tipEl.style.top  = `${Math.max(-tipH - 6, y - tipH - 6)}px`;
+    };
+    heatmapEl.addEventListener('mouseover', (ev) => {
+      const r = ev.target.closest('rect.usage-cell');
+      if (r) showTip(r, ev.clientX);
+    });
+    heatmapEl.addEventListener('mouseout', (ev) => {
+      // Only hide when leaving the heatmap entirely; cell→cell shouldn't flicker.
+      if (!ev.relatedTarget || !heatmapEl.contains(ev.relatedTarget)) {
+        tipEl.hidden = true;
       }
     });
 
