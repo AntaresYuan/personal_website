@@ -9,6 +9,9 @@ dist/
 # Claude Code — personal/local settings (allowlist for the autonomous loop)
 .claude/settings.local.json
 
+# devloop friction log — fed to /iterate at end of run, not committed
+LOOP-FRICTION.jsonl
+
 # wrangler (Cloudflare Workers CLI) local state
 .wrangler/
 .dev.vars
