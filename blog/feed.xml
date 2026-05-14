@@ -24,6 +24,7 @@
 <pre><code class="lang-plain">content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
                   ├──► llms.txt           (short summary, llmstxt.org)
                   ├──► llms-full.txt      (full content, plain text)
+                  ├──► agent-brief.txt    (private notes the &quot;ask&quot; Worker grounds on)
                   ├──► sitemap.xml
                   └──► npx antares-cv      (the CLI reads the live JSON)
 </code></pre>
@@ -40,6 +41,19 @@
 <p>It runs on Cloudflare's Workers AI free tier. For a personal site's traffic, that's free, forever, in practice.</p>
 <h2 id="5-a-cli">5. A CLI</h2>
 <p><code>npx antares-cv</code> prints my résumé, colored, in a terminal — fetching the same <code>content/*.json</code> from the live site. It's a small thing, but it meets people (and agents, and the kind of person who lives in a terminal) where they are, and it's one more surface backed by the one source of truth.</p>
+<h2 id="6-a-live-usage-signal">6. A live usage signal</h2>
+<p>There's a heatmap on the home page — <code>/usage</code> — that's a year of my Claude Code activity, plus a few aggregate numbers (tokens, sessions, days active, and a <code>≈ $X.XX</code> spent-on-Claude figure). It's fed by a Cloudflare Worker at <code>usage.antaresyuan.site</code>, which any agent can GET directly:</p>
+<pre><code class="lang-json">GET https://usage.antaresyuan.site/
+→ { &quot;days&quot;: [
+      { &quot;date&quot;: &quot;2026-05-14&quot;, &quot;tokens&quot;: 2891880, &quot;sessions&quot;: 10, &quot;costCents&quot;: 34630 },
+      ...
+    ],
+    &quot;since&quot;: &quot;2025-05-15&quot;, &quot;updated&quot;: &quot;...&quot; }
+</code></pre>
+<p>Why surface this at all? Two reasons. First, it's an honest signal — &quot;how much is this person actually building right now&quot; is the kind of question an agent gets asked, and a year of activity answers it better than any About paragraph. Second, the <strong>privacy contract</strong> is the interesting part: the wire shape is exactly <code>{date, tokens, sessions, costCents}</code> and nothing else. Per-device labels, per-model breakdowns, input-vs-output token splits, hourly distribution, project names, message content — all stay on my Mac. The cost figure is computed locally by a small sync agent (<code>input × p_in + output × p_out</code> against the published Anthropic per-model rates); only the final dollar-amount integer ever reaches the Worker. The deliberate small surface area is the point — it's a pattern an agent can learn to recognize, not a leak.</p>
+<p>Both Workers run on custom subdomains (<code>usage.antaresyuan.site</code>, <code>qa.antaresyuan.site</code>), not <code>*.workers.dev</code> — that hostname is intermittently DNS-poisoned on mainland-China networks. A signal isn't useful if agents can only reach it from some countries.</p>
+<h3 id="cost-of-being-public">Cost of being public</h3>
+<p>Making a signal agent-readable means agents will hit it. The GET handler originally did one KV read per day in the window — <strong>365 reads per request</strong>. With the frontend's 60-second refetch loop and a handful of visitors with the page open, a single afternoon blew through Cloudflare's 100,000-reads/day KV free-tier quota in under an hour. The fix was a fire-and-forget edge cache (<code>caches.default</code>, <code>s-maxage=60</code>) so each PoP does at most one KV fan-out per minute regardless of traffic; POSTs from the sync agent invalidate the cache so newer data shows up promptly. The shape of the lesson is general: <strong>an agent-readable surface is still a surface — budget for traffic the same way you would a human-facing one</strong>, or your first wave of agent traffic will rate-limit your second wave's into 429s.</p>
 <h2 id="the-shape-that-makes-it-work">The shape that makes it work</h2>
 <p>None of these surfaces is hard on its own. What makes them <em>stay</em> coherent is the discipline underneath:</p>
 <ul><li><strong>One source of truth</strong> — content lives in JSON and Markdown files. Nothing is written twice.</li><li><strong>A build step fans it out</strong> — a small Node script regenerates every artifact (the HTML, the <code>llms.txt</code>, the sitemap, the blog you're reading) from that source.</li><li><strong>The artifacts are committed</strong> — so any clone of the repo deploys without a build step. (You can flip to build-on-deploy later; the repo has notes.)</li><li><strong>Editing happens in a CMS</strong> — there's a <code>/admin/</code> (Sveltia CMS, GitHub-backed) so updating a project or writing a post is a form, not a commit. A workflow rebuilds the artifacts after each edit.</li></ul>

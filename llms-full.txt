@@ -447,6 +447,43 @@ npx antares-cv prints my résumé, colored, in a terminal — fetching the same
 content/.json from the live site. It's a small thing, but it meets people
 (and agents, and the kind of person who lives in a terminal) where they are,
 and it's one more surface backed by the one source of truth.
+6. A live usage signal
+
+There's a heatmap on the home page — /usage — that's a year of my Claude
+Code activity, plus a few aggregate numbers (tokens, sessions, days active,
+and a ≈ $X.XX spent-on-Claude figure). It's fed by a Cloudflare Worker at
+usage.antaresyuan.site, which any agent can GET directly:
+
+Why surface this at all? Two reasons. First, it's an honest signal — "how
+much is this person actually building right now" is the kind of question an
+agent gets asked, and a year of activity answers it better than any About
+paragraph. Second, the privacy contract is the interesting part: the wire
+shape is exactly {date, tokens, sessions, costCents} and nothing else.
+Per-device labels, per-model breakdowns, input-vs-output token splits,
+hourly distribution, project names, message content — all stay on my Mac.
+The cost figure is computed locally by a small sync agent
+(input × pin + output × pout against the published Anthropic per-model
+rates); only the final dollar-amount integer ever reaches the Worker. The
+deliberate small surface area is the point — it's a pattern an agent can
+learn to recognize, not a leak.
+
+Both Workers run on custom subdomains (usage.antaresyuan.site,
+qa.antaresyuan.site), not .workers.dev — that hostname is intermittently
+DNS-poisoned on mainland-China networks. A signal isn't useful if agents can
+only reach it from some countries.
+Cost of being public
+
+Making a signal agent-readable means agents will hit it. The GET handler
+originally did one KV read per day in the window — 365 reads per request.
+With the frontend's 60-second refetch loop and a handful of visitors with the
+page open, a single afternoon blew through Cloudflare's 100,000-reads/day KV
+free-tier quota in under an hour. The fix was a fire-and-forget edge cache
+(caches.default, s-maxage=60) so each PoP does at most one KV fan-out
+per minute regardless of traffic; POSTs from the sync agent invalidate the
+cache so newer data shows up promptly. The shape of the lesson is general:
+an agent-readable surface is still a surface — budget for traffic the same
+way you would a human-facing one, or your first wave of agent traffic will
+rate-limit your second wave's into 429s.
 The shape that makes it work
 
 None of these surfaces is hard on its own. What makes them stay coherent is
