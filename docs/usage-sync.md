@@ -58,29 +58,55 @@ The shape is hardcoded in the agent's `payloadsFor()` function — a
 4-field allowlist. The Worker re-validates server-side; any extra key
 → 400. Two layers of defense, one privacy contract.
 
-## Install (one machine)
+## Install — recommended (one command)
+
+`ops/setup-sync.sh` wraps the whole flow with interactive prompts.
+Idempotent — safe to re-run.
+
+```sh
+git clone https://github.com/AntaresYuan/personal_website   # if not already
+cd personal_website
+./ops/setup-sync.sh
+```
+
+It asks for:
+1. A **source label** (auto-suggests `claude-<hostname>`; must be unique
+   across your devices so they don't collide on Worker KV slots)
+2. The **shared bearer secret** (only if not already in your keychain).
+   On a fresh device you get this from your other Mac:
+   ```sh
+   # run on the OTHER mac (where it's already set up):
+   security find-generic-password -a "$USER" -s "antares-sync-usage" -w
+   ```
+   Copy the output, paste it into setup-sync.sh's prompt (input is hidden).
+
+It then writes `~/.config/antares-sync-usage.json`, stores the secret in
+keychain, runs a dry-run + first real sync, optionally installs the
+hourly LaunchAgent, and prints the Stop-hook snippet for
+`~/.claude/settings.json`.
+
+Flags:
+- `./ops/setup-sync.sh --rotate-secret` — force re-prompt for the secret
+- `./ops/setup-sync.sh --source claude-X` — skip the label prompt
+
+## Install — manual (if you want to see each step)
 
 1. **Config** — copy the example and edit `source` for this machine:
 
    ```sh
    mkdir -p ~/.config
    cp scripts/sync-usage.config.example.json ~/.config/antares-sync-usage.json
-   # edit ~/.config/antares-sync-usage.json:
-   #   - source: "claude-mbp" (or "claude-imac", or whatever)
-   #   - endpoint: leave as is unless you're forking
+   # edit ~/.config/antares-sync-usage.json → source: "claude-<this-mac>"
    ```
 
-2. **Secret** — store the bearer in the macOS keychain so the agent reads
-   it at runtime without a plaintext copy on disk:
+2. **Secret** — store the bearer in the macOS keychain (silent input, no
+   plaintext on disk, no terminal history leak):
 
    ```sh
-   security add-generic-password -a "$USER" -s "antares-sync-usage" -w '<bearer>'
+   read -rs SECRET   # paste, press Enter; input is hidden
+   security add-generic-password -U -a "$USER" -s "antares-sync-usage" -w "$SECRET"
+   unset SECRET
    ```
-
-   The Worker's `wrangler secret put SHARED_SECRET` value goes here. If
-   you'd rather paste the secret into the config file instead (less
-   secure), put it in the optional `"secret"` field and the agent will
-   prefer that.
 
 3. **Dry-run** to confirm payloads look right (nothing sent):
 
@@ -88,51 +114,30 @@ The shape is hardcoded in the agent's `payloadsFor()` function — a
    node scripts/sync-usage.js --dry-run
    ```
 
-   You'll see one JSON line per non-empty day in the trailing 14-day
-   window. Verify no extra fields, no message content.
-
 4. **First real sync**:
 
    ```sh
    node scripts/sync-usage.js --verbose
    ```
 
-   Expect a `POST <date> ok` line per day. Verify on the public side:
-
-   ```sh
-   curl -s -H 'origin: https://antaresyuan.site' https://usage.antaresyuan.site/ \
-     | python3 -m json.tool | head -20
-   ```
-
-   Today's `tokens` / `sessions` should match what the dry-run printed.
-
 5. **LaunchAgent** (hourly, runs in background):
 
    ```sh
-   ./ops/launchagent/install.sh           # installs + bootstraps + first run
+   ./ops/launchagent/install.sh           # install + bootstrap + first run
    ./ops/launchagent/install.sh status    # current state + last 20 log lines
    ./ops/launchagent/install.sh remove    # uninstall cleanly
    ```
 
-   Logs land in `~/Library/Logs/antares-sync-usage.log`. The agent is
-   idempotent — missing a tick is fine; the next tick picks it up.
-
-6. **Stop hook** (fires after each Claude Code session ends, so totals
-   refresh within seconds of your last response):
-
-   Edit `~/.claude/settings.json` and add:
+6. **Stop hook** — paste into `~/.claude/settings.json` (replace path):
 
    ```json
    {
      "hooks": {
        "Stop": [
-         {
-           "matcher": "",
+         { "matcher": "",
            "hooks": [
-             {
-               "type": "command",
-               "command": "/ABSOLUTE/PATH/TO/personal_website/ops/claude-hook/sync-usage-on-stop.sh"
-             }
+             { "type": "command",
+               "command": "/ABSOLUTE/PATH/TO/personal_website/ops/claude-hook/sync-usage-on-stop.sh" }
            ]
          }
        ]
@@ -140,20 +145,36 @@ The shape is hardcoded in the agent's `payloadsFor()` function — a
    }
    ```
 
-   Replace `/ABSOLUTE/PATH/TO/personal_website` with your repo path. The
-   wrapper backgrounds the sync so session-end isn't delayed; output
-   tails into the same log as the LaunchAgent.
+## Adding a second / Nth device
 
-## A second machine (e.g. iMac)
+Same `setup-sync.sh` flow as above — the script is idempotent and
+designed for repeat use on new machines. The Worker stores per-source
+slots in KV; the public GET sums across them. Different `source` labels
+mean two devices never overwrite each other's data.
 
-Repeat steps 1–6 with `source: "claude-imac"` (or any unique `[a-z0-9._-]+`
-label up to 32 chars). The Worker's KV layout is per-source-slot inside
-each day, so the two machines don't overwrite each other — the public
-GET sums them.
+Quick walkthrough for a fresh Mac:
 
-You'll need the same `SHARED_SECRET` on both machines. Easiest: copy
-it via your password manager, or `security export` from the first Mac
-and `security import` on the second.
+```sh
+# 1. Clone the repo
+git clone https://github.com/AntaresYuan/personal_website ~/personal_website
+cd ~/personal_website
+
+# 2. (If node isn't installed)
+brew install node
+
+# 3. Get the shared secret from your already-set-up Mac.
+#    On THAT mac, in a terminal:
+#      security find-generic-password -a "$USER" -s "antares-sync-usage" -w
+#    Copy the printed string. AirDrop / 1Password it over to this mac.
+
+# 4. Run the setup
+./ops/setup-sync.sh
+# → answer the prompts; paste the secret when asked
+# → say yes to LaunchAgent install
+```
+
+Within an hour the new device starts contributing to the dashboard total
+on `antaresyuan.site/#usage`. No Worker or frontend changes needed.
 
 ## Rotating the secret
 
