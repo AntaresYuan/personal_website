@@ -1,0 +1,151 @@
+{
+  "skill": "devloop",
+  "skill_repo": "AntaresYuan/claude-devloop",
+  "threshold": 3,
+  "first_run": "2026-05-13T16:00:00Z",
+  "runs": [
+    {
+      "id": "usage-loop-20260513",
+      "ts": "2026-05-13T21:31:00Z",
+      "tasks_done": 3,
+      "friction_count_initial": 2,
+      "friction_count_with_tail": 14,
+      "retro_path": "RETRO-2026-05-13.md",
+      "retro_path_late_tail": "RETRO-2026-05-14-late-iteration.md",
+      "prs": [154, 155, 156],
+      "follow_up_prs": [157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168],
+      "follow_up_commits": ["f83a5f0"]
+    }
+  ],
+  "friction_accumulators": {
+    "retry::wrangler-syntax-v2-vs-v3": {
+      "count": 1,
+      "first_seen": "2026-05-13T18:42:00Z",
+      "last_seen": "2026-05-13T18:42:00Z",
+      "examples": [
+        {
+          "run_id": "usage-loop-20260513",
+          "ts": "2026-05-13T18:42:00Z",
+          "issue": "Used legacy `wrangler kv:namespace create` (v2 colon syntax) in operator-facing docs; wrangler v4 rejected it."
+        }
+      ],
+      "pr_status": "none"
+    },
+    "subagent_flag_persistent::heatmap-edge-weekday": {
+      "count": 1,
+      "first_seen": "2026-05-13T21:30:00Z",
+      "last_seen": "2026-05-13T21:30:00Z",
+      "examples": [
+        {
+          "run_id": "usage-loop-20260513",
+          "pr": 156,
+          "issue": "Heatmap math silently dropped 2 oldest cells when today=Sunday — local test only covered today=Thursday."
+        }
+      ],
+      "pr_status": "none"
+    },
+    "viz_visual_weight::iterative_revision": {
+      "count": 4,
+      "first_seen": "2026-05-14T03:00:00Z",
+      "last_seen": "2026-05-14T03:30:00Z",
+      "examples": [
+        {"pr": 162, "issue": "Cell layout centered as quick fix vs left-aligned imbalance"},
+        {"pr": 163, "issue": "Restructured to year strip + moved inside hero, cells dropped to 10px"},
+        {"pr": 165, "issue": "Cells bumped 10 → 12px after operator pushback"},
+        {"pr": 167, "issue": "Cells bumped 12 → 16px + day labels + legend added"}
+      ],
+      "proposed_diff": "RETRO-2026-05-14-late-iteration.md §B — /devloop §2 step 3: show 2-3 sized mockups via AskUserQuestion before shipping visual decisions",
+      "threshold_crossed": true,
+      "pr_status": "pending_operator_approval"
+    },
+    "metric_correctness::sanity_smell_test": {
+      "count": 2,
+      "first_seen": "2026-05-14T00:30:00Z",
+      "last_seen": "2026-05-14T01:15:00Z",
+      "examples": [
+        {"pr": 157, "issue": "Shipped 3.6B tokens/14d (cache_read inflation, ~100× off)"},
+        {"pr": 158, "issue": "Shipped 63M tokens/14d (cache_creation inflation, ~5× off vs user's reference)"}
+      ],
+      "proposed_diff": "RETRO-2026-05-14-late-iteration.md §B — /devloop §2 step 4: sanity-grep user-visible aggregates before merging metrics",
+      "pr_status": "wait_one_more_occurrence"
+    },
+    "dom_lifecycle::innerhtml_wipes_appended_children": {
+      "count": 1,
+      "first_seen": "2026-05-14T02:00:00Z",
+      "last_seen": "2026-05-14T02:00:00Z",
+      "examples": [
+        {"pr": 160, "issue": "Tooltip appended to heatmap container; refetch's innerHTML wipe detached it silently"}
+      ],
+      "pr_status": "none"
+    },
+    "pacing_mismatch::frontend_polling_vs_data_cadence": {
+      "count": 1,
+      "first_seen": "2026-05-14T02:30:00Z",
+      "last_seen": "2026-05-14T02:30:00Z",
+      "examples": [
+        {"pr": 159, "issue": "60s refetch vs hourly data updates — 59/60 polls returned identical data"}
+      ],
+      "pr_status": "none"
+    },
+    "viz_semantic_ambiguity::missing_vs_zero": {
+      "count": 1,
+      "first_seen": "2026-05-14T03:00:00Z",
+      "last_seen": "2026-05-14T03:00:00Z",
+      "examples": [
+        {"pr": 161, "issue": "Outside-window cells rendered as grey 'no activity', collapsing distinct semantic categories"}
+      ],
+      "pr_status": "none"
+    },
+    "viz_motion::pulse_without_purpose": {
+      "count": 1,
+      "first_seen": "2026-05-14T03:45:00Z",
+      "last_seen": "2026-05-14T03:45:00Z",
+      "examples": [
+        {"pr": 166, "issue": "Two pulsing dots (yellow /usage + green hero) added by reflex; user called both 'flickering bullshit'"}
+      ],
+      "pr_status": "none"
+    },
+    "setup_collision::source_label_overlap": {
+      "count": 1,
+      "first_seen": "2026-05-14T04:30:00Z",
+      "last_seen": "2026-05-14T04:30:00Z",
+      "examples": [
+        {"issue": "setup-sync.sh accepted claude-mbp on iMac (example default), collided with mbp's slot, public total dropped instead of growing"}
+      ],
+      "pr_status": "none_local_fix_needed"
+    },
+    "setup_collision::stale_keychain_after_worker_rotate": {
+      "count": 1,
+      "first_seen": "2026-05-14T05:00:00Z",
+      "last_seen": "2026-05-14T05:00:00Z",
+      "examples": [
+        {"issue": "setup-sync.sh kept stale keychain entry after Worker secret rotation; every POST 401'd"}
+      ],
+      "pr_status": "none_local_fix_needed"
+    },
+    "agent_assumption_error::device_identity_from_hostname": {
+      "count": 1,
+      "first_seen": "2026-05-14T04:00:00Z",
+      "last_seen": "2026-05-14T04:00:00Z",
+      "examples": [
+        {"issue": "Inferred 'hostname=Mac → MacBook' for ~15 messages; was actually iMac. Propagated mbp/iMac confusion until user corrected."}
+      ],
+      "pr_status": "none"
+    },
+    "iterate_invocation::late_iteration_blind_spot": {
+      "count": 1,
+      "first_seen": "2026-05-14T05:30:00Z",
+      "last_seen": "2026-05-14T05:30:00Z",
+      "examples": [
+        {"issue": "/iterate ran at queue-exhaustion; 12 subsequent PRs and their friction events were never analyzed. Structural blind spot in /devloop ↔ /iterate handshake."}
+      ],
+      "proposed_diff": "Open issue on claude-skill-iterate: support re-invocation when LOOP-FRICTION.jsonl grows past last analyzed point",
+      "pr_status": "pending_operator_approval"
+    },
+    "stop_condition_hit::designed-pause": {
+      "count": 2,
+      "note": "Designed pauses (wrangler-bind handoff after #154, queue exhausted after #156). Guardrail working — NOT friction."
+    }
+  },
+  "pr_history": []
+}
