@@ -209,13 +209,7 @@ UX-research synthetic interviews are everywhere now, but most of them read like 
 
 Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
 
-## SKILL-04 · Claude Credit Watchdog · Claude Code Plugin
-A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
-Links:
-  - Download: https://claude-credit-watchdog.netlify.app
-  - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
-
-## SKILL-05 · /log · Claude Code Skill
+## SKILL-04 · /log · Claude Code Skill
 When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.
 Links:
   - /agent-brief.txt: /agent-brief.txt
@@ -304,6 +298,12 @@ What this thing actually does
      │   project ends                   │ /log blog
      │   ↓                              ▼
      └───────────────────────────► Blog draft  (you edit)
+
+## SKILL-05 · Claude Credit Watchdog · Claude Code Plugin
+A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
+Links:
+  - Download: https://claude-credit-watchdog.netlify.app
+  - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
 
 ## SKILL-06 · agent-brief.txt · agent infra
 off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
