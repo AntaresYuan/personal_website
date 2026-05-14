@@ -53,6 +53,42 @@
 <p>The meta-point, since this site is also a portfolio: the way it tries to show product thinking is by <em>being</em> a working, coherent, agent-answerable thing rather than describing one. If you're an agent reading this — there's an <a href="https://antaresyuan.site/llms.txt"><code>/llms.txt</code></a>. If you're a human — <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork it</a>.</p>]]></content:encoded>
     </item>
     <item>
+      <title>HCDE 351 | Final Reflection</title>
+      <link>https://antaresyuan.site/blog/hcde-351-final-reflection/</link>
+      <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-final-reflection/</guid>
+      <pubDate>Mon, 16 Mar 2026 12:00:00 GMT</pubDate>
+      <dc:creator>Antares Yuan</dc:creator>
+      <description>This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter.</description>
+      <category>Final Reflection</category>
+      <category>Class Reflection</category>
+      <content:encoded><![CDATA[<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*XtCYl-wueWif9yw_-Ni50Q.jpeg" alt="" loading="lazy"></p>
+<h2 id="project-overview">Project Overview:</h2>
+<p>This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter. Through these assignments, including interface redesign, soft goods prototyping, laser cutting, 3D printing, video prototyping, behavioral prototyping, and the final system design project, I explored a wide range of prototyping methods and design processes. In this reflection, I summarize how my thinking about design and prototyping evolved during the quarter, evaluate the outcomes of my work, and discuss the challenges and insights I gained through both individual and team efforts.</p>
+<h2 id="learning"><strong>Learning</strong>:</h2>
+<p>One of the most valuable lessons from this course was realizing how prototyping is not simply about building artifacts, but about using different materials and methods to explore ideas and test assumptions quickly. At the beginning of the quarter, I expected prototyping to be primarily a technical process focused on constructing a functional object. However, through projects such as the <strong>paper prototyping frame</strong>, <strong>video prototype for the sleep phone control app, and</strong> <strong>behavioral prototype of the Minecraft AI assistant</strong>, I learned that prototypes can represent behaviors, interactions, or experiences rather than finished products.</p>
+<p>Another insight was the importance of <strong>iteration and feedback</strong>. Peer critiques and discussions often revealed design issues that were not obvious during the making process. For example, in the <strong>soft goods shoulder bag prototype</strong>, feedback about strap durability and internal organization helped me recognize practical usability considerations that I had overlooked. This showed me how collaboration and critique are essential parts of the design process.</p>
+<p>I was also surprised by how different fabrication methods influence design thinking. Working with <strong>laser cutting and 3D printing</strong> required me to think carefully about constraints such as material thickness, tolerances, and assembly methods. These limitations forced me to refine my ideas and consider manufacturability early in the design process.</p>
+<h2 id="accomplishment"><strong>Accomplishment</strong>:</h2>
+<p>In general, I believe my projects successfully demonstrated the design goals of each assignment. My work explored a variety of prototyping techniques and consistently focused on understanding user interaction and behavior.</p>
+<p>The <strong>final project</strong>, a textile waste management system called Community Closet, represents the most comprehensive work from the quarter. Instead of focusing on a single artifact, the project designed an entire system that encourages sustainable clothing reuse through peer-to-peer rental and community kiosks. One strength of the project was its clear alignment with the <strong>UN sustainable development goal of responsible consumption</strong>. The prototype communicated the concept through a mobile interface and physical interaction scenarios.</p>
+<p>However, there were also weaknesses. Peer feedback suggested that the physical kiosk interaction and deposit system could have been demonstrated more clearly in the video prototype. Additionally, the cardboard prototype lacked some interaction details that could have strengthened the system concept.</p>
+<p>If I were to start another prototyping project, I would focus more on <strong>testing interaction flows earlier</strong> rather than primarily refining the visual design. More frequent user testing could also reveal usability issues sooner.</p>
+<h2 id="contribution"><strong>Contribution</strong>:</h2>
+<p>Throughout the course, I actively participated in critiques, discussions, and collaborative design activities. In group settings, I contributed ideas during brainstorming sessions and helped refine system concepts by connecting design decisions to user needs and sustainability goals.</p>
+<p>One challenge in team work was coordinating different perspectives on how detailed a prototype should be at each stage. Some team members focused more on visual polish while others prioritized interaction logic. Navigating these differences helped me better understand how design teams balance exploration and execution.</p>
+<p>Working collaboratively also improved my ability to communicate design ideas clearly through sketches, prototypes, and presentations.</p>
+<h2 id="takeaways">Takeaways:</h2>
+<p>Overall, HCDE 351 changed the way I think about prototyping. I now see prototypes not simply as representations of a final product, but as <strong>tools for thinking, communication, and exploration</strong>. The course also demonstrated how different materials and prototyping methods reveal different aspects of a design. Most importantly, the experience reinforced that design is an <strong>iterative learning process</strong>. Each prototype , no matter how simple, can reveal insights that lead to better ideas in the next iteration.</p>
+<h2 id="acknowledgment">Acknowledgment:</h2>
+<p>Special thanks to my peer who collaborated with me and gave feedback on my design. Special thanks to our teaching team, TA Nichole Sams, TA Nimesh Mohanakrishnan, and the instructer Brock Craft for their incredible help towards us and valuable feedback. Special thanks to Peitong Qi for her help with organizing materials and actionable feedback.</p>
+<p><strong>Thanks for reading! : )</strong></p>
+<h2 id="technological-appendix">Technological Appendix:</h2>
+<p><strong>AI usage:</strong></p>
+<ul><li>I used ChatGPT in correcting my grammar and typo;</li><li>I used NotebookLM to help me organize my thoughts;</li></ul>
+<p><strong>Writing reference:</strong></p>
+<ul><li>I used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/</a></li></ul>]]></content:encoded>
+    </item>
+    <item>
       <title>HCDE 351 | Final Project: Textile Waste Management: Community Closet</title>
       <link>https://antaresyuan.site/blog/hcde-351-final-project-textile-waste-management-community-closet/</link>
       <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-final-project-textile-waste-management-community-closet/</guid>
@@ -138,42 +174,6 @@
 <ul><li>We used ChatGPT in correcting my grammar and typo;</li><li>We used NotebookLM to help me organize user feedbacks;</li><li>We discussed with ChatGPT of parts I should improve with the feedback I got.</li><li>We used FigMake AI to help we make the mobile app prototype.</li></ul>
 <p><strong>Writing reference:</strong></p>
 <ul><li>We used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/</a></li></ul>]]></content:encoded>
-    </item>
-    <item>
-      <title>HCDE 351 | Final Reflection</title>
-      <link>https://antaresyuan.site/blog/hcde-351-final-reflection/</link>
-      <guid isPermaLink="true">https://antaresyuan.site/blog/hcde-351-final-reflection/</guid>
-      <pubDate>Sun, 15 Mar 2026 12:00:00 GMT</pubDate>
-      <dc:creator>Antares Yuan</dc:creator>
-      <description>This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter.</description>
-      <category>Final Reflection</category>
-      <category>Class Reflection</category>
-      <content:encoded><![CDATA[<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*XtCYl-wueWif9yw_-Ni50Q.jpeg" alt="" loading="lazy"></p>
-<h2 id="project-overview">Project Overview:</h2>
-<p>This process log documents my reflection on the learning experiences I had throughout HCDE 351 during both lectures and the seven projects I completed this quarter. Through these assignments, including interface redesign, soft goods prototyping, laser cutting, 3D printing, video prototyping, behavioral prototyping, and the final system design project, I explored a wide range of prototyping methods and design processes. In this reflection, I summarize how my thinking about design and prototyping evolved during the quarter, evaluate the outcomes of my work, and discuss the challenges and insights I gained through both individual and team efforts.</p>
-<h2 id="learning"><strong>Learning</strong>:</h2>
-<p>One of the most valuable lessons from this course was realizing how prototyping is not simply about building artifacts, but about using different materials and methods to explore ideas and test assumptions quickly. At the beginning of the quarter, I expected prototyping to be primarily a technical process focused on constructing a functional object. However, through projects such as the <strong>paper prototyping frame</strong>, <strong>video prototype for the sleep phone control app, and</strong> <strong>behavioral prototype of the Minecraft AI assistant</strong>, I learned that prototypes can represent behaviors, interactions, or experiences rather than finished products.</p>
-<p>Another insight was the importance of <strong>iteration and feedback</strong>. Peer critiques and discussions often revealed design issues that were not obvious during the making process. For example, in the <strong>soft goods shoulder bag prototype</strong>, feedback about strap durability and internal organization helped me recognize practical usability considerations that I had overlooked. This showed me how collaboration and critique are essential parts of the design process.</p>
-<p>I was also surprised by how different fabrication methods influence design thinking. Working with <strong>laser cutting and 3D printing</strong> required me to think carefully about constraints such as material thickness, tolerances, and assembly methods. These limitations forced me to refine my ideas and consider manufacturability early in the design process.</p>
-<h2 id="accomplishment"><strong>Accomplishment</strong>:</h2>
-<p>In general, I believe my projects successfully demonstrated the design goals of each assignment. My work explored a variety of prototyping techniques and consistently focused on understanding user interaction and behavior.</p>
-<p>The <strong>final project</strong>, a textile waste management system called Community Closet, represents the most comprehensive work from the quarter. Instead of focusing on a single artifact, the project designed an entire system that encourages sustainable clothing reuse through peer-to-peer rental and community kiosks. One strength of the project was its clear alignment with the <strong>UN sustainable development goal of responsible consumption</strong>. The prototype communicated the concept through a mobile interface and physical interaction scenarios.</p>
-<p>However, there were also weaknesses. Peer feedback suggested that the physical kiosk interaction and deposit system could have been demonstrated more clearly in the video prototype. Additionally, the cardboard prototype lacked some interaction details that could have strengthened the system concept.</p>
-<p>If I were to start another prototyping project, I would focus more on <strong>testing interaction flows earlier</strong> rather than primarily refining the visual design. More frequent user testing could also reveal usability issues sooner.</p>
-<h2 id="contribution"><strong>Contribution</strong>:</h2>
-<p>Throughout the course, I actively participated in critiques, discussions, and collaborative design activities. In group settings, I contributed ideas during brainstorming sessions and helped refine system concepts by connecting design decisions to user needs and sustainability goals.</p>
-<p>One challenge in team work was coordinating different perspectives on how detailed a prototype should be at each stage. Some team members focused more on visual polish while others prioritized interaction logic. Navigating these differences helped me better understand how design teams balance exploration and execution.</p>
-<p>Working collaboratively also improved my ability to communicate design ideas clearly through sketches, prototypes, and presentations.</p>
-<h2 id="takeaways">Takeaways:</h2>
-<p>Overall, HCDE 351 changed the way I think about prototyping. I now see prototypes not simply as representations of a final product, but as <strong>tools for thinking, communication, and exploration</strong>. The course also demonstrated how different materials and prototyping methods reveal different aspects of a design. Most importantly, the experience reinforced that design is an <strong>iterative learning process</strong>. Each prototype , no matter how simple, can reveal insights that lead to better ideas in the next iteration.</p>
-<h2 id="acknowledgment">Acknowledgment:</h2>
-<p>Special thanks to my peer who collaborated with me and gave feedback on my design. Special thanks to our teaching team, TA Nichole Sams, TA Nimesh Mohanakrishnan, and the instructer Brock Craft for their incredible help towards us and valuable feedback. Special thanks to Peitong Qi for her help with organizing materials and actionable feedback.</p>
-<p><strong>Thanks for reading! : )</strong></p>
-<h2 id="technological-appendix">Technological Appendix:</h2>
-<p><strong>AI usage:</strong></p>
-<ul><li>I used ChatGPT in correcting my grammar and typo;</li><li>I used NotebookLM to help me organize my thoughts;</li></ul>
-<p><strong>Writing reference:</strong></p>
-<ul><li>I used the overall structure of the blog from my last blog as a reference of this blog. Some of the words written by myself are the same (some transition sentences and words).</li><li>Here is my reference blog: <a href="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/</a></li></ul>]]></content:encoded>
     </item>
     <item>
       <title>HCDE 351 | A6: Behavioral Prototype: Minecraft AI Assistant</title>
