@@ -979,6 +979,17 @@
   const HEATMAP_CELL = 12;
   const HEATMAP_GAP  = 2;
   const FUNFACT_ROTATE_MS = 7000;
+  // Refetch hourly. The data only updates on the local sync agent's
+  // hourly LaunchAgent tick or a Claude Code Stop-hook, so anything more
+  // frequent re-fetches identical bytes — wastes Worker quota and the
+  // visitor's bandwidth. The pulsing dot still pulses to signal "section
+  // is healthy"; the label below reads "updated Nm ago" from the Worker's
+  // response, so visitors see actual data staleness instead of "Ns since
+  // I last polled" which is mostly noise.
+  const REFETCH_MS = 60 * 60 * 1000;
+  // Tick the "updated Nm ago" label every 30s so it stays current
+  // without polling the API.
+  const LABEL_TICK_MS = 30 * 1000;
 
   // Comparison set for the fun-fact rotator. Token estimates are deliberately
   // round so visitors get a relatable "≈ Nx" intuition, not a precise count.
@@ -1141,17 +1152,28 @@
       return;
     }
 
-    let lastSuccessAt = 0;
+    let lastUpdatedMs = 0;   // ms-epoch of the Worker's most recent write (from GET response)
     let lastCells = null;
     let refetchTimer = null;
     let liveTickTimer = null;
     let factRotateTimer = null;
     let inFlight = false;
 
+    // The label tracks DATA staleness (when the worker last got new data
+    // from a sync agent), not FETCH staleness (when this page last polled).
+    // For a 1h-refetch loop the latter is meaningless noise — the former
+    // is what visitors actually want to know.
     const updateLiveLabel = () => {
-      if (!lastSuccessAt) { liveEl.textContent = 'live'; return; }
-      const sec = Math.max(0, Math.round((Date.now() - lastSuccessAt) / 1000));
-      liveEl.textContent = `live · ${sec}s ago`;
+      if (!lastUpdatedMs) { liveEl.textContent = 'live'; return; }
+      const sec = Math.max(0, Math.round((Date.now() - lastUpdatedMs) / 1000));
+      if (sec < 60)        liveEl.textContent = `updated ${sec}s ago`;
+      else if (sec < 3600) liveEl.textContent = `updated ${Math.round(sec / 60)}m ago`;
+      else if (sec < 86400){
+        const h = Math.floor(sec / 3600);
+        const m = Math.round((sec % 3600) / 60);
+        liveEl.textContent = m ? `updated ${h}h ${m}m ago` : `updated ${h}h ago`;
+      }
+      else liveEl.textContent = `updated ${Math.round(sec / 86400)}d ago`;
     };
 
     const refetch = async () => {
@@ -1181,7 +1203,13 @@
         const fact = renderFunFact(cells);
         factEl.innerHTML    = fact;
         section.classList.add('usage-loaded');
-        lastSuccessAt = Date.now();
+        // Use the Worker's `updated` watermark (newest write across all
+        // sources) instead of "now" — that's the timestamp visitors care
+        // about. Falls back to "now" if the field is missing (no data
+        // yet) so the label has something to show.
+        const updIso = typeof data.updated === 'string' ? data.updated : null;
+        const parsed = updIso ? Date.parse(updIso) : NaN;
+        lastUpdatedMs = Number.isFinite(parsed) ? parsed : Date.now();
         updateLiveLabel();
       } catch (e) {
         // Silent hide on failure — fork without Worker, network blip, CORS,
@@ -1196,8 +1224,8 @@
 
     const startTimers = () => {
       stopTimers();
-      refetchTimer = setInterval(refetch, 60_000);
-      liveTickTimer = setInterval(updateLiveLabel, 1000);
+      refetchTimer = setInterval(refetch, REFETCH_MS);
+      liveTickTimer = setInterval(updateLiveLabel, LABEL_TICK_MS);
       // Fun-fact rotates locally without refetching the API.
       factRotateTimer = setInterval(() => {
         if (lastCells) factEl.innerHTML = renderFunFact(lastCells);
