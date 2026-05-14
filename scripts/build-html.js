@@ -120,11 +120,15 @@ const setAttr = (html, id, attr, value) => {
    shift when data lands. Empty cells use a CSS class instead of a fill
    attribute, so theme tokens drive the color (dark mode just works).
    ────────────────────────────────────────────────────────────────── */
-// GitHub-style year strip: 52 weeks × 7 days. Cells 10px with 2px gap →
-// ~620px wide × 82px tall, plus a 12px top band for month labels. Same
-// constants as scripts/render.js, in lockstep — must match or the SSR
-// shell and the client-rendered version mismatch on first paint.
-const HEATMAP_COLS = 52;
+// Data-driven heatmap: floor at 4 weeks (so SSR/no-data state is still a
+// recognizable strip, not a single isolated cell), cap at 52 weeks. The
+// client-side renderer (scripts/render.js) grows this between MIN and MAX
+// based on the first active day in the GET response. SSR uses MIN so the
+// first paint shows the smallest defensible grid; once render.js gets
+// data, it can widen — never shrink — which avoids layout jitter.
+// Constants must stay in lockstep with scripts/render.js.
+const HEATMAP_COLS_MIN = 4;
+const HEATMAP_COLS_MAX = 52;
 const HEATMAP_ROWS = 7;
 const HEATMAP_CELL = 16;
 const HEATMAP_GAP  = 3;
@@ -132,12 +136,13 @@ const HEATMAP_LABEL_BAND = 18;   // top: month-name strip
 const HEATMAP_LEFT_LABEL = 30;   // left: Mon/Wed/Fri row labels
 const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];
 function emptyHeatmapSvg() {
-  const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
+  const cols = HEATMAP_COLS_MIN;
+  const gridW = cols * HEATMAP_CELL + (cols - 1) * HEATMAP_GAP;
   const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
   const w = HEATMAP_LEFT_LABEL + gridW;
   const h = HEATMAP_LABEL_BAND + gridH;
   const rects = [];
-  for (let c = 0; c < HEATMAP_COLS; c++) {
+  for (let c = 0; c < cols; c++) {
     for (let r = 0; r < HEATMAP_ROWS; r++) {
       const x = HEATMAP_LEFT_LABEL + c * (HEATMAP_CELL + HEATMAP_GAP);
       const y = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP);
