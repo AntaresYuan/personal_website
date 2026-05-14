@@ -1150,14 +1150,6 @@
       : '$' + usd.toFixed(2);
   };
 
-  const renderUsageCost = (cells) => {
-    const s = formatCostUsd(cells);
-    if (!s) return '';
-    // "≈" because Anthropic pricing has tier-rules (e.g., 1M-context Opus
-    // doubles above 200K input) and we use base rates. Honest framing.
-    return `&asymp; <strong>${s}</strong> spent on Claude`;
-  };
-
   const renderUsageStats = (cells) => {
     let totalTokens = 0, totalSessions = 0, daysActive = 0;
     let oldestActive = '';
@@ -1174,6 +1166,14 @@
     // more naturally than the rolling-90-day rate.
     const last7 = cells.slice(-7);
     const last7Active = last7.filter(c => c.tokens > 0).length;
+    // Cost slots inline as one of the data items — only emitted when we
+    // have costCents data. "≈" because Anthropic pricing has tier rules
+    // (1M-context Opus doubles above 200K input) we don't model.
+    const costStr = formatCostUsd(cells);
+    const costItem = costStr
+      ? [`<span class="usage-stat">&asymp; <strong>${costStr}</strong></span>`,
+         `<span class="usage-stat-sep">·</span>`]
+      : [];
     // Always emit the "since" slot — even when empty — so the row's width
     // matches the SSR shell and the layout doesn't shift on first fetch.
     return [
@@ -1183,6 +1183,7 @@
       `<span class="usage-stat-sep">·</span>`,
       `<span class="usage-stat"><strong>${last7Active}/7</strong> days active</span>`,
       `<span class="usage-stat-sep">·</span>`,
+      ...costItem,
       `<span class="usage-stat usage-stat-since">since ${oldestActive || '—'}</span>`,
     ].join('');
   };
@@ -1216,10 +1217,9 @@
     }
     const heatmapEl = document.getElementById('usage-heatmap');
     const statsEl   = document.getElementById('usage-stats');
-    const costEl    = document.getElementById('usage-cost');
     const factEl    = document.getElementById('usage-funfact');
     const liveEl    = document.getElementById('usage-live-text');
-    if (!heatmapEl || !statsEl || !costEl || !factEl || !liveEl) {
+    if (!heatmapEl || !statsEl || !factEl || !liveEl) {
       section.hidden = true;
       return;
     }
@@ -1272,13 +1272,13 @@
         lastCells = cells;
         heatmapEl.innerHTML = renderHeatmap(cells);
         statsEl.innerHTML   = renderUsageStats(cells);
-        const cost = renderUsageCost(cells);
-        costEl.innerHTML    = cost;
-        // Hide the cost row entirely when there's no data yet (pre-upgrade
-        // sync agents still in flight). Show otherwise.
-        costEl.hidden       = !cost;
         const fact = renderFunFact(cells);
         factEl.innerHTML    = fact;
+        // When the funfact returns empty (no data yet this month), hide
+        // the leading "·" separator in the flourish row so it doesn't read
+        // as "· updated 2s ago".
+        const flourishSep = factEl.parentElement && factEl.parentElement.querySelector('.usage-flourish-sep');
+        if (flourishSep) flourishSep.hidden = !fact;
         section.classList.add('usage-loaded');
         // Use the Worker's `updated` watermark (newest write across all
         // sources) instead of "now" — that's the timestamp visitors care
