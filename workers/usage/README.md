@@ -71,7 +71,7 @@ the slot map, return `{date, tokens, sessions}` per day plus the global
 cd workers/usage
 npx wrangler login                                  # browser auth
 
-npx wrangler kv:namespace create USAGE_KV           # copy returned id
+npx wrangler kv namespace create USAGE_KV           # copy returned id (Wrangler v3+ syntax)
 # paste the id into wrangler.toml [[kv_namespaces]].id
 
 npx wrangler secret put SHARED_SECRET               # paste a long random bearer

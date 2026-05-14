@@ -9,7 +9,7 @@
 # One-time deploy:
 #   cd workers/usage
 #   npx wrangler login                                # browser auth
-#   npx wrangler kv:namespace create USAGE_KV         # copy the id below
+#   npx wrangler kv namespace create USAGE_KV         # copy the id below (v3+ syntax)
 #   # paste the returned id into the [[kv_namespaces]] block, then:
 #   npx wrangler secret put SHARED_SECRET             # paste bearer
 #   npx wrangler deploy
@@ -28,7 +28,7 @@ compatibility_date = "2026-05-13"
 enabled = true
 
 # KV — per-day map keyed by source slot. Created via:
-#   npx wrangler kv:namespace create USAGE_KV
+#   npx wrangler kv namespace create USAGE_KV     (Wrangler v3+ — space not colon)
 # then paste the returned id below (replace the placeholder).
 [[kv_namespaces]]
 binding = "USAGE_KV"
