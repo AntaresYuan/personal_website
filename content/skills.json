@@ -70,7 +70,7 @@
       "links": [
         {
           "label": "Download",
-          "href": "https://claude-credit-watchdog.vercel.app"
+          "href": "https://claude-credit-watchdog.netlify.app"
         },
         {
           "label": "GitHub",
