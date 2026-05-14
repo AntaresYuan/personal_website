@@ -127,11 +127,21 @@ function aggregate(projectsDir) {
         const ts = ev.timestamp;
         if (typeof ts !== 'string' || ts.length < 10) continue;
         const date = ts.slice(0, 10);   // UTC date
+        // "Tokens" = NEW content the model worked on this turn.
+        //   input_tokens                — fresh user-side input this turn
+        //   output_tokens               — model's response
+        //   cache_creation_input_tokens — content paid-to-cache this turn
+        // We deliberately DO NOT include cache_read_input_tokens — those are
+        // the cached prompt being *re-served* at each turn; for a 1M-context
+        // Claude Code session a single re-read can be 500K+ "tokens" of
+        // already-paid-for content. Counting it inflates daily totals by 50-
+        // 100× and the public dashboard ends up advertising billions of
+        // tokens that don't represent real work. The Anthropic billing
+        // surface tracks cache-read separately for the same reason.
         const tokens =
           (u.input_tokens                || 0) +
           (u.output_tokens               || 0) +
-          (u.cache_creation_input_tokens || 0) +
-          (u.cache_read_input_tokens     || 0);
+          (u.cache_creation_input_tokens || 0);
         if (!Number.isFinite(tokens) || tokens <= 0) continue;
         let b = buckets.get(date);
         if (!b) { b = { tokens: 0, sessions: new Set() }; buckets.set(date, b); }
