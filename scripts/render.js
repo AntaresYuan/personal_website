@@ -1048,11 +1048,11 @@
         const daysAgo = todayDow - row + 7 * weeksBack;
         if (daysAgo < 0) {
           // Future day of the current week — empty placeholder, no real date.
-          cells.push({ col, row, tokens: 0, sessions: 0, date: '' });
+          cells.push({ col, row, tokens: 0, sessions: 0, costCents: 0, date: '' });
           continue;
         }
         const date = new Date(todayMs - daysAgo * 86400000).toISOString().slice(0, 10);
-        const e = byDate.get(date) || { date, tokens: 0, sessions: 0 };
+        const e = byDate.get(date) || { date, tokens: 0, sessions: 0, costCents: 0 };
         cells.push({ col, row, ...e });
       }
     }
@@ -1129,6 +1129,35 @@
     return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${dayLabels.join('')}${rects}</svg>`;
   };
 
+  // Sum costCents across all cells, format as `$xx.xx` or `$xx,xxx.xx`.
+  // Returns '' when no cost data has reached the wire yet (older sync
+  // agents not upgraded) — render.js then hides the cost row entirely
+  // instead of showing "$0.00", which would read as "I haven't spent
+  // anything" rather than "I don't have the data."
+  const formatCostUsd = (cells) => {
+    let totalCents = 0;
+    let any = false;
+    for (const cell of cells) {
+      if (Number.isFinite(cell.costCents) && cell.costCents > 0) {
+        totalCents += cell.costCents;
+        any = true;
+      }
+    }
+    if (!any) return '';
+    const usd = totalCents / 100;
+    return usd >= 1000
+      ? '$' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '$' + usd.toFixed(2);
+  };
+
+  const renderUsageCost = (cells) => {
+    const s = formatCostUsd(cells);
+    if (!s) return '';
+    // "≈" because Anthropic pricing has tier-rules (e.g., 1M-context Opus
+    // doubles above 200K input) and we use base rates. Honest framing.
+    return `&asymp; <strong>${s}</strong> spent on Claude`;
+  };
+
   const renderUsageStats = (cells) => {
     let totalTokens = 0, totalSessions = 0, daysActive = 0;
     let oldestActive = '';
@@ -1187,9 +1216,10 @@
     }
     const heatmapEl = document.getElementById('usage-heatmap');
     const statsEl   = document.getElementById('usage-stats');
+    const costEl    = document.getElementById('usage-cost');
     const factEl    = document.getElementById('usage-funfact');
     const liveEl    = document.getElementById('usage-live-text');
-    if (!heatmapEl || !statsEl || !factEl || !liveEl) {
+    if (!heatmapEl || !statsEl || !costEl || !factEl || !liveEl) {
       section.hidden = true;
       return;
     }
@@ -1242,6 +1272,11 @@
         lastCells = cells;
         heatmapEl.innerHTML = renderHeatmap(cells);
         statsEl.innerHTML   = renderUsageStats(cells);
+        const cost = renderUsageCost(cells);
+        costEl.innerHTML    = cost;
+        // Hide the cost row entirely when there's no data yet (pre-upgrade
+        // sync agents still in flight). Show otherwise.
+        costEl.hidden       = !cost;
         const fact = renderFunFact(cells);
         factEl.innerHTML    = fact;
         section.classList.add('usage-loaded');
