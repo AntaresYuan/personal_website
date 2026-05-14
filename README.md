@@ -179,6 +179,26 @@ Empty token = no script, no tracking.
 
 While unconfigured, the comments section shows a placeholder.
 
+### `/usage` — live Claude usage dashboard
+
+The `/usage` section above the board renders a one-year heatmap of your
+Claude Code activity, fed by a Cloudflare Worker + a small local sync
+agent. To add a new device (or set up the first one):
+
+```sh
+./ops/setup-sync.sh
+```
+
+The script asks for a source label + the shared bearer secret, writes
+the config + keychain entry, runs a first sync, and installs the
+hourly LaunchAgent. **Idempotent** — safe to re-run; pass
+`--rotate-secret` to replace the keychain entry.
+
+Full doc: [`docs/usage-sync.md`](docs/usage-sync.md). Worker side +
+privacy contract: [`workers/usage/README.md`](workers/usage/README.md).
+Disable the section entirely by setting `usage.enabled = false` in
+`content/site.json`.
+
 ## Switching to deploy-time builds (when ready)
 
 Right now the artifacts (`index.html`, `llms.txt`, `llms-full.txt`) live in git so any clone can deploy without building. Once you're comfortable with the flow:
