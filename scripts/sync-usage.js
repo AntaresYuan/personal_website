@@ -4,7 +4,7 @@
 
    Walks `~/.claude/projects/<project-slug>/<session-uuid>.jsonl`, sums per
    day per session, and POSTs the last 14 days to the Worker as
-     { date, source, tokens, sessions, costCents }
+     { date, source, tokens, sessions }
 
    Source identifier comes from config so multi-device aggregation works
    (claude-mbp, claude-imac, ...). The Worker stores each source as its
@@ -16,11 +16,9 @@
    summed total per day. Per-source data never leaves the Worker.
 
    Privacy gate on THIS side: the script's POST body is built from a
-   hardcoded allowlist of 5 fields. No message content, no project name,
+   hardcoded allowlist of 4 fields. No message content, no project name,
    no model id, no session ids, no event counts, no hourly distribution
-   ever leaves the machine — by construction, not just by trust. costCents
-   is a SCALAR aggregate computed locally using the model-pricing table
-   below — the per-model token split that feeds it stays on this device.
+   ever leaves the machine — by construction, not just by trust.
 
    Config: ~/.config/antares-sync-usage.json  (per machine, untracked)
    Example: scripts/sync-usage.config.example.json
@@ -98,46 +96,8 @@ function loadSecret(cfg) {
       '  security add-generic-password -a "$USER" -s "antares-sync-usage" -w "<bearer>"');
 }
 
-// ── model pricing (USD per million tokens) ────────────────────────
-// [input, output, cache_write, cache_read]. Match by substring of the
-// `ev.message.model` field so we don't have to enumerate every dated
-// snapshot id ("claude-opus-4-7-20251101" etc.). Fallback to Sonnet
-// rates (safe middle ground — Opus would over-quote, Haiku would
-// under-quote). Edit when Anthropic publishes a new tier or when a new
-// family ships; the dashboard rebuilds on next sync.
-const MODEL_PRICING = {
-  'opus-4-7':   [15.00, 75.00, 18.75, 1.50],
-  'opus-4-6':   [15.00, 75.00, 18.75, 1.50],
-  'sonnet-4-6': [ 3.00, 15.00,  3.75, 0.30],
-  'sonnet-4-5': [ 3.00, 15.00,  3.75, 0.30],
-  'haiku-4-5':  [ 0.80,  4.00,  1.00, 0.08],
-};
-const DEFAULT_PRICING = [3.00, 15.00, 3.75, 0.30];
-
-function priceFor(model) {
-  if (typeof model !== 'string') return DEFAULT_PRICING;
-  for (const key of Object.keys(MODEL_PRICING)) {
-    if (model.includes(key)) return MODEL_PRICING[key];
-  }
-  return DEFAULT_PRICING;
-}
-
-// Cost of a single assistant turn in USD. Includes cache_creation +
-// cache_read at their real billing rates — these are charged by Anthropic
-// even though they don't count as "fresh work" in the tokens metric. On
-// 1M-context Opus sessions cache_read can be the dominant cost line.
-function eventCostUsd(u, model) {
-  const [pi, po, pcw, pcr] = priceFor(model);
-  return (
-    (u.input_tokens                || 0) / 1e6 * pi  +
-    (u.output_tokens               || 0) / 1e6 * po  +
-    (u.cache_creation_input_tokens || 0) / 1e6 * pcw +
-    (u.cache_read_input_tokens     || 0) / 1e6 * pcr
-  );
-}
-
 // ── walk jsonl + aggregate ────────────────────────────────────────
-// Returns Map<dateYYYYMMDD, { tokens: int, sessions: Set<sessionId>, costUsd: number }>
+// Returns Map<dateYYYYMMDD, { tokens: int, sessions: Set<sessionId> }>
 function aggregate(projectsDir) {
   const buckets = new Map();
   let projects;
@@ -185,15 +145,9 @@ function aggregate(projectsDir) {
           (u.input_tokens  || 0) +
           (u.output_tokens || 0);
         if (!Number.isFinite(tokens) || tokens <= 0) continue;
-        // Cost uses real Anthropic billing — input + output + cache_creation
-        // + cache_read at per-model rates. Diverges from `tokens` on purpose:
-        // tokens = "fresh work this turn", costUsd = "what Anthropic charged".
-        const model = ev.message && ev.message.model;
-        const cost = eventCostUsd(u, model);
         let b = buckets.get(date);
-        if (!b) { b = { tokens: 0, sessions: new Set(), costUsd: 0 }; buckets.set(date, b); }
+        if (!b) { b = { tokens: 0, sessions: new Set() }; buckets.set(date, b); }
         b.tokens += tokens;
-        b.costUsd += cost;
         if (ev.sessionId) b.sessions.add(ev.sessionId);
       }
     }
@@ -220,19 +174,13 @@ function payloadsFor(buckets, source, window) {
   const dates = lastNDates(window);
   return dates.map(date => {
     const b = buckets.get(date);
-    // costCents = integer USD-cents. Wire as int (not float) so KV
-    // round-trips are exact and Worker validation can use Number.isInteger.
-    // Capped at the Worker's MAX_INT just in case a bug fed a daily bucket
-    // that exploded.
-    const costCents = b ? Math.round(b.costUsd * 100) : 0;
     return {
       date,
       source,
-      tokens:    b ? b.tokens        : 0,
-      sessions:  b ? b.sessions.size : 0,
-      costCents,
+      tokens:   b ? b.tokens          : 0,
+      sessions: b ? b.sessions.size   : 0,
     };
-  }).filter(p => p.tokens > 0 || p.sessions > 0 || p.costCents > 0);
+  }).filter(p => p.tokens > 0 || p.sessions > 0);
   // Skip empty days — they're zero on the Worker anyway, and posting them
   // would just churn KV writes. The Worker's lastNDays(90) fills zero-days
   // back in on GET for heatmap continuity.
@@ -281,7 +229,7 @@ async function post(endpoint, secret, payload) {
   for (const p of payloads) {
     try {
       const r = await post(cfg.endpoint, secret, p);
-      if (r.status === 200) { ok++; log(`  POST ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions, $${(p.costCents/100).toFixed(2)})`); }
+      if (r.status === 200) { ok++; log(`  POST ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions)`); }
       else {
         // Worker error bodies are terse, schema-validator strings ('unexpected
         // field: foo' or 'date must be YYYY-MM-DD') — never echoes the payload.
