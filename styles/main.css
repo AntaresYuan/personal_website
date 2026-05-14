@@ -1888,6 +1888,97 @@ body.modal-open { overflow: hidden; }
   font-size: var(--fs-11);
 }
 
+/* ── /usage — live AI usage dashboard ──────────────────────────────────
+   Slim section sitting above the fold. Header line uses the standard
+   .sec-head trio (cmd · title · meta); meta carries a pulsing dot +
+   "live · Ns ago". Below: a 12-week × 7-day hand-SVG heatmap, a mono
+   stats row, and a rotating fun-fact line. Total target height ≤ 220px
+   so the section is above the fold on a 13" laptop. On a 375px iPhone
+   it shrinks via CSS-level cell-size override; nothing overflows.
+   Section silently hides on Worker fetch failure (render.js sets
+   [hidden]) — never show a broken widget. */
+.usage-section {
+  margin-bottom: var(--sp-40);
+}
+.usage-section .sec-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-6);
+}
+.usage-live-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-yellow);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-yellow) 60%, transparent);
+  animation: usage-pulse 1.6s ease-in-out infinite;
+}
+@keyframes usage-pulse {
+  0%   { box-shadow: 0 0 0 0   color-mix(in srgb, var(--color-yellow) 60%, transparent); }
+  60%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-yellow)  0%, transparent); }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--color-yellow)  0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .usage-live-dot { animation: none; }
+}
+
+.usage-heatmap-wrap {
+  /* Don't let the SVG width cap the section's height — it's intrinsic, no
+     padding. Center on mobile so it doesn't squat to the left of a narrow
+     viewport. */
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--sp-12);
+}
+.usage-heatmap {
+  /* SVG sits flush; tooltips on hover come from <title> elements inside. */
+  font-family: var(--font-mono);
+  line-height: 0;
+}
+.usage-heatmap svg { display: block; }
+
+.usage-cell { transition: fill 200ms ease; }
+.usage-cell-empty { fill: var(--color-line-soft); }
+.usage-cell-q0    { fill: color-mix(in srgb, var(--color-yellow) 25%, var(--color-bg)); }
+.usage-cell-q1    { fill: color-mix(in srgb, var(--color-yellow) 50%, var(--color-bg)); }
+.usage-cell-q2    { fill: color-mix(in srgb, var(--color-yellow) 75%, var(--color-bg)); }
+.usage-cell-q3    { fill: var(--color-yellow); }
+
+.usage-stats {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--color-text-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  align-items: baseline;
+  margin-bottom: var(--sp-6);
+}
+.usage-stat strong {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+}
+.usage-stat-sep { color: var(--color-line); }
+.usage-stat-since { font-style: normal; }
+
+.usage-funfact {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wide);
+  min-height: 1.4em;   /* reserve space so rotation doesn't reflow */
+}
+
+/* Mobile — drop cell + gap so 12 weeks fit on a 375px viewport with
+   page padding. 8px cell + 2px gap = 12*8 + 11*2 = 118px wide. */
+@media (max-width: 540px) {
+  .usage-heatmap svg {
+    width: 100%;
+    height: auto;
+    max-width: 240px;
+  }
+}
+
 /* ── /skills — terminal alias list, "dotfiles for AI" ─────────────────
    Each row is a real <button> (.skill-link) carrying data-card-id; the
    document-level click handler in render.js opens the same side-panel
