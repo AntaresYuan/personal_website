@@ -95,14 +95,17 @@ The build also bumps the `?v=<hash>` cache-bust on `<link rel="stylesheet">`
 and `<script>` tags from the file's content hash. Don't hand-edit those
 hashes.
 
-### Privacy contract — `/usage` (when it ships, #149)
+### Privacy contract — `/usage` (#149)
 
-The public POST/GET payload is **only** `{ date, tokens, sessions }`. Never
-expose: source / device labels, hourly distribution, project names, model
-breakdowns, streak counters, or any device identifiers. The Worker enforces
-the schema server-side; the local sync agent enforces it client-side; the GET
-response strips anything but the daily total. See issue #149's privacy
-contract for the full hard-line list.
+The public GET payload is **only** `{ date, tokens, sessions, costCents }`.
+POST accepts the same four (date, source, tokens, sessions) plus an optional
+`costCents`; the Worker rejects any other key with `400`. Never expose:
+source / device labels, hourly distribution, project names, **model
+breakdowns** (cost is the *summed* number — the per-model split that
+produced it stays on the sender), streak counters, or any device identifiers.
+The Worker enforces the schema server-side; the local sync agent enforces
+it client-side; the GET response strips anything but the daily totals. See
+issue #149's privacy contract for the full hard-line list.
 
 ### Public OSS repos: pure English
 

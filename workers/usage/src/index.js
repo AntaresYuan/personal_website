@@ -6,14 +6,20 @@
    POST /
      Headers:  Authorization: Bearer <SHARED_SECRET>
      Body:     { "date": "YYYY-MM-DD", "source": "<slot>",
-                 "tokens": <int>, "sessions": <int> }
+                 "tokens": <int>, "sessions": <int>,
+                 "costCents"?: <int>                     // optional
+               }
      →  200 { "ok": true }                       on success
      →  400 { "error": "<reason>" }              malformed / wrong schema
      →  401 { "error": "unauthorized" }          missing / wrong bearer
      →  500 { "error": "kv" }                    KV write failed
 
      Stores at KV key `usage:YYYY-MM-DD` an object:
-       { "<source>": { "tokens": int, "sessions": int, "updated": "<iso>" } }
+       { "<source>": { "tokens": int, "sessions": int,
+                       "costCents"?: int, "updated": "<iso>" } }
+     costCents is sender-computed (per-event rate × model breakdown is
+     never seen by this Worker — see the privacy contract). Sources that
+     can't compute it just omit the field; GET treats absent as 0.
      Read-modify-write the per-day map: each source owns its own slot in
      the JSON value, so concurrent writes from different sources don't
      overwrite each other's data. The parent KV key itself is shared, so
@@ -24,16 +30,17 @@
 
    GET /
      Public, CORS-locked to https://antaresyuan.site (+ localhost dev).
-     →  200 { "days": [{ "date": "...", "tokens": int, "sessions": int }, ...],
+     →  200 { "days": [{ "date": "...", "tokens": int,
+                         "sessions": int, "costCents": int }, ...],
               "since": "YYYY-MM-DD", "updated": "<iso-of-newest-write>" }
 
-     Last 90 days inclusive, summed across sources, zero-days included for
-     heatmap continuity. **Per-source data never leaves this Worker.**
+     One-year window inclusive, summed across sources, zero-days included
+     for heatmap continuity. **Per-source data never leaves this Worker.**
 
    Privacy contract (HARD LINE — see #149 + workers/usage/README.md):
-     The GET response is exactly `{date, tokens, sessions}` per day.
-     Source labels, per-source breakdowns, hourly distribution, model ids,
-     project names, and any identifier are server-side-only and never
+     The GET response is exactly `{date, tokens, sessions, costCents}` per
+     day. Source labels, per-source breakdowns, hourly distribution, model
+     ids, project names, and any identifier are server-side-only and never
      echoed by GET. Worker logs record date + source for ops; never the
      request body, never message content.
    ════════════════════════════════════════════════════════════════════════ */
@@ -45,7 +52,7 @@ const SITE = 'https://antaresyuan.site';
 // older data.
 const WINDOW_DAYS = 365;
 const KV_PREFIX = 'usage:';
-const MAX_BODY_BYTES = 1024;        // generous for {date,source,tokens,sessions}
+const MAX_BODY_BYTES = 1024;        // generous for {date,source,tokens,sessions,costCents}
 const MAX_SOURCE_LEN = 32;          // a source label can't exceed 32 chars
 const MAX_INT = 1e12;               // absurd ceiling so a bug can't write garbage
 
@@ -104,13 +111,15 @@ function lastNDays(n) {
 }
 
 // ── POST schema validation ──────────────────────────────────────────
-// Allowlist-based: any key outside {date, source, tokens, sessions} →
-// reject. Each field type-checked. Returns null on OK, else an error.
+// Allowlist-based: any key outside {date, source, tokens, sessions,
+// costCents} → reject. costCents is optional (sources that can't compute
+// it just omit). Each field type-checked. Returns null on OK, else an
+// error.
 function validatePost(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     return 'body must be a JSON object';
   }
-  const allowed = new Set(['date', 'source', 'tokens', 'sessions']);
+  const allowed = new Set(['date', 'source', 'tokens', 'sessions', 'costCents']);
   for (const k of Object.keys(body)) {
     if (!allowed.has(k)) return `unexpected field: ${k}`;
   }
@@ -126,6 +135,11 @@ function validatePost(body) {
   }
   if (!Number.isInteger(body.sessions) || body.sessions < 0 || body.sessions > MAX_INT) {
     return 'sessions must be a non-negative integer';
+  }
+  if (body.costCents !== undefined) {
+    if (!Number.isInteger(body.costCents) || body.costCents < 0 || body.costCents > MAX_INT) {
+      return 'costCents must be a non-negative integer';
+    }
   }
   return null;
 }
@@ -166,6 +180,7 @@ async function handlePost(request, env) {
   day[body.source] = {
     tokens: body.tokens,
     sessions: body.sessions,
+    ...(body.costCents !== undefined ? { costCents: body.costCents } : {}),
     updated: new Date().toISOString(),
   };
 
@@ -191,7 +206,7 @@ async function handleGet(request, env) {
 
   let updated = null;
   const days = dates.map((date, i) => {
-    let tokens = 0, sessions = 0;
+    let tokens = 0, sessions = 0, costCents = 0;
     const raw = reads[i];
     if (raw) {
       try {
@@ -200,8 +215,9 @@ async function handleGet(request, env) {
           for (const slot of Object.keys(parsed)) {
             const e = parsed[slot];
             if (!e || typeof e !== 'object') continue;
-            if (Number.isFinite(e.tokens))   tokens   += e.tokens;
-            if (Number.isFinite(e.sessions)) sessions += e.sessions;
+            if (Number.isFinite(e.tokens))    tokens    += e.tokens;
+            if (Number.isFinite(e.sessions))  sessions  += e.sessions;
+            if (Number.isFinite(e.costCents)) costCents += e.costCents;
             if (typeof e.updated === 'string' && (!updated || e.updated > updated)) {
               updated = e.updated;
             }
@@ -211,7 +227,7 @@ async function handleGet(request, env) {
         // corrupted day → treat as zero, don't fail the whole response
       }
     }
-    return { date, tokens, sessions };
+    return { date, tokens, sessions, costCents };
   });
 
   return reply(

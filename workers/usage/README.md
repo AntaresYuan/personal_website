@@ -14,12 +14,17 @@ The GET response is **only**:
 ```json
 {
   "days": [
-    { "date": "2026-05-13", "tokens": 1234567, "sessions": 8 }
+    { "date": "2026-05-13", "tokens": 1234567, "sessions": 8, "costCents": 3120 }
   ],
   "since": "2026-02-13",
   "updated": "2026-05-13T11:18:09Z"
 }
 ```
+
+`costCents` is optional on POST; sources that can't compute it omit the
+field and the GET aggregator treats absent as `0`. It's a sender-computed
+total — the Worker never sees model breakdowns or per-event data, just
+the daily integer.
 
 Never on the wire:
 
@@ -27,7 +32,8 @@ Never on the wire:
   stays in KV; GET sums and drops the source map.
 - ⛔ Per-hour distribution (presence inference, security risk)
 - ⛔ Project / repo names
-- ⛔ Model breakdown
+- ⛔ Model breakdown (cost is the *summed* number; the per-model split
+  that produced it never leaves the sender)
 - ⛔ Message contents or counts
 - ⛔ Streak / "days in a row"
 - ⛔ Any device hostname, IP, user, or PII
@@ -47,23 +53,24 @@ during deploy) but **never** the body. Don't add request-body logging.
 ```
 KV key: usage:2026-05-13
 value : {
-  "claude-mbp":  { "tokens":  800000, "sessions": 5, "updated": "2026-05-13T03:42:11Z" },
-  "claude-imac": { "tokens": 1200000, "sessions": 3, "updated": "2026-05-13T11:18:09Z" }
+  "claude-mbp":  { "tokens":  800000, "sessions": 5, "costCents": 1980, "updated": "2026-05-13T03:42:11Z" },
+  "claude-imac": { "tokens": 1200000, "sessions": 3,                    "updated": "2026-05-13T11:18:09Z" }
 }
 ```
 
-POST = read this map, set `[source] = { tokens, sessions, updated }`,
-write back. Each source owns its own slot in the JSON value so two
-sources' data never overwrite each other in normal operation. The parent
-KV key is shared, so concurrent same-date writes CAN race at the KV
-level (last-write wins on the whole object) — each write carries
+POST = read this map, set `[source] = { tokens, sessions, costCents?,
+updated }`, write back. Each source owns its own slot in the JSON value
+so two sources' data never overwrite each other in normal operation. The
+parent KV key is shared, so concurrent same-date writes CAN race at the
+KV level (last-write wins on the whole object) — each write carries
 **absolute** counters (not deltas) and sync cadence is hourly per source,
 so realistic loss is zero. Same-source concurrent writes are last-wins
 by design.
 
-GET = read the last 90 days in parallel, sum each day across slots, drop
-the slot map, return `{date, tokens, sessions}` per day plus the global
-`updated` watermark.
+GET = read the one-year window in parallel, sum each day across slots
+(missing `costCents` slots count as 0), drop the slot map, return
+`{date, tokens, sessions, costCents}` per day plus the global `updated`
+watermark.
 
 ## Deploy (one-time)
 
@@ -115,12 +122,19 @@ curl -s -o - -w '\nHTTP %{http_code}\n' \
   -H 'content-type: application/json' \
   --data '{"date":"2026-05-13","source":"claude-test","tokens":1,"sessions":1,"model":"opus"}'
 
-# 4. POST happy path → 200 { "ok": true }
+# 4. POST happy path (no cost) → 200 { "ok": true }
 curl -s -o - -w '\nHTTP %{http_code}\n' \
   -X POST https://usage.antaresyuan.site/ \
   -H "authorization: Bearer SECRET" \
   -H 'content-type: application/json' \
   --data '{"date":"2026-05-13","source":"claude-test","tokens":1234567,"sessions":4}'
+
+# 4b. POST happy path with optional costCents → 200 { "ok": true }
+curl -s -o - -w '\nHTTP %{http_code}\n' \
+  -X POST https://usage.antaresyuan.site/ \
+  -H "authorization: Bearer SECRET" \
+  -H 'content-type: application/json' \
+  --data '{"date":"2026-05-13","source":"claude-test","tokens":1234567,"sessions":4,"costCents":3120}'
 
 # 5. GET — should sum across sources and never echo the source slot
 curl -s -H 'origin: https://antaresyuan.site' https://usage.antaresyuan.site/ \
