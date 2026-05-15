@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node scripts/build.js",
     "reset-content": "node scripts/scaffold-reset.js",
-    "serve": "npx serve ."
+    "serve": "npx serve .",
+    "test": "node workers/usage/test/schema.test.js"
   },
   "repository": {
     "type": "git",
