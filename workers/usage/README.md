@@ -77,6 +77,33 @@ drop the slot map, return `{date, tokens, sessions, costCents}` per day
 plus the global `updated` watermark. Window is controlled by `WINDOW_DAYS`
 in `src/index.js`.
 
+## Edge cache (read-rate control)
+
+The GET handler fan-out is 365 KV reads per request. Without caching, a
+handful of visitors with the home page open (the frontend refetches every
+60s) blew through Cloudflare's 100,000-reads/day free-tier KV quota in
+under an hour on 2026-05-14.
+
+Fix: the assembled JSON body is stored in `caches.default` with
+`Cache-Control: s-maxage=60`. Cache key is a fixed URL
+(`/__cache/days`); CORS headers are applied per-request after lookup
+since the body is origin-independent. Each PoP therefore does at most
+one fan-out per minute regardless of traffic.
+
+**Invalidation contract — important.** After every successful POST the
+Worker calls `caches.default.delete(GET_CACHE_KEY)` so a sync agent's
+write shows up on the next GET (local-PoP only — other PoPs serve the
+60s-stale entry until natural expiry, which matches the frontend's
+refetch cadence). **Don't remove this invalidation** without also
+lowering `GET_CACHE_TTL_S` to something a sync POST can tolerate.
+
+Knobs in `src/index.js`:
+- `GET_CACHE_TTL_S` — TTL in seconds (default `60`). Higher = fewer KV
+  reads, longer staleness between POST and GET when invalidation is
+  cross-PoP.
+- `GET_CACHE_KEY` — fixed URL string; change only if you also rewrite
+  the cache.put / cache.match call sites.
+
 ## Deploy (one-time)
 
 ```sh

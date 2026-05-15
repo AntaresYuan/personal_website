@@ -114,6 +114,12 @@ constants (`HEATMAP_COLS=52`, `HEATMAP_CELL=16`, etc.) are duplicated in
 `scripts/build-html.js` and `scripts/render.js` — keep them in lockstep
 or the SSR shell and client render mismatch on first paint.
 
+**Worker GET is edge-cached.** `workers/usage/src/index.js` stashes the
+assembled JSON in `caches.default` for `GET_CACHE_TTL_S` (60s). POST handler
+**must invalidate** (`caches.default.delete(GET_CACHE_KEY)`) — without it, a
+sync agent's data lags by up to 60s. Background: `workers/usage/README.md` §
+"Edge cache (read-rate control)".
+
 ### Public OSS repos: pure English
 
 Repos that get pushed to public GitHub — this one, plus the user's open-source
