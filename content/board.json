@@ -3,6 +3,36 @@
     {
       "id": "shipped-1",
       "status": "shipped",
+      "title": "Lark Loom",
+      "summary": "The collaborative AI Agent rooted  in the Lark ecosystem.",
+      "details": "",
+      "tags": [
+        "HACKATHON PROJECT",
+        "AI Agent PM",
+        "Delivery Layer Developer",
+        "Collaboration",
+        "Lark",
+        "Lark AI Challenge for College Students"
+      ],
+      "impact": "",
+      "links": [
+        {
+          "label": "GitHub(in Chinese)",
+          "href": "https://github.com/EdwinjJ1/lark-loom"
+        },
+        {
+          "label": "Lark AI Challenge(in Chinese)",
+          "href": "https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr"
+        }
+      ],
+      "started": "2026-04-17",
+      "updated": "2026-05-15",
+      "present": false,
+      "order": 1
+    },
+    {
+      "id": "shipped-2",
+      "status": "shipped",
       "title": "Gmail Plus Plus",
       "summary": "Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.",
       "details": "11111",
@@ -29,7 +59,7 @@
       "order": 2
     },
     {
-      "id": "shipped-2",
+      "id": "shipped-3",
       "status": "shipped",
       "title": "Worth Fly",
       "summary": "WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.",
@@ -54,10 +84,10 @@
       ],
       "started": "2026-04-03",
       "updated": "2026-04-10",
-      "order": 1
+      "order": 3
     },
     {
-      "id": "shipped-3",
+      "id": "shipped-4",
       "status": "shipped",
       "title": "SusBench",
       "summary": "Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.",
@@ -84,39 +114,42 @@
       ],
       "started": "2025-08-21",
       "updated": "2026-02-23",
-      "order": 3
+      "order": 4
     },
     {
       "id": "now-1",
       "status": "now",
-      "title": "Lark Loom",
-      "summary": "The collaborative AI Agent rooted  in the Lark ecosystem.",
+      "title": "Landed",
+      "summary": "1",
       "details": "",
       "tags": [
-        "Lark AI Challenge for College Students",
-        "AI Agent PM",
-        "Delivery Layer Developer",
-        "Collaboration",
-        "Lark"
+        "SIDE PROJECT"
       ],
       "impact": "",
-      "links": [
-        {
-          "label": "GitHub(in Chinese)",
-          "href": "https://github.com/EdwinjJ1/lark-loom"
-        },
-        {
-          "label": "Lark AI Challenge(in Chinese)",
-          "href": "https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr"
-        }
-      ],
-      "started": "2026-04-17",
+      "links": [],
+      "started": "2026-05-15",
       "updated": "",
       "present": true,
       "order": 1
     },
     {
       "id": "now-2",
+      "status": "now",
+      "title": "YiTang Profile Matching Infra",
+      "summary": "1",
+      "details": "",
+      "tags": [
+        "INTERN PROJECT"
+      ],
+      "impact": "",
+      "links": [],
+      "started": "2026-05-08",
+      "updated": "",
+      "present": true,
+      "order": 2
+    },
+    {
+      "id": "now-3",
       "status": "now",
       "title": "ApplyMint",
       "summary": "ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form",
@@ -131,10 +164,10 @@
       "started": "2026-04-19",
       "updated": "",
       "present": true,
-      "order": 2
+      "order": 3
     },
     {
-      "id": "now-3",
+      "id": "now-4",
       "status": "now",
       "title": "SusFix",
       "summary": "Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.",
@@ -145,6 +178,22 @@
       "impact": "",
       "links": [],
       "started": "2026-03-15",
+      "updated": "",
+      "present": true,
+      "order": 4
+    },
+    {
+      "id": "now-4",
+      "status": "now",
+      "title": "SleepStreak",
+      "summary": "Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults",
+      "details": "• Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults\n• Studies found this crisis has been caused in part by smartphones and digital devices\n• This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this",
+      "tags": [
+        "RESEARCH PROJECT"
+      ],
+      "impact": "",
+      "links": [],
+      "started": "2024-12-10",
       "updated": "",
       "present": true,
       "order": 3
@@ -230,21 +279,6 @@
       "links": [],
       "updated": "2026-05-09",
       "order": 2
-    },
-    {
-      "id": "now-4",
-      "status": "now",
-      "title": "SleepStreak",
-      "summary": "Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults",
-      "details": "• Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults\n• Studies found this crisis has been caused in part by smartphones and digital devices\n• This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this",
-      "tags": [
-        "RESEARCH PROJECT"
-      ],
-      "impact": "",
-      "links": [],
-      "started": "2024-12-10",
-      "updated": "2025-05-10",
-      "order": 4
     }
   ]
 }
