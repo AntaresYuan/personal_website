@@ -11,7 +11,25 @@ Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
 
 # Shipped
 
-## SHIP-01 · SHIPPED · Worth Fly
+## SHIP-01 · SHIPPED · Lark Loom
+The collaborative AI Agent rooted  in the Lark ecosystem.
+Tags: HACKATHON PROJECT, AI Agent PM, Delivery Layer Developer, Collaboration, Lark, Lark AI Challenge for College Students
+Updated: 2026-05-15
+Links:
+  - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
+  - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
+
+## SHIP-02 · SHIPPED · Gmail Plus Plus
+Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
+Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
+Updated: 2026-04-25
+Links:
+  - Try it: https://gmailplusplus.site
+  - GitHub: https://github.com/AntaresYuan/Gmailplusplus
+
+11111
+
+## SHIP-03 · SHIPPED · Worth Fly
 WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.
 Tags: SIDE PROJECT, AI PM, 0→1, Explainable AI, Website
 Updated: 2026-04-10
@@ -34,17 +52,7 @@ Replace this with the longer story. Two or three short paragraphs is plenty.
 
 What happened. What you'd do differently.
 
-## SHIP-02 · SHIPPED · Gmail Plus Plus
-Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
-Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
-Updated: 2026-04-25
-Links:
-  - Try it: https://gmailplusplus.site
-  - GitHub: https://github.com/AntaresYuan/Gmailplusplus
-
-11111
-
-## SHIP-03 · SHIPPED · SusBench
+## SHIP-04 · SHIPPED · SusBench
 Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.
 Impact: cited by 2 papers
 Tags: RESEARCH PROJECT, HCI, IUI 2025
@@ -55,29 +63,29 @@ Links:
   - GitHub: https://github.com/SusBench-creator/SusBench
 # Now
 
-## NOW-01 · NOW · Lark Loom
-The collaborative AI Agent rooted  in the Lark ecosystem.
-Tags: Lark AI Challenge for College Students, AI Agent PM, Delivery Layer Developer, Collaboration, Lark
-Links:
-  - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
-  - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
+## NOW-01 · NOW · Landed
+1
+Tags: SIDE PROJECT
 
-## NOW-02 · NOW · ApplyMint
+## NOW-02 · NOW · YiTang Profile Matching Infra
+1
+Tags: INTERN PROJECT
+
+## NOW-03 · NOW · ApplyMint
 ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form
 Tags: SIDE PROJECT, Job Application, Chrome Extension
-
-## NOW-03 · NOW · SusFix
-Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
-Tags: RESEARCH PROJECT
 
 ## NOW-04 · NOW · SleepStreak
 Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults
 Tags: RESEARCH PROJECT
-Updated: 2025-05-10
 
 • Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults
 • Studies found this crisis has been caused in part by smartphones and digital devices
 • This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this
+
+## NOW-05 · NOW · SusFix
+Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
+Tags: RESEARCH PROJECT
 # Next
 
 ## NEXT-01 · NEXT · From PM to Builder
@@ -1352,7 +1360,7 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-05-14 from content/*.json. Last site update: 2026-05-14
+Generated 2026-05-17 from content/*.json. Last site update: 2026-05-16
 
 
 ---

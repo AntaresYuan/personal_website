@@ -127,7 +127,7 @@
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
         <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
       </button>
-      <span class="meta" id="last-updated">updated 2026-05-14</span>
+      <span class="meta" id="last-updated">updated 2026-05-16</span>
     </div>
   </nav>
 
@@ -243,9 +243,9 @@
         </div>
       </div>
       <div class="board-toolbar-right">
-        <span class="board-stat"><strong id="board-total-count">12</strong> cards</span>
+        <span class="board-stat"><strong id="board-total-count">14</strong> cards</span>
         <span class="board-stat sep">·</span>
-        <span class="board-stat" id="board-shipped-count">3 shipped</span>
+        <span class="board-stat" id="board-shipped-count">4 shipped</span>
         <span class="board-stat sep">·</span>
         <select class="audience-lens" id="audience-lens" aria-label="Audience preset — reorder cards for a particular reader">
           <option value="everyone" selected>For everyone</option>
@@ -257,34 +257,34 @@
     </div>
 
     <!-- filter chips (click to filter by tag) -->
-    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="0→1" aria-pressed="false">0→1</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="ai pm" aria-pressed="false">AI PM</button></div>
+    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button><button class="filter-chip" type="button" data-filter="0→1" aria-pressed="false">0→1</button><button class="filter-chip" type="button" data-filter="hackathon project" aria-pressed="false">HACKATHON PROJECT</button></div>
 
     <!-- columns -->
     <div class="board" id="board" role="tabpanel" aria-labelledby="tab-board">
       <article class="column col-shipped" id="col-shipped" aria-labelledby="col-shipped-title">
         <header class="col-head">
           <h3 class="col-title" id="col-shipped-title"><span class="col-dot"></span>Shipped</h3>
-          <span class="col-count" data-count="shipped">3</span>
+          <span class="col-count" data-count="shipped">4</span>
         </header>
         <div class="col-cards" data-cards="shipped">
-            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-01" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
+            <button type="button" class="card" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
-              <div class="card-title">Worth Fly</div>
-              <div class="card-summary">WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI PM</span><span class="tag">0→1</span><span class="tag tag-blue">Explainable AI</span><span class="tag">Website</span></div>
+              <div class="card-title">Lark Loom</div>
+              <div class="card-summary">The collaborative AI Agent rooted  in the Lark ecosystem.</div>
+              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Delivery Layer Developer</span><span class="tag tag-blue">Collaboration</span><span class="tag">Lark</span><span class="tag tag-blue">Lark AI Challenge for College Students</span></div>
               <div class="card-footer">
                 <span class="card-footer-left">
-                  <span>2026-04-10</span>
+                  <span>2026-05-15</span>
                   <span class="card-comments">0</span>
                 </span>
                 
               </div>
-              <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
+              <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
             </button>
-            <button type="button" class="card" data-id="shipped-1" data-card-id="SHIP-02" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-02" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-02</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -301,9 +301,26 @@
               </div>
               <div class="card-links"><a href="https://gmailplusplus.site" target="_blank" rel="noopener">Try it ↗</a><a href="https://github.com/AntaresYuan/Gmailplusplus" target="_blank" rel="noopener">GitHub ↗</a></div>
             </button>
-            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-03" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
+            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-03" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-03</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Worth Fly</div>
+              <div class="card-summary">WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI PM</span><span class="tag">0→1</span><span class="tag tag-blue">Explainable AI</span><span class="tag">Website</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-04-10</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-4" data-card-id="SHIP-04" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-04</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
               <div class="card-title">SusBench</div>
@@ -323,34 +340,17 @@
       <article class="column col-now" id="now" aria-labelledby="col-now-title">
         <header class="col-head">
           <h3 class="col-title" id="col-now-title"><span class="col-dot"></span>Now</h3>
-          <span class="col-count" data-count="now">4</span>
+          <span class="col-count" data-count="now">5</span>
         </header>
         <div class="col-cards" data-cards="now">
-            <button type="button" class="card" data-id="now-1" data-card-id="NOW-01" data-tags="lark ai challenge for college students|ai agent pm|delivery layer developer|collaboration|lark" aria-label="Open details for Lark Loom">
+            <button type="button" class="card" data-id="now-1" data-card-id="NOW-01" data-tags="side project" aria-label="Open details for Landed">
               <div class="card-meta-top">
                 <span class="card-id">NOW-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
-              <div class="card-title">Lark Loom</div>
-              <div class="card-summary">The collaborative AI Agent rooted  in the Lark ecosystem.</div>
-              <div class="card-tags"><span class="tag">Lark AI Challenge for College Students</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Delivery Layer Developer</span><span class="tag tag-blue">Collaboration</span><span class="tag">Lark</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
-            </button>
-            <button type="button" class="card" data-id="now-2" data-card-id="NOW-02" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-02</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">ApplyMint</div>
-              <div class="card-summary">ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">Job Application</span><span class="tag">Chrome Extension</span></div>
+              <div class="card-title">Landed</div>
+              <div class="card-summary">1</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span></div>
               <div class="card-footer">
                 <span class="card-footer-left">
                   <span>ongoing</span>
@@ -360,14 +360,31 @@
               </div>
               
             </button>
-            <button type="button" class="card" data-id="now-3" data-card-id="NOW-03" data-tags="research project" aria-label="Open details for SusFix">
+            <button type="button" class="card" data-id="now-2" data-card-id="NOW-02" data-tags="intern project" aria-label="Open details for YiTang Profile Matching Infra">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">YiTang Profile Matching Infra</div>
+              <div class="card-summary">1</div>
+              <div class="card-tags"><span class="tag">INTERN PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-3" data-card-id="NOW-03" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
               <div class="card-meta-top">
                 <span class="card-id">NOW-03</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
-              <div class="card-title">SusFix</div>
-              <div class="card-summary">Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.</div>
-              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
+              <div class="card-title">ApplyMint</div>
+              <div class="card-summary">ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">Job Application</span><span class="tag">Chrome Extension</span></div>
               <div class="card-footer">
                 <span class="card-footer-left">
                   <span>ongoing</span>
@@ -387,7 +404,24 @@
               <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
               <div class="card-footer">
                 <span class="card-footer-left">
-                  <span>2025-05-10</span>
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-4" data-card-id="NOW-05" data-tags="research project" aria-label="Open details for SusFix">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-05</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">SusFix</div>
+              <div class="card-summary">Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.</div>
+              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
                   <span class="card-comments">0</span>
                 </span>
                 
