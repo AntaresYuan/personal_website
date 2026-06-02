@@ -127,7 +127,7 @@
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
         <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
       </button>
-      <span class="meta" id="last-updated">updated 2026-05-16</span>
+      <span class="meta" id="last-updated">updated 2026-06-01</span>
     </div>
   </nav>
 
@@ -243,9 +243,9 @@
         </div>
       </div>
       <div class="board-toolbar-right">
-        <span class="board-stat"><strong id="board-total-count">14</strong> cards</span>
+        <span class="board-stat"><strong id="board-total-count">15</strong> cards</span>
         <span class="board-stat sep">·</span>
-        <span class="board-stat" id="board-shipped-count">4 shipped</span>
+        <span class="board-stat" id="board-shipped-count">5 shipped</span>
         <span class="board-stat sep">·</span>
         <select class="audience-lens" id="audience-lens" aria-label="Audience preset — reorder cards for a particular reader">
           <option value="everyone" selected>For everyone</option>
@@ -257,14 +257,14 @@
     </div>
 
     <!-- filter chips (click to filter by tag) -->
-    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button><button class="filter-chip" type="button" data-filter="0→1" aria-pressed="false">0→1</button><button class="filter-chip" type="button" data-filter="hackathon project" aria-pressed="false">HACKATHON PROJECT</button></div>
+    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="hackathon project" aria-pressed="false">HACKATHON PROJECT</button><button class="filter-chip" type="button" data-filter="ai agent pm" aria-pressed="false">AI Agent PM</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button></div>
 
     <!-- columns -->
     <div class="board" id="board" role="tabpanel" aria-labelledby="tab-board">
       <article class="column col-shipped" id="col-shipped" aria-labelledby="col-shipped-title">
         <header class="col-head">
           <h3 class="col-title" id="col-shipped-title"><span class="col-dot"></span>Shipped</h3>
-          <span class="col-count" data-count="shipped">4</span>
+          <span class="col-count" data-count="shipped">5</span>
         </header>
         <div class="col-cards" data-cards="shipped">
             <button type="button" class="card" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
@@ -284,9 +284,26 @@
               </div>
               <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
             </button>
-            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-02" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-02" data-tags="hackathon project|ai agent pm|benchmark" aria-label="Open details for Citation Trap">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Citation Trap</div>
+              <div class="card-summary">Agentic RAG Reference Benchmark for Trustworthiness Evaluation</div>
+              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Benchmark</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-15</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://github.com/AntaresYuan/citation-trap" target="_blank" rel="noopener">GitHub ↗</a><a href="https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe" target="_blank" rel="noopener">Run the benchmark ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-03" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-03</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
               <div class="card-title">Gmail Plus Plus</div>
@@ -301,9 +318,9 @@
               </div>
               <div class="card-links"><a href="https://gmailplusplus.site" target="_blank" rel="noopener">Try it ↗</a><a href="https://github.com/AntaresYuan/Gmailplusplus" target="_blank" rel="noopener">GitHub ↗</a></div>
             </button>
-            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-03" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
+            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-04" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
               <div class="card-meta-top">
-                <span class="card-id">SHIP-03</span>
+                <span class="card-id">SHIP-04</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
               <div class="card-title">Worth Fly</div>
@@ -318,9 +335,9 @@
               </div>
               <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
             </button>
-            <button type="button" class="card" data-id="shipped-4" data-card-id="SHIP-04" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
+            <button type="button" class="card" data-id="shipped-4" data-card-id="SHIP-05" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
               <div class="card-meta-top">
-                <span class="card-id">SHIP-04</span>
+                <span class="card-id">SHIP-05</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
               </div>
               <div class="card-title">SusBench</div>

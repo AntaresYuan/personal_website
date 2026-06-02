@@ -2,17 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://antaresyuan.site/</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-06-01</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://antaresyuan.site/llms.txt</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-06-01</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://antaresyuan.site/llms-full.txt</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-06-01</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
@@ -72,16 +72,21 @@
   </url>
   <url>
     <loc>https://antaresyuan.site/#card/SHIP-02</loc>
-    <lastmod>2026-04-25</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://antaresyuan.site/#card/SHIP-03</loc>
-    <lastmod>2026-04-10</lastmod>
+    <lastmod>2026-04-25</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://antaresyuan.site/#card/SHIP-04</loc>
+    <lastmod>2026-04-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://antaresyuan.site/#card/SHIP-05</loc>
     <lastmod>2026-02-23</lastmod>
     <priority>0.6</priority>
   </url>

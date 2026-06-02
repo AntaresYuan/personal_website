@@ -19,7 +19,15 @@ Links:
   - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
   - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
 
-## SHIP-02 · SHIPPED · Gmail Plus Plus
+## SHIP-02 · SHIPPED · Citation Trap
+Agentic RAG Reference Benchmark for Trustworthiness Evaluation
+Tags: HACKATHON PROJECT, AI Agent PM, Benchmark
+Updated: 2026-05-15
+Links:
+  - GitHub: https://github.com/AntaresYuan/citation-trap
+  - Run the benchmark: https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe
+
+## SHIP-03 · SHIPPED · Gmail Plus Plus
 Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
 Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
 Updated: 2026-04-25
@@ -29,7 +37,7 @@ Links:
 
 11111
 
-## SHIP-03 · SHIPPED · Worth Fly
+## SHIP-04 · SHIPPED · Worth Fly
 WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.
 Tags: SIDE PROJECT, AI PM, 0→1, Explainable AI, Website
 Updated: 2026-04-10
@@ -52,7 +60,7 @@ Replace this with the longer story. Two or three short paragraphs is plenty.
 
 What happened. What you'd do differently.
 
-## SHIP-04 · SHIPPED · SusBench
+## SHIP-05 · SHIPPED · SusBench
 Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.
 Impact: cited by 2 papers
 Tags: RESEARCH PROJECT, HCI, IUI 2025
@@ -1360,7 +1368,7 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-05-17 from content/*.json. Last site update: 2026-05-16
+Generated 2026-06-02 from content/*.json. Last site update: 2026-06-01
 
 
 ---
