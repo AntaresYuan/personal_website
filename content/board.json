@@ -33,6 +33,33 @@
     {
       "id": "shipped-2",
       "status": "shipped",
+      "title": "Citation Trap",
+      "summary": "Agentic RAG Reference Benchmark for Trustworthiness Evaluation",
+      "details": "",
+      "tags": [
+        "HACKATHON PROJECT",
+        "AI Agent PM",
+        "Benchmark"
+      ],
+      "impact": "",
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/citation-trap"
+        },
+        {
+          "label": "Run the benchmark",
+          "href": "https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe"
+        }
+      ],
+      "started": "2026-04-17",
+      "updated": "2026-05-15",
+      "present": false,
+      "order": 1
+    },
+    {
+      "id": "shipped-2",
+      "status": "shipped",
       "title": "Gmail Plus Plus",
       "summary": "Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.",
       "details": "11111",
