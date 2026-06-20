@@ -2,5 +2,8 @@
   "endpoint": "https://usage.antaresyuan.site",
   "source": "claude-mbp",
   "claudeProjectsDir": "~/.claude/projects",
-  "_secret_comment": "OPTIONAL. If omitted, the agent reads the bearer from the macOS keychain at (account=$USER, service=antares-sync-usage). Setting it here puts a plaintext secret on disk — prefer the keychain. Store via:  security add-generic-password -a \"$USER\" -s \"antares-sync-usage\" -w '<bearer>'"
+  "codexSource": "codex-mbp",
+  "codexSessionsDir": "~/.codex/sessions",
+  "_secret_comment": "OPTIONAL. If omitted, the agent reads the bearer from the macOS keychain at (account=$USER, service=antares-sync-usage). Setting it here puts a plaintext secret on disk — prefer the keychain. Store via:  security add-generic-password -a \"$USER\" -s \"antares-sync-usage\" -w '<bearer>'",
+  "_codex_comment": "OPTIONAL. Drop codexSource (and codexSessionsDir) to skip Codex entirely. When set, the agent ALSO scans ~/.codex/sessions/**/rollout-*.jsonl and POSTs Codex usage under its OWN source slot (must differ from `source`). codexSessionsDir defaults to ~/.codex/sessions."
 }
