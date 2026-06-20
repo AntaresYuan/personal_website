@@ -7,7 +7,7 @@ A star to ship by.
 ## Identity
 - Name: Antares Yuan
 - Role: AI Product Manager
-- Location: Seattle | Beijing · currently remote working at YitangLabs
+- Location: Seattle | Beijing · currently working at ByteDance as an AI PM intern
 - Status: Building in public
 - Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
 

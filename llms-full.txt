@@ -6,7 +6,7 @@ I build AI products by treating myself like one — versioned, measured, always 
 
 Name: Antares Yuan
 Role: AI Product Manager
-Location: Seattle | Beijing · currently remote working at YitangLabs
+Location: Seattle | Beijing · currently working at ByteDance as an AI PM intern
 Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
 
 # Shipped
@@ -1368,7 +1368,7 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-06-02 from content/*.json. Last site update: 2026-06-01
+Generated 2026-06-20 from content/*.json. Last site update: 2026-06-20
 
 
 ---
