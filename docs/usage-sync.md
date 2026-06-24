@@ -1,11 +1,18 @@
 # `/usage` — local sync agent install
 
-The agent reads Claude Code session jsonl files, aggregates daily totals
-(tokens + sessions + cost-in-cents), and POSTs the trailing window to
-the `usage.antaresyuan.site` Worker so the public `/usage` heatmap stays
-current. Source-aware: each machine identifies as `<ai>-<device>` so
-multiple Macs aggregate cleanly on the Worker side without overwriting
-each other.
+The agent reads Claude Code session jsonl files (and, opt-in, Codex
+session logs), aggregates daily totals (tokens + sessions + cost-in-cents),
+and POSTs the trailing window to the `usage.antaresyuan.site` Worker so the
+public `/usage` heatmap stays current. Source-aware: each provider on each
+machine identifies as `<ai>-<device>` (`claude-mbp`, `codex-mbp`, …) so
+multiple Macs and multiple agents aggregate cleanly on the Worker side
+without overwriting each other.
+
+> **Scope**: this only measures coding-AGENT usage that writes per-turn
+> token logs to disk — Claude Code (`~/.claude/projects`) and Codex
+> (`~/.codex/sessions`). Consumer chat apps (claude.ai and chatgpt.com,
+> web or desktop) keep usage server-side with no local token log, so they
+> can't be aggregated here.
 
 See `workers/usage/README.md` for the Worker side + privacy contract.
 
@@ -56,9 +63,57 @@ hourly distribution, no individual event details ever leave the
 machine. Model ids are read locally for the pricing lookup but stay
 on the device; only the aggregated `costCents` scalar is on the wire.
 
+## Codex usage (opt-in)
+
+Set `codexSource` in the config (e.g. `"codex-mbp"`) to also scan Codex
+session logs and POST them under their **own** source slot — separate
+from the Claude `source`, summed alongside it on the Worker GET.
+
+```json
+{
+  "endpoint": "https://usage.antaresyuan.site",
+  "source": "claude-mbp",
+  "codexSource": "codex-mbp",
+  "codexSessionsDir": "~/.codex/sessions"
+}
+```
+
+Drop `codexSource` and the agent behaves exactly as before (Claude only) —
+fully backward-compatible, so devices without Codex need no config change.
+`codexSessionsDir` defaults to `~/.codex/sessions`.
+
+**What it reads.** Codex stores one session per
+`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`. Token usage lives in
+`event_msg` lines with `payload.type === "token_count"`:
+
+```json
+{ "input_tokens": 311189, "cached_input_tokens": 300800, "output_tokens": 91 }
+```
+
+**The cache trap.** Unlike Claude — which reports fresh `input_tokens`
+with cache reads in a separate field — Codex's `input_tokens` is the
+**whole conversation re-sent that turn** (it grows monotonically across a
+session), and `cached_input_tokens` is the already-paid-for slice of it.
+So the fresh work this turn is:
+
+```
+(input_tokens − cached_input_tokens) + output_tokens
+```
+
+Summing raw `input_tokens` would double-count the re-sent context 50–100×.
+This mirrors the Claude side's "net out the cache" rule, so the two
+sources' `tokens` are directly comparable.
+
+**Cost.** Codex runs on a ChatGPT subscription (no per-token billing), so
+its `costCents` is a **notional** "what API rates would charge" figure,
+using `CODEX_PRICING` (gpt-5.5: $5/MTok in, $30/MTok out) on the same
+fresh input + output counts. Edit the table when OpenAI ships new pricing.
+
 ## What the agent sends
 
-Exactly one POST per non-empty day in the trailing window:
+One POST per non-empty day per source in the trailing window (so with
+`codexSource` set, up to two POSTs per day — one `claude-*`, one
+`codex-*`):
 
 ```
 POST https://usage.antaresyuan.site/

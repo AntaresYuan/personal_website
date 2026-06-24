@@ -1,15 +1,23 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════
-   sync-usage — local Claude Code usage → usage.antaresyuan.site sync agent
+   sync-usage — local coding-agent usage → usage.antaresyuan.site sync agent
 
-   Walks `~/.claude/projects/<project-slug>/<session-uuid>.jsonl`, sums per
-   day per session, and POSTs the last 14 days to the Worker as
+   Walks Claude Code logs (`~/.claude/projects/<slug>/<uuid>.jsonl`) and,
+   when `codexSource` is configured, Codex logs
+   (`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`), sums per day per
+   session, and POSTs the last 14 days to the Worker as
      { date, source, tokens, sessions, costCents }
 
-   Source identifier comes from config so multi-device aggregation works
-   (claude-mbp, claude-imac, ...). The Worker stores each source as its
-   own slot under the day key, so re-running this script overwrites only
-   THIS device's slot — never other devices'.
+   Each provider posts under its own source slot (claude-mbp, codex-mbp,
+   claude-imac, ...) so multi-device + multi-agent aggregation works. The
+   Worker stores each source as its own slot under the day key, so
+   re-running this script overwrites only THIS device's slots — never
+   other devices'. The public GET sums every slot for the day.
+
+   NOTE: this only measures coding-AGENT usage that writes per-turn token
+   logs to disk (Claude Code, Codex). Consumer chat apps — claude.ai and
+   chatgpt.com web/desktop — keep usage server-side with no local token
+   log, so they cannot be aggregated here.
 
    The Worker is the single privacy chokepoint: it strict-validates the
    POST schema (any extra field → 400) and the public GET only emits the
@@ -74,6 +82,16 @@ function loadConfig() {
   if (cfg.source.length > 32) die(`config.source must be <= 32 chars`);
   cfg.claudeProjectsDir = (cfg.claudeProjectsDir || '~/.claude/projects')
     .replace(/^~/, os.homedir());
+  // Codex is opt-in per device: only scan + POST a codex source slot when
+  // `codexSource` is set. Devices without Codex keep the legacy behavior.
+  if (cfg.codexSource != null) {
+    if (typeof cfg.codexSource !== 'string' || !cfg.codexSource) die('config.codexSource must be a non-empty string');
+    if (!/^[a-z0-9._-]+$/i.test(cfg.codexSource)) die(`config.codexSource must match [a-z0-9._-]+, got ${cfg.codexSource}`);
+    if (cfg.codexSource.length > 32) die(`config.codexSource must be <= 32 chars`);
+    if (cfg.codexSource === cfg.source) die('config.codexSource must differ from config.source (separate Worker slots)');
+    cfg.codexSessionsDir = (cfg.codexSessionsDir || '~/.codex/sessions')
+      .replace(/^~/, os.homedir());
+  }
   cfg.endpoint = cfg.endpoint.replace(/\/+$/, '');
   return cfg;
 }
@@ -148,6 +166,33 @@ function eventCostUsd(u, model) {
   );
 }
 
+// ── Codex (OpenAI) pricing (USD per million tokens) ───────────────
+// [input, output]. Codex runs on a ChatGPT subscription (no per-token
+// billing), so this is a NOTIONAL "what API rates would charge" cost,
+// to keep the dashboard's costCents comparable across sources. Match by
+// substring of the session's model id. Source of truth:
+// https://openai.com/api/pricing  (gpt-5.5: $5/MTok in, $30/MTok out,
+// cached input $0.50/MTok). Default fallback = gpt-5.5 rates.
+//
+// Like the Claude side, cost counts FRESH input + output only — the
+// cached-input portion (a re-served prompt at $0.50/MTok) is excluded so
+// `costCents` stays coherent with the `tokens` metric below, which also
+// nets out cache. Re-verify when OpenAI ships a new model family.
+const CODEX_PRICING = {
+  'gpt-5.5': [5.00, 30.00],
+  'gpt-5-codex': [5.00, 30.00],
+};
+const CODEX_DEFAULT_PRICING = [5.00, 30.00];
+
+function codexPriceFor(model) {
+  if (typeof model === 'string') {
+    for (const key of Object.keys(CODEX_PRICING)) {
+      if (model.includes(key)) return CODEX_PRICING[key];
+    }
+  }
+  return CODEX_DEFAULT_PRICING;
+}
+
 // ── walk jsonl + aggregate ────────────────────────────────────────
 // Returns Map<dateYYYYMMDD, { tokens: int, sessions: Set<sessionId>, costUsd: number }>
 function aggregate(projectsDir) {
@@ -213,6 +258,86 @@ function aggregate(projectsDir) {
   return buckets;
 }
 
+// ── walk codex sessions + aggregate ───────────────────────────────
+// Codex stores one session per `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`.
+// Token usage lives in `event_msg` lines with payload.type === 'token_count':
+//   payload.info.last_token_usage = { input_tokens, cached_input_tokens,
+//                                     output_tokens, ... }
+// CRITICAL: input_tokens is the WHOLE conversation re-sent that turn (it
+// grows monotonically across a session), and cached_input_tokens is the
+// already-paid-for slice of it. So the FRESH work this turn is
+//   (input_tokens - cached_input_tokens) + output_tokens
+// — exactly mirroring the Claude side, where `tokens` nets out cache_read.
+// Summing raw input_tokens would double-count the resent context 50-100×.
+//
+// Same Map shape as aggregate(): Map<date, {tokens, sessions:Set, costUsd}>.
+function aggregateCodex(sessionsDir) {
+  const buckets = new Map();
+  let files;
+  try { files = collectRollouts(sessionsDir); }
+  catch { return buckets; }   // no codex dir → contribute nothing
+  for (const full of files) {
+    let content;
+    try { content = fs.readFileSync(full, 'utf8'); } catch { continue; }
+    const sid = path.basename(full);   // one rollout file == one session
+    // Model id lives in session_meta / turn_context, not in the token
+    // event — capture it once per file and price every event with it.
+    let model = null;
+    for (const line of content.split('\n')) {
+      if (!line) continue;
+      let ev;
+      try { ev = JSON.parse(line); } catch { continue; }
+      if (!ev) continue;
+      if (model == null && ev.payload && typeof ev.payload.model === 'string') {
+        model = ev.payload.model;
+      }
+      if (ev.type !== 'event_msg') continue;
+      const p = ev.payload;
+      if (!p || p.type !== 'token_count' || !p.info) continue;
+      const lt = p.info.last_token_usage;
+      if (!lt) continue;
+      const ts = ev.timestamp;
+      if (typeof ts !== 'string' || ts.length < 10) continue;
+      const date = ts.slice(0, 10);   // UTC date
+      const freshIn = Math.max(0, (lt.input_tokens || 0) - (lt.cached_input_tokens || 0));
+      const out = lt.output_tokens || 0;
+      const tokens = freshIn + out;
+      if (!Number.isFinite(tokens) || tokens <= 0) continue;
+      const [pi, po] = codexPriceFor(model);
+      const cost = freshIn / 1e6 * pi + out / 1e6 * po;
+      let b = buckets.get(date);
+      if (!b) { b = { tokens: 0, sessions: new Set(), costUsd: 0 }; buckets.set(date, b); }
+      b.tokens += tokens;
+      b.costUsd += cost;
+      b.sessions.add(sid);
+    }
+  }
+  return buckets;
+}
+
+// Recursively collect every `rollout-*.jsonl` under the codex sessions dir
+// (nested YYYY/MM/DD/). Throws if the root dir is unreadable so the caller
+// can treat "no codex on this machine" as "contribute nothing".
+function collectRollouts(root) {
+  const out = [];
+  const stack = [root];
+  // readdirSync on a missing root throws → propagates to caller.
+  fs.readdirSync(root);
+  while (stack.length) {
+    const dir = stack.pop();
+    let ents;
+    try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { continue; }
+    for (const ent of ents) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) stack.push(full);
+      else if (ent.isFile() && ent.name.startsWith('rollout-') && ent.name.endsWith('.jsonl')) {
+        out.push(full);
+      }
+    }
+  }
+  return out;
+}
+
 // ── trailing-window date list (UTC, oldest → newest) ──────────────
 function lastNDates(n) {
   const today = new Date().toISOString().slice(0, 10);
@@ -270,13 +395,20 @@ async function post(endpoint, secret, payload) {
   const secret = DRY ? null : loadSecret(cfg);
 
   log(`scanning ${cfg.claudeProjectsDir} …`);
-  const buckets = aggregate(cfg.claudeProjectsDir);
-  log(`aggregated ${buckets.size} active days across all sessions`);
+  const claudeBuckets = aggregate(cfg.claudeProjectsDir);
+  log(`claude: aggregated ${claudeBuckets.size} active days across all sessions`);
 
-  const payloads = payloadsFor(buckets, cfg.source, WINDOW);
+  // One source slot per provider. Codex is opt-in via cfg.codexSource.
+  const payloads = payloadsFor(claudeBuckets, cfg.source, WINDOW);
+  if (cfg.codexSource) {
+    log(`scanning ${cfg.codexSessionsDir} …`);
+    const codexBuckets = aggregateCodex(cfg.codexSessionsDir);
+    log(`codex: aggregated ${codexBuckets.size} active days across all sessions`);
+    payloads.push(...payloadsFor(codexBuckets, cfg.codexSource, WINDOW));
+  }
 
   if (DRY) {
-    console.log(`[dry-run] would POST ${payloads.length} non-empty days to ${cfg.endpoint}:`);
+    console.log(`[dry-run] would POST ${payloads.length} non-empty day×source rows to ${cfg.endpoint}:`);
     for (const p of payloads) console.log('  ' + JSON.stringify(p));
     if (payloads.length === 0) {
       console.log('  (none — no activity in the trailing window)');
@@ -293,17 +425,17 @@ async function post(endpoint, secret, payload) {
   for (const p of payloads) {
     try {
       const r = await post(cfg.endpoint, secret, p);
-      if (r.status === 200) { ok++; log(`  POST ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions, $${(p.costCents/100).toFixed(2)})`); }
+      if (r.status === 200) { ok++; log(`  POST ${p.source} ${p.date} ok (${p.tokens} tokens, ${p.sessions} sessions, $${(p.costCents/100).toFixed(2)})`); }
       else {
         // Worker error bodies are terse, schema-validator strings ('unexpected
         // field: foo' or 'date must be YYYY-MM-DD') — never echoes the payload.
         // If that ever changes, sanitize before logging.
         fail++;
-        console.error(`  POST ${p.date} FAILED status=${r.status} body=${r.body}`);
+        console.error(`  POST ${p.source} ${p.date} FAILED status=${r.status} body=${r.body}`);
       }
     } catch (e) {
       fail++;
-      console.error(`  POST ${p.date} threw: ${e.message}`);
+      console.error(`  POST ${p.source} ${p.date} threw: ${e.message}`);
     }
   }
   log(`done: ${ok} ok, ${fail} failed`);
