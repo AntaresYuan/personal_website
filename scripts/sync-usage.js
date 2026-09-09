@@ -56,7 +56,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
-const { execSync } = require('node:child_process');
+const { execSync, spawnSync } = require('node:child_process');
 
 const { resolveSources, walkFiles } = require('./lib/usage-sources.js');
 const {
@@ -220,24 +220,36 @@ function loadConfig({ tolerateMissing = false } = {}) {
 }
 
 // ── secret: keychain first, fall back to config field ─────────────
+/* The keychain account name.
+   Resolved in Node rather than left to the shell as "$USER": launchd gives a
+   job a minimal environment where $USER is EMPTY, so `-a "$USER"` silently
+   looked up the wrong account and every scheduled upload fell back to
+   "no secret" without erroring. os.userInfo() reads the real uid, so it works
+   the same from a terminal and from launchd. */
+function keychainAccount() {
+  return process.env.USER || process.env.LOGNAME || os.userInfo().username;
+}
+
+function keychainSecret() {
+  // Pass the account as an argv element, not interpolated into a shell string,
+  // so a name with a space or quote cannot alter the command.
+  const r = spawnSync(
+    'security',
+    ['find-generic-password', '-a', keychainAccount(), '-s', 'antares-sync-usage', '-w'],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+  );
+  return r.status === 0 ? String(r.stdout || '').trim() : '';
+}
+
 function loadSecret(cfg) {
   if (typeof cfg.secret === 'string' && cfg.secret.length > 0) {
     log('using secret from config file');
     return cfg.secret;
   }
-  try {
-    const out = execSync(
-      'security find-generic-password -a "$USER" -s "antares-sync-usage" -w',
-      { shell: '/bin/zsh', stdio: ['ignore', 'pipe', 'ignore'] }
-    )
-      .toString()
-      .trim();
-    if (out) {
-      log('using secret from macOS keychain (antares-sync-usage)');
-      return out;
-    }
-  } catch {
-    /* keychain miss → fall through */
+  const fromKeychain = keychainSecret();
+  if (fromKeychain) {
+    log('using secret from macOS keychain (antares-sync-usage)');
+    return fromKeychain;
   }
   die(
     'no secret available — set "secret" in config OR run:\n' +
@@ -622,13 +634,7 @@ function printStatus() {
   // Secret: report only whether one is reachable.
   let hasSecret = Boolean(cfg && cfg.secret);
   let secretFrom = hasSecret ? 'config' : '';
-  if (!hasSecret) {
-    try {
-      const out = execSync('security find-generic-password -a "$USER" -s "antares-sync-usage" -w',
-        { shell: '/bin/zsh', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
-      if (out) { hasSecret = true; secretFrom = 'keychain'; }
-    } catch { /* miss */ }
-  }
+  if (!hasSecret && keychainSecret()) { hasSecret = true; secretFrom = 'keychain'; }
   console.log(`  Secret:    ${hasSecret ? `✓ present (${secretFrom})` : '✗ not found'}`);
 
   /* Scheduled agent: ask launchctl, don't infer from the plist file. A
@@ -705,12 +711,7 @@ function runDoctor(cfg) {
 
   // 3. Secret reachable (presence only).
   let hasSecret = Boolean(cfg.secret);
-  if (!hasSecret) {
-    try {
-      hasSecret = Boolean(execSync('security find-generic-password -a "$USER" -s "antares-sync-usage" -w',
-        { shell: '/bin/zsh', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim());
-    } catch { /* miss */ }
-  }
+  if (!hasSecret) hasSecret = Boolean(keychainSecret());
   /* A missing secret is only a fault if this machine actually uploads.
      A local-only install — scanning to keep the menu bar current, never
      publishing — legitimately has no bearer token, and failing it here

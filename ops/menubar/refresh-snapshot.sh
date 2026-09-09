@@ -47,4 +47,24 @@ cd "$REPO" || { echo "repo not found: $REPO" >&2; exit 1; }
 # agent. The `=` spelling was silently ignored by the arg parser until
 # that was fixed, which quietly capped this job at the 14-day default
 # and cost 36 of 41 days in the snapshot.
+#
+# No --local-only: this job both refreshes the snapshot AND uploads.
+# It ran local-only for a while, which meant the public site silently
+# froze at whatever the previous machine had last pushed -- 81 days
+# stale, showing 124M tokens while this machine was at 1.01B. Nothing
+# failed; the numbers were simply old, which is the hard kind to notice.
+#
+# Uploading needs the bearer, and a machine that has none must still be
+# able to keep its own snapshot current. So fall back to --local-only
+# rather than exiting: a laptop without the secret should degrade to
+# read-only, not stop feeding the menu bar.
+# launchd hands a job a minimal environment: $USER is NOT set, and `set -u`
+# turns that into a fatal "unbound variable" — the job would die every 30
+# minutes without ever reaching either branch. Derive the account name from
+# the environment instead, matching what sync-usage.js itself looks up.
+KC_ACCOUNT="${USER:-${LOGNAME:-$(id -un)}}"
+if security find-generic-password -a "$KC_ACCOUNT" -s "antares-sync-usage" -w >/dev/null 2>&1; then
+  exec "$NODE" scripts/sync-usage.js --window 90
+fi
+echo "$(date '+%Y-%m-%dT%H:%M:%S') no upload secret; snapshot only" >&2
 exec "$NODE" scripts/sync-usage.js --local-only --window 90
