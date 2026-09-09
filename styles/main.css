@@ -253,6 +253,11 @@ button:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Positioned + raised so the skin picker's dropdown lands above the hero.
+     Without this the nav has no stacking context, and the hero CTA cards
+     (later in the DOM) paint over the open menu. */
+  position: relative;
+  z-index: 20;
   margin-bottom: var(--sp-64);
   font-family: var(--font-mono);
   font-size: var(--fs-13);
@@ -1991,7 +1996,35 @@ body.modal-open { overflow: hidden; }
   color: var(--color-text);
   font-weight: var(--fw-semibold);
 }
-.usage-heatmap svg { display: block; }
+/* The chart now scales to the section width instead of rendering at its
+   intrinsic pixel size — a fixed-width svg is what pinned 11 weeks of data
+   into the right-hand fifth of the strip. */
+/* Width comes from --chart-w, which each renderer sets to its own viewBox
+   width (or 100% for the trend line). Driving the wrapper — not just the svg
+   — means the legend and caption inherit the same box, so all three share one
+   left and right edge. */
+.usage-heatmap { width: var(--chart-w, 100%); max-width: 100%; margin: 0 auto; }
+/* Cap at the intrinsic size. `width: 100%` alone upscaled the calendar's
+   viewBox (~350px wide for 11 weeks) by 2.6x, ballooning 26px cells into
+   60px slabs. The inline --chart-w carries each view's own width, so narrow
+   charts render 1:1 and centre while wide ones still fill the strip. */
+/* The wrapper already carries the chart's width (set from --chart-w in JS),
+   so the svg simply fills it. Keeping max-width here too would re-apply the
+   inherited value and double-constrain the box. */
+.usage-heatmap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* Cross-fade on view change so the 5s carousel reads as one surface
+   updating rather than three charts flickering. Suppressed for visitors who
+   asked for less motion. */
+.usage-heatmap { transition: opacity var(--dur-base) var(--ease-out); }
+.usage-heatmap.is-swapping { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .usage-heatmap { transition: none; }
+  .usage-heatmap.is-swapping { opacity: 1; }
+}
 /* Month labels (top) + day labels (left, Mon/Wed/Fri) live as SVG <text>
    inside the heatmap SVG. Mono, faint, matching the fun-fact's font-size
    (fs-12) so the section's typography reads as a single family. */
@@ -2002,12 +2035,29 @@ body.modal-open { overflow: hidden; }
   fill: var(--color-text-faint);
 }
 
-/* Heatmap + legend stack inside .usage-heatmap-inner; -wrap centers
-   that whole block within the section. */
+/* Heatmap + legend + caption stack inside .usage-heatmap-inner; -wrap centres
+   that whole block within the section.
+
+   The stack sizes to its widest child rather than to a fixed 900px: the SVG
+   is capped at its intrinsic width (--chart-w), so a fixed-width parent left
+   the legend and caption spanning 900px while the chart sat centred and
+   narrower inside — three different left edges. fit-content collapses them
+   onto one. */
 .usage-heatmap-inner {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: stretch;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 900px;
+}
+/* The grids have an intrinsic cell size worth preserving, so fit-content is
+   right for them. The trend line has none — it should use the whole strip, so
+   the stack goes full width when it's showing. The class is set in JS; the
+   :has() rule is the same thing for browsers that support it. */
+.usage-heatmap-inner.is-wide,
+.usage-heatmap-inner:has(> .usage-heatmap[data-view="trend"]) {
+  width: 100%;
 }
 .usage-legend {
   display: flex;
@@ -2025,14 +2075,24 @@ body.modal-open { overflow: hidden; }
   height: 12px;
   border-radius: 2px;
 }
-.usage-legend-empty { background: var(--color-line-soft); }
+/* The empty cell is the ramp's zero step, so it's mixed from the SAME accent
+   as q0–q3 at a lower strength — not from --color-line.
+
+   Deriving it from the line colour is what broke Press, Dossier and
+   Blueprint: a skin with a dark line and a soft accent ended up with "no
+   activity" reading heavier than "some activity", i.e. the scale inverted.
+   Tying every step to one hue makes the ramp monotonic by construction
+   instead of per-skin patching. 8% is low enough to read as "nothing here"
+   while still marking the cell as part of the grid. */
+:root { --usage-empty: color-mix(in srgb, var(--color-yellow) 8%, var(--color-bg)); }
+.usage-legend-empty { background: var(--usage-empty); }
 .usage-legend-q0    { background: color-mix(in srgb, var(--color-yellow) 25%, var(--color-bg)); }
 .usage-legend-q1    { background: color-mix(in srgb, var(--color-yellow) 50%, var(--color-bg)); }
 .usage-legend-q2    { background: color-mix(in srgb, var(--color-yellow) 75%, var(--color-bg)); }
 .usage-legend-q3    { background: var(--color-yellow); }
 
 .usage-cell { transition: fill 200ms ease; }
-.usage-cell-empty   { fill: var(--color-line-soft); }
+.usage-cell-empty   { fill: var(--usage-empty); }
 /* Outside the data window — before the first day the sync agent has data
    for, or future days of the current calendar week. Transparent so the
    heatmap visually represents only the window where activity is known. */
@@ -2042,23 +2102,501 @@ body.modal-open { overflow: hidden; }
 .usage-cell-q2      { fill: color-mix(in srgb, var(--color-yellow) 75%, var(--color-bg)); }
 .usage-cell-q3      { fill: var(--color-yellow); }
 
+/* ── view tabs ────────────────────────────────────────────────────────
+   Three lenses on the same data. render.js only emits the buttons when
+   more than one view has data, so this row is absent rather than
+   decorative on a fresh install. Segmented control rather than pills:
+   one enclosing border reads as "pick one of these", where separate
+   pills read as three unrelated actions. */
+.usage-views {
+  display: inline-flex;
+  gap: var(--bw);
+  margin: 0 auto var(--sp-20);
+  padding: var(--bw);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+.usage-views[hidden] { display: none; }
+/* The row is a flex child of a centered column, so it needs its own
+   centering context to sit under the title. */
+.usage-heatmap-wrap + .usage-views,
+.usage-title + .usage-views { display: inline-flex; }
+/* The tab row is inline-flex; give it a centered line box by making its own
+   used display block-level with auto margins AND a fit-content width, scoped
+   tightly to the row so nothing else is affected. */
+.usage-section > #usage-views {
+  display: flex;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+.usage-view-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-faint);
+  border-radius: calc(var(--r-sm) - 2px);
+  padding: var(--sp-6) var(--sp-14);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.02em;
+  transition: color var(--dur-quick) var(--ease-out),
+              background var(--dur-quick) var(--ease-out);
+}
+.usage-view-tab:hover { color: var(--color-text); background: var(--color-bg-soft); }
+.usage-view-tab.is-active {
+  color: var(--color-text);
+  background: var(--color-yellow-soft);
+}
+.usage-view-tab:focus-visible {
+  outline: var(--bw-thick) solid var(--color-yellow);
+  outline-offset: 1px;
+}
+
+/* Per-view summary line. Same scale as the stats row so the two read as
+   one block rather than competing. */
+.usage-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  display: flex;
+  flex-wrap: wrap;
+  /* Left-aligned and chart-width, not centred and full-bleed. Centred, this
+     line floated between the chart above and the stats rules below with no
+     visual owner — and overlapped those rules. Sitting flush with the
+     chart's left edge makes it read as the chart's own footnote. */
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: var(--sp-8);
+  margin-top: var(--sp-10);
+  padding-top: var(--sp-8);
+  border-top: var(--bw) solid var(--color-line-soft);
+}
+.usage-caption[hidden] { display: none; }
+.usage-caption strong { color: var(--color-text); font-weight: var(--fw-semibold); }
+
+/* Trend view — filled area under an unstroked polyline. */
+.usage-trend-area { fill: color-mix(in srgb, var(--color-yellow) 16%, transparent); }
+.usage-trend-line {
+  stroke: var(--color-yellow);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.usage-trend-dot { fill: var(--color-yellow); }
+
+.usage-more-link {
+  color: var(--color-text-faint);
+  text-decoration: none;
+  border-bottom: var(--bw) solid transparent;
+  transition: color var(--dur-quick) var(--ease-out),
+              border-color var(--dur-quick) var(--ease-out);
+}
+.usage-more-link:hover { color: var(--color-text); border-bottom-color: var(--color-line); }
+
+/* ══ /usage/ — the full dashboard sub-page ════════════════════════════ */
+.usage-page-head { padding-bottom: 0; }
+.usage-page-back {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  margin: 0 0 var(--sp-16);
+}
+.usage-page-back a { color: var(--color-text-faint); text-decoration: none; }
+.usage-page-back a:hover { color: var(--color-text); }
+.usage-page-title {
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--sp-12);
+}
+.usage-page-lead {
+  max-width: var(--w-prose);
+  color: var(--color-text-dim);
+  font-size: var(--fs-15);
+  line-height: 1.6;
+  margin: 0 0 var(--sp-32);
+}
+
+/* Headline numbers. A rule above each figure ties the number to its label
+   and gives the row structure without boxing every stat. */
+.usage-page-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: var(--sp-24);
+  margin: 0 0 var(--sp-20);
+  padding-top: var(--sp-20);
+  border-top: var(--bw) solid var(--color-line);
+}
+.ustat { display: flex; flex-direction: column-reverse; gap: var(--sp-6); }
+.ustat strong {
+  font-family: var(--font-mono);
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ustat-k {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.usage-page-state {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+  margin: 0;
+}
+
+/* Two columns on wide screens: the charts are mostly wide-and-short, and a
+   single 1280px column left each one as a sliver with acres of dead space.
+   Wide charts (calendar, rhythm, trend) opt back into full width. */
+.usage-page-grid {
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-20);
+  max-width: var(--w-page);
+  margin: 0 auto;
+  padding: var(--sp-32) var(--sp-32) var(--sp-48);
+  width: 100%;
+  box-sizing: border-box;
+}
+/* Only genuinely wide charts span both columns. The calendar renders at
+   its natural ~200px and the token-mix bar is one row tall, so giving them
+   full width left half the card empty — they pair up instead. */
+#ucard-rhythm, #ucard-trend { grid-column: 1 / -1; }
+
+.ucard {
+  background: var(--color-surface);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  padding: var(--sp-20) var(--sp-24) var(--sp-24);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ucard[hidden] { display: none; }
+.ucard-head { margin-bottom: var(--sp-16); }
+.ucard-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-17);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.005em;
+  margin: 0 0 var(--sp-4);
+}
+.ucard-note {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  line-height: 1.5;
+  margin: 0;
+}
+/* Charts sit against the card's inner edge and grow to fill it; the flex
+   column pushes the caption to the bottom so cards in a row align. */
+.ucard-body { overflow-x: auto; flex: 1 1 auto; }
+.uchart-svg { display: block; width: 100%; height: auto; }
+/* A short date range yields a small viewBox; stretching it to the card
+   width blew the calendar cells up into slabs 310px tall. Cap the intrinsic
+   scale so cells keep their designed size and the svg simply left-aligns. */
+/* An inline svg has no intrinsic size, so width:auto still resolves to the
+   container. Pin the rendered width to the viewBox width via a custom
+   property the JS sets, so cells render at their designed 13px. */
+#uchart-calendar { display: flex; justify-content: center; }
+#uchart-calendar .uchart-svg {
+  width: var(--cal-w, 100%);
+  max-width: 100%;
+  height: auto;
+}
+#uchart-rhythm  .uchart-svg { min-width: 460px; }
+.ucard-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.6;
+  color: var(--color-text-faint);
+  margin: var(--sp-16) 0 0;
+  padding-top: var(--sp-12);
+  border-top: var(--bw) solid var(--color-line-soft);
+}
+.ucard-caption[hidden] { display: none; }
+.ucard-caption strong { color: var(--color-text); font-weight: var(--fw-semibold); }
+
+/* Column charts (hour-of-day, weekday, per-day active time). */
+.ucol { fill: var(--color-yellow); opacity: 0.5; transition: opacity var(--dur-quick) var(--ease-out); }
+.ucol:hover { opacity: 1; }
+.ucol.is-peak { opacity: 1; }
+.ucol-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--color-text-faint);
+  letter-spacing: 0.04em;
+}
+.ugrid { stroke: var(--color-line-soft); stroke-width: var(--bw); }
+.utrend-mean {
+  stroke: var(--color-text-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  opacity: 0.55;
+}
+
+/* Horizontal bar lists (per tool / model / project). */
+.ubars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-10); }
+.ubar-row {
+  display: grid;
+  grid-template-columns: minmax(72px, 26%) 1fr auto;
+  align-items: center;
+  gap: var(--sp-12);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+.ubar-label {
+  color: var(--color-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ubar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-line-soft);
+  overflow: hidden;
+}
+.ubar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-yellow);
+  border-radius: 999px;
+}
+.ubar-value {
+  color: var(--color-text);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ubar-pct { color: var(--color-text-faint); margin-left: var(--sp-8); }
+
+/* Stacked token-mix bar. Five tints of one yellow so it reads as a single
+   quantity split into parts, not five unrelated series. */
+.umix-svg {
+  height: 44px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  width: 100%;
+}
+.umix-0 { fill: var(--color-yellow); }
+.umix-1 { fill: color-mix(in srgb, var(--color-yellow) 74%, var(--color-surface)); }
+.umix-2 { fill: color-mix(in srgb, var(--color-yellow) 52%, var(--color-surface)); }
+.umix-3 { fill: color-mix(in srgb, var(--color-yellow) 32%, var(--color-surface)); }
+.umix-4 { fill: color-mix(in srgb, var(--color-yellow) 16%, var(--color-surface)); }
+.umix-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  flex-wrap: wrap;
+  gap: var(--sp-10) var(--sp-16);
+  margin-top: var(--sp-16);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+}
+.umix-key { display: inline-flex; align-items: center; gap: var(--sp-6); }
+.umix-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+  border: var(--bw) solid var(--color-line-soft);
+}
+.umix-swatch.umix-0 { background: var(--color-yellow); }
+.umix-swatch.umix-1 { background: color-mix(in srgb, var(--color-yellow) 74%, var(--color-surface)); }
+.umix-swatch.umix-2 { background: color-mix(in srgb, var(--color-yellow) 52%, var(--color-surface)); }
+.umix-swatch.umix-3 { background: color-mix(in srgb, var(--color-yellow) 32%, var(--color-surface)); }
+.umix-swatch.umix-4 { background: color-mix(in srgb, var(--color-yellow) 16%, var(--color-surface)); }
+.umix-key strong { color: var(--color-text); font-weight: var(--fw-semibold); }
+
+/* Owner unlock box. */
+.usage-unlock {
+  max-width: var(--w-page);
+  margin: 0 auto;
+  padding: 0 var(--sp-32) var(--sp-48);
+  width: 100%;
+  box-sizing: border-box;
+}
+.usage-unlock-box {
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  padding: var(--sp-16) var(--sp-20);
+  background: var(--color-surface);
+}
+.usage-unlock-summary {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  cursor: pointer;
+  list-style: none;
+}
+.usage-unlock-summary::-webkit-details-marker { display: none; }
+.usage-unlock-summary::before {
+  content: '+ ';
+  color: var(--color-yellow);
+}
+.usage-unlock-box[open] .usage-unlock-summary::before { content: '− '; }
+.usage-unlock-note {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  line-height: 1.6;
+  max-width: var(--w-prose);
+  margin: var(--sp-12) 0 var(--sp-16);
+}
+.usage-unlock-form { display: flex; flex-wrap: wrap; gap: var(--sp-8); }
+.usage-unlock-input {
+  flex: 1 1 220px;
+  max-width: 340px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  padding: var(--sp-8) var(--sp-12);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.usage-unlock-input:focus-visible {
+  outline: var(--bw-thick) solid var(--color-yellow);
+  outline-offset: 1px;
+  border-color: var(--color-yellow);
+}
+.usage-unlock-btn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  padding: var(--sp-8) var(--sp-16);
+  border-radius: var(--r-sm);
+  border: var(--bw) solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color var(--dur-quick) var(--ease-out),
+              background var(--dur-quick) var(--ease-out);
+}
+.usage-unlock-btn:hover { border-color: var(--color-yellow); background: var(--color-yellow-glow); }
+.usage-unlock-clear { color: var(--color-text-faint); }
+.usage-unlock-state {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  margin: var(--sp-12) 0 0;
+}
+.usage-unlock-state.is-ok { color: var(--color-text-faint); }
+.usage-unlock-state.is-err { color: var(--color-text); font-weight: var(--fw-semibold); }
+
+@media (max-width: 900px) {
+  /* One column: two 400px-wide charts are worse than one readable one. */
+  .usage-page-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .usage-page-grid { padding: var(--sp-24) var(--sp-16) var(--sp-32); gap: var(--sp-16); }
+  .usage-unlock { padding: 0 var(--sp-16) var(--sp-32); }
+  .usage-page-summary { gap: var(--sp-16); }
+  .ucard { padding: var(--sp-16); }
+  .ubar-row { grid-template-columns: minmax(60px, 32%) 1fr auto; }
+}
+
 .usage-stats {
   font-family: var(--font-mono);
   font-size: var(--fs-13);
   color: var(--color-text-faint);
+  /* Breathing room between the chart block (chart + legend + caption) and the
+     numbers table, so the two read as separate sections rather than one
+     crowded stack with a stray line in the middle. */
+  margin-top: var(--sp-20);
+  margin-bottom: var(--sp-6);
+}
+
+/* Stats as a definition grid rather than a dot-separated run-on. Each cell is
+   label-over-value with a hairline above, so the eye can scan down a column
+   of labels or across a row of values. auto-fit means the column count
+   follows the available width without media queries. */
+.hstat-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-8);
+  gap: var(--sp-14) var(--sp-24);
+  margin: 0 auto;
+  max-width: 900px;
+  width: 100%;
+  text-align: left;
+}
+.hstat-cell {
+  /* Grow to share leftover space so a short final row spreads out instead of
+     huddling at the left edge, but never shrink below a readable width. */
+  flex: 1 1 auto;
+  min-width: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding-top: var(--sp-8);
+  border-top: var(--bw) solid var(--color-line);
+}
+.hstat-k {
+  font-size: var(--fs-10);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hstat-v {
+  margin: 0;
+  font-size: var(--fs-15);
+  line-height: 1.2;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  display: flex;
   align-items: baseline;
-  justify-content: center;
-  margin-bottom: var(--sp-6);
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.hstat-v strong {
+  font-weight: var(--fw-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The trailing qualifier ("/7 days", "71%") rides smaller and dimmer so the
+   headline figure stays the thing you read first. */
+.hstat-sub {
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+/* Provenance line under the grid — same dim register as the footer. */
+.hstat-since {
+  max-width: 900px;
+  margin: var(--sp-8) auto 0;
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+  text-align: right;
+}
+.hstat-since strong { color: var(--color-text-dim); font-weight: var(--fw-medium); }
+@media (max-width: 640px) {
+  /* The row is flex, not grid — tighten the gaps and let cells sit narrower
+     so five or six still fit per line on a phone. */
+  .hstat-grid { gap: var(--sp-12) var(--sp-16); }
+  .hstat-cell { min-width: 76px; }
+  .hstat-v { font-size: var(--fs-13); }
+  .hstat-since { text-align: left; }
 }
 .usage-stat strong {
   color: var(--color-text);
   font-weight: var(--fw-semibold);
 }
+/* Still used by the per-view caption lines (peak hour, weeks, etc.), which
+   remain a prose run — only the numeric stats block became a grid. */
 .usage-stat-sep { color: var(--color-line); }
-.usage-stat-since { font-style: normal; }
 
 /* .usage-funfact is now a span inside .usage-flourish — strong is the
    span's bolded multiple ("310×"). Min-height reserves space so the
@@ -2072,14 +2610,12 @@ body.modal-open { overflow: hidden; }
   color: var(--color-line);
 }
 
-/* Mobile — the 52-week strip is 620px wide intrinsic. Scale to viewport;
-   on a 375px iPhone that brings cells to ~6px which is still readable
-   for the "shape of activity," even if individual day clicks get fiddly. */
+/* Mobile — let the grids scale down past their 1:1 cap so a 375px viewport
+   still shows the whole shape of activity. Overriding --chart-w rather than
+   max-width keeps the desktop rule (cap at intrinsic size) intact. */
 @media (max-width: 720px) {
   .usage-heatmap svg {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
+    --chart-w: 100%;
   }
 }
 
@@ -2904,4 +3440,2358 @@ body.modal-open .palette-fab { opacity: 0; pointer-events: none; }
   .board { grid-template-columns: 1fr 1fr; gap: 12px; }
   .card { box-shadow: none; }
   body { background: white; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SKINS  —  one-click alternate palettes, ambient decoration, companions
+
+   HOW THIS WORKS
+   A skin re-points the colour custom properties under
+   `:root[data-skin="<id>"]`. That's the whole mechanism: every rule above
+   already reads the tokens, so nothing else needs to know skins exist.
+   `default` has no block at all — it *is* the plain `:root` palette, so the
+   untouched site stays byte-for-byte untouched.
+
+   Each skin block sits AFTER the `[data-theme="dark"]` block, so a skin
+   wins over dark mode where they overlap. That's deliberate: picking
+   "Terminal" should give you phosphor-on-black whether or not the OS is in
+   dark mode. Skins that are light-on-purpose (Meadow) also set
+   `color-scheme` so form controls and scrollbars follow.
+
+   Ambient layers and the companion creature are mounted by
+   scripts/skin-runtime.js; all their motion is gated behind
+   `prefers-reduced-motion: no-preference` here as a second line of defence
+   (the JS also refuses to mount them).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Meadow — soft greens, paper-warm, drifting clouds ─────────────── */
+:root[data-skin="meadow"] {
+  --color-bg:         #F2F7EE;
+  --color-bg-soft:    #E7F0E0;
+  --color-surface:    #FFFFFF;
+  --color-surface-alt:#F6FBF2;
+  --color-line:       #CFE0C4;
+  --color-line-soft:  #E1EDD9;
+  --color-text:       #1B2418;
+  --color-text-dim:   #4C5A46;
+  /* WCAG: was #6B7A64 at 4.21:1 on this skin's ground, under the 4.5
+     minimum for the stat labels / caption / legend that share this
+     token. #65735E is the smallest darkening that clears it. */
+  --color-text-faint:  #65735E;
+  --color-yellow:      #E8B23C;   /* warm accent still reads on green */
+  --color-yellow-soft: #FBEFCF;
+  --color-yellow-glow: #FDF6E4;
+  --color-blue:        #2F7A4F;   /* the "accent" turns leaf-green */
+  --color-blue-soft:   #DCEEE1;
+  --color-blue-deep:   #1E5C39;
+  --color-success:     #2F7A4F;
+  --color-warn:        #B4691B;
+  --skin-eye:          #FFFFFF;   /* companion eye colour */
+  color-scheme: light;
+}
+
+/* ── Press — risograph inks on newsprint, halftone, hard shadows ─────
+   The one alternate LIGHT skin, and the one that changes *shape* rather
+   than adding particles: hard offset shadows instead of soft blurs, and
+   tighter radii. Two-ink riso printing (a warm red + a deep blue on
+   off-white paper) is where the palette comes from. */
+:root[data-skin="press"] {
+  --color-bg:         #F4F1E8;
+  --color-bg-soft:    #EAE5D6;
+  --color-surface:    #FBF9F2;
+  --color-surface-alt:#F2EEE1;
+  --color-line:       #1F1B16;   /* ink, not grey — riso has no soft edges */
+  --color-line-soft:  #C9C2AE;
+  --color-text:       #1F1B16;
+  --color-text-dim:   #554E42;
+  /* WCAG: was #7A7264 at 4.21:1 on this skin's ground, under the 4.5
+     minimum for the stat labels / caption / legend that share this
+     token. #736B5E is the smallest darkening that clears it. */
+  --color-text-faint:  #736B5E;
+  --color-yellow:      #E2542C;  /* the warm ink */
+  --color-yellow-soft: #FBDDD2;
+  --color-yellow-glow: #FDEDE6;
+  --color-blue:        #1B3FA0;  /* the cool ink */
+  --color-blue-soft:   #D7DEF2;
+  --color-blue-deep:   #122B70;
+  --color-success:     #1B6B3A;
+  --color-warn:        #A85A10;
+  /* Hard, un-blurred shadows: the defining move of print-flavoured UI.
+   A blur would read as "web card" again and undo the whole skin. */
+  --shadow-card:       3px 3px 0 var(--color-line);
+  --shadow-card-hover: 5px 5px 0 var(--color-line);
+  --shadow-cta:        3px 3px 0 var(--color-line);
+  --bw:                1.5px;
+  --bw-thick:          2.5px;
+  --r-sm:              2px;
+  --r-md:              3px;
+  --r-lg:              4px;
+  color-scheme: light;
+}
+/* The base .card carries no static box-shadow — it only picks up
+   --shadow-card-hover on hover — so re-pointing the token alone changed
+   nothing at rest. Print cards need the offset block ALWAYS visible (that
+   offset *is* the style), so it's stated here rather than inherited. */
+:root[data-skin="press"] .card,
+:root[data-skin="press"] .ucard,
+:root[data-skin="press"] .skin-menu {
+  box-shadow: 3px 3px 0 var(--color-line);
+}
+:root[data-skin="press"] .card:hover {
+  box-shadow: 5px 5px 0 var(--color-line);
+}
+/* Display type gets the second ink offset behind it — misregistration is
+   the signature of two-colour printing. */
+:root[data-skin="press"] h1,
+:root[data-skin="press"] .hero-name {
+  text-shadow: 2px 2px 0 rgba(226, 84, 44, 0.28);
+}
+
+/* ── Solar — warm noon light, dust in the air ────────────────────────
+   The light-and-warm counterweight. Six of the others are dark or cool;
+   without this one the picker's "Plain" group is just Paper and Meadow. */
+:root[data-skin="solar"] {
+  --color-bg:         #FFF8EC;
+  --color-bg-soft:    #FCEFD8;
+  --color-surface:    #FFFDF8;
+  --color-surface-alt:#FEF6E7;
+  --color-line:       #E8CFA6;
+  --color-line-soft:  #F4E4C8;
+  --color-text:       #2A1F12;
+  --color-text-dim:   #5E4B33;
+  /* WCAG: was #86704F at 4.48:1 on this skin's ground, under the 4.5
+     minimum for the stat labels / caption / legend that share this
+     token. #836E4D is the smallest darkening that clears it. */
+  --color-text-faint:  #836E4D;
+  --color-yellow:      #E08A1E;
+  --color-yellow-soft: #FDE9C8;
+  --color-yellow-glow: #FEF3DF;
+  --color-blue:        #C2571B;   /* terracotta reads as "warm accent" */
+  --color-blue-soft:   #FBE0CD;
+  --color-blue-deep:   #98410F;
+  --color-success:     #6C8A1F;
+  --color-warn:        #C2571B;
+  --skin-eye:          #FFFFFF;
+  color-scheme: light;
+}
+
+/* ── Dossier — a declassified file ───────────────────────────────────
+   Changes TYPE and TEXTURE together: everything is typewriter monospace on
+   manila stock, and the accent is a redaction bar rather than a colour.
+   The one skin where the "ink" is black and the interest comes from the
+   paper. */
+:root[data-skin="dossier"] {
+  --color-bg:         #E8E0CC;
+  --color-bg-soft:    #DDD3BB;
+  --color-surface:    #F1EADA;
+  --color-surface-alt:#E4DBC4;
+  --color-line:       #8A7F66;
+  --color-line-soft:  #C3B79B;
+  --color-text:       #1C1A14;
+  --color-text-dim:   #4A4437;
+  /* WCAG: was #6E6653 at 4.33:1 on this skin's ground, under the 4.5
+     minimum for the stat labels / caption / legend that share this
+     token. #6A6250 is the smallest darkening that clears it. */
+  --color-text-faint:  #6A6250;
+  --color-yellow:      #8C2F1D;   /* stamp red */
+  --color-yellow-soft: #E4D2C6;
+  --color-yellow-glow: #EFE2D8;
+  --color-blue:        #2B2A22;   /* typewriter black is the "accent" */
+  --color-blue-soft:   #D2CAB2;
+  --color-blue-deep:   #0F0E0A;
+  --color-success:     #3F5A2A;
+  --color-warn:        #8C2F1D;
+  /* Typewritten all the way down — a file has no display face. */
+  --font-serif: var(--font-mono);
+  --font-sans:  var(--font-mono);
+  --shadow-card:       2px 2px 0 rgba(28, 26, 20, 0.18);
+  --shadow-card-hover: 3px 3px 0 rgba(28, 26, 20, 0.3);
+  --shadow-cta:        2px 2px 0 rgba(28, 26, 20, 0.24);
+  --r-sm: 0px;
+  --r-md: 1px;
+  --r-lg: 1px;
+  color-scheme: light;
+}
+:root[data-skin="dossier"] .card,
+:root[data-skin="dossier"] .ucard {
+  box-shadow: 2px 2px 0 rgba(28, 26, 20, 0.16);
+}
+/* Section headings get the redaction treatment: black bar, knocked-out
+   text. This is the skin's one strong move, so it's used sparingly —
+   applying it to every heading would make the page unreadable. */
+:root[data-skin="dossier"] .card-kicker,
+:root[data-skin="dossier"] .hstat-key {
+  background: var(--color-blue-deep);
+  color: var(--color-bg);
+  padding: 1px var(--sp-4);
+  letter-spacing: 0.14em;
+}
+:root[data-skin="dossier"] h1,
+:root[data-skin="dossier"] .hero-name {
+  letter-spacing: -0.01em;
+  /* Ink bleed: a typewriter strike isn't a clean edge. */
+  text-shadow: 0.4px 0.4px 0 rgba(28, 26, 20, 0.35);
+}
+
+/* ── Blueprint — cyanotype drafting sheet ───────────────────────────
+   Inverts the usual figure/ground: white line-work on saturated blue, the
+   way a real blueprint is a negative. Grid and dimension ticks come from
+   the ambient/overlay layers. */
+:root[data-skin="blueprint"] {
+  --color-bg:         #10315C;
+  --color-bg-soft:    #164073;
+  --color-surface:    #163A68;
+  --color-surface-alt:#1A4478;
+  --color-line:       #6E9CD2;
+  --color-line-soft:  #3D6BA3;
+  --color-text:       #EAF3FF;
+  --color-text-dim:   #B6D0EC;
+  --color-text-faint: #8FB2D8;
+  --color-yellow:      #FFD98A;
+  --color-yellow-soft: #24507F;
+  --color-yellow-glow: #1B4471;
+  --color-blue:        #FFFFFF;   /* the drawing is white; that IS the accent */
+  --color-blue-soft:   #23507E;
+  --color-blue-deep:   #FFFFFF;
+  --color-success:     #9BE0B4;
+  --color-warn:        #FFC168;
+  --font-serif: var(--font-mono);
+  --shadow-card:       none;
+  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.5);
+  --shadow-cta:        none;
+  --r-sm: 0px;
+  --r-md: 0px;
+  --r-lg: 0px;
+  --bw: 1px;
+  color-scheme: dark;
+}
+/* Drawings are line-work, not filled boxes: surfaces go transparent so the
+   grid shows straight through, leaving only the outline. */
+:root[data-skin="blueprint"] .card,
+:root[data-skin="blueprint"] .ucard {
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: none;
+  outline: 1px solid rgba(255, 255, 255, 0.28);
+  outline-offset: -1px;
+}
+:root[data-skin="blueprint"] .card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  outline-color: rgba(255, 255, 255, 0.6);
+}
+:root[data-skin="blueprint"] h1,
+:root[data-skin="blueprint"] h2 { letter-spacing: 0.03em; }
+
+/* ── Terminal — CRT phosphor on near-black ─────────────────────────── */
+:root[data-skin="terminal"] {
+  --color-bg:         #07090A;
+  --color-bg-soft:    #0D1114;
+  --color-surface:    #0E1316;
+  --color-surface-alt:#111a1c;
+  --color-line:       #1E3A2C;
+  --color-line-soft:  #152A20;
+  --color-text:       #C8F7D4;
+  --color-text-dim:   #7FC395;
+  --color-text-faint: #5C9B72;
+  --color-yellow:      #7CFFA0;
+  --color-yellow-soft: #10301D;
+  --color-yellow-glow: #0B2415;
+  --color-blue:        #46E08A;
+  --color-blue-soft:   #0F2A1B;
+  --color-blue-deep:   #8BFFB4;
+  --color-success:     #46E08A;
+  --color-warn:        #E0C246;
+  /* A terminal is monospace all the way down — including the display face.
+     This is the one skin that changes type, and it's the point of it. */
+  --font-serif: var(--font-mono);
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.6), 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.7), 0 16px 32px rgba(0, 0, 0, 0.6);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.7);
+  --skin-eye:          #07090A;   /* dark eyes read better on bright sprites */
+  color-scheme: dark;
+}
+/* Phosphor bleed on the display type — a real CRT can't render a hard
+   edge. Only on headings: doing it to body copy would hurt reading. */
+:root[data-skin="terminal"] h1,
+:root[data-skin="terminal"] h2,
+:root[data-skin="terminal"] .hero-name {
+  text-shadow: 0 0 12px rgba(124, 255, 160, 0.45), 0 0 2px rgba(124, 255, 160, 0.7);
+}
+
+/* ── Recon — amber tactical HUD, notched panels ─────────────────────
+   Changes the SHAPE language: cards get their corners cut off with
+   clip-path, which no amount of recolouring can imitate. Amber
+   monochrome, like a targeting display. */
+:root[data-skin="hud"] {
+  --color-bg:         #0B0D0C;
+  --color-bg-soft:    #131614;
+  --color-surface:    #141815;
+  --color-surface-alt:#191E1A;
+  --color-line:       #4A3A16;
+  --color-line-soft:  #33280F;
+  --color-text:       #F2DCA6;
+  --color-text-dim:   #C0A468;
+  --color-text-faint: #977D4C;
+  --color-yellow:      #FFB627;
+  --color-yellow-soft: #33260C;
+  --color-yellow-glow: #241B08;
+  --color-blue:        #FFC94D;   /* monochrome by design: one ink, two weights */
+  --color-blue-soft:   #2A2009;
+  --color-blue-deep:   #FFE0A0;
+  --color-success:     #9ED14E;
+  --color-warn:        #FF7A3D;
+  --font-serif: var(--font-mono);
+  --shadow-card:       0 0 0 1px rgba(255, 182, 39, 0.10), 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 182, 39, 0.22), 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.7);
+  --r-sm: 0px;
+  --r-md: 0px;
+  --r-lg: 0px;
+  color-scheme: dark;
+}
+/* Notched corners. Applied to the card surfaces only — clipping the whole
+   page would cut off the ambient grid and the sticky nav. */
+:root[data-skin="hud"] .card,
+:root[data-skin="hud"] .cta,
+:root[data-skin="hud"] .ucard,
+:root[data-skin="hud"] .skin-menu {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+/* An instrument panel is lit from inside: a faint amber wash plus a hairline
+   inner edge. Stated explicitly because .card has no static box-shadow. */
+:root[data-skin="hud"] .card,
+:root[data-skin="hud"] .ucard {
+  background:
+    linear-gradient(160deg, rgba(255, 182, 39, 0.05), transparent 62%),
+    var(--color-surface);
+  box-shadow: inset 0 0 0 1px rgba(255, 182, 39, 0.09);
+}
+:root[data-skin="hud"] h1,
+:root[data-skin="hud"] h2 { letter-spacing: 0.04em; }
+
+/* ── Neon — magenta glitch, data rain ──────────────────────────────
+   Changes MOTION: instead of ambient drift, the page itself is
+   periodically displaced by the glitch scheduler in skin-runtime.js. */
+:root[data-skin="neon"] {
+  --color-bg:         #08060F;
+  --color-bg-soft:    #100A1E;
+  --color-surface:    #130C22;
+  --color-surface-alt:#181029;
+  --color-line:       #3A1D57;
+  --color-line-soft:  #2A1440;
+  --color-text:       #F4E9FF;
+  --color-text-dim:   #B79AD8;
+  --color-text-faint: #8B72AC;
+  --color-yellow:      #F5D90A;
+  --color-yellow-soft: #2E2708;
+  --color-yellow-glow: #211C06;
+  --color-blue:        #FF2E9A;   /* hot magenta primary */
+  --color-blue-soft:   #350C24;
+  --color-blue-deep:   #00E5FF;   /* cyan as the second neon */
+  --color-success:     #00E5FF;
+  --color-warn:        #F5D90A;
+  --font-serif: var(--font-mono);
+  --shadow-card:       0 0 0 1px rgba(255, 46, 154, 0.14), 0 12px 34px rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 46, 154, 0.3), 0 0 26px rgba(255, 46, 154, 0.16), 0 16px 40px rgba(0, 0, 0, 0.66);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.7);
+  --r-sm: 1px;
+  --r-md: 2px;
+  --r-lg: 2px;
+  color-scheme: dark;
+}
+/* Chromatic aberration on the display type — the split that says "glitch"
+   without needing motion. Two offset shadows in the two neon hues. */
+:root[data-skin="neon"] h1,
+:root[data-skin="neon"] .hero-name {
+  text-shadow: -2px 0 rgba(255, 46, 154, 0.55), 2px 0 rgba(0, 229, 255, 0.5);
+}
+/* Neon signage glows at the edge, so cards get a magenta rim rather than a
+   drop shadow. Explicit for the same reason as the other two skins. */
+:root[data-skin="neon"] .card,
+:root[data-skin="neon"] .ucard {
+  box-shadow: inset 0 0 0 1px rgba(255, 46, 154, 0.14), 0 0 18px rgba(255, 46, 154, 0.05);
+}
+:root[data-skin="neon"] .card:hover {
+  box-shadow: inset 0 0 0 1px rgba(255, 46, 154, 0.4), 0 0 26px rgba(255, 46, 154, 0.16);
+}
+
+/* ── Dusk — indigo night, slow sparkles ───────────────────────────── */
+:root[data-skin="dusk"] {
+  --color-bg:         #0F1226;
+  --color-bg-soft:    #161A34;
+  --color-surface:    #191E3C;
+  --color-surface-alt:#1E2447;
+  --color-line:       #2E3660;
+  --color-line-soft:  #232A4E;
+  --color-text:       #E9EAFB;
+  --color-text-dim:   #ADB2DA;
+  --color-text-faint: #868DBE;
+  --color-yellow:      #FFD166;
+  --color-yellow-soft: #3A3050;
+  --color-yellow-glow: #2A2340;
+  --color-blue:        #9BA8FF;
+  --color-blue-soft:   #262E56;
+  --color-blue-deep:   #C2CBFF;
+  --color-success:     #5FD39B;
+  --color-warn:        #F0A65C;
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.6), 0 16px 32px rgba(0, 0, 0, 0.55);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.6);
+  --skin-eye:          #0F1226;
+  color-scheme: dark;
+}
+
+/* ══ Observatory — IP skin ═══════════════════════════════════════════════
+   A night at the telescope. What makes this an IP rather than a palette is
+   the vocabulary (see `lex` in skins.js: sessions → "nights out", spend →
+   "telescope time") plus a mascot of its own. The visual job here is to
+   support that fiction: a sky that actually reads as a sky, and instrument
+   chrome around the edges.
+
+   Deep navy rather than black — a real night sky retains blue, and pure
+   #000 would make the starfield look like dust on a screen. The accent is
+   Antares's own colour: the star is a red supergiant, so amber-red is the
+   literal answer, and it doubles as the "safe light" astronomers use to
+   preserve dark adaptation. */
+:root[data-skin="observatory"] {
+  --color-bg:         #070B18;
+  --color-bg-soft:    #0C1226;
+  --color-surface:    #101833;
+  --color-surface-alt:#141D3D;
+  --color-line:       #26325C;
+  --color-line-soft:  #1A2445;
+  --color-text:       #E8ECFA;
+  --color-text-dim:   #A6B0D2;
+  --color-text-faint: #7B87AE;
+  --color-yellow:      #FF9E4A;   /* Antares amber — the heat ramp */
+  --color-yellow-soft: #3A2418;
+  --color-yellow-glow: #291A12;
+  --color-blue:        #7FD4FF;   /* cold star blue — links, accents */
+  --color-blue-soft:   #14263A;
+  --color-blue-deep:   #B8E8FF;
+  --color-success:     #6FE3B0;
+  --color-warn:        #FFC46B;
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.65), 0 18px 40px rgba(0, 0, 0, 0.6);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.65);
+  --skin-eye:          #070B18;
+  color-scheme: dark;
+}
+/* Cards read as glass over the sky, not as opaque panels punched into it —
+   otherwise the starfield stops at the card edge and the illusion dies. */
+:root[data-skin="observatory"] .card,
+:root[data-skin="observatory"] .board-card {
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  backdrop-filter: blur(2px);
+}
+/* Section headings get a faint halo, the way a bright star blooms in an
+   eyepiece. Kept to 0.35em so it stays atmosphere, not a glow effect. */
+:root[data-skin="observatory"] .section-title,
+:root[data-skin="observatory"] .usage-title {
+  text-shadow: 0 0 0.35em color-mix(in srgb, var(--color-yellow) 30%, transparent);
+}
+
+/* ══ Abyss — IP skin ════════════════════════════════════════════════════
+   A deep dive. Same trick as Observatory but pointed the other way: the
+   lexicon turns the panel into a dive log (at keyboard → "submerged", peak
+   → "deepest"), and the page itself has to feel like depth.
+
+   The gradient runs top-to-bottom rather than being a flat fill, because
+   depth is the whole subject: light dies with distance from the surface. Teal
+   accent because that's the last wavelength to survive underwater — red is
+   gone by 5m, which is also why the heat ramp here is bio-luminescent green
+   rather than warm. */
+:root[data-skin="abyss"] {
+  --color-bg:         #04141C;
+  --color-bg-soft:    #072030;
+  --color-surface:    #0A2A3C;
+  --color-surface-alt:#0D3247;
+  --color-line:       #1B4C63;
+  --color-line-soft:  #123A4E;
+  --color-text:       #DFF3F7;
+  --color-text-dim:   #9EC4CF;
+  --color-text-faint: #74A0AD;
+  --color-yellow:      #4FE3C1;   /* bio-luminescence — the heat ramp */
+  --color-yellow-soft: #0B3A38;
+  --color-yellow-glow: #0A2C2C;
+  --color-blue:        #59C8F5;
+  --color-blue-soft:   #0C2E42;
+  --color-blue-deep:   #A8E6FF;
+  --color-success:     #58E0A8;
+  --color-warn:        #F5C97A;
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.6), 0 20px 44px rgba(0, 0, 0, 0.55);
+  --shadow-cta:        0 2px 0 rgba(0, 0, 0, 0.6);
+  --skin-eye:          #04141C;
+  color-scheme: dark;
+}
+:root[data-skin="abyss"] .card,
+:root[data-skin="abyss"] .board-card {
+  background: color-mix(in srgb, var(--color-surface) 78%, transparent);
+  backdrop-filter: blur(2px);
+}
+/* Headings glow faintly teal — the only light down here is the light you
+   brought with you. */
+:root[data-skin="abyss"] .section-title,
+:root[data-skin="abyss"] .usage-title {
+  text-shadow: 0 0 0.4em color-mix(in srgb, var(--color-yellow) 28%, transparent);
+}
+
+/* ══ Dumpling — IP skin (cute-creature-labour genre) ═════════════════════
+   The only skin here that touches TYPE, SHAPE, SHADOW and GROUND all at
+   once, because that combination is what the genre actually is. A cream
+   palette on its own would just look like Paper with pink links.
+
+   Measured from kaboo's chiikawa.css rather than guessed:
+     · radius 8px — NOT pills. I assumed big rounded everything and was
+       wrong; the cards are crisp, it's the creatures that are round.
+     · shadows are wide, soft and TINTED with the sky hue (they wrote
+       `0 20px 54px hsl(203 46% 44% / .16)`), never neutral grey.
+     · the body background is a four-stop sky→cream→grass gradient over a
+       46px grid, so the page reads as notebook paper under open sky. */
+:root[data-skin="dumpling"] {
+  --color-bg:         #F2FAFE;
+  --color-bg-soft:    #E8F4FB;
+  --color-surface:    #FFFFFF;
+  --color-surface-alt:#FDF8EC;
+  --color-line:       #B9DCEC;
+  --color-line-soft:  #D8EBF5;
+  --color-text:       #37424F;   /* soft ink, never #000 */
+  --color-text-dim:   #64748B;
+  /* WCAG: was #93A3B5 at 2.44:1 on this skin's ground, under the 4.5
+     minimum for the stat labels / caption / legend that share this
+     token. #67727F is the smallest darkening that clears it. */
+  --color-text-faint:  #67727F;
+  --color-yellow:      #F2B23C;  /* the snack colour — heat ramp */
+  --color-yellow-soft: #FDF0D4;
+  --color-yellow-glow: #FEF7E8;
+  --color-blue:        #3E8FB4;  /* macaron blue — links */
+  --color-blue-soft:   #DDEEF7;
+  --color-blue-deep:   #2C6D8C;
+  --color-success:     #6FBF8B;
+  --color-warn:        #EE9BA6;  /* macaron pink */
+  /* Wide, soft, sky-tinted — the "paper floating over paper" look. */
+  --shadow-card:       0 10px 30px rgba(58, 122, 156, 0.10);
+  --shadow-card-hover: 0 16px 44px rgba(58, 122, 156, 0.18);
+  --shadow-cta:        0 3px 0 rgba(58, 122, 156, 0.22);
+  /* Small radii, matching the reference. The roundness lives in the
+     creatures, not in the layout. */
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --skin-eye: #FFFFFF;
+  color-scheme: light;
+}
+/* TYPE: rounded sans for everything, including the display face. A serif
+   headline instantly breaks the genre — it reads editorial, not handmade. */
+:root[data-skin="dumpling"] {
+  --font-serif: var(--font-sans);
+}
+
+/* ══ Vocal — licensed-IP skin (vocal synth / DAW) ════════════════════════
+   Palette taken from the official character colours, in the same hues
+   kaboo uses: teal 175° as primary, magenta 335° as secondary, on a
+   near-black with a slight cyan cast. Both accents are saturated, so the
+   surfaces have to stay very dark or the whole thing turns to neon soup. */
+/* ── Workshop ────────────────────────────────────────────────────────
+   A machine shop: cream graph paper, rust-orange accents, steel-grey
+   secondaries. The heat ramp is the rust orange itself — on a light
+   ground there's no figure/ground risk in reusing the accent hue, unlike
+   the dark skins, and it keeps the whole page on one warm axis. */
+:root[data-skin="workshop"] {
+  --color-bg:          #F6F1E3;
+  --color-bg-soft:     #EFE8D6;
+  --color-surface:     #FFFDF6;
+  --color-surface-alt: #F2ECDC;
+  --color-line:        #C9BEA4;
+  --color-line-soft:   #DED5BF;
+  --color-text:        #2C2A24;
+  --color-text-dim:    #5E594C;
+  /* Darkened from #8A8271: measured 3.38 against the cream ground, below
+     the 4.5 AA threshold for the stat labels that use this token. #736A58
+     measures 4.73 and still reads as the quiet tier. */
+  --color-text-faint:  #736A58;
+  --color-yellow:      #B5501C;
+  --color-yellow-soft: #F3DCC9;
+  --color-yellow-glow: #FAEEE1;
+  --color-blue:        #1F5E7A;
+  --color-blue-soft:   #DCE9EF;
+  --color-blue-deep:   #133F53;
+  --color-success:     #4F7A3F;
+  --color-warn:        #C2761B;
+  --skin-eye:          #F6F1E3;
+  color-scheme: light;
+}
+/* Cards read as steel plate on the bench: square-ish, hairline edge, and
+   a shadow with the paper's warmth rather than neutral grey. */
+:root[data-skin="workshop"] { --r-sm: 3px; --r-md: 4px; --r-lg: 5px; }
+:root[data-skin="workshop"] .card,
+:root[data-skin="workshop"] .board-card {
+  border: 1px solid var(--color-line);
+  box-shadow: 0 1px 0 #FFFFFF inset, 0 8px 20px rgba(90, 66, 34, 0.09);
+}
+:root[data-skin="workshop"] .card:hover,
+:root[data-skin="workshop"] .board-card:hover {
+  border-color: color-mix(in srgb, var(--color-yellow) 45%, var(--color-line));
+}
+
+/* ── Hereva ──────────────────────────────────────────────────────────
+   A witch's potion notebook: deep violet ground with aged parchment
+   panels. The ramp is cauldron green, deliberately off the violet/gold
+   axis so the charts stay legible against both the ground and the links. */
+:root[data-skin="hereva"] {
+  --color-bg:          #1E1233;
+  --color-bg-soft:     #251742;
+  --color-surface:     #2B1B4A;
+  --color-surface-alt: #33215A;
+  --color-line:        #4E3579;
+  --color-line-soft:   #3A2660;
+  --color-text:        #F0E6D2;
+  --color-text-dim:    #BFAED4;
+  --color-text-faint:  #9583B2;
+  --color-yellow:      #62C48A;
+  --color-yellow-soft: #1B3A2C;
+  --color-yellow-glow: #142C21;
+  --color-blue:        #E8C463;
+  --color-blue-soft:   #3A2E1B;
+  --color-blue-deep:   #F6DE9A;
+  --color-success:     #62C48A;
+  --color-warn:        #E0806B;
+  --skin-eye:          #1E1233;
+  color-scheme: dark;
+}
+/* Panels are parchment pages pinned to the book: warm paper tint, soft
+   corner, and a gold hairline. Serif headings suit a grimoire, so unlike
+   Dumpling this skin keeps the display face. */
+:root[data-skin="hereva"] .card,
+:root[data-skin="hereva"] .board-card {
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, #E8D9B5 9%, var(--color-surface)),
+      var(--color-surface) 62%);
+  border: 1px solid color-mix(in srgb, var(--color-blue) 24%, var(--color-line));
+  box-shadow: 0 10px 30px rgba(10, 4, 24, 0.4);
+}
+:root[data-skin="hereva"] .card:hover,
+:root[data-skin="hereva"] .board-card:hover {
+  border-color: color-mix(in srgb, var(--color-blue) 52%, transparent);
+}
+:root[data-skin="hereva"] .section-title,
+:root[data-skin="hereva"] .usage-title {
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--color-blue) 22%, transparent);
+}
+
+:root[data-skin="vocal"] {
+  --color-bg:         #050D0F;
+  --color-bg-soft:    #081418;
+  --color-surface:    #0A171B;
+  --color-surface-alt:#0C1E24;
+  --color-line:       #1E4A50;
+  --color-line-soft:  #143036;
+  --color-text:       #E4F7F6;
+  --color-text-dim:   #9FC6C6;
+  --color-text-faint: #6E9B9E;
+  /* Heat ramp rides the magenta — the teal is spoken for by links, and a
+     teal ramp on a teal-linked page loses all figure/ground. */
+  --color-yellow:      #F2519B;
+  --color-yellow-soft: #3A1428;
+  --color-yellow-glow: #2A0F1E;
+  --color-blue:        #39D2C8;
+  --color-blue-soft:   #0E2E33;
+  --color-blue-deep:   #8FF0E8;
+  --color-success:     #4FE0A8;
+  --color-warn:        #FFC46B;
+  --skin-eye:          #050D0F;
+  color-scheme: dark;
+}
+/* Cards get a thin teal edge and a faint inner glow, like channel strips
+   in a mixer. Semi-transparent so the stage haze reads through them. */
+:root[data-skin="vocal"] .card,
+:root[data-skin="vocal"] .board-card {
+  background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+  border: 1px solid var(--color-line-soft);
+  backdrop-filter: blur(2px);
+}
+:root[data-skin="vocal"] .card:hover,
+:root[data-skin="vocal"] .board-card:hover {
+  border-color: color-mix(in srgb, var(--color-blue) 42%, transparent);
+}
+:root[data-skin="vocal"] .section-title,
+:root[data-skin="vocal"] .usage-title {
+  text-shadow: 0 0 0.4em color-mix(in srgb, var(--color-blue) 30%, transparent);
+}
+/* The stat numbers are the thing you read in a DAW — give them the accent
+   glow that a lit LED readout has. */
+:root[data-skin="vocal"] .hstat-v {
+  color: var(--color-blue-deep);
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--color-blue) 34%, transparent);
+}
+/* Cards are opaque white paper with a hairline edge and a soft drop —
+   they must sit ON the background rather than being cut out of it. */
+:root[data-skin="dumpling"] .card,
+:root[data-skin="dumpling"] .board-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-line-soft);
+  box-shadow: 0 8px 22px rgba(58, 122, 156, 0.09);
+}
+:root[data-skin="dumpling"] .card:hover,
+:root[data-skin="dumpling"] .board-card:hover {
+  box-shadow: 0 14px 34px rgba(58, 122, 156, 0.16);
+}
+/* Section kickers become little taped labels: pale yellow chip, dark ink. */
+:root[data-skin="dumpling"] .card-kicker,
+:root[data-skin="dumpling"] .hstat-key {
+  background: var(--color-yellow-soft);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #7A5A17;
+}
+/* Headings keep the sans face but pick up a hand-drawn underline. */
+:root[data-skin="dumpling"] .usage-title em,
+:root[data-skin="dumpling"] .hero-name em {
+  font-style: normal;
+  color: var(--color-blue-deep);
+  text-decoration: underline wavy color-mix(in srgb, var(--color-warn) 70%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+/* ── Ambient layer ─────────────────────────────────────────────────────
+   Fixed behind the page. `pointer-events: none` is non-negotiable:
+   decoration must never intercept a click. z-index 0 with .page above it. */
+.skin-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.page { position: relative; z-index: 1; }
+
+/* clouds — soft blobs drifting at different rates. NOT white: the Meadow
+   page is already near-white (#F2F7EE), so white-on-white measured as
+   invisible. Tinting with the skin's own accent (very low alpha) means the
+   layer reads as depth on any palette rather than vanishing on light ones. */
+.skin-ambient--clouds .sa-cloud {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at 50% 50%,
+    color-mix(in srgb, var(--color-blue) 16%, transparent),
+    transparent 72%);
+}
+.skin-ambient--clouds .sa-cloud-a { width: 460px; height: 170px; left: -70px;  top: 6%; }
+.skin-ambient--clouds .sa-cloud-b { width: 600px; height: 210px; right: -90px; top: 30%; }
+.skin-ambient--clouds .sa-cloud-c { width: 380px; height: 150px; left: 26%;    bottom: 4%; }
+/* A second, warmer band so the field isn't one flat hue. */
+.skin-ambient--clouds::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 40% at 18% 22%, color-mix(in srgb, var(--color-yellow) 13%, transparent), transparent 70%),
+    radial-gradient(ellipse 60% 35% at 82% 68%, color-mix(in srgb, var(--color-blue) 10%, transparent), transparent 70%);
+}
+
+/* scanlines — a CRT needs three things stacked: a phosphor glow pooling at
+   the top of the tube, the horizontal line structure, and a faint vertical
+   aperture grille. One flat gradient reads as "dark background"; the stack
+   reads as a screen. This layering is the single biggest difference between
+   a recoloured page and one that feels like a different object. */
+.skin-ambient--scan {
+  background:
+    radial-gradient(ellipse at 50% -8%, rgba(124, 255, 160, 0.14), transparent 44%),
+    radial-gradient(ellipse at 84% 92%, rgba(70, 224, 138, 0.07), transparent 38%),
+    repeating-linear-gradient(0deg, rgba(124, 255, 160, 0.05) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(124, 255, 160, 0.035) 0 1px, transparent 1px 42px);
+}
+
+/* halftone — riso printing is dots. A tiny repeating radial-gradient is a
+   halftone screen for free: no image, no mask, scales to any viewport.
+   Two offset layers in the two inks, at slightly different pitches, so
+   they beat against each other the way real misregistered plates do. */
+.skin-ambient--halftone {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(226, 84, 44, 0.16) 1px, transparent 1.6px) 0 0 / 7px 7px,
+    radial-gradient(circle at 1px 1px, rgba(27, 63, 160, 0.13) 1px, transparent 1.6px) 3px 4px / 9px 9px,
+    radial-gradient(ellipse at 12% 8%, rgba(226, 84, 44, 0.07), transparent 46%),
+    radial-gradient(ellipse at 88% 82%, rgba(27, 63, 160, 0.06), transparent 44%);
+}
+
+/* grid — a tactical display's measured field: a fine grid, a coarser one
+   over it, and a vignette so the corners fall away like a lens. */
+.skin-ambient--grid {
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 182, 39, 0.07), transparent 62%),
+    repeating-linear-gradient(0deg,  rgba(255, 182, 39, 0.05) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(255, 182, 39, 0.05) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg,  rgba(255, 182, 39, 0.09) 0 1px, transparent 1px 130px),
+    repeating-linear-gradient(90deg, rgba(255, 182, 39, 0.09) 0 1px, transparent 1px 130px);
+}
+/* The vignette has to be a child layer, not another gradient in the stack,
+   because it must sit ON TOP of the grid to darken it at the edges. */
+.skin-ambient--grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 78% 68% at 50% 48%, transparent 42%, rgba(8, 10, 9, 0.82) 100%);
+}
+
+/* rain — columns of glyphs falling at per-column rates. `writing-mode`
+   stacks the characters vertically without needing one element each, so 24
+   columns cost 24 nodes instead of ~500.
+
+   Two constraints learned from looking at it: the rain must not cross the
+   reading column, and it must stay far dimmer than body text. A mask keeps
+   it in the outer margins — the first version ran columns straight through
+   the résumé, which is indefensible on a page whose job is to be read. */
+.skin-ambient--rain {
+  --rain-mask: linear-gradient(90deg,
+    #000 0,
+    #000 calc(50% - var(--w-page) / 2 - 30px),
+    transparent calc(50% - var(--w-page) / 2 + 40px),
+    transparent calc(50% + var(--w-page) / 2 - 40px),
+    #000 calc(50% + var(--w-page) / 2 + 30px),
+    #000 100%);
+  -webkit-mask-image: var(--rain-mask);
+  mask-image: var(--rain-mask);
+}
+/* The colour field can't live on the masked layer — the mask would punch a
+   hole in the glow too. ::after is masked along with the parent, so the
+   field goes on a rule that ISN'T masked: html's own background, set only
+   for this skin. */
+:root[data-skin="neon"] body {
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 46, 154, 0.12), transparent 46%),
+    radial-gradient(ellipse at 80% 88%, rgba(0, 229, 255, 0.08), transparent 40%),
+    repeating-linear-gradient(90deg, rgba(255, 46, 154, 0.035) 0 1px, transparent 1px 38px);
+  background-attachment: fixed;
+}
+.skin-ambient--rain .sa-rain {
+  position: absolute;
+  top: -60%;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-mono);
+  font-size: var(--rsz, 12px);
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  color: #FF2E9A;
+  /* Halved from the first pass: at 0.3 the glyphs competed with body copy
+     for attention. Ambient means ambient. */
+  opacity: calc(var(--rop, 0.3) * 0.5);
+  white-space: nowrap;
+  text-shadow: 0 0 8px currentColor;
+  user-select: none;
+}
+.skin-ambient--rain .sa-rain.is-alt { color: #00E5FF; }
+/* Below the page width there are no margins left to rain in, so drop it
+   rather than have it fall across the text. */
+@media (max-width: 1340px) {
+  .skin-ambient--rain .sa-rain { display: none; }
+}
+
+/* motes — dust caught in a sunbeam. Bigger and softer than Dusk's sparks,
+   and they drift upward instead of twinkling: warm air moves. */
+.skin-ambient--motes {
+  background:
+    radial-gradient(ellipse 80% 55% at 14% -6%, rgba(224, 138, 30, 0.16), transparent 58%),
+    radial-gradient(ellipse 60% 45% at 88% 78%, rgba(194, 87, 27, 0.08), transparent 52%);
+}
+.skin-ambient--motes i {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(224, 138, 30, 0.5);
+  filter: blur(0.6px);
+  opacity: 0.4;
+}
+
+/* fibres — manila stock. Paper isn't flat: it has long fibres and blotches
+   where the ink or age has soaked in. Two very fine repeating gradients at
+   opposing angles read as a felt texture, and the blotches break up the
+   regularity that would otherwise look like a pattern. */
+.skin-ambient--fibres {
+  background:
+    repeating-linear-gradient(64deg,  rgba(90, 78, 54, 0.045) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-58deg, rgba(90, 78, 54, 0.035) 0 1px, transparent 1px 7px),
+    radial-gradient(ellipse 34% 22% at 18% 12%, rgba(122, 96, 52, 0.09), transparent 70%),
+    radial-gradient(ellipse 28% 20% at 84% 74%, rgba(122, 96, 52, 0.075), transparent 70%),
+    radial-gradient(ellipse 40% 26% at 62% 40%, rgba(140, 47, 29, 0.03), transparent 72%);
+}
+
+/* draft — a drafting sheet: 10mm minor grid, 50mm major grid, plus a soft
+   wash so the sheet isn't a dead flat blue. Minor lines are fainter than
+   major ones, which is what makes it read as measured paper and not as a
+   checkerboard. */
+.skin-ambient--draft {
+  background:
+    repeating-linear-gradient(0deg,  rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(0deg,  rgba(255, 255, 255, 0.13) 0 1px, transparent 1px 110px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.13) 0 1px, transparent 1px 110px),
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 62%);
+}
+
+/* sparkles — pin-points that breathe out of phase with each other */
+.skin-ambient--sparks i {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: var(--color-yellow);
+  opacity: 0.28;
+  box-shadow: 0 0 6px var(--color-yellow);
+}
+/* Dusk gets depth too — a night sky isn't flat indigo. */
+.skin-ambient--sparks {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(155, 168, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 82% 96%, rgba(255, 209, 102, 0.06), transparent 55%);
+}
+
+/* starfield (Observatory) — three layers, because a real sky has depth.
+   Two fields of fixed-position stars at different sizes and opacities plus
+   a Milky-Way band. The stars are drawn with `radial-gradient` dots in a
+   repeating tile rather than as elements: ~200 visible points would be 200
+   DOM nodes, and a tile costs nothing to composite.
+
+   The dots come in two tile sizes whose periods share no common factor
+   (137/91 and 89/113), so the eye can't find the grid — a single tile at
+   any size reads immediately as wallpaper. */
+.skin-ambient--starfield {
+  background-color: transparent;
+  background-image:
+    /* the galactic band, a soft diagonal wash */
+    linear-gradient(107deg, transparent 32%,
+      color-mix(in srgb, var(--color-blue) 6%, transparent) 46%,
+      color-mix(in srgb, #FFFFFF 4%, transparent) 52%,
+      color-mix(in srgb, var(--color-blue) 5%, transparent) 58%, transparent 72%),
+    /* bright, sparse stars */
+    radial-gradient(1.4px 1.4px at 22px 31px, rgba(255,255,255,.85), transparent 100%),
+    radial-gradient(1.2px 1.2px at 96px 12px, color-mix(in srgb, var(--color-blue) 90%, #fff), transparent 100%),
+    radial-gradient(1.5px 1.5px at 61px 74px, rgba(255,255,255,.7), transparent 100%),
+    /* faint, dense stars */
+    radial-gradient(1px 1px at 14px 58px, rgba(255,255,255,.42), transparent 100%),
+    radial-gradient(1px 1px at 71px 23px, rgba(255,255,255,.35), transparent 100%),
+    radial-gradient(0.9px 0.9px at 44px 97px, color-mix(in srgb, var(--color-yellow) 80%, #fff), transparent 100%);
+  background-size:
+    100% 100%,
+    137px 91px, 137px 91px, 137px 91px,
+    89px 113px, 89px 113px, 89px 113px;
+}
+/* Shooting stars: two streaks on long, offset delays. Rare enough that
+   catching one feels like luck rather than like a loading spinner. */
+.skin-ambient--starfield .sa-shoot {
+  position: absolute;
+  top: var(--sy, 12%);
+  left: var(--sx, -6%);
+  width: 130px;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+  transform: rotate(16deg);
+}
+
+/* bathy (Abyss) — the depth gradient plus suspended particulate.
+   Two things make water read as water: light falling off with depth, and
+   marine snow drifting through the beam. The vertical gradient does the
+   first; the dot tiles do the second. Caustics at the very top imply a
+   surface far above. */
+.skin-ambient--bathy {
+  background-image:
+    /* surface light, only in the top fifth */
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--color-blue) 14%, transparent) 0%,
+      color-mix(in srgb, var(--color-blue) 4%, transparent) 14%,
+      transparent 30%),
+    /* two lamp cones from above */
+    radial-gradient(ellipse 55% 40% at 26% -8%, color-mix(in srgb, var(--color-blue) 10%, transparent), transparent 70%),
+    radial-gradient(ellipse 45% 34% at 74% -6%, color-mix(in srgb, var(--color-yellow) 7%, transparent), transparent 70%),
+    /* marine snow, two densities */
+    radial-gradient(1.6px 1.6px at 33px 47px, color-mix(in srgb, var(--color-yellow) 45%, transparent), transparent 100%),
+    radial-gradient(1.1px 1.1px at 88px 19px, rgba(255,255,255,.22), transparent 100%),
+    radial-gradient(1.3px 1.3px at 12px 84px, rgba(255,255,255,.16), transparent 100%);
+  background-size:
+    100% 100%, 100% 100%, 100% 100%,
+    119px 97px, 83px 127px, 101px 79px;
+}
+/* Rising bubbles — the one motion cue that says "underwater" and nothing
+   else. Sized in the runtime so each column drifts at its own rate. */
+.skin-ambient--bathy .sa-bub {
+  position: absolute;
+  left: var(--sx);
+  bottom: -20px;
+  width: var(--sz, 5px);
+  height: var(--sz, 5px);
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-blue) 45%, transparent);
+  background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.5), transparent 62%);
+  opacity: 0;
+}
+
+/* meadowsky (Dumpling) — the genre's signature ground: open sky fading to
+   grass, laid over squared notebook paper.
+
+   Both halves matter. The gradient alone looks like a generic pastel
+   background; the grid alone looks like a wireframe. Together they read as
+   a page in a scrapbook, which is the whole point. Grid pitch is 46px,
+   matching the reference — larger reads as graph paper for maths, smaller
+   turns to mush at 1× zoom. */
+.skin-ambient--meadowsky {
+  background-image:
+    /* sky → pale blue → cream → the faintest green at the very bottom */
+    linear-gradient(180deg,
+      #E4F4FD 0%,
+      #EDF7FC 24%,
+      #FDFAF0 62%,
+      #EFF7E9 100%),
+    /* notebook squares */
+    repeating-linear-gradient(90deg, rgba(150, 200, 224, 0.20) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(0deg,  rgba(150, 200, 224, 0.20) 0 1px, transparent 1px 46px);
+  background-size: 100% 100%, 46px 46px, 46px 46px;
+}
+/* Fat rounded clouds, drifting. Built as three overlapping lobes per cloud
+   so the silhouette is bumpy rather than a plain ellipse.
+
+   Two constraints learned from the first render, both of which I got wrong:
+   (a) SIZE — at 170–200px wide and 82% opaque these read as amorphous white
+       blobs, not clouds. Down to ~110px and 62%.
+   (b) PLACEMENT — I scattered them from 8% to 64% of the viewport, so one
+       parked itself behind the panel heading and another sat inside the
+       heatmap. The ground is a sky→grass gradient: clouds live in the SKY,
+       which is the top fifth. Below that they're drifting through grass. */
+.skin-ambient--meadowsky .sa-puff {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: var(--sw, 110px);
+  height: calc(var(--sw, 110px) * 0.38);
+  background: #FFFFFF;
+  opacity: 0.62;
+  border-radius: 999px;
+  box-shadow:
+    /* the two side lobes */
+    calc(var(--sw, 110px) * -0.2) calc(var(--sw, 110px) * 0.05) 0 calc(var(--sw, 110px) * -0.09) #FFFFFF,
+    calc(var(--sw, 110px) *  0.22) calc(var(--sw, 110px) * 0.04) 0 calc(var(--sw, 110px) * -0.12) #FFFFFF;
+}
+/* stage (Vocal) — a concert stage seen from the floor: two coloured wash
+   lights from above, a haze layer, and staff lines ruled across the page.
+   The staff lines are what make it read as MUSIC rather than as a generic
+   dark neon theme — five hairlines at a real stave spacing. */
+/* ── Workshop ambient: graph paper + a drafting grid ─────────────────
+   Two grids at different pitches — a fine 8px engineering grid and a
+   heavier 40px one — over warm paper. Static: a machine shop's surface
+   doesn't move, and a moving texture under a résumé is a liability. */
+.skin-ambient--benchtop {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(120, 92, 52, 0.055) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(180deg, rgba(120, 92, 52, 0.055) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(90deg, rgba(120, 92, 52, 0.085) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(180deg, rgba(120, 92, 52, 0.085) 0 1px, transparent 1px 40px),
+    radial-gradient(circle at 88% 6%, rgba(181, 80, 28, 0.07), transparent 44%),
+    linear-gradient(170deg, #F8F3E6 0%, #F3EDDD 60%, #EFE7D4 100%);
+}
+/* Swarf — little curls of cut metal, scattered in the gutters. Static
+   marks, not particles: they read as debris on the bench. */
+.skin-ambient--benchtop .sa-curl {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: var(--ss, 9px); height: var(--ss, 9px);
+  border: 1.4px solid rgba(150, 96, 40, 0.34);
+  border-radius: 50% 50% 50% 0;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  transform: rotate(var(--st, 0deg));
+}
+
+/* ── Hereva ambient: candlelit violet + drifting spell motes ─────────
+   A pool of candlelight at the top, cooler violet falling away below,
+   and a faint parchment grain. */
+.skin-ambient--spellmotes {
+  background-image:
+    radial-gradient(circle at 78% 4%, rgba(232, 196, 99, 0.13), transparent 40%),
+    radial-gradient(circle at 14% 84%, rgba(98, 196, 138, 0.09), transparent 44%),
+    repeating-linear-gradient(115deg,
+      rgba(240, 230, 210, 0.016) 0 2px, transparent 2px 5px),
+    linear-gradient(168deg, #241541 0%, #1E1233 54%, #170D28 100%);
+}
+/* Motes of spell-light rising and fading. Gutter-pinned in px like every
+   other particle layer in this file. */
+.skin-ambient--spellmotes .sa-mote {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: var(--ss, 5px); height: var(--ss, 5px);
+  border-radius: 50%;
+  background: var(--sc, #E8C463);
+  box-shadow: 0 0 6px var(--sc, #E8C463);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skin-ambient--spellmotes .sa-mote {
+    animation: skin-float var(--sd, 7s) ease-in-out infinite;
+    animation-delay: calc(var(--si, 0) * -0.62s);
+  }
+}
+
+.skin-ambient--stage {
+  background-image:
+    /* teal wash from upper right, magenta from lower left */
+    radial-gradient(circle at 84% 8%, rgba(57, 210, 200, 0.15), transparent 46%),
+    radial-gradient(circle at 10% 78%, rgba(242, 81, 155, 0.11), transparent 48%),
+    /* stave: 5 lines, 7px apart, repeating every 128px */
+    repeating-linear-gradient(180deg,
+      rgba(57, 210, 200, 0.055) 0 1px, transparent 1px 7px,
+      rgba(57, 210, 200, 0.055) 7px 8px, transparent 8px 14px,
+      rgba(57, 210, 200, 0.055) 14px 15px, transparent 15px 21px,
+      rgba(57, 210, 200, 0.055) 21px 22px, transparent 22px 28px,
+      rgba(57, 210, 200, 0.055) 28px 29px, transparent 29px 128px),
+    linear-gradient(150deg, #040C0E 0%, #071417 52%, #05101A 100%);
+  background-size: 100% 100%, 100% 100%, 100% 128px, 100% 100%;
+}
+/* Floating note glyphs. Kept to the gutters like every other particle
+   layer, for the reason the Dumpling sparkles taught: percentage-placed
+   decoration walks onto the text as the window narrows. */
+.skin-ambient--stage .sa-note {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  font-family: var(--font-serif);
+  font-size: var(--ss, 15px);
+  line-height: 1;
+  color: var(--sc, #39D2C8);
+  opacity: 0;
+  transform: rotate(var(--st, 0deg));
+}
+/* Sparkles and clouds both have to stay out of the readable column, and
+   the column width is a MEASURED quantity, not a percentage: the page is a
+   fixed 1280px box centred in the viewport, so the free margin is
+   (100vw - 1280px)/2 and it hits zero at 1280. Positioning decoration in
+   percentages silently walks it onto the text as the window narrows — which
+   is exactly what happened at 1280 and 900. */
+.skin-ambient--meadowsky {
+  --gutter: max(0px, calc((100vw - var(--w-page)) / 2));
+}
+/* No usable margin → no scattered decoration. The gradient ground and the
+   notebook grid carry the skin on their own; they're full-bleed and can't
+   collide with anything. */
+@media (max-width: 1400px) {
+  .skin-ambient--meadowsky .sa-star { display: none; }
+  /* Narrow viewports: the header stacks and eats the band the clouds used
+     to live in. Hide them rather than let them drift over the brand — the
+     gradient sky and grid still carry the skin. */
+  .skin-ambient--meadowsky .sa-puff { display: none; }
+}
+/* Sparkle field — the reference has one and it does a lot of work: it's
+   what makes the page feel *cheerful* rather than merely pastel. Four-point
+   stars rather than dots, in the pink/blue macaron pair, twinkling out of
+   phase. Built with two crossed gradients so each is a plus-shaped glint. */
+.skin-ambient--meadowsky .sa-star {
+  position: absolute;
+  left: var(--sx);
+  top: var(--sy);
+  width: var(--ss, 9px);
+  height: var(--ss, 9px);
+  opacity: 0;
+  /* A four-point star, not a plus sign. Two crossed tapered slivers: each
+     is a gradient that fades to transparent at both ends, which is what
+     gives the points. A flat bar of colour reads as a crosshair. */
+  background:
+    linear-gradient(to bottom, transparent, var(--sc, #EE9BA6) 45% 55%, transparent) center / 16% 100% no-repeat,
+    linear-gradient(to right,  transparent, var(--sc, #EE9BA6) 45% 55%, transparent) center / 100% 16% no-repeat,
+    radial-gradient(circle, var(--sc, #EE9BA6) 0 12%, transparent 60%) center / 100% 100% no-repeat;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skin-ambient--clouds .sa-cloud   { animation: skin-drift 26s ease-in-out infinite; }
+  .skin-ambient--meadowsky .sa-puff {
+    animation: skin-puff calc(var(--sd, 40s)) linear infinite;
+    animation-delay: calc(var(--si) * -7s);
+  }
+  /* Below 1400px the hero text slides left into the clouds' flight path, so
+     they cross behind the top bar only. Verified at 1280 and 900, where a
+     cloud was landing on "Yuan" and on the tagline respectively. */
+  .skin-ambient--meadowsky .sa-star {
+    animation: skin-twinkle 5.5s ease-in-out infinite;
+    animation-delay: calc(var(--si) * -0.62s);
+  }
+  .skin-ambient--stage .sa-note {
+    animation: skin-float calc(var(--sd, 5s)) ease-in-out infinite;
+    animation-delay: calc(var(--si) * -0.83s);
+  }
+  .skin-ambient--clouds .sa-cloud-b { animation-duration: 34s; animation-delay: -8s; }
+  .skin-ambient--clouds .sa-cloud-c { animation-duration: 30s; animation-delay: -16s; }
+  .skin-ambient--sparks i {
+    animation: skin-twinkle 5.2s ease-in-out infinite;
+    animation-delay: calc(var(--si) * -0.23s);
+  }
+  .skin-ambient--rain .sa-rain {
+    animation: skin-rain var(--rd, 9s) linear infinite;
+    animation-delay: var(--rdelay, 0s);
+  }
+  .skin-ambient--motes i {
+    animation: skin-float 14s ease-in-out infinite;
+    animation-delay: calc(var(--si) * -0.9s);
+  }
+  /* The starfield itself twinkles by cross-fading the whole layer very
+     slightly — cheaper than animating individual stars, and at this
+     amplitude it reads as atmospheric seeing rather than as a pulse. */
+  .skin-ambient--starfield { animation: skin-seeing 9s ease-in-out infinite; }
+  .skin-ambient--starfield .sa-shoot {
+    animation: skin-shoot 14s ease-in infinite;
+    animation-delay: var(--sd, 0s);
+  }
+  .skin-ambient--bathy .sa-bub {
+    animation: skin-rise var(--bd, 16s) linear infinite;
+    animation-delay: calc(var(--si) * -1.7s);
+  }
+}
+@keyframes skin-seeing {
+  0%, 100% { opacity: 0.82; }
+  50%      { opacity: 1; }
+}
+/* Clouds cross the whole viewport and wrap. Translating past 100vw rather
+   than oscillating means they never visibly "bounce back". */
+@keyframes skin-puff {
+  0%   { transform: translateX(-24vw); }
+  100% { transform: translateX(112vw); }
+}
+/* Twinkle: mostly absent, brief bloom. A star that's visible 100% of the
+   time reads as a dot; the sparkle is in the appearing. */
+@keyframes skin-twinkle {
+  0%, 68%, 100% { opacity: 0; transform: scale(.55) rotate(0deg); }
+  80%           { opacity: .85; transform: scale(1) rotate(45deg); }
+}
+/* Notes rise and fade, like they're leaving the stage. Drifting sideways
+   as they go so the column doesn't look like a fountain. */
+@keyframes skin-float {
+  0%   { opacity: 0;   transform: translate(0, 12px) rotate(var(--st, 0deg)) scale(.85); }
+  22%  { opacity: .62; }
+  70%  { opacity: .42; }
+  100% { opacity: 0;   transform: translate(var(--sdx, 14px), -46px) rotate(var(--st, 0deg)) scale(1.05); }
+}
+@keyframes skin-shoot {
+  0%, 92%  { opacity: 0; transform: translate3d(0, 0, 0) rotate(16deg); }
+  94%      { opacity: 0.9; }
+  100%     { opacity: 0; transform: translate3d(62vw, 26vh, 0) rotate(16deg); }
+}
+@keyframes skin-rise {
+  0%   { transform: translate3d(0, 0, 0) scale(0.7); opacity: 0; }
+  12%  { opacity: 0.5; }
+  85%  { opacity: 0.35; }
+  100% { transform: translate3d(var(--bx, 14px), -104vh, 0) scale(1.1); opacity: 0; }
+}
+@keyframes skin-float {
+  0%   { transform: translate3d(0, 12px, 0); opacity: 0.12; }
+  50%  { opacity: 0.55; }
+  100% { transform: translate3d(14px, -70px, 0); opacity: 0; }
+}
+@keyframes skin-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(26px, -12px, 0); }
+}
+@keyframes skin-twinkle {
+  0%, 100% { opacity: 0.16; transform: scale(0.8); }
+  50%      { opacity: 0.85; transform: scale(1.35); }
+}
+@keyframes skin-rain {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, 190vh, 0); }
+}
+
+/* ── Foreground overlay ────────────────────────────────────────────────
+   Above the content, below the companion. Same absolute rule as ambient:
+   never interactive. Kept separate from .skin-ambient so the z-order is
+   stated rather than implied by paint order. */
+.skin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* CRT: a curvature vignette, a scanning roll-line, and an overall flicker.
+   The vignette is what sells "tube" — a flat screen has no dark corners. */
+.skin-overlay--crt {
+  background: radial-gradient(ellipse 92% 84% at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.55) 100%);
+}
+.skin-overlay--crt .so-roll {
+  position: absolute;
+  left: 0; right: 0;
+  height: 92px;
+  background: linear-gradient(180deg, transparent, rgba(124, 255, 160, 0.055), transparent);
+  opacity: 0;
+}
+.skin-overlay--crt .so-flicker {
+  position: absolute;
+  inset: 0;
+  background: rgba(124, 255, 160, 0.02);
+}
+
+/* HUD: corner brackets, a status tag and an edge tick-strip. Chrome like
+   this is what makes an interface read as *equipment* — and it's the layer
+   a palette swap can never supply. */
+.skin-overlay--hud {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+}
+.skin-overlay--hud .so-corner {
+  position: absolute;
+  width: 26px; height: 26px;
+  border: 2px solid rgba(255, 182, 39, 0.5);
+}
+.skin-overlay--hud .so-corner.tl { top: 14px;    left: 14px;  border-right: 0; border-bottom: 0; }
+.skin-overlay--hud .so-corner.tr { top: 14px;    right: 14px; border-left: 0;  border-bottom: 0; }
+.skin-overlay--hud .so-corner.bl { bottom: 14px; left: 14px;  border-right: 0; border-top: 0; }
+/* The ⌘K palette button is pinned at right/bottom 20px and is ~34px tall,
+   so the bottom-right bracket clears it rather than sitting on it. */
+.skin-overlay--hud .so-corner.br { bottom: 66px; right: 14px; border-left: 0;  border-top: 0; }
+.skin-overlay--hud .so-tag {
+  position: absolute;
+  /* Was left: 50px, which put it under the project cards once the page
+     scrolled (74% over a tag). Rotated into the measured gutter instead. */
+  left: calc(var(--gutter) / 2 + 8px);
+  bottom: 300px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.18em;
+  color: rgba(255, 182, 39, 0.6);
+  font-style: normal;
+  white-space: nowrap;
+}
+/* A measured tick strip down the left edge — the "instrument" cue. */
+.skin-overlay--hud .so-ticks {
+  position: absolute;
+  left: 0; top: 18%; bottom: 18%;
+  width: 8px;
+  background: repeating-linear-gradient(180deg,
+    rgba(255, 182, 39, 0.42) 0 1px, transparent 1px 14px);
+}
+
+/* Dossier: a rubber stamp and a file reference.
+
+   PLACEMENT took three attempts and a measurement. Top-right landed on a
+   CTA and on the hero name at 390px. Bottom-left landed on the page's own
+   "TOP TOOL" label. Rotating into the left margin still overlapped cards,
+   because the margin is only 80px wide at 1440 (.page starts at x=80) while
+   a rotated 15px-tall stamp needs ~34px plus clearance.
+
+   So both pieces are now pinned to the CENTRE of the measured margin —
+   half of (viewport − content width) — and the skin drops them entirely
+   when that margin is too narrow to hold them. --stamp-gutter makes the
+   threshold explicit instead of hidden in a guessed breakpoint. */
+.skin-overlay--stamp {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+}
+.skin-overlay--stamp .so-stamp {
+  position: absolute;
+  /* Centre of the left margin; the element is centred on this point, so
+     rotation can't push it into either the viewport edge or the content. */
+  left: calc(var(--gutter) / 2);
+  top: 260px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-78deg);
+  padding: 4px 12px;
+  border: 2.5px solid rgba(140, 47, 29, 0.42);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(140, 47, 29, 0.42);
+  font-style: normal;
+  white-space: nowrap;
+  /* Ink doesn't stamp evenly — a slight blur reads as absorbed pigment. */
+  filter: blur(0.25px);
+}
+.skin-overlay--stamp .so-ref {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  bottom: 190px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.12em;
+  color: rgba(28, 26, 20, 0.4);
+  font-style: normal;
+  white-space: nowrap;
+}
+/* A rotated stamp occupies ~40px across. Below 1400px the margin is under
+   60px per side, which isn't enough to hold it clear of the content — so
+   the chrome goes rather than overlapping the résumé. */
+@media (max-width: 1400px) {
+  .skin-overlay--stamp .so-stamp,
+  .skin-overlay--stamp .so-ref { display: none; }
+}
+
+/* Blueprint: a dimension rule down the left edge and a rotated title block.
+   Same gutter-centred placement as Dossier's stamp, for the same reason. */
+.skin-overlay--rule {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+}
+.skin-overlay--rule .so-rule {
+  position: absolute;
+  left: 0; top: 12%; bottom: 12%;
+  width: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  background: repeating-linear-gradient(180deg,
+    rgba(255, 255, 255, 0.45) 0 1px, transparent 1px 11px);
+}
+.skin-overlay--rule .so-block {
+  position: absolute;
+  left: calc(var(--gutter) / 2 + 8px);
+  bottom: 190px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  padding: 3px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.12em;
+  color: rgba(234, 243, 255, 0.62);
+  font-style: normal;
+  white-space: nowrap;
+}
+@media (max-width: 1400px) {
+  .skin-overlay--rule .so-block { display: none; }
+}
+@media (max-width: 900px) {
+  .skin-overlay--rule .so-rule { display: none; }
+}
+
+/* Scope (Observatory): the view through an eyepiece, plus a reticle and a
+   sky-log strip. The vignette is the load-bearing piece — a circular field
+   of view with darkened corners is *the* visual signature of looking
+   through a telescope, and nothing else here would say "instrument".
+
+   The reticle is deliberately off-centre and thin: a crosshair dead in the
+   middle of a résumé would read as a targeting UI, which is a different
+   (and more aggressive) fiction than an observatory. */
+.skin-overlay--scope {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+  background:
+    /* eyepiece field: clear at centre, falling off hard past 60% */
+    radial-gradient(ellipse 78% 72% at 50% 42%, transparent 54%, rgba(2, 5, 14, 0.62) 100%);
+}
+/* Coordinate readout in the gutter — the numbers are Antares's actual
+   right ascension and declination, which is the sort of detail that makes
+   a fiction hold up if anyone checks. */
+.skin-overlay--scope .so-coord {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 280px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.14em;
+  color: rgba(255, 158, 74, 0.55);
+  font-style: normal;
+  white-space: nowrap;
+}
+/* Seeing/conditions strip, mirrored into the right gutter. */
+.skin-overlay--scope .so-seeing {
+  position: absolute;
+  right: calc(var(--gutter) / 2);
+  bottom: 240px;
+  transform-origin: 50% 50%;
+  transform: translateX(50%) rotate(90deg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.14em;
+  color: rgba(127, 212, 255, 0.5);
+  font-style: normal;
+  white-space: nowrap;
+}
+@media (max-width: 1400px) {
+  .skin-overlay--scope .so-coord,
+  .skin-overlay--scope .so-seeing { display: none; }
+}
+
+/* Sonar (Abyss): pressure vignette plus a depth gauge and a sweep.
+   The vignette here is bottom-weighted rather than symmetric — pressure
+   and darkness both come from below, so a centred vignette would read as
+   the same "eyepiece" cue Observatory already owns. */
+.skin-overlay--sonar {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+  background:
+    linear-gradient(180deg, transparent 40%, rgba(1, 8, 12, 0.5) 100%),
+    radial-gradient(ellipse 90% 60% at 50% 108%, rgba(1, 8, 12, 0.55), transparent 70%);
+}
+/* Depth ladder down the left edge, with a marked "current depth" band. */
+.skin-overlay--sonar .so-depth {
+  position: absolute;
+  left: 0; top: 14%; bottom: 14%;
+  width: 12px;
+  border-right: 1px solid rgba(79, 227, 193, 0.28);
+  background: repeating-linear-gradient(180deg,
+    rgba(79, 227, 193, 0.4) 0 1px, transparent 1px 16px);
+}
+.skin-overlay--sonar .so-gauge {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 300px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.14em;
+  color: rgba(79, 227, 193, 0.55);
+  font-style: normal;
+  white-space: nowrap;
+}
+/* The sonar ping: a ring that expands from the lower-left and fades. One
+   ping every 6s — slow enough to feel like listening, not like a spinner. */
+.skin-overlay--sonar .so-ping {
+  position: absolute;
+  left: 8%;
+  bottom: 16%;
+  width: 18px; height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 1px solid rgba(79, 227, 193, 0.5);
+  opacity: 0;
+}
+@media (max-width: 1400px) {
+  .skin-overlay--sonar .so-gauge { display: none; }
+}
+@media (max-width: 900px) {
+  .skin-overlay--sonar .so-depth { display: none; }
+}
+
+/* Scrapbook (Dumpling): the furniture that makes a page look assembled by
+   hand — washi tape, a push pin, a punched ticket, a rubber stamp.
+
+   All of it lives in the measured gutter and disappears below 1400px, the
+   same rule the other three furniture skins follow. Learned the hard way:
+   at 1440 the real margin is only 80px, so anything wider than ~40px has
+   to be dropped rather than shifted onto the résumé. */
+.skin-overlay--scrapbook {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+}
+/* Washi tape: a translucent yellow strip at a jaunty angle, with the
+   torn-edge look done as a dashed mask on both ends. */
+.skin-overlay--scrapbook .so-tape {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 150px;
+  width: 34px;
+  height: 82px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  background: rgba(242, 178, 60, 0.34);
+  border-left: 1px solid rgba(242, 178, 60, 0.22);
+  border-right: 1px solid rgba(242, 178, 60, 0.22);
+  /* torn ends */
+  clip-path: polygon(0 3%, 22% 0, 47% 4%, 73% 0, 100% 3%, 100% 97%, 74% 100%, 48% 96%, 21% 100%, 0 97%);
+}
+/* Push pin: a small dome with a highlight and a soft cast shadow. */
+.skin-overlay--scrapbook .so-pin {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 268px;
+  width: 15px;
+  height: 15px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #FFFFFF 6%, #EE9BA6 45%, #D97A87 100%);
+  box-shadow: 0 3px 6px rgba(58, 122, 156, 0.28);
+}
+/* Punched ticket in the right gutter — a chore coupon. The notches are two
+   background-positioned circles matching the page, so it reads as PUNCHED
+   rather than as a rectangle with dots on it. */
+.skin-overlay--scrapbook .so-ticket {
+  position: absolute;
+  right: calc(var(--gutter) / 2);
+  top: 320px;
+  transform-origin: 50% 50%;
+  transform: translateX(50%) rotate(90deg);
+  padding: 4px 12px;
+  border: 1px dashed rgba(62, 143, 180, 0.5);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.82);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.1em;
+  color: #5B7386;
+  font-style: normal;
+  white-space: nowrap;
+}
+/* "Good work!" rubber stamp, bottom of the left gutter. Slight rotation and
+   a soft blur so it reads as pressed ink rather than as a label. */
+.skin-overlay--scrapbook .so-good {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  bottom: 210px;
+  transform-origin: 50% 50%;
+  transform: translateX(-50%) rotate(-84deg);
+  padding: 3px 10px;
+  border: 2px solid rgba(238, 155, 166, 0.55);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(217, 122, 135, 0.72);
+  font-style: normal;
+  white-space: nowrap;
+  filter: blur(0.2px);
+}
+@media (max-width: 1400px) {
+  .skin-overlay--scrapbook .so-tape,
+  .skin-overlay--scrapbook .so-pin,
+  .skin-overlay--scrapbook .so-ticket,
+  .skin-overlay--scrapbook .so-good { display: none; }
+}
+
+/* Sequencer (Vocal): a miniature vocal-synth editor in the gutters — piano
+   roll down the left, parameter rail on the right, licence credit along
+   the bottom.
+
+   The credit is the one piece of overlay furniture that is NOT decoration.
+   The Piapro Character Licence requires the notice, its URL, the character
+   name and the company name to be displayed, so unlike every other so-*
+   part it survives at ALL widths and is a real anchor. Decoration can be
+   dropped when there's no room; an attribution obligation cannot. */
+/* ── Workshop overlay: bench furniture ───────────────────────────────
+   A steel rule down the left edge with real inch-ish ticks, and a job
+   card in the right gutter. Same discipline as every other overlay: these
+   live in the margins, and they're hidden below 1400px where the margins
+   collapse. */
+.skin-overlay--bench .so-rule2 {
+  position: absolute;
+  left: calc(var(--gutter, 40px) * 0.34);
+  top: 22vh;
+  width: 13px; height: 220px;
+  border: 1px solid rgba(120, 92, 52, 0.4);
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(120, 92, 52, 0.4) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(180deg,
+      rgba(120, 92, 52, 0.55) 0 1px, transparent 1px 55px);
+}
+.skin-overlay--bench .so-job {
+  position: absolute;
+  right: calc(var(--gutter, 40px) * 0.3);
+  top: 26vh;
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  color: rgba(120, 92, 52, 0.62);
+  border: 1px solid rgba(120, 92, 52, 0.3);
+  border-radius: 2px;
+  padding: 10px 4px;
+  background: rgba(255, 253, 246, 0.5);
+}
+/* A caliper reading, bottom left — the shop equivalent of Abyss's gauge. */
+.skin-overlay--bench .so-cal {
+  position: absolute;
+  left: calc(var(--gutter, 40px) * 0.28);
+  bottom: 12vh;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: rgba(120, 92, 52, 0.58);
+}
+@media (max-width: 1400px) {
+  .skin-overlay--bench .so-rule2,
+  .skin-overlay--bench .so-job,
+  .skin-overlay--bench .so-cal { display: none; }
+}
+
+/* ── Hereva overlay: grimoire furniture ──────────────────────────────
+   A ribbon bookmark hanging from the top, a wax seal, and a recipe note
+   in the margin. */
+.skin-overlay--grimoire .so-ribbon {
+  position: absolute;
+  left: calc(var(--gutter, 40px) * 0.46);
+  top: 0;
+  width: 15px; height: 130px;
+  background: linear-gradient(180deg, #8E2F4A, #6B2036);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
+  opacity: 0.72;
+}
+.skin-overlay--grimoire .so-seal {
+  position: absolute;
+  left: calc(var(--gutter, 40px) * 0.34);
+  bottom: 15vh;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #B8425F, #7E2038 70%);
+  box-shadow: 0 3px 8px rgba(10, 4, 24, 0.5);
+  display: grid; place-items: center;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: rgba(255, 240, 220, 0.85);
+  opacity: 0.88;
+}
+.skin-overlay--grimoire .so-recipe {
+  position: absolute;
+  right: calc(var(--gutter, 40px) * 0.28);
+  top: 24vh;
+  writing-mode: vertical-rl;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(232, 196, 99, 0.6);
+}
+@media (max-width: 1400px) {
+  .skin-overlay--grimoire .so-ribbon,
+  .skin-overlay--grimoire .so-seal,
+  .skin-overlay--grimoire .so-recipe { display: none; }
+}
+
+.skin-overlay--sequencer {
+  --gutter: calc((100vw - var(--w-page)) / 2);
+}
+.skin-overlay--sequencer .so-roll {
+  position: absolute;
+  left: calc(var(--gutter) / 2);
+  top: 150px;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  width: 30px;
+}
+.skin-overlay--sequencer .so-key {
+  height: 13px;
+  border: 1px solid rgba(57, 210, 200, 0.26);
+  border-radius: 2px;
+  background: rgba(10, 23, 27, 0.72);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  line-height: 11px;
+  text-align: center;
+  color: rgba(159, 198, 198, 0.7);
+  font-style: normal;
+}
+.skin-overlay--sequencer .so-key[data-sharp="1"] {
+  background: rgba(4, 10, 12, 0.9);
+  border-color: rgba(57, 210, 200, 0.16);
+  color: rgba(110, 155, 158, 0.55);
+}
+/* Note blocks on the roll, in magenta, pulsing — the "something is
+   playing" cue. */
+.skin-overlay--sequencer .so-blk {
+  position: absolute;
+  left: calc(var(--gutter) / 2 + 20px);
+  top: var(--by);
+  width: var(--bw2, 10px);
+  height: 7px;
+  border-radius: 2px;
+  background: rgba(242, 81, 155, 0.6);
+  box-shadow: 0 0 6px rgba(242, 81, 155, 0.32);
+}
+/* Parameter rail: the five VOCALOID-style parameter names, set vertically
+   so they fit a 40px gutter. */
+.skin-overlay--sequencer .so-params {
+  position: absolute;
+  right: calc(var(--gutter) / 2);
+  top: 176px;
+  transform: translateX(50%);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+.skin-overlay--sequencer .so-param {
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.16em;
+  color: rgba(110, 155, 158, 0.62);
+  font-style: normal;
+  white-space: nowrap;
+}
+.skin-overlay--sequencer .so-meter {
+  position: absolute;
+  right: calc(var(--gutter) / 2);
+  bottom: 190px;
+  transform: translateX(50%);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+}
+.skin-overlay--sequencer .so-seg {
+  width: 8px;
+  height: 4px;
+  border-radius: 1px;
+  background: rgba(57, 210, 200, 0.5);
+}
+.skin-overlay--sequencer .so-seg[data-hot="1"] { background: rgba(242, 81, 155, 0.62); }
+@media (max-width: 1400px) {
+  .skin-overlay--sequencer .so-roll,
+  .skin-overlay--sequencer .so-blk,
+  .skin-overlay--sequencer .so-params,
+  .skin-overlay--sequencer .so-meter { display: none; }
+}
+
+/* ── Background character ───────────────────────────────────────────────
+   The art comes from DiceBear at build time (scripts/gen-characters.js);
+   Lorelei is by Lisa Wischofsky and Notionists by Zoish, both CC0. I drew
+   this figure by hand first and it wasn't good enough — a face needs
+   proportion judgement that a professional illustration set already has.
+
+   Because the art is external, its colours are baked in rather than driven
+   by --dv-* tokens. Per-skin tinting is done with hue-rotate/saturate on
+   the whole figure instead, which is why each skin gets its own filter
+   below rather than a palette of variables.
+
+   Lives in the ambient layer (z-index 0, under .page), so she is behind
+   the content and cannot take a click. Bottom-right of the viewport rather
+   than in a gutter: the gutters already hold each skin's own overlay, and
+   they collapse to zero below 1280px. Fixed positioning keeps her in view
+   while the page scrolls, which is what makes the pointer reaction worth
+   having at all. */
+.skin-diva {
+  position: fixed;
+  /* Measured: at 1280 the previous `clamp(-56px, …)` pushed 20% of her off
+     the right edge. The floor is now 0 so she is always fully on screen —
+     a figure sliced by the viewport reads as a mistake, not as framing. */
+  right: clamp(0px, calc(50vw - 700px), 28px);
+  bottom: 0;
+  /* First pass was clamp(300px, 32vw, 500px), which put her head across a
+     third of the viewport and crowded the stats row. Scenery should be
+     noticed second, not first. */
+  width: clamp(230px, 22vw, 340px);
+  pointer-events: none;
+  /* Opacity is deliberately 1. Fading the whole figure blends every colour
+     toward the background, which over a cool ground turns warm tones
+     brown-grey — and solving backwards for a source that composites to
+     real gold at .62 went out of gamut, so no value could fix it. The
+     colours below are already muted to sit back; authored value = rendered
+     value, which is also far easier to reason about. */
+  opacity: 1;
+  /* Fade the lower edge so she rises out of the page rather than being
+     cropped off by the viewport bottom. The art is a head-and-shoulders
+     portrait, so the fade starts late — cutting earlier eats her chin. */
+  /* 76% cut into her jaw — the art is a head-and-shoulders portrait, so
+     almost all of it is the part you want to see. Fade only the last
+     sliver, which is shoulder. */
+  -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 88%, transparent 100%);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.skin-diva .dv-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;   /* the lean/scale transform must not self-clip */
+}
+
+/* The figure group is what the runtime transforms; give it a sane origin
+   and let the GPU own it so the rAF loop stays cheap. */
+.skin-diva .dv-fig {
+  will-change: transform;
+}
+
+/* Per-skin treatment. The art is monochrome-ish line work, so a glow in the
+   skin's accent is enough to seat it in the scene — no recolouring needed
+   for Lorelei (the hair colour is already generated per character). */
+/* --ch-fill is the face/skin flat, --ch-line the linework. DiceBear bakes
+   these as #fff and #000; left alone, white-on-black at half opacity
+   composites to a grey face (visible in the first render). Each skin sets
+   them to two colours from its own palette instead, which is also what
+   makes one piece of art work in three different worlds. */
+/* Each skin's values are picked to sit ~2:1 (face) and ~5:1 (line) against
+   its own ground — visible, clearly scenery, and no longer dependent on
+   alpha to get there. */
+/* These are SOLVED, not picked. Each skin's hue and saturation come from
+   its own palette; the LIGHTNESS was searched for the value that hits a
+   target contrast ratio against that skin's actual background:
+     face 1.5:1  — a form you can read, not a shout
+     hair 2.4:1  — the largest mass, so it sets the silhouette's weight
+     line 3.4:1  — strokes that survive without competing with body text
+   Light-ground skins need much tighter ratios: a dark figure on cream
+   reads far heavier than a light one on black, so Workshop targets
+   1.12 / 1.35 / 1.7 for the same perceived presence. */
+[data-skin="vocal"] .skin-diva {
+  --ch-fill: #163536;   /* 1.49:1 vs #050D0F */
+  --ch-hair: #235557;   /* 2.34:1 */
+  --ch-line: #2E6E70;   /* 3.34:1 */
+  filter: drop-shadow(0 0 34px rgba(57, 210, 200, .16));
+}
+[data-skin="workshop"] .skin-diva {
+  --ch-fill: #E9E5DD;   /* 1.11:1 vs #F6F1E3 */
+  --ch-hair: #D9D1C4;   /* 1.34:1 */
+  --ch-line: #C5B9A5;   /* 1.71:1 */
+  filter: none;
+}
+[data-skin="hereva"] .skin-diva {
+  --ch-fill: #3F371C;   /* 1.49:1 vs #1E1233 */
+  --ch-hair: #63562C;   /* 2.44:1 */
+  --ch-line: #7B6B37;   /* 3.36:1 */
+  filter: drop-shadow(0 0 34px rgba(232, 196, 99, .14));
+}
+
+/* Under 1280px the content column takes the full width, so she sits
+   directly behind body copy — smaller and fainter there. Text over her
+   still measures 8.5:1, so this is about visual calm, not legibility. */
+@media (max-width: 1279px) {
+  /* Narrower: she sits behind the single content column here, so pull her
+     visual weight down via the colours' own contrast, not via alpha. */
+  .skin-diva { width: clamp(180px, 22vw, 240px); right: 0; opacity: .55; }
+}
+
+/* No room, and no pointer to react to. */
+@media (max-width: 860px) {
+  .skin-diva { display: none; }
+}
+@media (hover: none) {
+  .skin-diva { display: none; }
+}
+
+/* Reduced motion keeps the figure (she is scenery, not motion) but the
+   runtime never starts its loop, so she simply holds a resting pose. */
+@media (prefers-reduced-motion: reduce) {
+  .skin-diva .dv-fig { will-change: auto; }
+}
+
+
+/* Glitch plane: normally invisible. The scheduler tags <html> with
+   .skin-fx-* and these rules do the work — `tear` paints on this plane,
+   the others displace .page itself. */
+.skin-overlay--glitch { background: transparent; }
+:root.skin-fx-tear .skin-overlay--glitch {
+  background:
+    linear-gradient(180deg, transparent 28%, rgba(255, 46, 154, 0.16) 28.4%, transparent 30%),
+    linear-gradient(180deg, transparent 61%, rgba(0, 229, 255, 0.14) 61.5%, transparent 63%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skin-overlay--crt .so-roll    { animation: skin-roll 7.5s linear infinite; }
+  .skin-overlay--crt .so-flicker { animation: skin-crt-flicker 0.14s steps(2, end) infinite; }
+  .skin-overlay--sonar .so-ping  { animation: skin-ping 6s ease-out infinite; }
+  /* Page displacement. Applied to .page (not <body>) so the fixed ambient
+     and overlay layers stay put — the content tears against a stable
+     frame, which is what makes it read as a signal fault. */
+  :root.skin-fx-rgb   .page { animation: skin-fx-rgb   0.32s steps(3, end); }
+  :root.skin-fx-slice .page { animation: skin-fx-slice 0.26s steps(4, end); }
+  :root.skin-fx-shake .page { animation: skin-fx-shake 0.24s ease-in-out; }
+}
+@keyframes skin-roll {
+  0%   { transform: translateY(-100px); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+@keyframes skin-crt-flicker {
+  0%   { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+/* Sonar return: one ring, expanding and fading. Scaled rather than sized so
+   it composites on the GPU. */
+@keyframes skin-ping {
+  0%       { transform: scale(1);  opacity: 0; }
+  4%       { opacity: 0.7; }
+  60%, 100%{ transform: scale(26); opacity: 0; }
+}
+/* RGB channel split via drop-shadow — cheaper and crisper than duplicating
+   the DOM into three tinted copies. */
+@keyframes skin-fx-rgb {
+  0%, 100% { filter: none; transform: none; }
+  33% { filter: drop-shadow(3px 0 rgba(255, 46, 154, 0.7)) drop-shadow(-3px 0 rgba(0, 229, 255, 0.7)); transform: translateX(-2px); }
+  66% { filter: drop-shadow(-4px 0 rgba(255, 46, 154, 0.6)) drop-shadow(4px 0 rgba(0, 229, 255, 0.6)); transform: translateX(2px); }
+}
+@keyframes skin-fx-slice {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-9px) skewX(2.2deg); }
+  50% { transform: translateX(7px)  skewX(-1.6deg); }
+  75% { transform: translateX(-4px) skewX(0.8deg); }
+}
+@keyframes skin-fx-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 1px) skewX(0.5deg); }
+  45% { transform: translate(3px, -2px) skewX(-0.6deg); }
+  70% { transform: translate(-2px, 1px); }
+}
+
+/* ── Boot overlay ──────────────────────────────────────────────────────
+   One-shot entry animation, only when the skin actually changes. Opaque
+   for a beat, then fades. Non-interactive throughout, and any input
+   dismisses it (see skin-runtime.js) so it can never trap the page. */
+.skin-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding-left: 12vw;
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--color-blue);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.skin-boot.is-out { opacity: 0; }
+.skin-boot span { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .skin-boot span {
+    animation: skin-boot-line 0.3s var(--ease-out) forwards;
+    animation-delay: calc(var(--bi) * 0.16s);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skin-boot { display: none; }
+}
+@keyframes skin-boot-line {
+  0%   { opacity: 0; transform: translateX(-10px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ── Companion creature ────────────────────────────────────────────────
+   Follows the pointer via --cx/--cy set by skin-runtime.js. Sits above
+   everything and ignores hit-testing, so it can never block a click. */
+.skin-companion {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 300;
+  width: 30px; height: 30px;
+  transform: translate3d(calc(var(--cx, -80px) - 5px), calc(var(--cy, -80px) - 4px), 0);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-quick) linear;
+  color: var(--color-blue);
+  /* Two shadows: a tight ring in the page background colour to separate the
+     silhouette from whatever it passes over, then a soft drop for lift. */
+  filter:
+    drop-shadow(0 0 1.5px var(--color-bg))
+    drop-shadow(0 2px 5px rgba(0, 0, 0, 0.28));
+}
+.skin-companion.is-visible { opacity: 1; }
+/* Hide the native cursor only while ours is genuinely on screen. */
+body.skin-companion-on,
+body.skin-companion-on a,
+body.skin-companion-on button,
+body.skin-companion-on [role="button"] { cursor: none; }
+/* Text input is the exception — losing the I-beam there costs real
+   usability (you can no longer see where the caret will land). */
+body.skin-companion-on input,
+body.skin-companion-on textarea,
+body.skin-companion-on select,
+body.skin-companion-on [contenteditable="true"] { cursor: auto; }
+
+.skin-companion .sc-sprite { display: block; width: 30px; height: 30px; }
+.skin-companion .sc-sprite svg { display: block; width: 100%; height: 100%; }
+
+/* trail — three streaks that only exist while moving */
+.skin-companion .sc-trail { position: absolute; left: 1px; top: 14px; display: block; opacity: 0; }
+.skin-companion .sc-trail i {
+  position: absolute;
+  display: block;
+  width: 7px; height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.5;
+}
+.skin-companion .sc-trail i:nth-child(2) { top: 5px;  width: 5px; }
+.skin-companion .sc-trail i:nth-child(3) { top: -5px; width: 4px; }
+.skin-companion.is-moving .sc-trail { opacity: 1; }
+
+/* busy — three dots hopping under the creature after you activate something */
+.skin-companion .sc-busy { position: absolute; left: 7px; top: 29px; display: block; opacity: 0; }
+.skin-companion .sc-busy i {
+  position: absolute;
+  display: block;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.skin-companion .sc-busy i:nth-child(1) { left: 0; }
+.skin-companion .sc-busy i:nth-child(2) { left: 6px; }
+.skin-companion .sc-busy i:nth-child(3) { left: 12px; }
+.skin-companion.is-loading .sc-busy { opacity: 1; }
+
+/* pop — one expanding ring on press */
+.skin-companion .sc-pop {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 30px; height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skin-companion.is-idle    .sc-sprite { animation: skin-breathe 2.6s ease-in-out infinite; }
+  .skin-companion.is-moving  .sc-trail i { animation: skin-streak 0.4s ease-out infinite; }
+  .skin-companion.is-loading .sc-busy i  { animation: skin-hop 0.5s ease-in-out infinite; }
+  .skin-companion.is-loading .sc-busy i:nth-child(2) { animation-delay: 0.08s; }
+  .skin-companion.is-loading .sc-busy i:nth-child(3) { animation-delay: 0.16s; }
+  .skin-companion.is-pressed .sc-pop     { animation: skin-pop 0.28s ease-out; }
+}
+@keyframes skin-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+@keyframes skin-streak {
+  0%   { opacity: 0.6; transform: translate3d(3px, 0, 0) scaleX(0.7); }
+  100% { opacity: 0;   transform: translate3d(-9px, 0, 0) scaleX(1.2); }
+}
+@keyframes skin-hop {
+  0%, 100% { transform: translateY(1px); opacity: 0.5; }
+  50%      { transform: translateY(-3px); opacity: 1; }
+}
+@keyframes skin-pop {
+  0%   { opacity: 0.7; transform: scale(0.5); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+
+/* No companion where there's no pointer to follow. */
+@media (pointer: coarse) {
+  .skin-companion { display: none; }
+  body.skin-companion-on { cursor: auto; }
+}
+
+/* On narrow viewports the HUD chrome has no margin to live in — the tick
+   strip and the status tag would sit on top of content. Textures stay
+   (they're what makes the skin), the furniture goes. */
+/* The status tag now lives in the gutter, so it needs the same 1400px floor
+   as the other gutter chrome — below that the margin can't hold it clear of
+   the cards. The tick strip and brackets hug the very edge and only become
+   a problem on a phone. */
+@media (max-width: 1400px) {
+  .skin-overlay--hud .so-tag { display: none; }
+}
+@media (max-width: 720px) {
+  /* At 390px the page runs edge to edge — there is no margin for corner
+     furniture to sit in, so shrinking the brackets (the previous fix) just
+     put a smaller bracket on top of the same heading. Measured: `tr` covered
+     91% of the usage title, `tl` 74%. Furniture goes; the grid texture stays,
+     because the texture is what the skin actually IS. */
+  .skin-overlay--hud .so-ticks,
+  .skin-overlay--hud .so-corner { display: none; }
+}
+
+/* ── Picker — a <details> disclosure in the topnav ─────────────────────
+   <details> gives us open/close, Esc-to-close and keyboard access with no
+   JS and no focus trap. The marker is stripped; the summary is the button.
+
+   The trigger is a SWATCH + THE CURRENT SKIN'S NAME + a chevron. The first
+   version was a lone ◈ glyph, which failed the only test that matters: a
+   bare symbol doesn't say what it does, so nobody clicks it. Naming the
+   current value turns the control into its own affordance — you can see
+   there's a skin, see which one, and see that it opens. */
+.skin-picker { position: relative; }
+.skin-picker > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-6);
+  height: 28px;
+  padding: 0 var(--sp-8);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  color: var(--color-text-dim);
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+}
+.skin-picker > summary::-webkit-details-marker { display: none; }
+.skin-picker > summary::marker { content: ''; }
+.skin-picker > summary:hover {
+  border-color: var(--color-text-faint);
+  color: var(--color-text);
+  background: var(--color-bg-soft);
+}
+.skin-picker[open] > summary { border-color: var(--color-blue); color: var(--color-text); }
+.skin-trigger-sw {
+  flex: 0 0 auto;
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  border: var(--bw) solid var(--color-line);
+}
+.skin-trigger-name {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.skin-trigger-chev {
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.6;
+  /* The glyph sits high in its em box; nudge it onto the text baseline. */
+  transform: translateY(-2px);
+  transition: transform var(--dur-quick);
+}
+.skin-picker[open] .skin-trigger-chev { transform: translateY(-1px) rotate(180deg); }
+
+.skin-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 120;
+  /* Two columns of swatch+name, so ten skins are four short groups instead
+     of one ten-row column. kaboo fits 45 this way. */
+  width: 340px;
+  padding: var(--sp-10);
+  background: var(--color-surface);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card-hover);
+}
+.skin-menu-head {
+  margin: 0 0 var(--sp-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.skin-group + .skin-group {
+  margin-top: var(--sp-10);
+  padding-top: var(--sp-10);
+  border-top: var(--bw) solid var(--color-line-soft);
+}
+/* Group label carries the genre name plus what that genre *does* — the
+   note is why "Print" and "Machine" mean anything to a first-time visitor. */
+.skin-group-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-6);
+  margin: 0 0 var(--sp-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+}
+.skin-group-title em {
+  font-style: normal;
+  font-size: var(--fs-10);
+  font-weight: var(--fw-regular);
+  color: var(--color-text-faint);
+}
+.skin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.skin-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  min-width: 0;
+  padding: var(--sp-6) var(--sp-8);
+  border: var(--bw) solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-quick), border-color var(--dur-quick);
+}
+.skin-opt:hover { background: var(--color-bg-soft); }
+.skin-opt[aria-checked="true"] { border-color: var(--color-blue); background: var(--color-blue-soft); }
+.skin-opt-sw,
+.skin-trigger-sw[data-sw] {
+  flex: 0 0 auto;
+}
+.skin-opt-sw {
+  width: 20px; height: 20px;
+  border-radius: var(--r-sm);
+  border: var(--bw) solid var(--color-line);
+}
+/* Swatches are literal: each shows its own skin's page + accent, so the
+   choice is legible before you make it. Hard-coded on purpose — a swatch
+   must show the *other* palette, not inherit the current one. Shared by
+   the menu options and the trigger, hence the doubled selector. */
+.skin-opt-sw[data-sw="default"],   .skin-trigger-sw[data-sw="default"]   { background: linear-gradient(135deg, #FAF7F0 55%, #2347D9 55%); }
+.skin-opt-sw[data-sw="meadow"],    .skin-trigger-sw[data-sw="meadow"]    { background: linear-gradient(135deg, #F2F7EE 55%, #2F7A4F 55%); }
+.skin-opt-sw[data-sw="solar"],     .skin-trigger-sw[data-sw="solar"]     { background: linear-gradient(135deg, #FFF8EC 55%, #C2571B 55%); }
+.skin-opt-sw[data-sw="press"],     .skin-trigger-sw[data-sw="press"]     { background: linear-gradient(135deg, #F4F1E8 55%, #E2542C 55%); }
+.skin-opt-sw[data-sw="dossier"],   .skin-trigger-sw[data-sw="dossier"]   { background: linear-gradient(135deg, #E8E0CC 55%, #8C2F1D 55%); }
+.skin-opt-sw[data-sw="blueprint"], .skin-trigger-sw[data-sw="blueprint"] { background: linear-gradient(135deg, #10315C 55%, #FFFFFF 55%); }
+.skin-opt-sw[data-sw="terminal"],  .skin-trigger-sw[data-sw="terminal"]  { background: linear-gradient(135deg, #07090A 55%, #7CFFA0 55%); }
+.skin-opt-sw[data-sw="hud"],       .skin-trigger-sw[data-sw="hud"]       { background: linear-gradient(135deg, #0B0D0C 55%, #FFB627 55%); }
+.skin-opt-sw[data-sw="neon"],      .skin-trigger-sw[data-sw="neon"]      { background: linear-gradient(135deg, #08060F 55%, #FF2E9A 55%); }
+.skin-opt-sw[data-sw="dusk"],      .skin-trigger-sw[data-sw="dusk"]      { background: linear-gradient(135deg, #0F1226 55%, #FFD166 55%); }
+/* The two IP skins get three-stop swatches — they carry two accents each
+   (a warm heat ramp and a cool link colour), and showing both is the only
+   way the swatch previews what the skin actually looks like. */
+.skin-opt-sw[data-sw="observatory"], .skin-trigger-sw[data-sw="observatory"] { background: linear-gradient(135deg, #070B18 42%, #FF9E4A 42%, #FF9E4A 72%, #7FD4FF 72%); }
+.skin-opt-sw[data-sw="abyss"],       .skin-trigger-sw[data-sw="abyss"]       { background: linear-gradient(135deg, #04141C 42%, #4FE3C1 42%, #4FE3C1 72%, #59C8F5 72%); }
+/* Dumpling: cream ground with the pink + blue macaron pair. */
+.skin-opt-sw[data-sw="dumpling"],    .skin-trigger-sw[data-sw="dumpling"]    { background: linear-gradient(135deg, #FDFAF0 40%, #EE9BA6 40%, #EE9BA6 70%, #3E8FB4 70%); }
+/* Workshop: rust orange over graph-paper cream. */
+.skin-opt-sw[data-sw="workshop"],   .skin-trigger-sw[data-sw="workshop"]   { background: linear-gradient(135deg, #F6F1E3 40%, #B5501C 40%, #B5501C 70%, #3E4C59 70%); }
+/* Hereva: violet ground, parchment, cauldron green. */
+.skin-opt-sw[data-sw="hereva"],     .skin-trigger-sw[data-sw="hereva"]     { background: linear-gradient(135deg, #1E1233 40%, #E8D9B5 40%, #E8D9B5 70%, #62C48A 70%); }
+/* Vocal: near-black with the official teal + magenta pair. */
+.skin-opt-sw[data-sw="vocal"],       .skin-trigger-sw[data-sw="vocal"]       { background: linear-gradient(135deg, #050D0F 40%, #39D2C8 40%, #39D2C8 70%, #F2519B 70%); }
+
+/* Licence credit in the footer. Flow content, so it cannot overlap
+   anything; styled to match the footer's own small print rather than
+   shouting, but kept at full text contrast because an attribution that
+   can't be read isn't an attribution.
+
+   The footer is `display: flex; justify-content: space-between`, i.e. a
+   ROW of two spans — so a plain <p> becomes a third flex item squeezed
+   into that row. Measured symptom: footer stayed 70px tall while the
+   credit reported height 33 at y=5155, past the document's own
+   maxScroll of 4375, i.e. it had overflowed out of the scrollable area
+   entirely and could never be seen or clicked. `flex-basis: 100%` plus
+   wrapping on the parent puts it on its own line. */
+.site-footer { flex-wrap: wrap; }
+.skin-credit {
+  flex: 0 0 100%;
+  margin: var(--sp-12) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.5;
+  color: var(--color-text-dim);
+  max-width: var(--w-prose);
+}
+.skin-credit a {
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.skin-credit a:hover { color: var(--color-blue-deep); }
+.skin-opt-name {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  /* 340px would touch both edges of a 390px phone. One column, full-bleed
+     minus the page gutter — and the trigger drops its name, since the
+     topnav has no room for it and the swatch still marks the control. */
+  .skin-menu { width: calc(100vw - var(--sp-24)); max-width: 340px; padding: var(--sp-8); }
+  .skin-grid { grid-template-columns: 1fr; }
+  .skin-trigger-name { display: none; }
+  .skin-picker > summary { padding: 0 var(--sp-6); }
+}
+
+@media print {
+  /* Every decorative layer, including the ones added with the genre skins.
+     A printed page has no business carrying scanlines or a boot screen. */
+  .skin-ambient,
+  .skin-overlay,
+  .skin-companion,
+  .skin-boot,
+  .skin-picker { display: none; }
 }
