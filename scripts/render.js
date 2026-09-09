@@ -24,6 +24,35 @@
 
   /* ── Renderers ──────────────────────────────────────────────────── */
 
+  /* The topnav "updated <date>" stamp.
+
+     Two writers, and precedence matters:
+       1. site.json footer.lastUpdated — an explicit pin by the site owner,
+          which must win over everything.
+       2. the usage Worker's data watermark — the live path, set once usage
+          data lands (see the refetch handler).
+     The build-time value baked into index.html is only the fallback for
+     visitors whose usage fetch never completes.
+
+     `dataDatePinned` records case 1 so the live path cannot overwrite a
+     deliberate pin. Monotonic: never moves the label backwards, so a stale
+     edge-cached response can't make the page look older than it already
+     claims. */
+  let dataDatePinned = false;
+  let dataDateMs = 0;
+  const stampDataDate = (ms) => {
+    if (dataDatePinned) return;
+    if (!Number.isFinite(ms) || ms <= 0) return;
+    if (ms <= dataDateMs) return;                 // monotonic
+    const el = document.getElementById('last-updated');
+    if (!el) return;
+    // Local calendar date, matching how the rest of the page renders dates.
+    const d = new Date(ms);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    dataDateMs = ms;
+    el.textContent = `updated ${iso}`;
+  };
+
   const renderMeta = (site) => {
     document.title = site.meta?.title ?? document.title;
     if (site.meta?.lang) document.documentElement.lang = site.meta.lang;
@@ -32,9 +61,12 @@
       if (m) m.setAttribute('content', site.meta.description);
     }
     $('#brand-name').textContent = site.meta?.title?.split('—')[0]?.trim() ?? '';
-    // Only override the build-time "updated <date>" if site.json pins one;
-    // otherwise leave the auto value (last-commit date) baked in by build-html.js.
-    if (site.footer?.lastUpdated) $('#last-updated').textContent = `updated ${site.footer.lastUpdated}`;
+    // A pinned footer.lastUpdated is the owner's explicit choice, so it wins
+    // over both the build-time value and the live data watermark.
+    if (site.footer?.lastUpdated) {
+      $('#last-updated').textContent = `updated ${site.footer.lastUpdated}`;
+      dataDatePinned = true;
+    }
     $('#footer-copyright').innerHTML = [
       escape(site.footer?.copyright ?? ''),
       site.footer?.tagline ? `<em>${escape(site.footer.tagline)}</em>` : '',
@@ -939,8 +971,27 @@
   const themeStored = () => { try { const t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark') ? t : 'auto'; } catch (_) { return 'auto'; } };
   const osDark = () => !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const resolvedTheme = (mode) => (mode === 'auto') ? (osDark() ? 'dark' : 'light') : mode;
+  /* Only post once giscus has announced itself.
+
+     The iframe element exists well before giscus.app is loaded into it, and
+     until then its contentWindow is still same-origin about:blank. Posting
+     with targetOrigin 'https://giscus.app' at that moment cannot be
+     delivered, so the browser logs "Failed to execute 'postMessage' ... does
+     not match the recipient window's origin". Harmless but noisy, and it
+     buries real console errors.
+
+     Widening targetOrigin to '*' would silence it by broadcasting the message
+     to whatever currently occupies the frame — the wrong trade. Instead wait
+     for giscus's own ready message (handled below), which is the only point
+     at which the frame is guaranteed to be giscus.app. Theme changes made
+     before that are not lost: data-theme is set on <html> first, and the
+     ready handler pushes the current theme when the frame arrives. */
+  let giscusReady = false;
   const syncGiscus = (theme) => {
-    try { document.querySelector('iframe.giscus-frame')?.contentWindow?.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app'); } catch (_) { /* noop */ }
+    if (!giscusReady) return;
+    const frame = document.querySelector('iframe.giscus-frame');
+    if (!frame || !frame.contentWindow) return;
+    try { frame.contentWindow.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app'); } catch (_) { /* noop */ }
   };
   const applyTheme = (mode) => {
     const t = resolvedTheme(mode);
@@ -968,9 +1019,14 @@
       const onChange = () => { if (themeStored() === 'auto') applyTheme('auto'); };
       if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
     }
-    // When giscus (re)loads its iframe, push the current theme to it.
+    // giscus's first message marks the frame as really being giscus.app; only
+    // from then on can a setConfig post be delivered. Flip the flag before
+    // syncing so this very message's push goes through.
     window.addEventListener('message', (ev) => {
-      if (ev.origin === 'https://giscus.app' && ev.data && typeof ev.data === 'object' && 'giscus' in ev.data) syncGiscus(resolvedTheme(themeStored()));
+      if (ev.origin !== 'https://giscus.app') return;
+      if (!ev.data || typeof ev.data !== 'object' || !('giscus' in ev.data)) return;
+      giscusReady = true;
+      syncGiscus(resolvedTheme(themeStored()));
     });
     syncGiscus(resolvedTheme(themeStored()));   // in case the iframe is already up
   };
@@ -1657,6 +1713,12 @@
   };
 
   const wireUsage = (site) => {
+    /* Honour a pinned footer.lastUpdated here, not only in renderMeta.
+       renderMeta runs ONLY in the non-prerendered branch, so on a prerendered
+       page the pin would never register and the live watermark below would
+       quietly overwrite the owner's explicit choice. wireUsage runs in both
+       modes, and before any fetch can resolve. */
+    if (site && site.footer && site.footer.lastUpdated) dataDatePinned = true;
     const section  = document.getElementById('usage');
     if (!section) return;
     const cfg = site && site.usage;
@@ -1942,6 +2004,15 @@
         const parsed = updIso ? Date.parse(updIso) : NaN;
         lastUpdatedMs = Number.isFinite(parsed) ? parsed : Date.now();
         updateLiveLabel();
+        /* Topnav "updated <date>" follows the DATA, not the build.
+
+           It used to be baked in at build time from the last commit date, so
+           it sat at 2026-06-20 while the data behind it had moved to 09-07 --
+           the page claimed to be three months older than the numbers on it.
+           Reuse the watermark already parsed above rather than fetching again;
+           only move the label forward, so a stale cached response can never
+           make the site look older than it is. */
+        stampDataDate(lastUpdatedMs);
       } catch (e) {
         // Silent hide on failure — fork without Worker, network blip, CORS,
         // CN-block, any reason. Don't show a broken widget. console for ops.

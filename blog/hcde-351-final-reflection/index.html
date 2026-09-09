@@ -133,14 +133,30 @@
 <script>
 (function () {
   // ── theme toggle: auto → light → dark → auto ─────────────────────────
+  // giscusReady: the iframe exists before giscus.app loads into it, and until
+  // then contentWindow is same-origin about:blank — posting with targetOrigin
+  // 'https://giscus.app' then only produces a console warning. Wait for
+  // giscus's own message instead of widening targetOrigin to '*'.
   var d = document.documentElement, btn = document.getElementById('theme-toggle');
+  var giscusReady = false;
+  var pushGiscus = function (theme) {
+    if (!giscusReady) return;
+    var gi = document.querySelector('iframe.giscus-frame');
+    if (!gi || !gi.contentWindow) return;
+    try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app'); } catch (e) {}
+  };
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== 'https://giscus.app') return;
+    if (!ev.data || typeof ev.data !== 'object' || !('giscus' in ev.data)) return;
+    giscusReady = true;
+    pushGiscus(d.getAttribute('data-theme'));
+  });
   if (btn) {
     var mq = window.matchMedia('(prefers-color-scheme: dark)');
     var apply = function (mode) {
       d.setAttribute('data-theme-mode', mode);
       d.setAttribute('data-theme', mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode);
-      var gi = document.querySelector('iframe.giscus-frame');
-      if (gi) { try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: d.getAttribute('data-theme') } } }, 'https://giscus.app'); } catch (e) {} }
+      pushGiscus(d.getAttribute('data-theme'));
     };
     btn.addEventListener('click', function () {
       var cur = d.getAttribute('data-theme-mode') || 'auto';
