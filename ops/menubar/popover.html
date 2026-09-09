@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════════
+     popover.html — the usagebar popover UI.
+
+     Loaded from the app bundle as a file:// page, with data injected by
+     the host via window.__render(json). No network, no server, no
+     cookies: the Swift side already fetched the public endpoint.
+
+     Palette is lifted from the site's own "dusk" skin (styles/main.css
+     :root[data-skin="dusk"]) so the popover and the website look like
+     the same product. Values copied literally rather than approximated.
+     ═══════════════════════════════════════════════════════════════════ -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg:          #0F1226;
+    --bg-soft:     #161A34;
+    --surface:     #191E3C;
+    --surface-alt: #1E2447;
+    --line:        #2E3660;
+    --line-soft:   #232A4E;
+    --text:        #E9EAFB;
+    --dim:         #ADB2DA;
+    --faint:       #868DBE;
+    --yellow:      #FFD166;
+    --blue:        #9BA8FF;
+    --blue-deep:   #C2CBFF;
+    --success:     #5FD39B;
+    --warn:        #F0A65C;
+    --danger:      #F2779A;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    /* Transparent: the panel draws the rounded shell beneath us. An
+       opaque body here would square off the corners. */
+    background: transparent;
+    font-family: var(--body);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    cursor: default;
+    overflow: hidden;
+  }
+  .wrap {
+    background: linear-gradient(168deg, var(--bg-soft) 0%, var(--bg) 62%);
+    border-radius: 12px;
+    padding: 0 0 8px;
+    min-height: 100%;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────── */
+  .head {
+    padding: 15px 16px 13px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .head h1 {
+    font-size: 12px; font-weight: 600; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--faint);
+  }
+  .head .when { margin-left: auto; font-size: 10px; color: var(--faint); font-family: var(--mono); }
+
+  /* ── Hero ───────────────────────────────────────────────────────── */
+
+  /* ── Sparkline ──────────────────────────────────────────────────── */
+  .spark { padding: 2px 16px 14px; }
+  .spark svg { display: block; width: 100%; height: 54px; overflow: visible; }
+  /* Standalone: .cap used to be styled only as `.spark .cap`, so deleting
+     the sparkline left it inheriting body type — a 3-line block of 16px
+     text sitting above the footer. Scoping a shared class under one
+     parent is what made its removal a layout bug elsewhere. */
+  .cap { margin-top: 8px; font-size: 9.5px; line-height: 1.5;
+         color: var(--faint); font-family: var(--mono); }
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 12px; }
+
+  /* ── Section ────────────────────────────────────────────────────── */
+  .sec { padding: 4px 16px 10px; }
+  .sec h2 {
+    font-size: 9.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 9px;
+  }
+
+  /* ── Tool mix bars ──────────────────────────────────────────────── */
+
+  /* ── Cache donut ────────────────────────────────────────────────── */
+  .cache { display: flex; align-items: center; gap: 13px; }
+  .cache svg { flex: 0 0 auto; }
+  .cache .txt .big { font-family: var(--mono); font-size: 19px; color: var(--text); }
+  .cache .txt .lbl { font-size: 10.5px; color: var(--dim); margin-top: 1px; }
+
+  /* ── Footer ─────────────────────────────────────────────────────── */
+  .foot {
+    display: flex; gap: 6px; padding: 10px 16px 4px;
+    border-top: 1px solid var(--line-soft); margin-top: 2px;
+  }
+  button {
+    flex: 1; font-family: var(--body); font-size: 11.5px; color: var(--dim);
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-radius: 7px; padding: 7px 6px; cursor: pointer;
+    transition: background .13s, color .13s, border-color .13s;
+  }
+  button:hover { background: var(--surface-alt); color: var(--text); border-color: var(--line); }
+  button:active { transform: translateY(.5px); }
+  button.icon { flex: 0 0 34px; }
+
+  /* ── usage table ─────────────────────────────────────────────────
+     Numbers are compared DOWN the columns (today vs 7d vs 30d), so the
+     figures are right-aligned and tabular-lining: proportional digits
+     make 1.3M and 158k fail to line up at the decimal, which is exactly
+     the "can't tell what this says" problem the old free-form cards had. */
+  table.usage { width: 100%; border-collapse: collapse; }
+  table.usage th, table.usage td { padding: 6px 4px; font-size: 11.5px; }
+  table.usage thead th {
+    font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--faint); font-weight: 500; text-align: right;
+    border-bottom: 1px solid var(--line); padding-bottom: 5px;
+  }
+  table.usage thead th:first-child { text-align: left; }
+  table.usage tbody tr + tr td, table.usage tbody tr + tr th {
+    border-top: 1px solid var(--line-soft);
+  }
+  table.usage th.rk { text-align: left; color: var(--dim); font-weight: 500; }
+  table.usage td.n {
+    text-align: right; font-family: var(--mono); font-size: 11px;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  table.usage td.n.strong { color: var(--blue-deep); }
+  table.usage td.n.dim { color: var(--faint); }
+  table.usage tr.total th, table.usage tr.total td {
+    border-top: 1px solid var(--line) !important; padding-top: 8px;
+  }
+  table.usage tr.total th.rk { color: var(--text); }
+
+  /* ── workstation status ──────────────────────────────────────────
+     A compact status strip: one row per thing that can be wrong. Rows
+     are grid-aligned rather than flex-spaced so the dot / label / value
+     columns line up down the block — with flex, each row centres its own
+     content and the values wander, which is what made the earlier usage
+     cards look unruly. */
+  .station { display: flex; flex-direction: column; gap: 1px;
+             background: var(--line-soft); border: 1px solid var(--line);
+             border-radius: 9px; overflow: hidden; }
+  .st { display: grid; grid-template-columns: 14px 1fr auto; align-items: center;
+        gap: 8px; padding: 7px 10px; background: var(--surface);
+        font-size: 11.5px; }
+  .st.click { cursor: pointer; }
+  .st.click:hover { background: var(--surface-alt); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; justify-self: center;
+         background: var(--faint); }
+  .dot.ok   { background: var(--success); }
+  .dot.warn { background: var(--warn); }
+  .dot.bad  { background: var(--danger); }
+  .st .lbl { color: var(--dim); }
+  .st .val { font-family: var(--mono); font-size: 10.5px; color: var(--text);
+             text-align: right; }
+  .st .val.muted { color: var(--faint); }
+
+  /* Action row. Buttons are equal-width so the row reads as one control
+     group rather than three differently-sized buttons. */
+  .acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+          margin-top: 9px; }
+  .acts button { padding: 7px 4px; font-size: 11px; font-family: var(--body);
+                 color: var(--dim); background: var(--surface);
+                 border: 1px solid var(--line); border-radius: 7px;
+                 cursor: pointer; transition: background .12s, color .12s; }
+  .acts button:hover { background: var(--surface-alt); color: var(--text); }
+  .acts button:disabled { opacity: .4; cursor: default; }
+  .acts button.busy { color: var(--yellow); }
+
+  .empty { padding: 34px 16px; text-align: center; color: var(--faint); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+  <div class="empty">loading…</div>
+</div>
+
+<script>
+'use strict';
+const send = (o) => { try { window.webkit.messageHandlers.bar.postMessage(o); } catch (e) {} };
+
+const compact = (n) => {
+  n = Number(n) || 0;
+  if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+  if (n >= 1e9)  return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6)  return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3)  return (n / 1e3).toFixed(1) + 'k';
+  return String(n);
+};
+/* Cost here is MODELLED, not billed: tokens multiplied by public API list
+   prices. This machine signs into Claude Code with an OAuth subscription
+   (billingType "stripe_subscription"), so those calls draw on a flat
+   monthly plan and incur no per-call charge. Printing a bare "$5,778"
+   therefore claims something untrue — the figure is what the same tokens
+   would have cost at API rates. The value is still worth showing (it is
+   the only comparable measure of how much work went through), so it is
+   kept and labelled, not removed. */
+const money = (c) => {
+  c = Number(c) || 0;
+  const d = c / 100;
+  return d >= 1000 ? '$' + Math.round(d).toLocaleString()
+       : d >= 10   ? '$' + d.toFixed(0)
+                   : '$' + d.toFixed(2);
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* Sparkline over the recent window. Area + line + peak dot, matching the
+   idiom used on the site's own usage page rather than inventing a new one. */
+function sparkline(days) {
+  const vals = days.map((d) => Number(d.tokens) || 0);
+  if (vals.length < 2) return '';
+  const peak = Math.max(...vals);
+  if (peak <= 0) return '';
+  const W = 348, H = 54;
+  const step = W / (vals.length - 1);
+  const pts = vals.map((v, i) => [i * step, H - (v / peak) * (H - 6) - 3]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = line + ` L${W} ${H} L0 ${H} Z`;
+  const pi = vals.indexOf(peak);
+  const first = days.find((d) => (Number(d.tokens) || 0) > 0);
+  const last = days[days.length - 1];
+  const fd = (s) => {
+    if (!s) return '';
+    const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return s;
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return mn[+m[1] - 1] + ' ' + (+m[2]);
+  };
+  return `<div class="spark">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#9BA8FF" stop-opacity=".30"/>
+        <stop offset="100%" stop-color="#9BA8FF" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${area}" fill="url(#g)"/>
+      <path d="${line}" fill="none" stroke="#9BA8FF" stroke-width="1.6"
+            stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${pts[pi][0].toFixed(1)}" cy="${pts[pi][1].toFixed(1)}" r="2.8" fill="#C2CBFF"/>
+    </svg>
+    <div class="cap"><span>${esc(fd(first && first.date))}</span>
+      <span>peak ${compact(peak)}</span>
+      <span>${esc(fd(last && last.date))}</span></div>
+  </div>`;
+}
+
+window.__render = function (json) {
+  // Remember the raw payload: the station probe arrives seconds later and
+  // needs to re-render the whole popover with the same usage data.
+  window.__lastData = json;
+  let d;
+  try { d = JSON.parse(json); } catch (e) {
+    document.getElementById('root').innerHTML =
+      '<div class="empty">could not parse data</div>';
+    return;
+  }
+  const days = Array.isArray(d.days) ? d.days : [];
+  const active = days.filter((x) => (Number(x.tokens) || 0) > 0);
+  if (!active.length) {
+    document.getElementById('root').innerHTML =
+      '<div class="empty">no usage published yet</div>';
+    measure();
+    return;
+  }
+
+  const sum = (arr, k) => arr.reduce((a, x) => a + (Number(x[k]) || 0), 0);
+  const latest = active[active.length - 1];
+
+  /* Window by DATE, not by array position.
+     slice(-7) means "the last 7 rows", which only equals "the last 7 days"
+     when the document has one row per calendar day. The public endpoint
+     does (365 padded rows) but the local snapshot stores active days only,
+     so slice(-7) once swallowed 5 rows spanning 11 calendar days and made
+     the 7-day figure identical to all-time. Anchor on the latest active
+     date and count backwards in real days. */
+  const dayMs = 86400000;
+  /* Anchor on the CALENDAR date of the document, not on the last active
+     day. Anchoring on latest.date makes "today" mean "the most recent day
+     I worked", so after an idle stretch the today row silently reports a
+     days-old figure as if it were current — and the longer the gap, the
+     more confidently wrong it reads. Prefer the document's own updated
+     timestamp (the machine that produced it decided what day it was);
+     fall back to the last active day only when that is missing. */
+  const stamp = d.updated ? Date.parse(String(d.updated).slice(0, 10) + 'T00:00:00Z') : NaN;
+  const anchor = Number.isFinite(stamp)
+    ? stamp
+    : Date.parse(latest.date + 'T00:00:00Z');
+  const within = (x, n) => {
+    const t = Date.parse(x.date + 'T00:00:00Z');
+    return Number.isFinite(t) && t > anchor - n * dayMs && t <= anchor;
+  };
+
+  /* Roll a window up per platform. bySource carries per-source token and
+     cost fields; a day predating that field still contributes to the row
+     total, so the totals stay correct even when the split is unavailable
+     and the platform rows simply come up short. */
+  function rollup(n) {
+    // n === null means every day on record. Passing a huge day count
+    // instead would look equivalent but silently truncate once the data
+    // outgrew it, and the row would quietly stop being "all time".
+    const rows = n === null ? days : days.filter((x) => within(x, n));
+    const per = {};
+    let tok = 0, cost = 0, split = 0;
+    for (const x of rows) {
+      tok += Number(x.tokens) || 0;
+      cost += Number(x.costCents) || 0;
+      const bs = x.bySource || {};
+      for (const [name, v] of Object.entries(bs)) {
+        const t = (Number(v.inputTokens) || 0) + (Number(v.outputTokens) || 0);
+        if (!per[name]) per[name] = { tokens: 0, costCents: 0 };
+        per[name].tokens += t;
+        per[name].costCents += Number(v.costCents) || 0;
+        split += t;
+      }
+    }
+    return {
+      tokens: tok, costCents: cost,
+      activeDays: rows.filter((x) => (Number(x.tokens) || 0) > 0).length,
+      per,
+      // True when no day in the window carried a breakdown: the platform
+      // columns must then read "—" rather than silently showing zeros.
+      hasSplit: split > 0,
+    };
+  }
+
+  const windows = [
+    { key: 'today', label: 'today', days: 1 },
+    { key: 'week',  label: '7 days', days: 7 },
+    { key: 'month', label: '30 days', days: 30 },
+    { key: 'all',   label: 'all time', days: null },
+  ].map((w) => Object.assign(w, rollup(w.days)));
+  const allTime = windows[windows.length - 1];
+
+  /* Platform columns, ordered by 30-day volume so the busiest sits first.
+     With a single platform every cell would duplicate the tokens column
+     verbatim (7 / 7, 3.8k / 3.8k) — a column that restates its neighbour
+     costs width and teaches the reader that columns are meaningless. Show
+     the split only when there is genuinely a split to show. */
+  const allPlatforms = [...new Set(windows.flatMap((w) => Object.keys(w.per)))]
+    .sort((a, b) => (allTime.per[b]?.tokens || 0) - (allTime.per[a]?.tokens || 0));
+  const platforms = allPlatforms.length > 1 ? allPlatforms : [];
+
+  const when = d.updated ? String(d.updated).slice(0, 10) : '';
+
+  /* The panel header already says "workstation"; the status block used to
+     repeat it as a section heading directly underneath. Pass a flag so
+     the block renders headingless here but keeps its heading in the error
+     path, where it is the only label present. */
+  let html = `<div class="head"><h1>workstation</h1><span class="when">${esc(when)}</span></div>`;
+  html += renderStation({ heading: false });
+
+  /* Usage as ONE table: three windows down, platforms across. The panel
+     previously spent ~700 of its 850px on usage detail — sparkline, cache
+     donut, tool-mix bars, a four-card grid — which made a workstation
+     panel read as a usage report with a status strip bolted on. Those
+     views still exist, on the usage page, where there is room for them. */
+  html += `<div class="sec"><h2>usage</h2><table class="usage"><thead><tr>
+    <th></th><th>tokens</th>${platforms.map((p) => `<th>${esc(p)}</th>`).join('')}<th>cost</th>
+  </tr></thead><tbody>`;
+
+  for (const w of windows) {
+    const cells = platforms.map((name) => {
+      const v = w.per[name];
+      if (!w.hasSplit) return '<td class="n dim">—</td>';
+      return `<td class="n">${v && v.tokens ? compact(v.tokens) : '·'}</td>`;
+    }).join('');
+    // Set the cumulative row apart: it answers a different question from
+    // the three rolling windows above and should not read as a fourth
+    // period that happens to be larger.
+    html += `<tr class="${w.key === 'all' ? 'total' : ''}"><th class="rk">${esc(w.label)}</th>
+      <td class="n strong">${compact(w.tokens)}</td>${cells}
+      <td class="n">${money(w.costCents)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+
+  /* Context line. When the split column is suppressed the reader still
+     needs to know WHICH platform the numbers are — "all via claude" is
+     the information the hidden column would have carried, in a fraction
+     of the width. */
+  const only = allPlatforms.length === 1 ? `all via ${allPlatforms[0]} · ` : '';
+  html += `<div class="cap">${only}${active.length} active days since ${esc(active[0].date)}
+    · figures are API-equivalent, not billed</div>`;
+  html += '</div>';
+
+  html += `<div class="foot">
+    <button onclick="send({action:'open_site'})">Open usage page</button>
+    <button class="icon" title="Refresh" onclick="send({action:'refresh'})">↻</button>
+    <button class="icon" title="Quit" onclick="send({action:'quit'})">✕</button>
+  </div>`;
+
+  document.getElementById('root').innerHTML = html;
+  measure();
+};
+
+/* ── workstation panel ────────────────────────────────────────────────
+   Populated asynchronously: the station probe shells out to curl, git and
+   gh and takes 2-5s, while the usage snapshot is a local file read that
+   returns instantly. Blocking the whole popover on the slowest network
+   probe would make opening it feel broken, so usage paints first and this
+   block fills in underneath. window.station is set by the host. */
+window.station = null;
+
+function ago(iso) {
+  if (!iso) return '';
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return '';
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 90) return 'just now';
+  const m = s / 60;      if (m < 60)  return Math.round(m) + 'm ago';
+  const h = m / 60;      if (h < 24)  return Math.round(h) + 'h ago';
+  const d = h / 24;      if (d < 30)  return Math.round(d) + 'd ago';
+  const mo = d / 30.4;   if (mo < 12) return Math.round(mo) + 'mo ago';
+  return Math.round(mo / 12) + 'y ago';
+}
+
+function row(cls, label, value, valCls, action) {
+  const click = action ? ` class="st click" onclick="act('${action}')"` : ' class="st"';
+  return `<div${click}><span class="dot ${cls}"></span>` +
+    `<span class="lbl">${esc(label)}</span>` +
+    `<span class="val ${valCls || ''}">${esc(value)}</span></div>`;
+}
+
+function renderStation(opts) {
+  const withHeading = !opts || opts.heading !== false;
+  const head = withHeading ? '<h2>workstation</h2>' : '';
+  const st = window.station;
+  if (st && st.__error) {
+    /* Name the reason: a "checking…" that never resolves teaches the
+       reader to ignore the block, while a stated fault can be acted on.
+       Reasons carry file paths, which are far too long for the 3-column
+       row, so this state gets its own stacked layout with the detail
+       clamped — an overflowing row spills past the panel edge. */
+    return `<div class="sec">${head}
+      <div class="station"><div class="st" style="grid-template-columns:14px minmax(0,1fr)">
+      <span class="dot bad"></span>
+      <span style="min-width:0"><span class="lbl">probe failed</span>
+      <span class="val muted" style="display:block;text-align:left;margin-top:2px;
+        overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+        title="${esc(st.__error)}">${esc(st.__error)}</span></span>
+      </div></div></div>`;
+  }
+  if (!st) {
+    return `<div class="sec">${head}
+      <div class="station"><div class="st"><span class="dot"></span>
+      <span class="lbl">checking…</span><span class="val muted">—</span></div></div></div>`;
+  }
+
+  let rows = '';
+
+  /* ── audience ──────────────────────────────────────────────────────
+     Visitors first: for a personal site this is the one number that is
+     about the outside world rather than about the machine it is built on.
+     Visits and views are shown TOGETHER because they answer different
+     questions (people vs pages) and labelling either one "visitors"
+     alone would misstate it. */
+  const au = st.audience || {};
+  if (au.ok) {
+    const v = au.visits || 0, pv = au.views || 0;
+    rows += row(v > 0 ? 'ok' : '', 'visitors',
+      v === 0 ? `none in ${au.days}d` : `${v} · ${pv} views · ${au.days}d`,
+      v > 0 ? '' : 'muted', 'open_analytics');
+  } else {
+    // A missing wrangler login is a normal state, not a fault — say what
+    // to do about it instead of colouring it red.
+    const login = /wrangler login/.test(au.error || '');
+    rows += row(login ? '' : 'bad', 'visitors', au.error || 'unavailable', 'muted',
+      login ? '' : 'open_analytics');
+  }
+
+  /* ── features ──────────────────────────────────────────────────────
+     Our own counters. Zero is a real answer ("nobody touched a counted
+     feature"), so it renders as a plain muted line rather than an error
+     — a red row here would imply the pipeline is broken when it is
+     simply reporting no activity. */
+  const fx = st.features || {};
+  if (fx.ok) {
+    if (!fx.total) {
+      rows += row('', 'features', `no activity · ${fx.days}d`, 'muted');
+    } else {
+      const bits = [];
+      if (fx.topSkin) bits.push(`${fx.topSkin.name} ×${fx.topSkin.n}`);
+      if (fx.cmdTotal) bits.push(`${fx.cmdTotal} cmd`);
+      if (fx.chartTotal) bits.push(`${fx.chartTotal} chart`);
+      rows += row('ok', 'top skin', bits.join(' · ') || `${fx.total} events`, '');
+    }
+    // Unanswered questions are a to-do list, so they get their own line
+    // and an amber dot rather than being averaged into a total.
+    if (fx.qaUnanswered) {
+      rows += row('warn', 'unanswered q', `${fx.qaUnanswered} of ${fx.qaTotal}`, '');
+    }
+  } else {
+    rows += row('bad', 'features', fx.error || 'unavailable', 'muted');
+  }
+
+  // Site + worker. Amber for reachable-but-slow: this site legitimately
+  // takes ~5s sometimes, and calling that "down" would be a false alarm.
+  for (const [key, label] of [['site', 'site'], ['worker', 'usage api']]) {
+    const p = st[key] || {};
+    const cls = !p.ok ? 'bad' : p.slow ? 'warn' : 'ok';
+    const val = p.ok ? `${p.code} · ${p.ms}ms` : (p.error || 'down');
+    // Distinct action names: 'open_site' is already taken by the footer
+    // button (which opens the usage page, not the site root).
+    rows += row(cls, label, val, p.ok ? '' : 'muted',
+      key === 'site' ? 'open_site_row' : 'open_worker');
+  }
+
+  // Working tree. Uncommitted work is the single most actionable thing
+  // here — it is the state that silently accumulates.
+  const g = st.git || {};
+  if (g.ok) {
+    const n = g.dirty || 0;
+    const parts = [];
+    if (n) parts.push(n + ' changed');
+    if (g.unpushed) parts.push(g.unpushed + ' unpushed');
+    rows += row(n ? 'warn' : 'ok', 'working tree',
+      parts.length ? parts.join(' · ') : 'clean', n ? '' : 'muted', 'open_repo');
+    if (g.lastCommit) {
+      rows += row('', 'last commit', ago(g.lastCommit.when), 'muted');
+    }
+  } else {
+    rows += row('bad', 'working tree', g.error || 'unknown', 'muted');
+  }
+
+  // CI.
+  const ci = st.ci || {};
+  if (ci.ok && !ci.empty) {
+    const running = ci.status && ci.status !== 'completed';
+    const good = ci.conclusion === 'success';
+    rows += row(running ? 'warn' : good ? 'ok' : 'bad', 'last build',
+      running ? (ci.status || 'running') : (ci.conclusion || '?'), '', 'open_ci');
+  } else {
+    rows += row('', 'last build', ci.error || 'none yet', 'muted');
+  }
+
+  let html = `<div class="sec">${head}<div class="station">${rows}</div>`;
+
+  /* Actions. "Ask Claude" only appears when claude is actually on PATH —
+     an action that cannot run is worse than an absent one. codex is
+     deliberately probed too: it shows up in this machine's transcript
+     history but is not installed here. */
+  const ag = st.agents || {};
+  const askLabel = ag.claude ? 'Ask Claude' : 'Claude n/a';
+  html += `<div class="acts">
+    <button id="btn-sync" onclick="act('sync')">Sync now</button>
+    <button onclick="act('open_repo')">Open repo</button>
+    <button id="btn-ask" onclick="act('ask')"${ag.claude ? '' : ' disabled'}>${esc(askLabel)}</button>
+  </div>`;
+
+  html += '</div>';
+  return html;
+}
+
+/* Actions that take time report back through window.actionState so the
+   button can show progress. Without that, clicking "Sync now" looks like
+   nothing happened for ~30 seconds. */
+function act(a) {
+  if (a === 'sync') {
+    const b = document.getElementById('btn-sync');
+    if (b) { b.textContent = 'Syncing…'; b.classList.add('busy'); b.disabled = true; }
+  }
+  send({ action: a });
+}
+
+window.stationError = function (reason) {
+  window.station = { __error: String(reason || 'probe failed') };
+  if (window.__lastData) window.__render(window.__lastData);
+};
+
+window.setStation = function (json) {
+  try { window.station = typeof json === 'string' ? JSON.parse(json) : json; }
+  catch (e) { window.station = null; }
+  if (window.__lastData) window.__render(window.__lastData);
+};
+
+window.syncDone = function (msg) {
+  const b = document.getElementById('btn-sync');
+  if (b) { b.textContent = msg || 'Sync now'; b.classList.remove('busy'); b.disabled = false; }
+};
+
+// Tell the host how tall we ended up, so the panel fits the content.
+function measure() {
+  requestAnimationFrame(() => {
+    const h = document.querySelector('.wrap').scrollHeight;
+    send({ action: 'resize', height: h });
+  });
+}
+window.send = send;
+</script>
+</body>
+</html>
