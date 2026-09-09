@@ -456,6 +456,19 @@ function beaconCors(origin) {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
+        /* navigator.sendBeacon ALWAYS sends in credentials:'include' mode, and
+           that mode rejects a response without this header even when the
+           origin is allowed. Without it every beacon from a real browser was
+           dropped at the CORS layer while curl kept returning 204 — curl sends
+           no credentials, so it never exercised this path.
+
+           sendBeacon() also returns true on failure (true means "queued", not
+           "delivered"), so nothing on the page could notice, and the counters
+           just stayed empty as though no visitor had ever clicked anything.
+
+           Echoing the exact origin, never '*': the wildcard is illegal in
+           credentialed mode, and the allowlist above is what limits this. */
+        'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '86400',
         Vary: 'Origin',
       }

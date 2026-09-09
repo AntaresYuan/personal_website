@@ -169,6 +169,59 @@ async function loadWorker(file) {
       /list\(\{ prefix: BEACON_PREFIX/.test(src));
   }
 
+  /* Credentialed CORS on /beacon.
+     navigator.sendBeacon always sends in credentials:'include' mode, and a
+     browser rejects such a response unless it carries
+     Access-Control-Allow-Credentials: true. Shipping without it dropped every
+     real beacon while curl still returned 204 — curl sends no credentials, so
+     no curl-based check could ever see this. sendBeacon() compounds it by
+     returning true for "queued", so the page cannot detect the loss either.
+     Asserting on the real Response headers, from both the POST and the
+     preflight, because those are what the browser actually enforces. */
+  {
+    const src = fs.readFileSync(NEW_FILE, 'utf8');
+    const body = src.replace(/export default\s*/, 'const __W = ') + '\n;return __W;';
+    const W = new Function('caches', body)(missCache());
+    const kv = { async get() { return null; }, async put() {}, async list() { return { keys: [], list_complete: true }; } };
+    const env = { USAGE_KV: kv, USAGE_PUBLISH: '' };
+    const site = 'https://antaresyuan.site';
+
+    const post = await W.fetch(new Request('https://usage.antaresyuan.site/beacon', {
+      method: 'POST', headers: { origin: site, 'content-type': 'application/json' },
+      body: '{"event":"chart_open","value":"calendar"}',
+    }), env, { waitUntil() {} });
+    ok('beacon POST accepts a real event', post.status === 204, String(post.status));
+    ok('beacon POST allows credentials (sendBeacon requires it)',
+      post.headers.get('access-control-allow-credentials') === 'true',
+      String(post.headers.get('access-control-allow-credentials')));
+    ok('beacon POST echoes the origin, never a wildcard',
+      post.headers.get('access-control-allow-origin') === site,
+      String(post.headers.get('access-control-allow-origin')));
+
+    const pre = await W.fetch(new Request('https://usage.antaresyuan.site/beacon', {
+      method: 'OPTIONS',
+      headers: { origin: site, 'access-control-request-method': 'POST',
+                 'access-control-request-headers': 'content-type' },
+    }), env, { waitUntil() {} });
+    ok('beacon preflight allows credentials',
+      pre.headers.get('access-control-allow-credentials') === 'true',
+      String(pre.headers.get('access-control-allow-credentials')));
+
+    // A wildcard ACAO is illegal in credentialed mode: the browser refuses it
+    // even with allow-credentials set, so this must never regress to '*'.
+    ok('never pairs wildcard origin with credentials',
+      !/'Access-Control-Allow-Origin':\s*'\*'/.test(src));
+
+    // An outside origin must still be refused outright.
+    const bad = await W.fetch(new Request('https://usage.antaresyuan.site/beacon', {
+      method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'application/json' },
+      body: '{"event":"chart_open","value":"calendar"}',
+    }), env, { waitUntil() {} });
+    ok('foreign origin is still rejected', bad.status === 403, String(bad.status));
+    ok('foreign origin gets no credential grant',
+      !bad.headers.get('access-control-allow-credentials'));
+  }
+
   console.log(`\nkv-cost billed ops: ${billedOld} → ${billedNew}` +
     (billedOld ? `  (${(100 - billedNew / billedOld * 100).toFixed(1)}% fewer)` : ''));
   process.exit(fails ? 1 : 0);
