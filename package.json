@@ -1,16 +1,22 @@
 {
   "name": "personal-website",
   "private": true,
-  "description": "An open template for a PM-style portfolio dashboard — agent-answerable by design. See README.",
+  "description": "An open template for a PM-style portfolio dashboard \u2014 agent-answerable by design. See README.",
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.js",
     "reset-content": "node scripts/scaffold-reset.js",
     "serve": "npx serve .",
-    "test": "node workers/usage/test/schema.test.js"
+    "preview": "node ops/preview.js",
+    "preview:demo": "node ops/preview.js --demo",
+    "test": "node workers/usage/test/schema.test.js && node workers/usage/test/render-stats.test.js && node scripts/characters.test.js && node ops/menubar/selftest.js && node ops/menubar/station.test.js && node workers/usage/test/kv-cost.test.js && node scripts/beacon.test.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/AntaresYuan/personal_website"
+  },
+  "devDependencies": {
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.3"
   }
 }

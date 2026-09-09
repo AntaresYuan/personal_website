@@ -16,6 +16,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://antaresyuan.site/usage/</loc>
+    <lastmod>2026-06-20</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://antaresyuan.site/blog/</loc>
     <lastmod>2026-05-12</lastmod>
     <priority>0.7</priority>

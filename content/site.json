@@ -17,7 +17,8 @@
     "lastUpdated": ""
   },
   "analytics": {
-    "cfAnalyticsToken": ""
+    "cfAnalyticsToken": "",
+    "featureBeacon": true
   },
   "giscus": {
     "repo": "AntaresYuan/personal_website",
@@ -33,6 +34,12 @@
   },
   "usage": {
     "enabled": true,
-    "endpoint": "https://usage.antaresyuan.site"
+    "endpoint": "https://usage.antaresyuan.site",
+    "views": [
+      "rhythm",
+      "calendar",
+      "trend"
+    ],
+    "defaultView": "rhythm"
   }
 }

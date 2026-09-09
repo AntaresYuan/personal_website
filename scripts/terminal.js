@@ -584,6 +584,16 @@
 
       const [name, ...rest] = trimmed.split(/\s+/);
       const fn = cmds[name.toLowerCase()];
+      /* Command NAME only — never args. `search <term>` and `ask <question>`
+         carry whatever the visitor typed, which is exactly the kind of
+         content this site promised not to collect. An unrecognised name
+         reports as 'unknown' rather than being echoed, so a typo cannot
+         become a counter key either. */
+      try {
+        if (typeof window.SITE_BEACON === 'function') {
+          window.SITE_BEACON('terminal_cmd', fn ? name.toLowerCase() : 'unknown');
+        }
+      } catch (_) { /* noop */ }
       if (!fn) {
         print(`<span class="term-err">command not found:</span> ${escape(name)} <span class="term-dim">— try \`help\`</span>`);
         return;

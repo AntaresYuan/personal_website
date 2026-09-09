@@ -14,8 +14,18 @@
   // is also a deploy build command, so a non-zero exit here breaks the site).
   try { await require('./build-og')(); } catch (e) { console.log('  (OG cards skipped: ' + ((e && e.message) || e) + ')'); }
 
+  // Skin character art, baked from DiceBear into a plain JS file so the
+  // site keeps zero runtime dependencies and makes no third-party calls.
+  // Best-effort for the same reason as the OG cards: @dicebear is a
+  // devDependency, the generated file is committed, and someone building
+  // from a fresh clone without dev deps must still get a working site.
+  try { require('./gen-characters'); } catch (e) { console.log('  (characters skipped: ' + ((e && e.message) || e) + ')'); }
+
   require('./build-html');
   require('./build-blog');
+  // /usage/ — the full dashboard. After build-html so the homepage skeleton
+  // (and its "all charts →" link) is already in place.
+  require('./build-usage-page');
   require('./build-llms');
   require('./build-sitemap');
   require('./build-agent-brief');

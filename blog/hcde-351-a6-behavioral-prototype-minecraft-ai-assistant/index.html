@@ -41,9 +41,13 @@
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);
     d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+    try {
+      var s = localStorage.getItem('skin');
+      if (s && ['meadow', 'solar', 'press', 'dossier', 'blueprint', 'terminal', 'hud', 'neon', 'dusk', 'observatory', 'abyss', 'dumpling', 'vocal', 'workshop', 'hereva'].indexOf(s) >= 0) d.setAttribute('data-skin', s);
+    } catch (e) {}
   })();
 </script>
-<link rel="stylesheet" href="/styles/main.css?v=09232925">
+<link rel="stylesheet" href="/styles/main.css?v=9487bcc9">
 </head>
 <body class="blog-page blog-post-page">
 <div class="blog-progress" aria-hidden="true"><span class="blog-progress-bar"></span></div>
@@ -58,6 +62,10 @@
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
         <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
       </button>
+      <details class="skin-picker" id="skin-picker">
+        <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
+        <div class="skin-menu" role="menu" aria-label="Skin"></div>
+      </details>
     </div>
   </nav>
   <article class="section blog-post">
@@ -170,6 +178,10 @@
   }
 })();
 </script>
-<script src="/scripts/doodle.js?v=08a1995d" defer></script>
+<script src="/scripts/doodle.js?v=3d1f7d5c" defer></script>
+<script src="/scripts/skins.js?v=3be8d6c2" defer></script>
+<script src="/scripts/skin-characters.js?v=b78cfa18" defer></script>
+<script src="/scripts/skin-diva.js?v=4bfce5f2" defer></script>
+<script src="/scripts/skin-runtime.js?v=b502cee2" defer></script>
 </body>
 </html>

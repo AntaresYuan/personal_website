@@ -106,10 +106,22 @@
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);
     d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+    // Skin: an optional palette on top of light/dark. Same reason this runs
+    // here — <html data-skin> must be set before the stylesheet paints.
+    // The id list is duplicated from scripts/skins.js on purpose: that file
+    // is deferred, and validating here keeps a stale localStorage value from
+    // half-styling the page.
+    try {
+      var s = localStorage.getItem('skin');
+      if (s && ['meadow', 'solar', 'press', 'dossier', 'blueprint', 'terminal', 'hud', 'neon', 'dusk', 'observatory', 'abyss', 'dumpling', 'vocal', 'workshop', 'hereva'].indexOf(s) >= 0) d.setAttribute('data-skin', s);
+    } catch (e) {}
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=09232925">
+<link rel="stylesheet" href="styles/main.css?v=9487bcc9">
+  <!-- feature-beacon -->
+  <script defer src="scripts/beacon.js?v=2dc05071"></script>
+  <!-- /feature-beacon -->
 </head>
 <body>
 
@@ -127,6 +139,14 @@
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
         <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
       </button>
+      <!-- Skin picker — alternate palettes (+ ambient effects and a cursor
+           companion on some). A <details> so it opens, closes and takes
+           keyboard/Esc for free; options are injected by
+           scripts/skin-runtime.js from the registry in scripts/skins.js. -->
+      <details class="skin-picker" id="skin-picker">
+        <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
+        <div class="skin-menu" role="menu" aria-label="Skin"></div>
+      </details>
       <span class="meta" id="last-updated">updated 2026-06-20</span>
     </div>
   </nav>
@@ -186,6 +206,7 @@
          See workers/usage/README.md + docs/usage-sync.md. -->
     <section class="section usage-section rise rise-2" id="usage" aria-label="Live AI usage">
       <h2 class="usage-title">Antares's <em>Token Consumption</em></h2>
+      <div class="usage-views" id="usage-views" role="group" aria-label="Chart view" hidden hidden=""></div>
       <div class="usage-heatmap-wrap">
         
         <div class="usage-heatmap-inner">
@@ -199,11 +220,14 @@
                   <span class="usage-legend-cell usage-legend-q3"></span>
                   <span>More</span>
                 </div>
+          <div class="usage-caption" id="usage-caption" hidden hidden=""></div>
         </div>
       </div>
       <div class="usage-stats" id="usage-stats"><span class="usage-stat"><strong>—</strong> tokens</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> sessions</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> days active</span><span class="usage-stat-sep">·</span><span class="usage-stat usage-stat-since">since —</span></div>
       <div class="usage-flourish">
         <span class="usage-funfact" id="usage-funfact"></span>
+        <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
+        <a class="usage-more-link" href="/usage/">all charts →</a>
         <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
         <span class="usage-foot" id="usage-foot"><span id="usage-live-text">live</span></span>
       </div>
@@ -929,9 +953,13 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=2aa4f0c9"   defer></script>
-<script src="scripts/terminal.js?v=220438c1" defer></script>
+<script src="scripts/render.js?v=0bf75393"   defer></script>
+<script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=7a43d41d"  defer></script>
-<script src="scripts/doodle.js?v=08a1995d"   defer></script>
+<script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>
+<script src="scripts/skins.js?v=3be8d6c2"        defer></script>
+<script src="scripts/skin-characters.js?v=b78cfa18" defer></script>
+<script src="scripts/skin-diva.js?v=4bfce5f2" defer></script>
+<script src="scripts/skin-runtime.js?v=b502cee2" defer></script>
 </body>
 </html>

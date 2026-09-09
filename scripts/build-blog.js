@@ -35,6 +35,10 @@ const FEED_DESC = `Writeups and notes from building — by ${AUTHOR}.`;
 const hashOf = (rel) => crypto.createHash('sha1').update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
 const cssV = hashOf('styles/main.css');
 const doodleV = hashOf('scripts/doodle.js');   // the moon-phase / doodle mark — same on blog pages as on the home page
+const skinsV = hashOf('scripts/skins.js');     // skin registry + companion art
+const skinRtV = hashOf('scripts/skin-runtime.js');
+const skinDivaV = hashOf('scripts/skin-diva.js');
+const skinCharsV = hashOf('scripts/skin-characters.js');
 
 // rough reading time, ~200 wpm — strip Markdown punctuation first.
 const readMinutes = (md) => {
@@ -57,6 +61,10 @@ const THEME_INIT = `<script>
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);
     d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+    try {
+      var s = localStorage.getItem('skin');
+      if (s && ['meadow', 'solar', 'press', 'dossier', 'blueprint', 'terminal', 'hud', 'neon', 'dusk', 'observatory', 'abyss', 'dumpling', 'vocal', 'workshop', 'hereva'].indexOf(s) >= 0) d.setAttribute('data-skin', s);
+    } catch (e) {}
   })();
 </script>`;
 
@@ -172,6 +180,10 @@ ${THEME_INIT}
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
         <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
       </button>
+      <details class="skin-picker" id="skin-picker">
+        <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
+        <div class="skin-menu" role="menu" aria-label="Skin"></div>
+      </details>
     </div>
   </nav>
 ${main}
@@ -182,6 +194,10 @@ ${main}
 </main>
 ${BLOG_JS}
 <script src="/scripts/doodle.js?v=${doodleV}" defer></script>
+<script src="/scripts/skins.js?v=${skinsV}" defer></script>
+<script src="/scripts/skin-characters.js?v=${skinCharsV}" defer></script>
+<script src="/scripts/skin-diva.js?v=${skinDivaV}" defer></script>
+<script src="/scripts/skin-runtime.js?v=${skinRtV}" defer></script>
 </body>
 </html>
 `;

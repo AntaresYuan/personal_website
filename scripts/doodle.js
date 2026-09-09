@@ -23,10 +23,21 @@
 
   var SYNODIC = 29.530588853;                         // days, new moon → new moon
   var REF = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // a known new moon, in days
-  var YELLOW = '#F5C518', DARK = '#14130D';
   var dot = document.querySelector('.brand .dot');
   var fav = document.querySelector('link[rel="icon"]');
   var now = new Date();
+
+  /* The favicon is a raster-ish data-URI, so it can't use currentColor like
+     the in-page mark does — it needs literal hexes. Read them from the live
+     tokens so the icon follows the active theme/skin instead of being
+     frozen to the default palette. Falls back to the original constants if
+     the stylesheet hasn't applied (or a token is ever renamed). */
+  function token(name, fallback) {
+    try {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch (e) { return fallback; }
+  }
 
   /* ── moon phase ────────────────────────────────────────────────────── */
   function phaseOf(date) {
@@ -67,6 +78,8 @@
       dot.setAttribute('title', phaseName(p.frac) + ' · ' + Math.round(p.illum * 100) + '% lit · ' + now.toISOString().slice(0, 10));
     }
     if (fav) {
+      var YELLOW = token('--color-yellow', '#F5C518');
+      var DARK = token('--color-bg', '#14130D');
       var s = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>"
         + "<rect width='32' height='32' rx='6' fill='" + DARK + "'/>"
         + "<circle cx='16' cy='16' r='11.5' fill='none' stroke='" + YELLOW + "' stroke-opacity='0.18' stroke-width='2'/>"

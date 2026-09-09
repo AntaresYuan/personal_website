@@ -353,14 +353,41 @@ html = html.replace(/<html\b[^>]*>/, (m) => {
 });
 
 // ── Cloudflare Web Analytics ──────────────────────────────────────────
-// Strip any prior beacon (idempotent), then inject before </head> if
-// site.analytics.cfAnalyticsToken is set. No script when empty — the
-// page loads without any tracking until the token is configured.
+/* Strip any prior beacon (idempotent), then inject before </head> if
+   site.analytics.cfAnalyticsToken is set. No script when empty.
+
+   LEAVE THE TOKEN EMPTY while the zone is proxied through Cloudflare.
+   Web Analytics is already enabled on this zone and Cloudflare injects
+   beacon.min.js AT THE EDGE, so setting the token here loads the same
+   beacon twice and every pageview is counted twice. Verified 2026-09:
+   the edge-injected tag is absent from `curl` with a default Accept
+   header and present with a browser-like one, which is why an earlier
+   check for it here came up empty and concluded it was not installed.
+
+   Set the token only if the site ever moves off Cloudflare's proxy (or
+   automatic injection is turned off in the dashboard). */
 html = html.replace(/[ \t]*<!--\s*cf-analytics\s*-->[\s\S]*?<!--\s*\/cf-analytics\s*-->\n?/g, '');
 const cfToken = site.analytics?.cfAnalyticsToken?.trim();
 if (cfToken) {
   const block = `  <!-- cf-analytics -->\n  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"${escape(cfToken)}"}'></script>\n  <!-- /cf-analytics -->\n`;
   html = html.replace('</head>', `${block}</head>`);
+}
+
+// ── Feature beacon (own counters) ─────────────────────────────────────
+/* Counts which site features get touched (skins, terminal, charts, Q&A).
+   Separate from Cloudflare's beacon above, which does pageviews and Web
+   Vitals — this one answers "does anyone use the thing I built", which no
+   hosted analytics can, because only this codebase knows what a "skin
+   pick" is.
+
+   Gated on site.analytics.featureBeacon so the whole thing can be turned
+   off from content, exactly like the Cloudflare token. Stripped and
+   re-injected each build so toggling it off actually removes the tag
+   rather than leaving a stale one behind. */
+html = html.replace(/[ \t]*<!--\s*feature-beacon\s*-->[\s\S]*?<!--\s*\/feature-beacon\s*-->\n?/g, '');
+if (site.analytics?.featureBeacon === true) {
+  const bBlock = `  <!-- feature-beacon -->\n  <script defer src="scripts/beacon.js"></script>\n  <!-- /feature-beacon -->\n`;
+  html = html.replace('</head>', `${bBlock}</head>`);
 }
 
 // ── Giscus (GitHub Discussions comments) ──────────────────────────────
@@ -549,6 +576,14 @@ if (site.usage?.enabled === false) {
       `<span class="usage-stat-sep">·</span>`,
       `<span class="usage-stat usage-stat-since">since —</span>`,
     ].join(''));
+  // View tabs and the per-view caption start empty and hidden: render.js
+  // fills them once it knows which views the Worker actually published, so
+  // a fork with only the v1 four scalars shows no chrome for views it can't
+  // draw. Reset here so a stale build can't leave tabs in the markup.
+  html = replaceInner(html, 'usage-views', '');
+  html = setAttr(html, 'usage-views', 'hidden', '');
+  html = replaceInner(html, 'usage-caption', '');
+  html = setAttr(html, 'usage-caption', 'hidden', '');
 }
 
 // Footer
@@ -565,7 +600,7 @@ const crypto = require('crypto');
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js', 'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js', 'scripts/skin-characters.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),

@@ -1024,6 +1024,24 @@
     { tokens:   6500, label: 'the U.S. Constitution' },
   ];
 
+  // ── skin lexicon ────────────────────────────────────────────────
+  // An IP skin can rename every label in this panel (Observatory turns
+  // "sessions" into "nights out"; Abyss turns it into "dives"). Look the
+  // skin up on each call rather than caching it: the skin changes without a
+  // reload, and the panel re-renders on refetch and on view switch.
+  //
+  // Fails soft in three ways, because this panel must not depend on the
+  // skin feature existing: no SITE_SKINS (skins.js not loaded), no lexicon
+  // on the active skin, or no entry for this key → the key comes back
+  // unchanged, which IS the default English copy.
+  const W = (key) => {
+    try {
+      const S = window.SITE_SKINS;
+      if (!S || typeof S.word !== 'function') return key;
+      return S.word(document.documentElement.getAttribute('data-skin') || 'default', key);
+    } catch (_) { return key; }
+  };
+
   const fmtCompact = (n) => {
     if (!Number.isFinite(n) || n <= 0) return '0';
     if (n >= 1e9)  return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
@@ -1082,15 +1100,36 @@
   const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];   // alternating, GitHub-style
   const renderHeatmap = (cells) => {
     const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
-    const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
-    const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
-    const w = HEATMAP_LEFT_LABEL + gridW;
-    const h = HEATMAP_LABEL_BAND + gridH;
 
     let firstActiveDate = '';
     for (const c of cells) {
       if (c.tokens > 0 && (!firstActiveDate || c.date < firstActiveDate)) firstActiveDate = c.date;
     }
+
+    // Only draw the columns that contain real activity (plus one lead-in
+    // week). The Worker returns a dense 365-day range, so plotting all 52
+    // columns pinned the data into the right-hand fifth and left the rest of
+    // the strip visibly empty — it read as a broken layout, not as history.
+    let firstCol = 0;
+    if (firstActiveDate) {
+      let earliest = HEATMAP_COLS;
+      for (const c of cells) {
+        if (c.tokens > 0 && c.col < earliest) earliest = c.col;
+      }
+      firstCol = Math.max(0, Math.min(HEATMAP_COLS - 1, earliest - 1));
+    }
+    const cols = HEATMAP_COLS - firstCol;
+
+    // Scale the cell so the visible range fills the strip. 22px is the upper
+    // bound: past that the squares stop reading as a calendar and start
+    // looking like a bar chart. With ~11 weeks this lands at 22px → ~290px
+    // of grid, which then centres rather than being upscaled to 900px.
+    const targetGridW = 860 - HEATMAP_LEFT_LABEL;
+    const cell = Math.max(9, Math.min(22, Math.floor((targetGridW - (cols - 1) * HEATMAP_GAP) / cols)));
+    const gridW = cols * cell + (cols - 1) * HEATMAP_GAP;
+    const gridH = HEATMAP_ROWS * cell + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
+    const w = HEATMAP_LEFT_LABEL + gridW;
+    const h = HEATMAP_LABEL_BAND + gridH;
 
     const grid = [];
     for (let c = 0; c < HEATMAP_COLS; c++) {
@@ -1109,12 +1148,12 @@
     // the cell grid, not the row-label band.
     const monthLabels = [];
     let prevMonth = -1;
-    for (let c = 0; c < HEATMAP_COLS; c++) {
+    for (let c = firstCol; c < HEATMAP_COLS; c++) {
       const sunday = grid[c * HEATMAP_ROWS];
       if (!sunday.date) continue;
       const m = new Date(sunday.date + 'T00:00:00Z').getUTCMonth();
       if (m !== prevMonth) {
-        const x = HEATMAP_LEFT_LABEL + c * (HEATMAP_CELL + HEATMAP_GAP);
+        const x = HEATMAP_LEFT_LABEL + (c - firstCol) * (cell + HEATMAP_GAP);
         monthLabels.push(`<text x="${x}" y="13" class="usage-month-label">${MONTH_ABBR[m]}</text>`);
         prevMonth = m;
       }
@@ -1125,27 +1164,39 @@
     const dayLabels = [];
     for (let r = 0; r < HEATMAP_ROWS; r++) {
       if (!DAY_LABELS[r]) continue;
-      const yRow = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP) + HEATMAP_CELL / 2;
+      const yRow = HEATMAP_LABEL_BAND + r * (cell + HEATMAP_GAP) + cell / 2;
       dayLabels.push(`<text x="${HEATMAP_LEFT_LABEL - 6}" y="${yRow}" class="usage-day-label" text-anchor="end" dominant-baseline="middle">${DAY_LABELS[r]}</text>`);
     }
 
-    const rects = grid.map(cell => {
-      const x = HEATMAP_LEFT_LABEL + cell.col * (HEATMAP_CELL + HEATMAP_GAP);
-      const y = HEATMAP_LABEL_BAND + cell.row * (HEATMAP_CELL + HEATMAP_GAP);
-      const isOutside = !cell.date
-                     || (firstActiveDate && cell.date < firstActiveDate);
+    const rects = grid.filter(c => c.col >= firstCol).map(cellData => {
+      const x = HEATMAP_LEFT_LABEL + (cellData.col - firstCol) * (cell + HEATMAP_GAP);
+      const y = HEATMAP_LABEL_BAND + cellData.row * (cell + HEATMAP_GAP);
+      const isOutside = !cellData.date
+                     || (firstActiveDate && cellData.date < firstActiveDate);
       let cls, dataAttrs;
       if (isOutside) {
         cls = 'usage-cell-outside';
         dataAttrs = '';
       } else {
-        const bin = quartileBin(cell.tokens, nonZero);
+        const bin = quartileBin(cellData.tokens, nonZero);
         cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
-        dataAttrs = `data-date="${cell.date}" data-tokens="${cell.tokens}" data-sessions="${cell.sessions}"`;
+        dataAttrs = `data-date="${cellData.date}" data-tokens="${cellData.tokens}" data-sessions="${cellData.sessions}"`;
+        // Optional v2 attributes — only emitted when the Worker publishes
+        // the backing field, so the tooltip enriches itself without any
+        // frontend change when a dimension is switched on.
+        if (Number.isFinite(cellData.totalTokens) && cellData.totalTokens > 0) {
+          dataAttrs += ` data-total="${cellData.totalTokens}"`;
+        }
+        if (Number.isFinite(cellData.cachedInputTokens) && cellData.cachedInputTokens > 0) {
+          dataAttrs += ` data-cached="${cellData.cachedInputTokens}"`;
+        }
+        if (Number.isFinite(cellData.costCents) && cellData.costCents > 0) {
+          dataAttrs += ` data-cost="${cellData.costCents}"`;
+        }
       }
-      return `<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
+      return `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2" class="usage-cell ${cls}" ${dataAttrs}/>`;
     }).join('');
-    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${monthLabels.join('')}${dayLabels.join('')}${rects}</svg>`;
+    return `<svg viewBox="0 0 ${w} ${h}" style="--chart-w:${w}px" preserveAspectRatio="xMidYMin meet" aria-hidden="true">${monthLabels.join('')}${dayLabels.join('')}${rects}</svg>`;
   };
 
   // Sum costCents across all cells, format as `$xx.xx` or `$xx,xxx.xx`.
@@ -1169,6 +1220,51 @@
       : '$' + usd.toFixed(2);
   };
 
+  // ── optional v2 dimensions ──────────────────────────────────────
+  // The Worker decides which extra fields/dims reach the public GET (its
+  // USAGE_PUBLISH config). This side is deliberately DATA-DRIVEN: a field
+  // renders iff it's present and non-zero, and disappears the moment the
+  // Worker stops publishing it. No frontend redeploy needed to flip a
+  // dimension on or off, and a v1 Worker keeps rendering exactly as before.
+  const sumField = (cells, field) => {
+    let total = 0;
+    for (const cell of cells) {
+      if (Number.isFinite(cell[field])) total += cell[field];
+    }
+    return total;
+  };
+
+  const hasField = (cells, field) =>
+    cells.some(c => Number.isFinite(c[field]) && c[field] > 0);
+
+  // Merge a per-day breakdown map ({model: {...}}) across the window into
+  // one ranked list. Returns [] when the dim isn't published.
+  const mergeDim = (cells, dim, metric = 'totalTokens') => {
+    const acc = new Map();
+    for (const cell of cells) {
+      const m = cell[dim];
+      if (!m || typeof m !== 'object') continue;
+      for (const key of Object.keys(m)) {
+        const v = m[key];
+        if (!v || typeof v !== 'object') continue;
+        const n = Number.isFinite(v[metric]) ? v[metric] : 0;
+        if (n <= 0) continue;
+        acc.set(key, (acc.get(key) || 0) + n);
+      }
+    }
+    return [...acc.entries()].sort((a, b) => b[1] - a[1]);
+  };
+
+  // "57% served from cache" — the single most interesting derived number
+  // once cache counters are published, and impossible to compute from the
+  // v1 wire shape at all.
+  const cacheSharePct = (cells) => {
+    const cached = sumField(cells, 'cachedInputTokens');
+    const total = sumField(cells, 'totalTokens');
+    if (cached <= 0 || total <= 0) return null;
+    return Math.round((cached / total) * 100);
+  };
+
   const renderUsageStats = (cells) => {
     let totalTokens = 0, totalSessions = 0, daysActive = 0;
     let oldestActive = '';
@@ -1180,31 +1276,365 @@
         if (!oldestActive || cell.date < oldestActive) oldestActive = cell.date;
       }
     }
-    // Recent activity = days active in the last 7 cells (calendar order)
-    // — same window the section's header sells ("/usage live"), reads
-    // more naturally than the rolling-90-day rate.
-    const last7 = cells.slice(-7);
-    const last7Active = last7.filter(c => c.tokens > 0).length;
+    // Recent activity = days active in the last 7 CALENDAR days.
+    //
+    // Not `cells.slice(-7)`: buildHeatmapGrid fills column-major (col outer,
+    // row inner), so the final 7 entries are the last COLUMN — this week's
+    // Sun..Sat, including empty placeholders for days that haven't happened
+    // yet. On a Monday that's 1 real day and 6 blanks, which rendered as
+    // "1/7 days active" under a heatmap showing near-daily activity.
+    // Selecting by date keeps the number honest regardless of weekday.
+    const dated = cells.filter(c => c.date);
+    let newest = '';
+    for (const c of dated) if (c.date > newest) newest = c.date;
+    const last7Active = newest
+      ? (() => {
+          const cutoffMs = new Date(newest + 'T00:00:00Z').getTime() - 6 * 86400000;
+          const seen = new Set();
+          for (const c of dated) {
+            if (c.tokens > 0 && new Date(c.date + 'T00:00:00Z').getTime() >= cutoffMs) {
+              seen.add(c.date);
+            }
+          }
+          return seen.size;
+        })()
+      : 0;
     // Cost slots inline as one of the data items — only emitted when we
     // have costCents data. "≈" because Anthropic pricing has tier rules
     // (1M-context Opus doubles above 200K input) we don't model.
+    // "≈" because tiered pricing rules (e.g. 1M-context Opus doubling above
+    // 200K input) are not modelled.
     const costStr = formatCostUsd(cells);
-    const costItem = costStr
-      ? [`<span class="usage-stat">&asymp; <strong>${costStr}</strong></span>`,
-         `<span class="usage-stat-sep">·</span>`]
-      : [];
-    // Always emit the "since" slot — even when empty — so the row's width
-    // matches the SSR shell and the layout doesn't shift on first fetch.
-    return [
-      `<span class="usage-stat"><strong>${fmtCompact(totalTokens)}</strong> tokens</span>`,
+
+    // ── the stats block ─────────────────────────────────────────────
+    // Previously this was eleven numbers joined by "·" across four wrapped
+    // lines. Two problems, both fatal to reading it: nothing told you which
+    // number was which kind of thing, and "1B tokens" sat three items away
+    // from "2.4B total" with no hint that one is a subset of the other.
+    //
+    // Now it's a definition grid — label above value, fixed columns, aligned
+    // baselines. Same data, but scannable, and the two token figures are
+    // named so the difference is self-evident:
+    //   "tokens billed"    = input + output (what you pay per-token for)
+    //   "tokens processed" = all five categories, including cache reads
+    const items = [];
+    // Every user-facing label goes through W(). With no skin (or a skin
+    // without a lexicon) this is the identity function, so the default copy
+    // is byte-identical to what it was before the IP skins existed.
+    const push = (k, v, title) =>
+      items.push(
+        `<div class="hstat-cell"${title ? ` title="${title}"` : ''}>` +
+          `<dt class="hstat-k">${W(k)}</dt>` +
+          `<dd class="hstat-v">${v}</dd>` +
+        `</div>`
+      );
+
+    const hasTotal = hasField(cells, 'totalTokens');
+    push(
+      hasTotal ? 'tokens billed' : 'tokens',
+      `<strong>${fmtCompact(totalTokens)}</strong>`,
+      hasTotal ? 'Input + output only — the categories charged per token' : ''
+    );
+    if (hasTotal) {
+      push(
+        'tokens processed',
+        `<strong>${fmtCompact(sumField(cells, 'totalTokens'))}</strong>`,
+        'All five categories, including cache reads and writes'
+      );
+    }
+    const cachePct = cacheSharePct(cells);
+    if (cachePct !== null) {
+      push('from cache', `<strong>${cachePct}%</strong>`,
+        'Share of processed tokens served from cache rather than re-read');
+    }
+    if (costStr) {
+      push('spend', `&asymp;<strong>${costStr}</strong>`,
+        'Approximate — tiered pricing rules are not modelled');
+    }
+    push('sessions', `<strong>${totalSessions.toLocaleString()}</strong>`);
+    if (hasField(cells, 'activeSeconds')) {
+      const hrs = sumField(cells, 'activeSeconds') / 3600;
+      push('at keyboard', `<strong>${hrs >= 10 ? Math.round(hrs) : hrs.toFixed(1)}h</strong>`,
+        'Active agent time, not wall clock');
+    }
+    push('active this week', `<strong>${last7Active}</strong><span class="hstat-sub">/7 ${W('days')}</span>`);
+
+    // Top tool / model, when published.
+    for (const dim of ['bySource', 'byModel']) {
+      const ranked = mergeDim(cells, dim);
+      if (ranked.length === 0) continue;
+      const [topKey, topVal] = ranked[0];
+      const dimTotal = ranked.reduce((a, [, v]) => a + v, 0);
+      const pct = dimTotal > 0 ? Math.round((topVal / dimTotal) * 100) : 0;
+      push(
+        dim === 'bySource' ? 'top tool' : 'top model',
+        `<strong>${escape(String(topKey).slice(0, 20))}</strong><span class="hstat-sub">${pct}%</span>`
+      );
+    }
+
+    // "since" is provenance, not a metric — it was the one cell that wrapped
+    // to a lonely second row. It reads better appended to the footer line,
+    // which is already where the "updated Nh ago" provenance lives.
+    return `<dl class="hstat-grid">${items.join('')}</dl>` +
+      `<div class="hstat-since">${W('tracking since')} <strong>${oldestActive || '—'}</strong></div>`;
+  };
+
+  // ── view 2: rhythm — 7×24 weekday × local-hour ──────────────────
+  // The calendar heatmap answers "how often"; this answers "when". kaboo's
+  // dashboard leads with the same shape because it's the one chart that
+  // reads as a portrait of a working style rather than a usage total.
+  //
+  // Hours are LOCAL to the device that recorded them (normalised by the sync
+  // agent — the browser can't know a past session's timezone), so the axis
+  // means "the hour it felt like where I was sitting".
+  const RHYTHM_CELL = 15;
+  const RHYTHM_GAP = 3;
+  const RHYTHM_LEFT = 30;
+  const RHYTHM_TOP = 18;
+  const RHYTHM_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Sum the flat 168-slot vectors across every day in the window.
+  const mergeWeekHours = (cells) => {
+    const flat = new Array(168).fill(0);
+    let any = false;
+    for (const cell of cells) {
+      const v = cell.promptWeekHours;
+      if (!Array.isArray(v) || v.length !== 168) continue;
+      any = true;
+      for (let i = 0; i < 168; i++) {
+        if (Number.isFinite(v[i])) flat[i] += v[i];
+      }
+    }
+    return any ? flat : null;
+  };
+
+  const renderRhythm = (cells) => {
+    const flat = mergeWeekHours(cells);
+    if (!flat) return '';
+    const nonZero = flat.filter((n) => n > 0).sort((a, b) => a - b);
+    if (nonZero.length === 0) return '';
+
+    const gridW = 24 * RHYTHM_CELL + 23 * RHYTHM_GAP;
+    const gridH = 7 * RHYTHM_CELL + 6 * RHYTHM_GAP;
+    const w = RHYTHM_LEFT + gridW;
+    const h = RHYTHM_TOP + gridH;
+
+    // Hour ruler every 3h — dense enough to locate a peak, sparse enough
+    // not to collide at mobile widths.
+    const hourLabels = [];
+    for (let hr = 0; hr < 24; hr += 3) {
+      const x = RHYTHM_LEFT + hr * (RHYTHM_CELL + RHYTHM_GAP);
+      hourLabels.push(
+        `<text x="${x}" y="13" class="usage-month-label">${String(hr).padStart(2, '0')}</text>`
+      );
+    }
+
+    const dayLabels = [];
+    for (let d = 0; d < 7; d++) {
+      // Alternate rows like the calendar view so the labels stay legible.
+      if (d % 2 === 0) continue;
+      const y = RHYTHM_TOP + d * (RHYTHM_CELL + RHYTHM_GAP) + RHYTHM_CELL / 2;
+      dayLabels.push(
+        `<text x="${RHYTHM_LEFT - 6}" y="${y}" class="usage-day-label" text-anchor="end" dominant-baseline="middle">${RHYTHM_DAYS[d]}</text>`
+      );
+    }
+
+    const rects = [];
+    for (let d = 0; d < 7; d++) {
+      for (let hr = 0; hr < 24; hr++) {
+        const n = flat[d * 24 + hr] || 0;
+        const x = RHYTHM_LEFT + hr * (RHYTHM_CELL + RHYTHM_GAP);
+        const y = RHYTHM_TOP + d * (RHYTHM_CELL + RHYTHM_GAP);
+        const bin = quartileBin(n, nonZero);
+        const cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
+        const attrs = n > 0
+          ? ` data-rhythm="1" data-day="${RHYTHM_DAYS[d]}" data-hour="${hr}" data-prompts="${n}"`
+          : '';
+        rects.push(
+          `<rect x="${x}" y="${y}" width="${RHYTHM_CELL}" height="${RHYTHM_CELL}" rx="2" class="usage-cell ${cls}"${attrs}/>`
+        );
+      }
+    }
+    return `<svg viewBox="0 0 ${w} ${h}" style="--chart-w:${w}px" preserveAspectRatio="xMidYMin meet" aria-hidden="true">${hourLabels.join('')}${dayLabels.join('')}${rects.join('')}</svg>`;
+  };
+
+  // Caption under the rhythm view: the two facts a visitor actually takes
+  // away — when the peak is, and how much of the work is after hours.
+  const rhythmCaption = (cells) => {
+    const flat = mergeWeekHours(cells);
+    if (!flat) return '';
+    let peakIdx = -1;
+    let peakVal = 0;
+    let total = 0;
+    let night = 0;      // 22:00–05:59
+    let weekend = 0;
+    for (let i = 0; i < 168; i++) {
+      const n = flat[i] || 0;
+      total += n;
+      if (n > peakVal) { peakVal = n; peakIdx = i; }
+      const d = Math.floor(i / 24);
+      const hr = i % 24;
+      if (hr >= 22 || hr < 6) night += n;
+      if (d === 0 || d === 6) weekend += n;
+    }
+    if (total === 0 || peakIdx < 0) return '';
+    const pd = RHYTHM_DAYS[Math.floor(peakIdx / 24)];
+    const ph = peakIdx % 24;
+    const parts = [
+      `<span class="usage-stat">${W('peak')} <strong>${pd} ${String(ph).padStart(2, '0')}:00</strong></span>`,
       `<span class="usage-stat-sep">·</span>`,
-      `<span class="usage-stat"><strong>${totalSessions}</strong> sessions</span>`,
+      `<span class="usage-stat"><strong>${Math.round((night / total) * 100)}%</strong> ${W('after hours')}</span>`,
       `<span class="usage-stat-sep">·</span>`,
-      `<span class="usage-stat"><strong>${last7Active}/7</strong> days active</span>`,
+      `<span class="usage-stat"><strong>${Math.round((weekend / total) * 100)}%</strong> ${W('weekend')}</span>`,
       `<span class="usage-stat-sep">·</span>`,
-      ...costItem,
-      `<span class="usage-stat usage-stat-since">since ${oldestActive || '—'}</span>`,
-    ].join('');
+      `<span class="usage-stat">${total.toLocaleString()} ${W('prompts')}</span>`,
+    ];
+    return parts.join('');
+  };
+
+  // ── view 3: trend — weekly totals as an area+line sparkline ──────
+  // The calendar and rhythm views both flatten time; this is the only one
+  // that shows direction (ramping up, tapering off, a gap while travelling).
+  //
+  // The viewBox aspect ratio IS the rendered aspect ratio: the svg scales to
+  // the container width and takes its height from this ratio. At 1015x148 a
+  // 622px-wide strip collapsed to 91px tall, which read as a sparkline
+  // squeezed into a footnote rather than a chart.
+  //
+  // This view renders full-strip (up to 900px), so the ratio is picked for
+  // that: at 900 wide, a height of 200 keeps the line readable without
+  // dwarfing the 7-row grids it alternates with.
+  //
+  // Side padding is in viewBox units and scales with the width, so it's sized
+  // to hold half of the widest tick label ("Aug 30") at this scale.
+  const TREND_W = 900;
+  const TREND_H = 200;
+  const TREND_PAD_L = 34;
+  const TREND_PAD_R = 34;   // room for the right-most date label
+  const TREND_PAD_B = 26;
+  // Headroom above the peak. The tooltip sits above the dot it describes, so
+  // a peak pinned to the very top of the plot pushes its own label out of the
+  // chart and over the section heading. This band is sized to fit the label
+  // (~26px tall) plus its gap, so even the tallest week keeps its label inside
+  // the chart and clear of the line.
+  const TREND_PAD_T = 36;
+
+  // Group daily cells into ISO-ish weeks (Sun-started, matching the grid).
+  const weeklySeries = (cells) => {
+    const byWeek = new Map();
+    for (const cell of cells) {
+      if (!cell.date) continue;
+      const t = new Date(cell.date + 'T00:00:00Z');
+      // Snap back to the Sunday that starts this week.
+      const sunday = new Date(t.getTime() - t.getUTCDay() * 86400000)
+        .toISOString()
+        .slice(0, 10);
+      if (!byWeek.has(sunday)) byWeek.set(sunday, { week: sunday, tokens: 0, total: 0, cost: 0 });
+      const w = byWeek.get(sunday);
+      w.tokens += cell.tokens || 0;
+      if (Number.isFinite(cell.totalTokens)) w.total += cell.totalTokens;
+      if (Number.isFinite(cell.costCents)) w.cost += cell.costCents;
+    }
+    const all = [...byWeek.values()].sort((a, b) => a.week.localeCompare(b.week));
+    // Start at the first week that actually has tokens. Keeping a zero week
+    // as a lead-in drew a flat tail on the left that read as "no data here"
+    // rather than as a chart baseline — the caption already states the range.
+    const firstReal = all.findIndex((w) => (w.total || w.tokens || 0) > 0);
+    return firstReal <= 0 ? all : all.slice(firstReal);
+  };
+
+  const renderTrend = (cells) => {
+    const series = weeklySeries(cells);
+    if (series.length < 2) return '';
+    // Prefer the honest all-category total; fall back to v1 `tokens` when the
+    // Worker doesn't publish totalTokens.
+    const useTotal = series.some((s) => s.total > 0);
+    const vals = series.map((s) => (useTotal ? s.total : s.tokens));
+    const max = Math.max(...vals);
+    if (max <= 0) return '';
+
+    const plotW = TREND_W - TREND_PAD_L - TREND_PAD_R;
+    const plotH = TREND_H - TREND_PAD_B - TREND_PAD_T;
+    const stepX = series.length > 1 ? plotW / (series.length - 1) : plotW;
+    const xAt = (i) => TREND_PAD_L + i * stepX;
+    const yAt = (v) => TREND_PAD_T + plotH - (v / max) * plotH;
+
+    const linePts = vals.map((v, i) => `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');
+    const areaPts = `${TREND_PAD_L},${(TREND_PAD_T + plotH).toFixed(1)} ${linePts} ${xAt(series.length - 1).toFixed(1)},${(TREND_PAD_T + plotH).toFixed(1)}`;
+
+    // Month ticks along the bottom. With a trimmed range there's room for
+    // roughly eight labels; include the day so two ticks inside the same
+    // month stay distinguishable (a bare "Aug Aug" reads as a bug).
+    const ticks = [];
+    const every = Math.max(1, Math.ceil(series.length / 7));
+    series.forEach((s, i) => {
+      if (i % every !== 0 && i !== series.length - 1) return;
+      const d = new Date(s.week + 'T00:00:00Z');
+      ticks.push(
+        `<text x="${xAt(i).toFixed(1)}" y="${TREND_H - 4}" class="usage-month-label" text-anchor="middle">${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCDate()}</text>`
+      );
+    });
+
+    // One hover target per week, full plot height so it's easy to hit. The
+    // target is a tall column, but the thing it describes is the dot at
+    // yAt(v) — so carry that dot's position on the rect and let the tooltip
+    // anchor to it. Without this the label tracked the cursor and drifted far
+    // from the actual data point whenever the pointer sat low in the column.
+    const hits = series.map((s, i) => {
+      const v = useTotal ? s.total : s.tokens;
+      const bw = Math.max(6, stepX);
+      return `<rect x="${(xAt(i) - bw / 2).toFixed(1)}" y="${TREND_PAD_T}" width="${bw.toFixed(1)}" height="${plotH.toFixed(1)}" fill="transparent" data-trend="1" data-week="${s.week}" data-value="${v}" data-cost="${s.cost}" data-dot-x="${xAt(i).toFixed(1)}" data-dot-y="${yAt(v).toFixed(1)}"/>`;
+    });
+
+    const dots = vals.map((v, i) =>
+      `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="2" class="usage-trend-dot"/>`
+    );
+
+    // No --chart-w here: a line chart has no square grid to distort, so it
+    // takes the full strip. Emitting `--chart-w:100%` would inherit down to
+    // the wrapper and resolve against the wrapper's own width, collapsing it.
+    return `<svg viewBox="0 0 ${TREND_W} ${TREND_H}" preserveAspectRatio="xMidYMin meet" aria-hidden="true">`
+      + `<polygon points="${areaPts}" class="usage-trend-area"/>`
+      + `<polyline points="${linePts}" class="usage-trend-line" fill="none"/>`
+      + dots.join('')
+      + ticks.join('')
+      + hits.join('')
+      + `</svg>`;
+  };
+
+  const trendCaption = (cells) => {
+    const series = weeklySeries(cells);
+    if (series.length < 2) return '';
+    const useTotal = series.some((s) => s.total > 0);
+    const vals = series.map((s) => (useTotal ? s.total : s.tokens));
+    const peak = Math.max(...vals);
+    const peakWeek = series[vals.indexOf(peak)].week;
+    // Drop the in-progress week before comparing averages. Today is only
+    // partway through its week, so including it makes every Monday look
+    // like a collapse — on 2026-08-31 the raw comparison read -77% purely
+    // because the newest "week" was one day long.
+    const newest = series[series.length - 1].week;
+    const weekEndMs = new Date(newest + 'T00:00:00Z').getTime() + 6 * 86400000;
+    const complete = Date.now() > weekEndMs + 86400000 ? vals : vals.slice(0, -1);
+    const tail = complete.slice(-4);
+    const prev = complete.slice(-8, -4);
+    const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+    const now = avg(tail);
+    const before = avg(prev);
+    const parts = [
+      `<span class="usage-stat">${series.length} weeks</span>`,
+      `<span class="usage-stat-sep">·</span>`,
+      `<span class="usage-stat">${W('peak')} week <strong>${fmtCompact(peak)}</strong></span>`,
+    ];
+    if (before > 0 && tail.length === 4 && prev.length === 4) {
+      const delta = Math.round(((now - before) / before) * 100);
+      const sign = delta > 0 ? '+' : '';
+      parts.push(
+        `<span class="usage-stat-sep">·</span>`,
+        `<span class="usage-stat">last 4 full weeks <strong>${sign}${delta}%</strong></span>`
+      );
+    }
+    return parts.join('');
   };
 
   // Sum tokens for this calendar month (UTC). Used by the fun-fact line.
@@ -1250,6 +1680,199 @@
     let factRotateTimer = null;
     let inFlight = false;
 
+    // ── view switching ──────────────────────────────────────────────
+    // Three lenses on the same fetched data — no extra requests when
+    // switching. `calendar` is the v1 view and stays the default so the
+    // section looks unchanged to anyone who doesn't touch the tabs.
+    //
+    // A view is only offered when its data is actually present: `rhythm`
+    // needs the Worker to publish promptWeekHours, and `trend` needs at
+    // least two weeks of history. That keeps the tab row honest rather than
+    // showing controls that lead to an empty panel.
+    const VIEWS = [
+      { id: 'calendar', label: 'calendar', render: (c) => renderHeatmap(c), caption: null,
+        available: () => true },
+      { id: 'rhythm', label: 'rhythm', render: (c) => renderRhythm(c), caption: rhythmCaption,
+        available: (c) => !!mergeWeekHours(c) },
+      { id: 'trend', label: 'trend', render: (c) => renderTrend(c), caption: trendCaption,
+        available: (c) => weeklySeries(c).length >= 2 },
+    ];
+
+    // Which views the site owner wants on the homepage, and in what order.
+    // `site.usage.views` is an allowlist of ids; omit it to offer all three.
+    // Unknown ids are ignored and an empty/invalid result falls back to the
+    // full set, so a typo degrades to "show everything" rather than to a
+    // blank section.
+    const pickViews = () => {
+      const want = Array.isArray(cfg.views) ? cfg.views : null;
+      if (!want || !want.length) return VIEWS;
+      const chosen = want
+        .map((id) => VIEWS.find((v) => v.id === id))
+        .filter(Boolean);
+      return chosen.length ? chosen : VIEWS;
+    };
+    const OFFERED = pickViews();
+    // `site.usage.defaultView` picks the one shown first; default to the
+    // owner's first offered view.
+    const wantedDefault = typeof cfg.defaultView === 'string' ? cfg.defaultView : '';
+    let currentView = OFFERED.some((v) => v.id === wantedDefault)
+      ? wantedDefault
+      : OFFERED[0].id;
+
+    // Auto-advance every 5s so a visitor who never touches the tabs still
+    // sees each lens. Hovering (or focusing, or interacting with the tabs)
+    // pauses it — the rotation must never fight the reader. It also stops
+    // while the tab is backgrounded, and stops permanently once the visitor
+    // picks a view by hand, since that's an explicit choice.
+    const ROTATE_MS = 5000;
+    let rotateTimer = null;
+    let rotatePaused = false;
+    let rotateDisabled = false;
+
+    // Respect the OS "reduce motion" setting: an unattended 5s swap is
+    // exactly the kind of motion that setting exists to suppress.
+    const prefersReducedMotion = () =>
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const stopRotate = () => {
+      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
+    };
+    const startRotate = () => {
+      stopRotate();
+      if (rotateDisabled || rotatePaused) return;
+      if (document.hidden) return;
+      // Nothing to rotate between.
+      if (!lastCells) return;
+      const usable = OFFERED.filter((v) => v.available(lastCells));
+      if (usable.length < 2) return;
+      if (prefersReducedMotion()) return;
+      rotateTimer = setInterval(() => {
+        if (!lastCells) return;
+        const list = OFFERED.filter((v) => v.available(lastCells));
+        if (list.length < 2) return;
+        const i = list.findIndex((v) => v.id === currentView);
+        const nextId = list[(i + 1) % list.length].id;
+        // Fade out, swap, fade in — the class is removed on the next frame
+        // after the new SVG is in the DOM.
+        heatmapEl.classList.add('is-swapping');
+        setTimeout(() => {
+          currentView = nextId;
+          paint(lastCells);
+          renderTabs(lastCells);
+          requestAnimationFrame(() => heatmapEl.classList.remove('is-swapping'));
+        }, 250);
+      }, ROTATE_MS);
+    };
+
+    const tabsEl = document.getElementById('usage-views');
+    const captionEl = document.getElementById('usage-caption');
+    const legendEl = section.querySelector('.usage-legend');
+
+    const viewById = (id) => VIEWS.find((v) => v.id === id) || VIEWS[0];
+
+    const paint = (cells) => {
+      const view = viewById(currentView);
+      const svg = view.render(cells);
+      // A view that yields nothing (e.g. rhythm with no vector data) falls
+      // back to the calendar rather than blanking the section.
+      if (!svg && view.id !== 'calendar') {
+        currentView = 'calendar';
+        paint(cells);
+        return;
+      }
+      heatmapEl.innerHTML = svg;
+      heatmapEl.setAttribute('data-view', currentView);
+      // Lift the chart's own width onto the wrapper so the legend and caption
+      // below it share the chart's left/right edges. Read it off the rendered
+      // svg rather than duplicating the per-view geometry here. A percentage
+      // would resolve against the wrapper itself, so only pixel widths get
+      // promoted; the trend view falls through to the full-width CSS default.
+      const svgEl = heatmapEl.querySelector('svg');
+      const cw = svgEl && svgEl.style.getPropertyValue('--chart-w');
+      if (cw && cw.endsWith('px')) heatmapEl.style.setProperty('--chart-w', cw);
+      else heatmapEl.style.removeProperty('--chart-w');
+      // Mirror the view onto the stack so it can go full width for the line
+      // chart. CSS :has() covers this too, but a class keeps it working in
+      // browsers without :has() rather than silently shrinking the chart.
+      const innerEl = heatmapEl.parentElement;
+      if (innerEl && innerEl.classList.contains('usage-heatmap-inner')) {
+        innerEl.classList.toggle('is-wide', currentView === 'trend');
+      }
+      if (captionEl) {
+        const cap = view.caption ? view.caption(cells) : '';
+        captionEl.innerHTML = cap;
+        captionEl.hidden = !cap;
+      }
+      // The Less/More ramp describes the two heatmap views; it means nothing
+      // against a line chart.
+      if (legendEl) legendEl.hidden = currentView === 'trend';
+    };
+
+    const renderTabs = (cells) => {
+      if (!tabsEl) return;
+      const usable = OFFERED.filter((v) => v.available(cells));
+      // One usable view = nothing to switch between; don't show chrome.
+      if (usable.length < 2) { tabsEl.hidden = true; return; }
+      tabsEl.hidden = false;
+      tabsEl.innerHTML = usable
+        .map((v) => `<button type="button" class="usage-view-tab${v.id === currentView ? ' is-active' : ''}" data-view="${v.id}" aria-pressed="${v.id === currentView}">${v.label}</button>`)
+        .join('');
+    };
+
+    // Pause rotation whenever the reader is plausibly looking at or using
+    // the chart: pointer over the section, keyboard focus inside it, or the
+    // browser tab hidden.
+    const pauseRotate = () => { rotatePaused = true; stopRotate(); };
+    const resumeRotate = () => { rotatePaused = false; startRotate(); };
+    section.addEventListener('pointerenter', pauseRotate);
+    section.addEventListener('pointerleave', resumeRotate);
+    section.addEventListener('focusin', pauseRotate);
+    section.addEventListener('focusout', (ev) => {
+      if (!section.contains(ev.relatedTarget)) resumeRotate();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopRotate();
+      else startRotate();
+    });
+
+    if (tabsEl) {
+      tabsEl.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button[data-view]');
+        if (!btn || !lastCells) return;
+        const id = btn.getAttribute('data-view');
+        // An explicit pick ends the carousel for this visit — continuing to
+        // swap under someone who just chose a view would be hostile.
+        rotateDisabled = true;
+        stopRotate();
+        /* Only a deliberate click counts. The 5s auto-rotation also changes
+           currentView, and counting that would report the timer's taste
+           rather than the visitor's — the numbers would just track how long
+           the tab stayed open. */
+        try {
+          if (typeof window.SITE_BEACON === 'function' && id !== currentView) {
+            window.SITE_BEACON('chart_open', id);
+          }
+        } catch (_) { /* noop */ }
+        if (id === currentView) return;
+        currentView = id;
+        paint(lastCells);
+        renderTabs(lastCells);
+      });
+    }
+
+    // Let the skin runtime ask for a repaint. An IP skin renames every
+    // label in this panel, and those labels are baked into the HTML that
+    // paint()/renderUsageStats() emit — so switching skin has to re-run
+    // them. Without this the new vocabulary wouldn't appear until the next
+    // hourly refetch. Guarded on lastCells: before the first successful
+    // fetch there's nothing to repaint and the skeleton is still showing.
+    window.SITE_REPAINT_USAGE = () => {
+      if (!lastCells || section.hidden) return;
+      paint(lastCells);
+      renderTabs(lastCells);
+      statsEl.innerHTML = renderUsageStats(lastCells);
+    };
+
     // The label tracks DATA staleness (when the worker last got new data
     // from a sync agent), not FETCH staleness (when this page last polled).
     // For a 1h-refetch loop the latter is meaningless noise — the former
@@ -1289,7 +1912,19 @@
         const todayUTC = trimmed[trimmed.length - 1]?.date || new Date().toISOString().slice(0, 10);
         const cells = buildHeatmapGrid(trimmed, todayUTC);
         lastCells = cells;
-        heatmapEl.innerHTML = renderHeatmap(cells);
+        // Vectors live on the raw day rows, not the grid cells — carry them
+        // across so the rhythm view can find them.
+        for (const cell of cells) {
+          if (!cell.date) continue;
+          const src = trimmed.find((d) => d && d.date === cell.date);
+          if (src && Array.isArray(src.promptWeekHours)) {
+            cell.promptWeekHours = src.promptWeekHours;
+          }
+        }
+        renderTabs(cells);
+        paint(cells);
+        // Data is in, so the carousel now knows how many views are usable.
+        startRotate();
         statsEl.innerHTML   = renderUsageStats(cells);
         const fact = renderFunFact(cells);
         factEl.innerHTML    = fact;
@@ -1363,29 +1998,108 @@
       return `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
     };
     const showTip = (rect) => {
+      // Rhythm cell: weekday + local hour + prompt count.
+      if (rect.hasAttribute('data-rhythm')) {
+        const day = rect.getAttribute('data-day') || '';
+        const hr = parseInt(rect.getAttribute('data-hour'), 10) || 0;
+        const n = parseInt(rect.getAttribute('data-prompts'), 10) || 0;
+        tipEl.innerHTML =
+          `<span class="usage-tip-date">${day} ${String(hr).padStart(2, '0')}:00</span>` +
+          ` &mdash; <strong>${n.toLocaleString()}</strong> prompt${n === 1 ? '' : 's'}`;
+        positionTip(rect);
+        return;
+      }
+      // Trend hit-area: week-of date + that week's tokens.
+      if (rect.hasAttribute('data-trend')) {
+        const week = rect.getAttribute('data-week') || '';
+        const v = parseInt(rect.getAttribute('data-value'), 10) || 0;
+        const cost = parseInt(rect.getAttribute('data-cost'), 10) || 0;
+        let html =
+          `<span class="usage-tip-date">week of ${formatDate(week)}</span>` +
+          ` &mdash; <strong>${fmtCompact(v)}</strong>`;
+        if (cost > 0) html += ` &middot; $${(cost / 100).toFixed(2)}`;
+        tipEl.innerHTML = html;
+        positionTip(rect);
+        return;
+      }
       const date = rect.getAttribute('data-date');
       if (!date) { tipEl.hidden = true; return; }
       const tokens = parseInt(rect.getAttribute('data-tokens'), 10) || 0;
-      tipEl.innerHTML =
+      // Base line stays exactly as v1: date — tokens. Extra segments append
+      // only when the Worker published them (see dataAttrs above).
+      let html =
         `<span class="usage-tip-date">${formatDate(date)}</span>` +
         ` &mdash; <strong>${tokens.toLocaleString()}</strong>`;
-      // Position relative to .usage-section (its CSS sets position:relative).
+      const total = parseInt(rect.getAttribute('data-total'), 10) || 0;
+      const cached = parseInt(rect.getAttribute('data-cached'), 10) || 0;
+      const cost = parseInt(rect.getAttribute('data-cost'), 10) || 0;
+      if (total > 0) html += ` / ${fmtCompact(total)} total`;
+      if (total > 0 && cached > 0) {
+        html += ` &middot; ${Math.round((cached / total) * 100)}% cached`;
+      }
+      if (cost > 0) html += ` &middot; $${(cost / 100).toFixed(2)}`;
+      tipEl.innerHTML = html;
+      positionTip(rect);
+    };
+    // Shared placement: anchor to the DATA POINT, not the cursor.
+    //
+    // Two earlier attempts got this wrong. Anchoring to the hovered rect's
+    // top-left worked on the grids (a cell IS its data point) but put the
+    // label a column-height away on the trend view, whose hit-areas are
+    // full-height transparent columns. Following the cursor then made the
+    // label track empty space inside those columns — the dot could be at the
+    // top of the plot while the pointer sat at the bottom.
+    //
+    // A grid cell's own box is its data point; the trend view carries the
+    // dot's coordinates on the rect (data-dot-x / data-dot-y in viewBox
+    // units) so both cases resolve to "the mark the number belongs to".
+    function anchorRect(rect) {
+      const box = rect.getBoundingClientRect();
+      const dx = rect.getAttribute('data-dot-x');
+      const dy = rect.getAttribute('data-dot-y');
+      if (dx === null || dy === null) return box;   // grid cell: box is the mark
+      // Map viewBox units to screen px through the owning <svg>.
+      const svg = rect.ownerSVGElement;
+      const vb = svg && svg.viewBox && svg.viewBox.baseVal;
+      if (!vb || !vb.width || !vb.height) return box;
+      const svgBox = svg.getBoundingClientRect();
+      const sx = svgBox.width / vb.width;
+      const sy = svgBox.height / vb.height;
+      const cx = svgBox.left + (parseFloat(dx) - vb.x) * sx;
+      const cy = svgBox.top + (parseFloat(dy) - vb.y) * sy;
+      // A zero-size box centred on the dot: the caller only needs a centre
+      // and a top edge, and both collapse to the dot itself.
+      return { left: cx, right: cx, width: 0, top: cy, bottom: cy, height: 0 };
+    }
+    function positionTip(rect) {
       const sectionBox = section.getBoundingClientRect();
-      const cellBox = rect.getBoundingClientRect();
-      const xCenter = cellBox.left + cellBox.width / 2 - sectionBox.left;
-      const cellTopInSection = cellBox.top - sectionBox.top;
+      const markBox = anchorRect(rect);
+      const xCenter = markBox.left + markBox.width / 2 - sectionBox.left;
+      const markTop = markBox.top - sectionBox.top;
       tipEl.hidden = false;
       // Measure after un-hiding so width is real
       const tipW = tipEl.offsetWidth;
       const tipH = tipEl.offsetHeight;
       const sectionW = sectionBox.width;
-      // Clamp so the tooltip doesn't overflow section edges
       const left = Math.max(0, Math.min(sectionW - tipW, xCenter - tipW / 2));
+      const GAP = 8;
+      const MIN_GAP = 3;   // still reads as "attached" when space is tight
+      // Ceiling is the top of the chart, not of the section: floating above
+      // the chart parks the label over the section heading.
+      const chartBox = heatmapEl.getBoundingClientRect();
+      const chartTop = chartBox.top - sectionBox.top;
+      let top = markTop - tipH - GAP;
+      if (top < chartTop) {
+        // Tight above the mark. Prefer shrinking the gap over flipping, since
+        // flipping puts the label on top of the line/area it describes.
+        const squeezed = markTop - tipH - MIN_GAP;
+        top = squeezed >= chartTop ? squeezed : markBox.bottom - sectionBox.top + GAP;
+      }
       tipEl.style.left = `${left}px`;
-      tipEl.style.top  = `${Math.max(0, cellTopInSection - tipH - 6)}px`;
-    };
+      tipEl.style.top  = `${top}px`;
+    }
     heatmapEl.addEventListener('mouseover', (ev) => {
-      const r = ev.target.closest('rect.usage-cell');
+      const r = ev.target.closest('rect.usage-cell, rect[data-trend]');
       if (r) showTip(r);
     });
     heatmapEl.addEventListener('mouseout', (ev) => {
@@ -1451,6 +2165,15 @@
             ? '\n\n（这是离线 FAQ 的简短回答——网络受限，连不上对话式 AI 服务。完整功能请稍后再试，或邮件联系 chenjy4@uw.edu。）'
             : "\n\n(quick FAQ answer — couldn't reach the live answer service from your network. Try again later, or email chenjy4@uw.edu.)")
         : '';
+      /* Answered vs not — the whole point of counting this. A run of
+         'unanswered' is a to-do list for the FAQ, and it is the one
+         counter here that names a concrete next action. The QUESTION
+         TEXT is never sent: only which of the two outcomes happened. */
+      try {
+        if (typeof window.SITE_BEACON === 'function') {
+          window.SITE_BEACON('qa_ask', m ? 'answered' : 'unanswered');
+        }
+      } catch (_) { /* noop */ }
       if (m) return m.answer + tag;
       return (isZh
         ? '抱歉，这个问题我没有在这里写过——可以看看下面的 roadmap 或者邮件 chenjy4@uw.edu。'

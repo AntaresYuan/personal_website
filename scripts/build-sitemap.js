@@ -56,6 +56,12 @@ const urls = [
   { loc: `${SITE_URL}/`,             lastmod, priority: '1.0' },
   { loc: `${SITE_URL}/llms.txt`,     lastmod, priority: '0.5' },
   { loc: `${SITE_URL}/llms-full.txt`,lastmod, priority: '0.5' },
+  // /usage/ — the full dashboard. Only listed when the page was actually
+  // built and usage tracking is on, so a fork without the Worker doesn't
+  // advertise a page that renders empty.
+  ...(site.usage?.enabled !== false && fs.existsSync(path.join(root, 'usage', 'index.html'))
+    ? [{ loc: `${SITE_URL}/usage/`, lastmod, priority: '0.6' }]
+    : []),
   ...blogLinks,
   ...cardLinks,
 ];

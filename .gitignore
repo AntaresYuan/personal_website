@@ -16,3 +16,12 @@ LOOP-FRICTION.jsonl
 .wrangler/
 .dev.vars
 wrangler.local.toml
+
+# menu bar app — build output, not source
+# `usagebar` and `usagebar.app/` are produced by ops/menubar/build.sh and
+# bundle.sh from the .swift files + popover.html sitting next to them. They are
+# ~645KB of arch-specific Mach-O, and usagebar.app bundles a COPY of
+# popover.html — committing it would put two versions of the same file in the
+# repo, and the stale copy is the one that actually runs.
+ops/menubar/usagebar
+ops/menubar/usagebar.app/
