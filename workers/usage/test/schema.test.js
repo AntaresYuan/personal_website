@@ -221,6 +221,342 @@ async function main() {
        body.days.find(x => x.date === d).tokens, 999);
   }
 
+  /* ════════════════════════════════════════════════════════════════════
+     v2: token-category detail, configurable public projection, /detail
+     ════════════════════════════════════════════════════════════════════ */
+
+  // A full v2 payload as the upgraded sync agent builds it.
+  const v2Payload = (over = {}) => ({
+    date: today,
+    source: 'mbp',
+    tokens: 300,                        // input+output, v1 meaning preserved
+    sessions: 2,
+    costCents: 450,
+    inputTokens: 100,
+    outputTokens: 200,
+    cachedInputTokens: 5000,
+    cacheCreationInputTokens: 80,
+    reasoningOutputTokens: 40,
+    totalTokens: 5420,
+    activeSeconds: 600,
+    durationSeconds: 900,
+    messageCount: 20,
+    userMessageCount: 8,
+    bySource: { claude: { inputTokens: 60, outputTokens: 120, cachedInputTokens: 5000, cacheCreationInputTokens: 80, reasoningOutputTokens: 0, totalTokens: 5260, costCents: 300 } },
+    byModel:  { 'claude-sonnet-5': { inputTokens: 60, outputTokens: 120, cachedInputTokens: 5000, cacheCreationInputTokens: 80, reasoningOutputTokens: 0, totalTokens: 5260, costCents: 300 } },
+    byProject:{ kaboo: { inputTokens: 100, outputTokens: 200, cachedInputTokens: 5000, cacheCreationInputTokens: 80, reasoningOutputTokens: 40, totalTokens: 5420, costCents: 450 } },
+    ...over,
+  });
+
+  function getWith(env, origin = 'https://antaresyuan.site') {
+    return worker.fetch(new Request('https://usage.example/', {
+      method: 'GET', headers: { origin },
+    }), env);
+  }
+  function detail(env, { auth = `Bearer ${SECRET}`, days } = {}) {
+    const u = new URL('https://usage.example/detail');
+    if (days) u.searchParams.set('days', String(days));
+    return worker.fetch(new Request(u, {
+      method: 'GET', headers: auth ? { authorization: auth } : {},
+    }), env);
+  }
+
+  console.log('\nv2 detail fields: accepted + stored');
+  {
+    resetCaches();
+    const env = makeEnv();
+    let r = await post(env, v2Payload());
+    ok('full v2 payload → 200', r.status === 200, await r.text());
+
+    const stored = JSON.parse(env._store.get('usage:' + today));
+    eq('slot keeps cachedInputTokens', stored.mbp.cachedInputTokens, 5000);
+    eq('slot keeps reasoningOutputTokens', stored.mbp.reasoningOutputTokens, 40);
+    eq('slot keeps byModel', Object.keys(stored.mbp.byModel), ['claude-sonnet-5']);
+    eq('slot keeps activeSeconds', stored.mbp.activeSeconds, 600);
+
+    // Still an allowlist: an unknown key must be rejected even in v2.
+    r = await post(env, v2Payload({ somethingNew: 1 }));
+    ok('unknown v2 field → 400', r.status === 400);
+
+    r = await post(env, v2Payload({ cachedInputTokens: -5 }));
+    ok('negative cachedInputTokens → 400', r.status === 400);
+
+    r = await post(env, v2Payload({ byModel: { m: { inputTokens: 'x' } } }));
+    ok('non-int inside byModel → 400', r.status === 400);
+
+    r = await post(env, v2Payload({ byModel: { m: { unknownField: 1 } } }));
+    ok('unknown field inside byModel → 400', r.status === 400);
+  }
+
+  console.log('\nv2 privacy: detail withheld from public GET by default');
+  {
+    resetCaches();
+    const env = makeEnv();                    // no USAGE_PUBLISH set
+    await post(env, v2Payload());
+    const r = await getWith(env);
+    const body = await r.json();
+    const row = body.days.find(x => x.date === today);
+
+    eq('default public row keys stay v1-shaped',
+       Object.keys(row).sort(), ['costCents', 'date', 'sessions', 'tokens']);
+    ok('public body has no cachedInputTokens', !JSON.stringify(body).includes('cachedInputTokens'));
+    ok('public body has no model id', !JSON.stringify(body).includes('claude-sonnet-5'));
+    ok('public body has no project name', !JSON.stringify(body).includes('kaboo'));
+    ok('public body has no device slot', !JSON.stringify(body).includes('mbp'));
+    eq('public tokens still summed', row.tokens, 300);
+  }
+
+  console.log('\nv2 opt-in: publish chosen fields + dims');
+  {
+    resetCaches();
+    const env = makeEnv();
+    env.USAGE_PUBLISH = JSON.stringify({
+      fields: ['cachedInputTokens', 'totalTokens'],
+      dims: ['byModel'],
+    });
+    await post(env, v2Payload());
+    const r = await getWith(env);
+    const body = await r.json();
+    const row = body.days.find(x => x.date === today);
+
+    eq('opted-in field appears', row.cachedInputTokens, 5000);
+    eq('opted-in totalTokens appears', row.totalTokens, 5420);
+    eq('opted-in dim appears', Object.keys(row.byModel), ['claude-sonnet-5']);
+    ok('non-opted dim stays hidden', row.byProject === undefined);
+    ok('non-opted field stays hidden', row.reasoningOutputTokens === undefined);
+    ok('device slot still never exposed', !JSON.stringify(body).includes('"mbp"'));
+  }
+
+  console.log('\nv2 publish config is fail-closed');
+  {
+    resetCaches();
+    const env = makeEnv();
+    env.USAGE_PUBLISH = '{not valid json';
+    await post(env, v2Payload());
+    const body = await (await getWith(env)).json();
+    const row = body.days.find(x => x.date === today);
+    eq('malformed config → v1 shape only',
+       Object.keys(row).sort(), ['costCents', 'date', 'sessions', 'tokens']);
+
+    resetCaches();
+    const env2 = makeEnv();
+    env2.USAGE_PUBLISH = JSON.stringify({ fields: ['../etc/passwd', 'nope'], dims: ['bySecret'] });
+    await post(env2, v2Payload());
+    const row2 = (await (await getWith(env2)).json()).days.find(x => x.date === today);
+    eq('unknown field/dim names ignored',
+       Object.keys(row2).sort(), ['costCents', 'date', 'sessions', 'tokens']);
+  }
+
+  console.log('\nv2 /detail endpoint: authed full read');
+  {
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload());
+
+    let r = await detail(env, { auth: '' });
+    ok('/detail without bearer → 401', r.status === 401);
+    r = await detail(env, { auth: 'Bearer wrong' });
+    ok('/detail wrong bearer → 401', r.status === 401);
+
+    r = await detail(env);
+    ok('/detail authed → 200', r.status === 200);
+    const body = await r.json();
+    const row = body.days.find(x => x.date === today);
+    eq('/detail exposes cachedInputTokens', row.cachedInputTokens, 5000);
+    eq('/detail exposes byProject', Object.keys(row.byProject), ['kaboo']);
+    eq('/detail exposes bySource', Object.keys(row.bySource), ['claude']);
+    ok('/detail omits empty days', body.days.every(d => d.tokens > 0 || d.totalTokens > 0));
+
+    // The private read must not poison the public edge cache.
+    const pub = await (await getWith(env)).json();
+    ok('/detail did not leak into public GET cache',
+       !JSON.stringify(pub).includes('kaboo'));
+  }
+
+  console.log('\nv2 back-compat: a v1 agent still works unchanged');
+  {
+    resetCaches();
+    const env = makeEnv();
+    const r = await post(env, { date: today, source: 'old-mac', tokens: 42, sessions: 3, costCents: 7 });
+    ok('v1 payload → 200', r.status === 200);
+    const stored = JSON.parse(env._store.get('usage:' + today));
+    eq('v1 slot has no detail keys',
+       Object.keys(stored['old-mac']).sort(),
+       ['costCents', 'sessions', 'tokens', 'updated']);
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('v1 data still aggregates', row.tokens, 42);
+  }
+
+  console.log('\nv2 multi-device: slots sum, never overwrite');
+  {
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload({ source: 'mbp',  tokens: 100, cachedInputTokens: 1000, sessions: 1 }));
+    await post(env, v2Payload({ source: 'imac', tokens: 250, cachedInputTokens: 3000, sessions: 4 }));
+    env.USAGE_PUBLISH = JSON.stringify({ fields: ['cachedInputTokens'], dims: [] });
+    resetCaches();   // drop the cache so the new publish config takes effect
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('two devices sum tokens', row.tokens, 350);
+    eq('two devices sum sessions', row.sessions, 5);
+    eq('two devices sum detail', row.cachedInputTokens, 4000);
+
+    const stored = JSON.parse(env._store.get('usage:' + today));
+    eq('both slots retained', Object.keys(stored).sort(), ['imac', 'mbp']);
+  }
+
+  console.log('\nv3 rhythm vectors: validated, summed, opt-in');
+  {
+    // A 168-slot vector with one prompt at Tue 17:00 (weekday 2 → 2*24+17).
+    const vec = (idx, n) => { const a = new Array(168).fill(0); a[idx] = n; return a; };
+    const hours = (idx, n) => { const a = new Array(24).fill(0); a[idx] = n; return a; };
+
+    resetCaches();
+    const env = makeEnv();
+    const r = await post(env, v2Payload({
+      source: 'mbp',
+      promptHours: hours(17, 5),
+      promptWeekHours: vec(2 * 24 + 17, 5),
+      tzOffsetMinutes: 480,
+    }));
+    ok('vectors accepted → 200', r.status === 200);
+    const slot = JSON.parse(env._store.get('usage:' + today))['mbp'];
+    eq('promptWeekHours stored at full length', slot.promptWeekHours.length, 168);
+    eq('promptHours stored at full length', slot.promptHours.length, 24);
+    eq('tz offset stored', slot.tzOffsetMinutes, 480);
+
+    // Wrong length must be rejected — a truncated vector would silently
+    // misalign every weekday downstream.
+    const bad = await post(env, v2Payload({ source: 'mbp', promptWeekHours: new Array(24).fill(0) }));
+    eq('wrong-length vector → 400', bad.status, 400);
+    const neg = await post(env, v2Payload({ source: 'mbp', promptHours: hours(3, -1) }));
+    eq('negative vector entry → 400', neg.status, 400);
+    const badTz = await post(env, v2Payload({ source: 'mbp', tzOffsetMinutes: 9999 }));
+    eq('absurd tz offset → 400', badTz.status, 400);
+  }
+  {
+    // Private by default: publishing nothing must not leak the vectors.
+    resetCaches();
+    const env = makeEnv();
+    const a = new Array(168).fill(0); a[50] = 9;
+    await post(env, v2Payload({ source: 'mbp', promptWeekHours: a, tzOffsetMinutes: 480 }));
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    ok('vectors withheld from default public GET', row.promptWeekHours === undefined);
+    ok('tz withheld too', row.tzOffsetMinutes === undefined);
+
+    // Opt in through the same dims list the keyed maps use.
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['promptWeekHours'] });
+    resetCaches();
+    const row2 = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('published vector has 168 slots', row2.promptWeekHours.length, 168);
+    eq('published vector keeps its value', row2.promptWeekHours[50], 9);
+    eq('tz rides along when a vector is published', row2.tzOffsetMinutes, 480);
+    ok('publishing a vector does not leak byModel', row2.byModel === undefined);
+  }
+  {
+    // Two devices in the same slot-day must add element-wise.
+    resetCaches();
+    const env = makeEnv();
+    const a = new Array(168).fill(0); a[10] = 4;
+    const b = new Array(168).fill(0); b[10] = 6; b[11] = 1;
+    await post(env, v2Payload({ source: 'mbp',  promptWeekHours: a }));
+    await post(env, v2Payload({ source: 'imac', promptWeekHours: b }));
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['promptWeekHours'] });
+    resetCaches();
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('vectors sum element-wise', row.promptWeekHours[10], 10);
+    eq('non-overlapping slot preserved', row.promptWeekHours[11], 1);
+    eq('untouched slot stays zero', row.promptWeekHours[0], 0);
+  }
+  {
+    // A v1/v2 agent that sends no vectors must not gain empty ones.
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload({ source: 'mbp' }));
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['promptWeekHours'] });
+    resetCaches();
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    ok('no vector data → field absent, not 168 zeros', row.promptWeekHours === undefined);
+  }
+
+  /* ── toolCounts: the fixed-key tool tally ───────────────────────────
+     This field exists so the site can show WHAT KIND of work happened,
+     without ever shipping a tool / MCP-server / skill name. The closed key
+     set is the privacy boundary, so the rejection cases below matter more
+     than the happy path. */
+  {
+    resetCaches();
+    const env = makeEnv();
+    const r = await post(env, v2Payload({
+      source: 'mbp',
+      toolCounts: { read: 3, edit: 4, shell: 10, search: 1, browser: 2, task: 1, other: 0, mcp: 5 },
+    }));
+    eq('toolCounts accepted', r.status, 200);
+  }
+  {
+    // An arbitrary key must be REJECTED, not ignored. This is the check
+    // that stops a modified agent from smuggling a server name through as
+    // a map key.
+    resetCaches();
+    const env = makeEnv();
+    const r = await post(env, v2Payload({
+      source: 'mbp',
+      toolCounts: { shell: 1, 'mcp__internal-system__query': 7 },
+    }));
+    eq('unknown toolCounts key rejected', r.status, 400);
+    const body = await r.json();
+    ok('error names the offending field', /unexpected key in toolCounts/.test(body.error));
+  }
+  {
+    resetCaches();
+    const env = makeEnv();
+    const r = await post(env, v2Payload({ source: 'mbp', toolCounts: { shell: -2 } }));
+    eq('negative tool count rejected', r.status, 400);
+    const r2 = await post(env, v2Payload({ source: 'mbp', toolCounts: { shell: 1.5 } }));
+    eq('fractional tool count rejected', r2.status, 400);
+    const r3 = await post(env, v2Payload({ source: 'mbp', toolCounts: [1, 2, 3] }));
+    eq('array instead of object rejected', r3.status, 400);
+  }
+  {
+    // Private by default: the tally must not appear until it's opted in.
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload({ source: 'mbp', toolCounts: { shell: 9 } }));
+    resetCaches();
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    ok('toolCounts private by default', row.toolCounts === undefined);
+
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['toolCounts'] });
+    resetCaches();
+    const row2 = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('toolCounts published when opted in', row2.toolCounts.shell, 9);
+    // Absent keys must read as 0, not undefined, so a chart can sum them.
+    eq('absent category reads as 0', row2.toolCounts.browser, 0);
+  }
+  {
+    // Two devices must add up per category.
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload({ source: 'mbp',  toolCounts: { shell: 10, edit: 2 } }));
+    await post(env, v2Payload({ source: 'imac', toolCounts: { shell: 5,  read: 3 } }));
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['toolCounts'] });
+    resetCaches();
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    eq('shell sums across devices', row.toolCounts.shell, 15);
+    eq('edit from one device only', row.toolCounts.edit, 2);
+    eq('read from the other device only', row.toolCounts.read, 3);
+  }
+  {
+    // No tally sent → field absent rather than eight zeros, matching how
+    // the vectors behave.
+    resetCaches();
+    const env = makeEnv();
+    await post(env, v2Payload({ source: 'mbp' }));
+    env.USAGE_PUBLISH = JSON.stringify({ fields: [], dims: ['toolCounts'] });
+    resetCaches();
+    const row = (await (await getWith(env)).json()).days.find(x => x.date === today);
+    ok('no tool data → field absent', row.toolCounts === undefined);
+  }
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed === 0 ? 0 : 1);
 }

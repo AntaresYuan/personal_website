@@ -1,6 +1,13 @@
 {
   "endpoint": "https://usage.antaresyuan.site",
-  "source": "claude-mbp",
-  "claudeProjectsDir": "~/.claude/projects",
+  "_source_comment": "OPTIONAL and mostly legacy. The device slot now comes from a canonical hostname resolved once and persisted to ~/.local/share/antares-usage/canonical-hostname, so two machines can never silently share a slot. If you already run v1 with a `source` label, keep it here: it seeds the first canonical resolution so this device keeps writing to the slot it already owns. Override at any time with the ANTARES_USAGE_HOSTNAME env var.",
+  "sources": {
+    "claude": "~/.claude/projects",
+    "codex": "~/.codex/sessions"
+  },
+  "_sources_comment": "Which local transcript trees to scan. Omit the whole block to auto-discover every supported tool at its default location. Use an array (['claude']) to limit without changing paths, an object to override a path, or set a tool to false to skip it. A configured directory that doesn't exist is skipped with a notice, not an error.",
+  "sendModelBreakdown": true,
+  "sendProjectBreakdown": true,
+  "_breakdown_comment": "Whether to upload per-model / per-project token maps. The Worker keeps them server-side and its own USAGE_PUBLISH var decides what becomes public, so `true` here does NOT make them public. Set either to false to keep that dimension on this machine entirely — the aggregate numbers still work.",
   "_secret_comment": "OPTIONAL. If omitted, the agent reads the bearer from the macOS keychain at (account=$USER, service=antares-sync-usage). Setting it here puts a plaintext secret on disk — prefer the keychain. Store via:  security add-generic-password -a \"$USER\" -s \"antares-sync-usage\" -w '<bearer>'"
 }

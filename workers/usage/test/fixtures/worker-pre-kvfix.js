@@ -61,11 +61,7 @@ const MAX_DIM_KEY_LEN = 64;
 // the page open blew through the 100k/day free-tier KV read quota in under
 // an hour on 2026-05-14. With s-maxage=60 each PoP does at most ~1 fan-out
 // per minute regardless of traffic.
-/* 600s, not 60s. The upstream agent pushes every 30 minutes, so a 60-second
-   window bought no freshness at all — it just multiplied cache misses by ten,
-   and every miss is a KV fan-out. Anything below the agent's own interval is
-   spending reads to re-derive a number that cannot have changed. */
-const GET_CACHE_TTL_S = 600;
+const GET_CACHE_TTL_S = 60;
 const GET_CACHE_KEY = 'https://usage.antaresyuan.site/__cache/days';
 
 // ── token detail fields ─────────────────────────────────────────────
@@ -522,43 +518,7 @@ async function handleBeaconGet(request, env) {
   for (let i = n - 1; i >= 0; i--) {
     dates.push(new Date(now - i * 86400000).toISOString().slice(0, 10));
   }
-  /* Same two fixes as handleGet, for the same reason.
-
-     As written this fanned out n KV gets on EVERY call with no cache at all,
-     and the menu bar polls it every 15 minutes. Counters only move when a
-     visitor does something, so serving a 10-minute-old tally costs no real
-     accuracy and removes almost all of the reads.
-
-     The cache key includes n: `?days=7` and `?days=90` are different answers
-     and must not share an entry. Keying on the raw request URL instead would
-     also split on unrelated query junk, quietly making the cache useless. */
-  const cache = caches.default;
-  const ckey = `https://usage.antaresyuan.site/__cache/beacon/${n}`;
-  const hit = await cache.match(ckey);
-  if (hit) {
-    return new Response(await hit.text(), {
-      status: 200,
-      headers: { 'content-type': 'application/json; charset=utf-8',
-                 'cache-control': 'no-store', ...ch },
-    });
-  }
-
-  // Read only days that exist: on a namespace where beacon counters have
-  // barely been written, 30 gets is 30 billed reads returning nothing.
-  const present = new Set();
-  try {
-    let cursor;
-    do {
-      const page = await env.USAGE_KV.list({ prefix: BEACON_PREFIX, cursor });
-      for (const k of page.keys) present.add(k.name.slice(BEACON_PREFIX.length));
-      cursor = page.list_complete ? null : page.cursor;
-    } while (cursor);
-  } catch {
-    for (const d of dates) present.add(d);   // correctness over cost
-  }
-  const reads = await Promise.all(
-    dates.filter((d) => present.has(d)).map((d) => env.USAGE_KV.get(BEACON_PREFIX + d))
-  );
+  const reads = await Promise.all(dates.map((d) => env.USAGE_KV.get(BEACON_PREFIX + d)));
   const total = {};
   for (const raw of reads) {
     if (!raw) continue;
@@ -569,16 +529,7 @@ async function handleBeaconGet(request, env) {
       if (Number.isInteger(v)) total[k] = (total[k] || 0) + v;
     }
   }
-  const payload = JSON.stringify({ counts: total, since: dates[0], days: n });
-  cache.put(ckey, new Response(payload, {
-    headers: { 'content-type': 'application/json; charset=utf-8',
-               'cache-control': `public, s-maxage=${GET_CACHE_TTL_S}` },
-  })).catch(() => { /* stashing is best-effort */ });
-  return new Response(payload, {
-    status: 200,
-    headers: { 'content-type': 'application/json; charset=utf-8',
-               'cache-control': 'no-store', ...ch },
-  });
+  return reply({ counts: total, since: dates[0], days: n }, 200, ch);
 }
 
 // ── Handlers ────────────────────────────────────────────────────────
@@ -799,49 +750,15 @@ async function handleGet(request, env) {
     });
   }
 
-  /* Cache miss: assemble the window.
-
-     This used to `get()` all WINDOW_DAYS keys unconditionally. With 365 days
-     in the window and ~40 days of real data, 89% of those reads returned null
-     — and a KV read costs the same whether the key exists or not. Measured on
-     2026-09-07 that came to 91,291 reads in one day, 91% of the free daily
-     allowance, from a personal site with 11 visitors.
-
-     `list()` is ONE billed operation and names exactly the keys that exist,
-     so we read only those. A day with no key is synthesized through the same
-     aggregateDay(null) path as before, which returns the identical zero-filled
-     shape — so the response stays byte-for-byte what it was. That equality is
-     the whole point: this is a cost fix, and it must not become a data change.
-
-     list() paginates at 1000 keys. This namespace holds ~40, but the loop is
-     here because silently truncating would drop the OLDEST days and leave a
-     plausible-looking response — the kind of bug you find months later. */
+  // Cache miss: do the WINDOW_DAYS fan-out, assemble, stash for 60s.
   const dates = lastNDays(WINDOW_DAYS);
-  const existing = new Set();
-  try {
-    let cursor;
-    do {
-      const page = await env.USAGE_KV.list({ prefix: KV_PREFIX, cursor });
-      for (const k of page.keys) existing.add(k.name.slice(KV_PREFIX.length));
-      cursor = page.list_complete ? null : page.cursor;
-    } while (cursor);
-  } catch {
-    // If list() fails we must not report an empty history as if it were the
-    // truth. Fall back to the old fan-out: expensive, but correct.
-    for (const d of dates) existing.add(d);
-  }
-
-  const wanted = dates.filter((d) => existing.has(d));
-  const fetched = await Promise.all(
-    wanted.map((d) => env.USAGE_KV.get(KV_PREFIX + d))
+  const reads = await Promise.all(
+    dates.map(d => env.USAGE_KV.get(KV_PREFIX + d))
   );
-  const byDate = new Map(wanted.map((d, i) => [d, fetched[i]]));
 
   let updated = null;
-  const days = dates.map((date) => {
-    // undefined for a day with no key — aggregateDay treats it exactly as it
-    // treated the null that a get() on a missing key used to return.
-    const r = aggregateDay(byDate.get(date), projection);
+  const days = dates.map((date, i) => {
+    const r = aggregateDay(reads[i], projection);
     if (r.updated && (!updated || r.updated > updated)) updated = r.updated;
     return { date, ...r.day };
   });

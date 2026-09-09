@@ -37,6 +37,39 @@ routes = [
 [observability]
 enabled = true
 
+# ── Public projection (privacy switchboard) ──────────────────────────
+# The agent uploads full detail (five token categories + per-tool /
+# per-model / per-project breakdowns) and the Worker stores all of it.
+# This var decides what the PUBLIC GET / is allowed to emit. Anything not
+# listed here stays server-side, reachable only via authed GET /detail.
+#
+# Private by default: with USAGE_PUBLISH unset, GET / returns exactly the
+# v1 shape {date, tokens, sessions, costCents} — same bytes as before.
+#
+#   fields  extra per-day scalars to publish. Valid names:
+#             inputTokens, outputTokens, cachedInputTokens,
+#             cacheCreationInputTokens, reasoningOutputTokens, totalTokens,
+#             activeSeconds, durationSeconds, messageCount, userMessageCount
+#   dims    breakdown maps to publish: bySource, byModel, byProject
+#
+# The frontend is data-driven: publishing a field makes it appear on the
+# page, removing it makes it disappear — no site rebuild required.
+# Unknown names are ignored, and malformed JSON falls back to
+# private-by-default rather than over-sharing.
+#
+# Examples:
+#   Show the real total + cache ratio + which tool did the work, but keep
+#   model ids and project names private:
+#     USAGE_PUBLISH = '{"fields":["totalTokens","cachedInputTokens"],"dims":["bySource"]}'
+#
+#   Also reveal model mix:
+#     USAGE_PUBLISH = '{"fields":["totalTokens","cachedInputTokens"],"dims":["bySource","byModel"]}'
+#
+#   Back to v1 (nothing extra):
+#     USAGE_PUBLISH = '{}'
+[vars]
+USAGE_PUBLISH = '{"fields":["totalTokens","cachedInputTokens","inputTokens","outputTokens","cacheCreationInputTokens","reasoningOutputTokens","activeSeconds","messageCount"],"dims":["bySource","promptWeekHours","toolCounts"]}'
+
 # KV — per-day map keyed by source slot. Created via:
 #   npx wrangler kv namespace create USAGE_KV     (Wrangler v3+ — space not colon)
 # then paste the returned id below (replace the placeholder).
