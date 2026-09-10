@@ -2517,6 +2517,13 @@ body.modal-open { overflow: hidden; }
   margin: 0;
   padding: 0;
   display: grid;
+  /* minmax(0, 1fr), not the implicit `auto`: an auto track is floored at the
+     items' min-content width, so the long clone URL inside a step blew the
+     track out past the container (measured: 732px items in a 610px track).
+     body has overflow-x:hidden, so instead of a scrollbar the copy button
+     just got clipped off the right edge — visible in a screenshot but NOT
+     in document.scrollWidth, which that same hidden overflow clamps. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-16);
 }
 .ucli-step {
@@ -2524,6 +2531,7 @@ body.modal-open { overflow: hidden; }
   border-radius: var(--r-md);
   padding: var(--sp-16) var(--sp-20);
   background: var(--color-surface);
+  min-width: 0;   /* let the step shrink; its code block scrolls instead */
 }
 .ucli-step-title {
   display: flex;
