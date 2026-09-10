@@ -11,14 +11,20 @@
      USAGE_PUBLISH on the Worker decides, and the page adapts.
    - No charting library. Same yellow quartile ramp as the homepage heatmap,
      drawn with plain SVG so it inherits the site's CSS variables and themes.
-   - Owner view is opt-in and ephemeral: a bearer token typed into the unlock
-     box lives in sessionStorage for this tab only, and is used solely to call
-     the Worker's /detail endpoint.
+   - Owner view is a real sign-in, not a pasted secret. Cloudflare Access
+     gates /api/usage-detail (same origin, so no CORS) and the bearer stays
+     server-side in a Pages env var. The browser never sees the sync key.
+     The previous design had the page fetch the Worker's /detail directly with
+     a pasted token -- that never actually worked: /detail sends no CORS
+     headers by design, so the request died at the preflight before auth was
+     ever consulted.
    ════════════════════════════════════════════════════════════════════════ */
 (() => {
   'use strict';
 
-  const TOKEN_KEY = 'usage-detail-token';
+  /* Same-origin, Access-protected proxy for the private feed. Same origin is
+     the point: it means no preflight, hence no CORS to satisfy. */
+  const DETAIL_URL = '/api/usage-detail?days=365';
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -536,10 +542,16 @@
     return cfg.endpoint.replace(/\/+$/, '');
   }
 
-  async function load(endpoint, token) {
-    const url = token ? `${endpoint}/detail?days=365` : `${endpoint}/`;
+  /* Public feed from the Worker, or the private one through the Access-gated
+     same-origin proxy. `private` is a request, not a promise: if the visitor
+     has no Access session the proxy answers 401 and the caller falls back. */
+  async function load(endpoint, wantPrivate) {
+    const url = wantPrivate ? DETAIL_URL : `${endpoint}/`;
     const opts = { cache: 'no-store' };
-    if (token) opts.headers = { authorization: `Bearer ${token}` };
+    // Send the CF_Authorization cookie. Same-origin already implies it, but
+    // being explicit means a later move to a different host does not silently
+    // drop the session and look like "not signed in".
+    if (wantPrivate) opts.credentials = 'same-origin';
     const res = await fetch(url, opts);
     if (!res.ok) throw new Error('http ' + res.status);
     return res.json();
@@ -585,13 +597,31 @@
     }
   }
 
-  /* ── owner unlock ────────────────────────────────────────────────── */
-  function wireUnlock(endpoint) {
-    const form = $('usage-unlock-form');
-    const input = $('usage-unlock-input');
-    const clear = $('usage-unlock-clear');
+  /* Local hint that this browser signed in before. NOT a credential and NOT a
+     security check: the Access cookie is HttpOnly on Access's own domain, so
+     this page genuinely cannot see whether a session exists. Its only job is
+     to keep anonymous visitors from firing a request that is certain to 401.
+     Worst case it is wrong, and the answer is simply a 401 we ignore. */
+  const SEEN_KEY = 'usage-owner-seen';
+  const maybeSignedIn = () => {
+    try { return localStorage.getItem(SEEN_KEY) === '1'; } catch (e) { return false; }
+  };
+  const markSignedIn = (on) => {
+    try {
+      if (on) localStorage.setItem(SEEN_KEY, '1');
+      else localStorage.removeItem(SEEN_KEY);
+    } catch (e) { /* private mode — the hint is optional */ }
+  };
+
+  /* ── owner sign-in (Cloudflare Access) ──────────────────────────────
+     No token to paste and nothing kept in storage. Access owns the session
+     (a cookie set on its own domain, which this page cannot read), so the
+     only way to know whether we are signed in is to ask the proxy. */
+  function wireSignIn(endpoint) {
+    const signIn = $('usage-signin');
+    const signOut = $('usage-signout');
     const state = $('usage-unlock-state');
-    if (!form || !input) return;
+    if (!signIn) return;
 
     const say = (msg, ok) => {
       if (!state) return;
@@ -600,28 +630,40 @@
       state.className = 'usage-unlock-state' + (ok ? ' is-ok' : ' is-err');
     };
 
-    form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const token = input.value.trim();
-      if (!token) return;
+    signIn.addEventListener('click', async () => {
       say('Checking…', true);
       try {
-        const data = await load(endpoint, token);
-        // sessionStorage, not localStorage: the token dies with the tab.
-        try { sessionStorage.setItem(TOKEN_KEY, token); } catch (e) {}
-        input.value = '';
+        const data = await load(endpoint, true);
         render(data);
-        say('Unlocked — showing private detail for this tab only.', true);
+        markSignedIn(true);
+        say('Signed in — showing private detail.', true);
+        return;
       } catch (e) {
-        say('That token was rejected (' + e.message + ').', false);
+        /* 401 is the expected "not signed in yet" case: navigate to the
+           protected path so Access shows its own login screen, then it
+           redirects back here. Any other status is a real fault and must not
+           be disguised as a login prompt. */
+        if (e.message === 'http 401') {
+          say('Redirecting to sign-in…', true);
+          window.location.href = '/api/usage-detail?days=1&redirect=' +
+            encodeURIComponent(window.location.pathname);
+          return;
+        }
+        if (e.message === 'http 503') {
+          say('Sign-in is not configured on the server yet (missing token binding).', false);
+          return;
+        }
+        say('Could not load the private feed (' + e.message + ').', false);
       }
     });
 
-    if (clear) {
-      clear.addEventListener('click', async () => {
-        try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
-        say('Cleared — back to the public view.', true);
-        try { render(await load(endpoint, null)); } catch (e) {}
+    if (signOut) {
+      signOut.addEventListener('click', async () => {
+        /* Access's own logout endpoint clears its cookie; the page cannot.
+           Clear the local hint FIRST -- navigation ends this script, so
+           anything after it would not run. */
+        markSignedIn(false);
+        window.location.href = '/cdn-cgi/access/logout';
       });
     }
   }
@@ -639,22 +681,33 @@
       if (stateEl) stateEl.textContent = 'Usage tracking is not configured on this site.';
       return;
     }
-    wireUnlock(endpoint);
-    let token = null;
-    try { token = sessionStorage.getItem(TOKEN_KEY); } catch (e) {}
+    wireSignIn(endpoint);
+
+    /* Render the public feed first, unconditionally: it is what every visitor
+       is here for and it must not wait on an auth round-trip.
+
+       Then upgrade to private only when there is a plausible session. The
+       check is a cheap local hint, not a security decision -- the proxy and
+       Access are the real gate. It exists to avoid firing a doomed request on
+       every anonymous page view: this site already tripped a Cloudflare
+       free-tier cost alarm once, and "one extra request per visitor, forever"
+       is exactly the shape of change that caused it. */
     try {
-      render(await load(endpoint, token));
+      render(await load(endpoint, false));
     } catch (e) {
-      // A stale token shouldn't strand the page on an error — fall back to
-      // the public feed, which is what an ordinary visitor sees anyway.
-      if (token) {
-        try { sessionStorage.removeItem(TOKEN_KEY); } catch (e2) {}
-        try {
-          render(await load(endpoint, null));
-          return;
-        } catch (e2) { /* fall through */ }
-      }
       if (stateEl) stateEl.textContent = 'Could not load usage data (' + e.message + ').';
+      return;
+    }
+
+    if (maybeSignedIn()) {
+      try {
+        render(await load(endpoint, true));
+      } catch (e) {
+        /* The session expired or was revoked. Clear the hint so later visits
+           stop making a request that now always fails; the public view the
+           visitor is already looking at stands unchanged. */
+        if (e.message === 'http 401') markSignedIn(false);
+      }
     }
   })();
 })();
