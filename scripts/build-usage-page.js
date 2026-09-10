@@ -213,8 +213,10 @@ function cliSection() {
 ${step(1, 'Clone the repo', cmd(`git clone ${REPO_URL}.git && cd personal_website`))}
 ${step(2, 'Run the setup script', cmd('./ops/setup-sync.sh') + `
         <p class="ucli-note">Detects which tools are installed, pins this machine's
-          device slot, asks for the bearer, then does a local scan and a dry-run
-          before anything is uploaded. Re-runnable.</p>`)}
+          device slot, then asks for the shared bearer — the endpoint rejects every
+          write without it. The key is checked against the Worker before it's stored,
+          so a mistyped one fails here instead of silently 401-ing on every later run.
+          Local scan and dry-run come before anything is uploaded. Re-runnable.</p>`)}
 ${step(3, 'Check what it found', cmd('node scripts/sync-usage.js --stats') + `
         <p class="ucli-note">Local breakdown, no network. <code>--doctor</code> checks
           the config, the secret and the endpoint if something looks off.</p>`)}

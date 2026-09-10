@@ -43,6 +43,11 @@ SYNC_LIBS=(
   "$REPO_ROOT/scripts/lib/usage-aggregate.js"
 )
 CANONICAL_FILE="$HOME/.local/share/antares-usage/canonical-hostname"
+ENDPOINT="https://usage.antaresyuan.site"
+# $USER is empty under launchd and some CI shells, and `security -a ""` looks
+# up the wrong account and silently finds nothing. Same fallback chain the
+# agent and refresh-snapshot.sh use, so all three agree on one account.
+KC_ACCOUNT="${USER:-${LOGNAME:-$(id -un)}}"
 
 for f in "$EXAMPLE" "$SYNC_JS" "$LA_INSTALLER" "$HOOK_SCRIPT" "${SYNC_LIBS[@]}"; do
   [[ -f "$f" ]] || { echo "setup-sync: missing $f — clone the repo first?" >&2; exit 1; }
@@ -145,7 +150,7 @@ done
 
 cat > "$CONFIG" <<EOF
 {
-  "endpoint": "https://usage.antaresyuan.site",
+  "endpoint": "$ENDPOINT",
   "source": "$SOURCE",
   "sources": {
 $sources_block
@@ -171,7 +176,7 @@ echo ""
 
 # ── 4. Secret in keychain ─────────────────────────────────────────
 has_secret=0
-if security find-generic-password -a "$USER" -s "antares-sync-usage" -w >/dev/null 2>&1; then
+if security find-generic-password -a "$KC_ACCOUNT" -s "antares-sync-usage" -w >/dev/null 2>&1; then
   has_secret=1
 fi
 
@@ -187,9 +192,38 @@ else
   read -rs SECRET
   echo ""
   if [[ -z "$SECRET" ]]; then echo "setup-sync: empty secret — aborting" >&2; exit 1; fi
-  security add-generic-password -U -a "$USER" -s "antares-sync-usage" -w "$SECRET" 2>/dev/null
+
+  # Verify BEFORE storing. A mistyped secret used to be accepted here and
+  # then failed 401 on every LaunchAgent tick from then on — into a log file
+  # nobody reads, so the only symptom was "the numbers stopped moving".
+  # GET /detail takes the same bearer and writes nothing, so it's the safe
+  # way to ask "is this key real?" without putting junk in KV.
+  echo -n "Checking the secret against $ENDPOINT ... "
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
+            -H "authorization: Bearer $SECRET" "$ENDPOINT/detail?days=1" || echo "000")"
+  case "$code" in
+    200)
+      echo "ok" ;;
+    401)
+      echo "REJECTED (401)"
+      echo "setup-sync: that secret is not the one the Worker expects — nothing was stored." >&2
+      echo "            Re-read it on the working Mac; note it's the SYNC bearer," >&2
+      echo "            not a Cloudflare API token." >&2
+      unset SECRET
+      exit 1 ;;
+    000)
+      # Offline / DNS / timeout: refusing to store would strand someone
+      # setting up on a plane, so keep it but be explicit that it's unproven.
+      echo "could not reach the endpoint"
+      echo "  Storing it unverified — run 'node scripts/sync-usage.js --doctor' once you're online." ;;
+    *)
+      echo "unexpected HTTP $code"
+      echo "  Storing it unverified — the endpoint answered, but not with 200/401." ;;
+  esac
+
+  security add-generic-password -U -a "$KC_ACCOUNT" -s "antares-sync-usage" -w "$SECRET" 2>/dev/null
   unset SECRET
-  echo "Stored in keychain (account=\$USER, service=antares-sync-usage)"
+  echo "Stored in keychain (account=$KC_ACCOUNT, service=antares-sync-usage)"
 fi
 echo ""
 

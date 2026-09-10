@@ -595,12 +595,33 @@ async function handleBeaconGet(request, env) {
 }
 
 // ── Handlers ────────────────────────────────────────────────────────
+/* Constant-time bearer check.
+
+   `===` on strings bails at the first differing character, so response time
+   leaks how much of a guess was correct. With a 43-char (~256-bit) secret
+   that isn't a realistic break — network jitter dwarfs the difference and
+   the keyspace is unsearchable — but timingSafeEqual is one call, so there's
+   no reason to leave the side channel in.
+
+   Two subtleties from Cloudflare's guidance, both easy to get wrong:
+   - timingSafeEqual THROWS when the buffers differ in length, so a naive
+     call turns a wrong-length token into a 500 instead of a 401.
+   - returning early on a length mismatch would itself leak the secret's
+     length. Instead compare the input against itself (always true) and
+     negate, so the check still fails and still costs the same. */
 function bearerOk(request, env) {
   const auth = request.headers.get('authorization') || '';
   const m = /^Bearer\s+(.+)$/i.exec(auth);
   const expected = env.SHARED_SECRET;
   if (!expected) return null;              // misconfigured
-  return Boolean(m && m[1] === expected);
+  if (!m) return false;
+
+  const enc = new TextEncoder();
+  const got = enc.encode(m[1]);
+  const want = enc.encode(expected);
+  return got.byteLength === want.byteLength
+    ? crypto.subtle.timingSafeEqual(got, want)
+    : !crypto.subtle.timingSafeEqual(got, got);
 }
 
 async function handlePost(request, env) {

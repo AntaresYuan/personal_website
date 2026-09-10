@@ -59,6 +59,21 @@ async function main() {
   // future top-level usage working too).
   globalThis.caches = makeCachesMock();
 
+  // `crypto.subtle.timingSafeEqual` is a Cloudflare extension that Node's
+  // WebCrypto does not implement, so bearerOk would throw here. Polyfill it
+  // with the same contract as the runtime's: throws when the byte lengths
+  // differ, so a missing length guard in the Worker still surfaces as a
+  // failure rather than being masked by a lenient stub.
+  if (!globalThis.crypto.subtle.timingSafeEqual) {
+    const nodeCrypto = require('node:crypto');
+    globalThis.crypto.subtle.timingSafeEqual = (a, b) => {
+      if (a.byteLength !== b.byteLength) {
+        throw new TypeError('Input buffers must have the same byte length');
+      }
+      return nodeCrypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+    };
+  }
+
   const mod = await import(path.join(__dirname, '..', 'src', 'index.js'));
   const worker = mod.default;
 

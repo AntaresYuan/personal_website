@@ -198,8 +198,10 @@
         <h3 class="ucli-step-title"><span class="ucli-step-n">2</span>Run the setup script</h3>
         <button class="ucli-cmd" type="button" data-copy="./ops/setup-sync.sh"><code><span class="ucli-dollar">$</span> ./ops/setup-sync.sh</code><span class="ucli-copy" aria-hidden="true">copy</span></button>
         <p class="ucli-note">Detects which tools are installed, pins this machine's
-          device slot, asks for the bearer, then does a local scan and a dry-run
-          before anything is uploaded. Re-runnable.</p>
+          device slot, then asks for the shared bearer — the endpoint rejects every
+          write without it. The key is checked against the Worker before it's stored,
+          so a mistyped one fails here instead of silently 401-ing on every later run.
+          Local scan and dry-run come before anything is uploaded. Re-runnable.</p>
       </li>
       <li class="ucli-step">
         <h3 class="ucli-step-title"><span class="ucli-step-n">3</span>Check what it found</h3>
