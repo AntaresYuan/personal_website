@@ -545,6 +545,46 @@
     return res.json();
   }
 
+  /* ── copy buttons in the "Add a device" section ──────────────────── */
+  function wireCopy() {
+    var btns = document.querySelectorAll('.ucli-cmd[data-copy]');
+    for (var i = 0; i < btns.length; i++) {
+      (function (btn) {
+        var label = btn.querySelector('.ucli-copy');
+        var timer = null;
+        btn.addEventListener('click', function () {
+          var text = btn.getAttribute('data-copy') || '';
+          var done = function (ok) {
+            if (!label) return;
+            label.textContent = ok ? 'copied' : 'select it';
+            btn.classList.toggle('is-copied', ok);
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(function () {
+              label.textContent = 'copy';
+              btn.classList.remove('is-copied');
+            }, 1600);
+          };
+          /* navigator.clipboard is undefined on http:// origins other than
+             localhost, so a plain-HTTP preview would throw here. Fall back to
+             selecting the text rather than failing silently — the visitor can
+             still copy it by hand, and the label says so. */
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+          } else {
+            try {
+              var r = document.createRange();
+              r.selectNodeContents(btn.querySelector('code'));
+              var sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(r);
+            } catch (e) { /* noop */ }
+            done(false);
+          }
+        });
+      })(btns[i]);
+    }
+  }
+
   /* ── owner unlock ────────────────────────────────────────────────── */
   function wireUnlock(endpoint) {
     const form = $('usage-unlock-form');
@@ -588,6 +628,10 @@
 
   /* ── boot ────────────────────────────────────────────────────────── */
   (async () => {
+    /* Before loadConfig: the copy buttons are static markup and must keep
+       working even when usage tracking isn't configured or the fetch fails --
+       the early `return` below would otherwise leave them dead. */
+    wireCopy();
     let endpoint;
     try {
       endpoint = await loadConfig();

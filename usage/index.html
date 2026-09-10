@@ -42,7 +42,7 @@
     } catch (e) {}
   })();
 </script>
-<link rel="stylesheet" href="/styles/main.css?v=9487bcc9">
+<link rel="stylesheet" href="/styles/main.css?v=38850336">
 <script defer src="/scripts/beacon.js?v=2dc05071"></script>
 </head>
 <body class="usage-page-body">
@@ -181,6 +181,40 @@
       <p class="usage-unlock-state" id="usage-unlock-state" hidden></p>
     </details>
   </section>
+
+  <section class="section usage-cli" id="usage-cli">
+    <h2 class="usage-cli-title">Add a device</h2>
+    <p class="usage-cli-lead">These numbers come from a small agent that reads local
+      Claude Code and Codex transcripts and posts daily totals here. It's multi-device:
+      each machine owns its own slot, so several Macs merge instead of overwriting.
+      Setting up another one takes three commands.</p>
+
+    <ol class="ucli-steps">
+      <li class="ucli-step">
+        <h3 class="ucli-step-title"><span class="ucli-step-n">1</span>Clone the repo</h3>
+        <button class="ucli-cmd" type="button" data-copy="git clone https://github.com/AntaresYuan/personal_website.git &amp;&amp; cd personal_website"><code><span class="ucli-dollar">$</span> git clone https://github.com/AntaresYuan/personal_website.git &amp;&amp; cd personal_website</code><span class="ucli-copy" aria-hidden="true">copy</span></button>
+      </li>
+      <li class="ucli-step">
+        <h3 class="ucli-step-title"><span class="ucli-step-n">2</span>Run the setup script</h3>
+        <button class="ucli-cmd" type="button" data-copy="./ops/setup-sync.sh"><code><span class="ucli-dollar">$</span> ./ops/setup-sync.sh</code><span class="ucli-copy" aria-hidden="true">copy</span></button>
+        <p class="ucli-note">Detects which tools are installed, pins this machine's
+          device slot, asks for the bearer, then does a local scan and a dry-run
+          before anything is uploaded. Re-runnable.</p>
+      </li>
+      <li class="ucli-step">
+        <h3 class="ucli-step-title"><span class="ucli-step-n">3</span>Check what it found</h3>
+        <button class="ucli-cmd" type="button" data-copy="node scripts/sync-usage.js --stats"><code><span class="ucli-dollar">$</span> node scripts/sync-usage.js --stats</code><span class="ucli-copy" aria-hidden="true">copy</span></button>
+        <p class="ucli-note">Local breakdown, no network. <code>--doctor</code> checks
+          the config, the secret and the endpoint if something looks off.</p>
+      </li>
+    </ol>
+
+    <p class="usage-cli-foot">Needs macOS (keychain + launchd) and Node. The bearer isn't
+      on this page by design — read it off a machine that's already syncing:
+      <code>security find-generic-password -a "$USER" -s antares-sync-usage -w</code>.
+      Only token counts, timings and cost leave the machine; prompt and code content
+      never do. <a href="https://github.com/AntaresYuan/personal_website/blob/main/docs/usage-sync.md">Full setup notes →</a></p>
+  </section>
   <footer class="site-footer">
     <span>© 2026 Antares Yuan · <em>This site is a roadmap of how Antares is growing as an AI Builder, not only a resume.</em></span>
     <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/blog/feed.xml">rss</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
@@ -204,7 +238,7 @@
   mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
 })();
 </script>
-<script src="/scripts/usage-page.js?v=2faf5129" defer></script>
+<script src="/scripts/usage-page.js?v=e8a451ef" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c" defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2" defer></script>
 <script src="/scripts/skin-characters.js?v=b78cfa18" defer></script>

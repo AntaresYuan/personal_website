@@ -179,6 +179,55 @@ const card = (id, title, note) => `      <section class="ucard" id="ucard-${id}"
         <p class="ucard-caption" id="ucap-${id}" hidden></p>
       </section>`;
 
+/* ── "add a device" / CLI section ────────────────────────────────────────
+   Ported in spirit from kaboo's onboarding stepper: numbered steps, each
+   with one copyable command. Differences that matter here:
+
+   - kaboo ships a published npm package and an OAuth `login`; this agent is
+     a script in a public repo authorised by ONE shared bearer. So step 1 is
+     a clone, and the bearer is never printed on this page — it's read off a
+     machine that already works. A token in the HTML would be a token handed
+     to every visitor, and the endpoint accepts writes with nothing else.
+   - The commands are shown, not executed by a piped one-liner. `curl | bash`
+     from a personal site is exactly the habit that makes supply-chain
+     attacks easy, and it hides what's about to run.
+
+   Safe to publish: POST without the bearer is 401 (verified), so the
+   endpoint and repo URL are not secrets. Only the bearer is. */
+const REPO_URL = 'https://github.com/AntaresYuan/personal_website';
+const step = (n, title, body) => `      <li class="ucli-step">
+        <h3 class="ucli-step-title"><span class="ucli-step-n">${n}</span>${e(title)}</h3>
+${body}
+      </li>`;
+const cmd = (c, label) => `        <button class="ucli-cmd" type="button" data-copy="${e(c)}"${label ? ` aria-label="${e(label)}"` : ''}><code><span class="ucli-dollar">$</span> ${e(c)}</code><span class="ucli-copy" aria-hidden="true">copy</span></button>`;
+
+function cliSection() {
+  return `  <section class="section usage-cli" id="usage-cli">
+    <h2 class="usage-cli-title">Add a device</h2>
+    <p class="usage-cli-lead">These numbers come from a small agent that reads local
+      Claude Code and Codex transcripts and posts daily totals here. It's multi-device:
+      each machine owns its own slot, so several Macs merge instead of overwriting.
+      Setting up another one takes three commands.</p>
+
+    <ol class="ucli-steps">
+${step(1, 'Clone the repo', cmd(`git clone ${REPO_URL}.git && cd personal_website`))}
+${step(2, 'Run the setup script', cmd('./ops/setup-sync.sh') + `
+        <p class="ucli-note">Detects which tools are installed, pins this machine's
+          device slot, asks for the bearer, then does a local scan and a dry-run
+          before anything is uploaded. Re-runnable.</p>`)}
+${step(3, 'Check what it found', cmd('node scripts/sync-usage.js --stats') + `
+        <p class="ucli-note">Local breakdown, no network. <code>--doctor</code> checks
+          the config, the secret and the endpoint if something looks off.</p>`)}
+    </ol>
+
+    <p class="usage-cli-foot">Needs macOS (keychain + launchd) and Node. The bearer isn't
+      on this page by design — read it off a machine that's already syncing:
+      <code>security find-generic-password -a "$USER" -s antares-sync-usage -w</code>.
+      Only token counts, timings and cost leave the machine; prompt and code content
+      never do. <a href="${REPO_URL}/blob/main/docs/usage-sync.md">Full setup notes →</a></p>
+  </section>`;
+}
+
 const main = `  <section class="section usage-page-head">
     <p class="usage-page-back"><a href="/#usage">← back to home</a></p>
     <h1 class="usage-page-title">AI usage, in full</h1>
@@ -219,7 +268,9 @@ ${card('project', 'By project', 'Private unless published — unlock below to vi
       </form>
       <p class="usage-unlock-state" id="usage-unlock-state" hidden></p>
     </details>
-  </section>`;
+  </section>
+
+${cliSection()}`;
 
 const usagePageV = hashOf('scripts/usage-page.js');
 const html = pageShell({

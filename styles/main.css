@@ -2492,6 +2492,123 @@ body.modal-open { overflow: hidden; }
 .usage-unlock-state.is-ok { color: var(--color-text-faint); }
 .usage-unlock-state.is-err { color: var(--color-text); font-weight: var(--fw-semibold); }
 
+/* ── "Add a device" / CLI steps ──────────────────────────────────────── */
+.usage-cli {
+  max-width: var(--w-page);
+  margin: 0 auto;
+  padding: 0 var(--sp-32) var(--sp-64);
+  width: 100%;
+  box-sizing: border-box;
+}
+.usage-cli-title {
+  font-size: var(--fs-19);
+  font-weight: var(--fw-semibold);
+  margin: 0 0 var(--sp-8);
+}
+.usage-cli-lead {
+  font-size: var(--fs-13);
+  color: var(--color-text-dim);
+  line-height: 1.7;
+  max-width: var(--w-prose);
+  margin: 0 0 var(--sp-24);
+}
+.ucli-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-16);
+}
+.ucli-step {
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-md);
+  padding: var(--sp-16) var(--sp-20);
+  background: var(--color-surface);
+}
+.ucli-step-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  margin: 0 0 var(--sp-12);
+}
+/* Fixed-size counter so a 1-digit and a 2-digit step stay aligned. */
+.ucli-step-n {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--color-yellow-glow);
+  border: var(--bw) solid var(--color-yellow);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+}
+.ucli-cmd {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  padding: var(--sp-8) var(--sp-12);
+  border: var(--bw) solid var(--color-line-soft);
+  border-radius: var(--r-sm);
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color var(--dur-quick) var(--ease-out),
+              background var(--dur-quick) var(--ease-out);
+}
+.ucli-cmd:hover { border-color: var(--color-yellow); background: var(--color-yellow-glow); }
+.ucli-cmd:focus-visible {
+  outline: var(--bw-thick) solid var(--color-yellow);
+  outline-offset: 1px;
+}
+/* A long clone URL must not stretch the card: the code scrolls, the
+   copy affordance stays put and stays clickable.
+   `min-width: 0` on BOTH the flex container and the code element is what
+   actually allows the shrink — without it the button's min-content width
+   (the whole unbroken URL) wins and pushes past the viewport on a phone. */
+.ucli-cmd { min-width: 0; }
+.ucli-cmd code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+.ucli-cmd code::-webkit-scrollbar { display: none; }
+.ucli-dollar { color: var(--color-text-faint); margin-right: var(--sp-4); }
+.ucli-copy {
+  flex: 0 0 auto;
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+}
+.ucli-cmd.is-copied .ucli-copy { color: var(--color-success); }
+.ucli-note {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  line-height: 1.6;
+  max-width: var(--w-prose);
+  margin: var(--sp-12) 0 0;
+}
+.usage-cli-foot {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  line-height: 1.7;
+  max-width: var(--w-prose);
+  margin: var(--sp-24) 0 0;
+}
+.usage-cli-foot code {
+  font-size: var(--fs-11);
+  word-break: break-all;
+}
+
 @media (max-width: 900px) {
   /* One column: two 400px-wide charts are worse than one readable one. */
   .usage-page-grid { grid-template-columns: minmax(0, 1fr); }
@@ -2499,6 +2616,8 @@ body.modal-open { overflow: hidden; }
 @media (max-width: 640px) {
   .usage-page-grid { padding: var(--sp-24) var(--sp-16) var(--sp-32); gap: var(--sp-16); }
   .usage-unlock { padding: 0 var(--sp-16) var(--sp-32); }
+  .usage-cli { padding: 0 var(--sp-16) var(--sp-40); }
+  .ucli-step { padding: var(--sp-14) var(--sp-16); }
   .usage-page-summary { gap: var(--sp-16); }
   .ucard { padding: var(--sp-16); }
   .ubar-row { grid-template-columns: minmax(60px, 32%) 1fr auto; }

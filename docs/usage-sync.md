@@ -106,6 +106,46 @@ To rename a device, edit that file (or set `ANTARES_USAGE_HOSTNAME`) and
 re-run. The old slot's value freezes; zero it out by POSTing
 `{date, source: OLD, tokens: 0, sessions: 0}` for each day in the window.
 
+### Slots currently in KV, and the double-count trap
+
+As of 2026-09-09 the namespace holds **five** slots across 82 days. Worth
+knowing before reviving an old machine, because three of them come from
+the v1 `<tool>-<device>` naming:
+
+| slot | days | tokens | range |
+|---|---|---|---|
+| `mmxw7v5731` | 42 | 1,008,875,395 | 2026-06-26 → 2026-09-07 |
+| `claude-imac` | 35 | 106,821,952 | 2026-05-01 → 2026-06-17 |
+| `claude-mbp` | 19 | 9,411,820 | 2026-05-08 → 2026-06-06 |
+| `codex-mbp2` | 3 | 6,297,187 | 2026-06-17 → 2026-06-20 |
+| `claude-mbp2` | 4 | 1,721,487 | 2026-06-16 → 2026-06-20 |
+
+The trap: v1 wrote one slot **per tool per device** (`claude-mbp2` AND
+`codex-mbp2` for the same Mac); this version writes one slot **per
+device**. So if an old machine starts syncing again with the current
+agent, it resolves to a NEW slot name and re-sends days it already has
+under the old names — and `aggregateDay` sums across slots, so those days
+get counted twice. Nothing errors; the totals just grow. With
+`--window 90` the overlap today is 10 days / ~58.7M tokens (≈5% of the
+all-time total).
+
+Before reviving a machine that already owns v1 slots, do one of:
+
+- point it back at an old slot (`ANTARES_USAGE_HOSTNAME=claude-mbp2`) —
+  only fully correct if that machine ran a single tool, otherwise its
+  other per-tool slots still linger; or
+- zero the stale slots for the overlapping days (the POST above); or
+- keep the window short enough that it cannot reach those days.
+
+Verify after any revival — the all-time total must not jump by more than
+that machine's genuinely new days:
+
+```sh
+curl -s https://usage.antaresyuan.site/ | python3 -c \
+  "import json,sys; d=json.load(sys.stdin); n=[x for x in d['days'] if x['tokens']]; \
+   print(len(n), f\"{sum(x['tokens'] for x in n):,}\")"
+```
+
 ## What the agent sends
 
 Exactly one POST per non-empty day in the trailing window:
@@ -301,6 +341,11 @@ curl -s -H "authorization: Bearer local-preview-secret" \
 
 `ops/setup-sync.sh` wraps the whole flow with interactive prompts.
 Idempotent — safe to re-run.
+
+These same three steps are published as an "Add a device" section at the
+bottom of <https://antaresyuan.site/usage/>, with copy buttons — that's
+the copy to hand to another machine. The bearer is deliberately not on
+that page; it's read off a machine that already syncs (step 2 below).
 
 ```sh
 git clone https://github.com/AntaresYuan/personal_website   # if not already
