@@ -325,8 +325,13 @@ function lastNDates(n) {
 // This function defines the ONLY shape that leaves the machine. The Worker
 // re-validates; this is the first line of defense.
 function buildPayload(day, hostname, cfg) {
-  // `tokens` keeps its v1 meaning — input + output — so the public heatmap
-  // and every historical KV row stay on one consistent scale.
+  // `tokens` keeps its v1 meaning — input + output — because 40 days of KV
+  // rows from the old laptop were written against it and cannot be
+  // recomputed (those transcripts no longer exist on any machine). The
+  // DISPLAYED headline is no longer this field: every surface now reads
+  // totalTokens (the kaboo basis, cache included) and falls back to this one
+  // only for those legacy rows. Changing the meaning here would silently
+  // rewrite history's scale, so it stays put.
   const tokens = (day.inputTokens || 0) + (day.outputTokens || 0);
 
   const p = {
@@ -513,8 +518,8 @@ function printStats(days, hostname, scanned) {
   console.log(`  cache read       ${fmt(sum('cachedInputTokens')).padStart(15)}`);
   console.log(`  cache write      ${fmt(sum('cacheCreationInputTokens')).padStart(15)}`);
   console.log(`  reasoning        ${fmt(sum('reasoningOutputTokens')).padStart(15)}`);
-  console.log(`  ── total         ${fmt(totalAll).padStart(15)}`);
-  console.log(`  public "tokens"  ${fmt(sum('inputTokens') + sum('outputTokens')).padStart(15)}  (input+output only)`);
+  console.log(`  ── total         ${fmt(totalAll).padStart(15)}  ← headline (kaboo basis)`);
+  console.log(`  billed only      ${fmt(sum('inputTokens') + sum('outputTokens')).padStart(15)}  (input+output)`);
   if (totalAll > 0) {
     const cachePct = ((sum('cachedInputTokens') / totalAll) * 100).toFixed(1);
     console.log(`  cache read share ${String(cachePct).padStart(14)}%`);

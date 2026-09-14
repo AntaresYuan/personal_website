@@ -1155,7 +1155,9 @@
   const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];   // alternating, GitHub-style
   const renderHeatmap = (cells) => {
-    const nonZero = cells.map(c => c.tokens).filter(t => t > 0).sort((a, b) => a - b);
+    /* Colour by the same basis as the headline, or the quartile ramp would
+       be shading a different quantity than the number printed above it. */
+    const nonZero = cells.map(cellTokens).filter(t => t > 0).sort((a, b) => a - b);
 
     let firstActiveDate = '';
     for (const c of cells) {
@@ -1234,9 +1236,9 @@
         cls = 'usage-cell-outside';
         dataAttrs = '';
       } else {
-        const bin = quartileBin(cellData.tokens, nonZero);
+        const bin = quartileBin(cellTokens(cellData), nonZero);
         cls = bin < 0 ? 'usage-cell-empty' : `usage-cell-q${bin}`;
-        dataAttrs = `data-date="${cellData.date}" data-tokens="${cellData.tokens}" data-sessions="${cellData.sessions}"`;
+        dataAttrs = `data-date="${cellData.date}" data-tokens="${cellTokens(cellData)}" data-sessions="${cellData.sessions}"`;
         // Optional v2 attributes — only emitted when the Worker publishes
         // the backing field, so the tooltip enriches itself without any
         // frontend change when a dimension is switched on.
@@ -1293,6 +1295,24 @@
   const hasField = (cells, field) =>
     cells.some(c => Number.isFinite(c[field]) && c[field] > 0);
 
+  /* The headline token basis, per cell, with a fallback that matters.
+     Rows written by the v1 CLI (the old laptop, 2026-05-01..06-20) have no
+     detail block: totalTokens is 0 while `tokens` holds a real input+output
+     figure. Summing totalTokens alone would silently render those 40 days as
+     zero and delete that machine from the chart -- a wrong answer wearing the
+     costume of a working page. Those days stay on the older, narrower basis;
+     understated but present beats absent. */
+  const cellTokens = (c) => {
+    const total = Number(c.totalTokens);
+    if (Number.isFinite(total) && total > 0) return total;
+    return Number.isFinite(c.tokens) ? c.tokens : 0;
+  };
+  const sumHeadline = (cells) => {
+    let total = 0;
+    for (const cell of cells) total += cellTokens(cell);
+    return total;
+  };
+
   // Merge a per-day breakdown map ({model: {...}}) across the window into
   // one ranked list. Returns [] when the dim isn't published.
   const mergeDim = (cells, dim, metric = 'totalTokens') => {
@@ -1322,12 +1342,16 @@
   };
 
   const renderUsageStats = (cells) => {
-    let totalTokens = 0, totalSessions = 0, daysActive = 0;
+    // `billedTokens` is deliberately the narrow basis (input + output): it is
+    // rendered as the "tokens billed" line. The headline uses sumHeadline().
+    let billedTokens = 0, totalSessions = 0, daysActive = 0;
     let oldestActive = '';
     for (const cell of cells) {
-      totalTokens += cell.tokens;
+      billedTokens += cell.tokens;
       totalSessions += cell.sessions;
-      if (cell.tokens > 0) {
+      // Count a day as active on the headline basis, so "days active" cannot
+      // disagree with the coloured cells in the heatmap beside it.
+      if (cellTokens(cell) > 0) {
         daysActive++;
         if (!oldestActive || cell.date < oldestActive) oldestActive = cell.date;
       }
@@ -1385,17 +1409,26 @@
         `</div>`
       );
 
+    /* Headline is the kaboo basis: input + output + cache read + cache write
+       + reasoning (kaboo's cli/export_cmd.go). Cache reads dominate a Claude
+       Code workload -- roughly 55% of volume here -- and omitting them made
+       this number look absurd beside the spend figure next to it. kaboo hit
+       exactly this and fixed it in their migration 000006, whose note says
+       the old basis understated reality "by 5-100x".
+
+       "tokens billed" stays as a second line: it is the honest answer to a
+       different question -- what actually costs full price. */
     const hasTotal = hasField(cells, 'totalTokens');
     push(
-      hasTotal ? 'tokens billed' : 'tokens',
-      `<strong>${fmtCompact(totalTokens)}</strong>`,
-      hasTotal ? 'Input + output only — the categories charged per token' : ''
+      'tokens',
+      `<strong>${fmtCompact(hasTotal ? sumHeadline(cells) : billedTokens)}</strong>`,
+      hasTotal ? 'All five categories, including cache reads and writes' : ''
     );
     if (hasTotal) {
       push(
-        'tokens processed',
-        `<strong>${fmtCompact(sumField(cells, 'totalTokens'))}</strong>`,
-        'All five categories, including cache reads and writes'
+        'tokens billed',
+        `<strong>${fmtCompact(billedTokens)}</strong>`,
+        'Input + output only — the categories charged per token'
       );
     }
     const cachePct = cacheSharePct(cells);
@@ -1588,7 +1621,9 @@
       if (!byWeek.has(sunday)) byWeek.set(sunday, { week: sunday, tokens: 0, total: 0, cost: 0 });
       const w = byWeek.get(sunday);
       w.tokens += cell.tokens || 0;
-      if (Number.isFinite(cell.totalTokens)) w.total += cell.totalTokens;
+      /* Fallback basis, so a week made only of v1 rows plots at its real
+         height instead of collapsing to zero in the middle of the series. */
+      w.total += cellTokens(cell);
       if (Number.isFinite(cell.costCents)) w.cost += cell.costCents;
     }
     const all = [...byWeek.values()].sort((a, b) => a.week.localeCompare(b.week));

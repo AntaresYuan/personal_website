@@ -305,14 +305,33 @@ window.__render = function (json) {
     // instead would look equivalent but silently truncate once the data
     // outgrew it, and the row would quietly stop being "all time".
     const rows = n === null ? days : days.filter((x) => within(x, n));
+    /* kaboo basis (cli/export_cmd.go): input + output + cache read + cache
+       write + reasoning. Cache reads are the bulk of a Claude Code workload,
+       so excluding them left this panel disagreeing with both the spend
+       column beside it and kaboo itself by ~2.3x.
+       The fallback is load-bearing: v1 rows from the old laptop carry no
+       detail block, so totalTokens is 0 while `tokens` holds a real figure --
+       reading totalTokens alone would show those 40 days as zero. */
+    const dayTokens = (d) => {
+      if (!d) return 0;
+      const t = Number(d.totalTokens);
+      if (Number.isFinite(t) && t > 0) return t;
+      return Number(d.tokens) || 0;
+    };
+    const slotTokens = (v) => {
+      if (!v) return 0;
+      const t = Number(v.totalTokens);
+      if (Number.isFinite(t) && t > 0) return t;
+      return (Number(v.inputTokens) || 0) + (Number(v.outputTokens) || 0);
+    };
     const per = {};
     let tok = 0, cost = 0, split = 0;
     for (const x of rows) {
-      tok += Number(x.tokens) || 0;
+      tok += dayTokens(x);
       cost += Number(x.costCents) || 0;
       const bs = x.bySource || {};
       for (const [name, v] of Object.entries(bs)) {
-        const t = (Number(v.inputTokens) || 0) + (Number(v.outputTokens) || 0);
+        const t = slotTokens(v);
         if (!per[name]) per[name] = { tokens: 0, costCents: 0 };
         per[name].tokens += t;
         per[name].costCents += Number(v.costCents) || 0;
@@ -321,7 +340,7 @@ window.__render = function (json) {
     }
     return {
       tokens: tok, costCents: cost,
-      activeDays: rows.filter((x) => (Number(x.tokens) || 0) > 0).length,
+      activeDays: rows.filter((x) => dayTokens(x) > 0).length,
       per,
       // True when no day in the window carried a breakdown: the platform
       // columns must then read "—" rather than silently showing zeros.

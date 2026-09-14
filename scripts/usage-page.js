@@ -33,6 +33,24 @@
   const summaryEl = $('usage-page-summary');
 
   /* ── formatting ──────────────────────────────────────────────────── */
+  /* The headline token basis, matching kaboo's cli/export_cmd.go:
+     input + output + cache read + cache write + reasoning.
+
+     Cache reads are the majority of a Claude Code workload (~55% here), so
+     leaving them out understates volume badly -- kaboo's migration 000006
+     puts the gap at "5-100x" and calls it a bug.
+
+     The fallback is load-bearing: v1 rows from the old laptop
+     (2026-05-01..06-20) carry no detail block, so totalTokens is 0 while
+     `tokens` holds a real figure. Reading totalTokens alone would render
+     those 40 days as zero and erase that machine from every chart. */
+  const dayTokens = (d) => {
+    if (!d) return 0;
+    const total = Number(d.totalTokens);
+    if (Number.isFinite(total) && total > 0) return total;
+    return Number(d.tokens) || 0;
+  };
+
   const fmtCompact = (n) => {
     const v = Number(n) || 0;
     if (v >= 1e12) return (v / 1e12).toFixed(1).replace(/\.0$/, '') + 'T';
@@ -169,7 +187,7 @@
   function drawCalendar(days) {
     const withDate = days.filter((d) => d.date);
     if (!withDate.length) return;
-    const activeDays = withDate.filter((d) => (d.tokens || 0) > 0);
+    const activeDays = withDate.filter((d) => dayTokens(d) > 0);
     if (!activeDays.length) {
       show('calendar', 'No activity in this window');
       return;
@@ -196,7 +214,7 @@
     const targetW = 520;
     const cell = Math.max(10, Math.min(22, Math.floor((targetW - left) / cols) - gap));
     const endDow = end.getUTCDay();
-    const bin = bins(activeDays.map((d) => d.tokens || 0));
+    const bin = bins(activeDays.map(dayTokens));
     const rects = [];
     const months = [];
     let prevMonth = -1;
@@ -214,7 +232,7 @@
         }
         const iso = new Date(ms).toISOString().slice(0, 10);
         const d = byDate.get(iso);
-        const v = d ? d.tokens || 0 : 0;
+        const v = d ? dayTokens(d) : 0;
         const b = d ? bin(v) : -1;
         const cls = b < 0 ? 'usage-cell-empty' : `usage-cell-q${b}`;
         rects.push(
@@ -322,7 +340,7 @@
       const sunday = new Date(t.getTime() - t.getUTCDay() * 86400000).toISOString().slice(0, 10);
       if (!byWeek.has(sunday)) byWeek.set(sunday, { week: sunday, v: 0, cost: 0 });
       const w = byWeek.get(sunday);
-      w.v += Number.isFinite(d.totalTokens) && d.totalTokens > 0 ? d.totalTokens : d.tokens || 0;
+      w.v += dayTokens(d);
       w.cost += d.costCents || 0;
     }
     const allWeeks = [...byWeek.values()].sort((a, b) => a.week.localeCompare(b.week));
@@ -492,14 +510,14 @@
 
   function drawSummary(days, updated) {
     const sum = (f) => days.reduce((a, d) => a + (Number(d[f]) || 0), 0);
-    const total = sum('totalTokens') || sum('tokens');
+    const total = days.reduce((a, d) => a + dayTokens(d), 0);
     const items = [
       { k: 'tokens', v: fmtCompact(total) },
       { k: 'sessions', v: sum('sessions').toLocaleString() },
     ];
     if (sum('costCents') > 0) items.push({ k: 'spend', v: '$' + (sum('costCents') / 100).toFixed(0) });
     if (sum('activeSeconds') > 0) items.push({ k: 'at keyboard', v: fmtDur(sum('activeSeconds')) });
-    const active = days.filter((d) => (d.tokens || 0) > 0).length;
+    const active = days.filter((d) => dayTokens(d) > 0).length;
     items.push({ k: 'active days', v: String(active) });
     if (summaryEl) {
       summaryEl.innerHTML = items

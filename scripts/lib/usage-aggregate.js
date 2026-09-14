@@ -436,6 +436,45 @@ function dailyRollup(buckets, sessions, toolCalls = []) {
   return days;
 }
 
+// ── the headline "tokens" number ──────────────────────────────────────
+// One definition, shared by every surface that shows a token count, so the
+// site, the menu bar and the CLI can never drift apart.
+//
+// Matches kaboo's cli/export_cmd.go:
+//     TotalTokens = Input + Output + CachedInput + CacheCreationInput
+//                 + ReasoningOutput
+//
+// Cache reads belong in the total. kaboo learned this the hard way -- their
+// migration 000006 notes that leaving cache_read out made the dashboard
+// understate reality "by 5-100x" while the cost column, which always priced
+// cache_read, kept climbing. Claude Code replays the whole conversation each
+// turn, so for this workload cache_read is the majority of real volume (~55%
+// here).
+//
+// The fallback is the part that matters for correctness. Rows written by the
+// v1 CLI (the old laptop, 2026-05-01..06-20) carry no detail block at all, so
+// totalTokens is 0 while `tokens` holds a real input+output figure. Reading
+// totalTokens blindly would silently render those 40 days as zero and erase
+// that machine's history from the chart -- a wrong answer that looks like a
+// working page. Those days stay on the old basis; they are understated
+// relative to newer days, which is visible and honest, rather than absent.
+function headlineTokens(day) {
+  if (!day) return 0;
+  const total = Number(day.totalTokens) || 0;
+  if (total > 0) return total;
+  const legacy = Number(day.tokens) || 0;
+  if (legacy > 0) return legacy;
+  // Neither field present: derive what we can rather than reporting nothing.
+  return (Number(day.inputTokens) || 0) + (Number(day.outputTokens) || 0);
+}
+
+// True when this row predates the detail block, i.e. headlineTokens had to
+// fall back. Callers use it to label the older span rather than pretend the
+// two spans are measured the same way.
+function isLegacyBasis(day) {
+  return !!day && !(Number(day.totalTokens) > 0) && (Number(day.tokens) || 0) > 0;
+}
+
 module.exports = {
   dedupeEntries,
   dedupeEvents,
@@ -449,4 +488,6 @@ module.exports = {
   MODEL_PRICING,
   DEFAULT_PRICING,
   TOKEN_FIELDS,
+  headlineTokens,
+  isLegacyBasis,
 };
