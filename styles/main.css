@@ -2454,6 +2454,22 @@ body.modal-open { overflow: hidden; }
   margin: var(--sp-12) 0 var(--sp-16);
 }
 .usage-unlock-form { display: flex; flex-wrap: wrap; gap: var(--sp-8); }
+.usage-unlock-input {
+  flex: 1 1 220px;
+  max-width: 340px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  padding: var(--sp-8) var(--sp-12);
+  border: var(--bw) solid var(--color-line);
+  border-radius: var(--r-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.usage-unlock-input:focus-visible {
+  outline: var(--bw-thick) solid var(--color-yellow);
+  outline-offset: 1px;
+  border-color: var(--color-yellow);
+}
 .usage-unlock-btn {
   font-family: var(--font-mono);
   font-size: var(--fs-12);

@@ -42,7 +42,7 @@
     } catch (e) {}
   })();
 </script>
-<link rel="stylesheet" href="/styles/main.css?v=c12b0d20">
+<link rel="stylesheet" href="/styles/main.css?v=2796e725">
 <script defer src="/scripts/beacon.js?v=2dc05071"></script>
 </head>
 <body class="usage-page-body">
@@ -168,15 +168,16 @@
   <section class="section usage-unlock">
     <details class="usage-unlock-box">
       <summary class="usage-unlock-summary">Owner view</summary>
-      <p class="usage-unlock-note">Sign in to load the private detail feed
-        (per-model and per-project breakdowns). Sign-in is handled by Cloudflare
-        Access — it emails a one-time code, so there's no password to set and no
-        token to paste. The sync key stays on the server and never reaches this
-        page.</p>
-      <div class="usage-unlock-form">
-        <button class="usage-unlock-btn" type="button" id="usage-signin">sign in</button>
-        <button class="usage-unlock-btn usage-unlock-clear" type="button" id="usage-signout">sign out</button>
-      </div>
+      <p class="usage-unlock-note">Paste the sync bearer token to load the private
+        <code>/detail</code> feed (per-model and per-project breakdowns). It's kept in
+        this tab's <code>sessionStorage</code> only — never written to disk, never sent
+        anywhere except the usage Worker.</p>
+      <form class="usage-unlock-form" id="usage-unlock-form" autocomplete="off">
+        <input class="usage-unlock-input" id="usage-unlock-input" type="password"
+               placeholder="bearer token" aria-label="Bearer token" spellcheck="false">
+        <button class="usage-unlock-btn" type="submit">unlock</button>
+        <button class="usage-unlock-btn usage-unlock-clear" type="button" id="usage-unlock-clear">clear</button>
+      </form>
       <p class="usage-unlock-state" id="usage-unlock-state" hidden></p>
     </details>
   </section>
@@ -239,7 +240,7 @@
   mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
 })();
 </script>
-<script src="/scripts/usage-page.js?v=324767f8" defer></script>
+<script src="/scripts/usage-page.js?v=063a4bda" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c" defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2" defer></script>
 <script src="/scripts/skin-characters.js?v=b78cfa18" defer></script>

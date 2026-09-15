@@ -258,15 +258,16 @@ ${card('project', 'By project', 'Private unless published — unlock below to vi
   <section class="section usage-unlock">
     <details class="usage-unlock-box">
       <summary class="usage-unlock-summary">Owner view</summary>
-      <p class="usage-unlock-note">Sign in to load the private detail feed
-        (per-model and per-project breakdowns). Sign-in is handled by Cloudflare
-        Access — it emails a one-time code, so there's no password to set and no
-        token to paste. The sync key stays on the server and never reaches this
-        page.</p>
-      <div class="usage-unlock-form">
-        <button class="usage-unlock-btn" type="button" id="usage-signin">sign in</button>
-        <button class="usage-unlock-btn usage-unlock-clear" type="button" id="usage-signout">sign out</button>
-      </div>
+      <p class="usage-unlock-note">Paste the sync bearer token to load the private
+        <code>/detail</code> feed (per-model and per-project breakdowns). It's kept in
+        this tab's <code>sessionStorage</code> only — never written to disk, never sent
+        anywhere except the usage Worker.</p>
+      <form class="usage-unlock-form" id="usage-unlock-form" autocomplete="off">
+        <input class="usage-unlock-input" id="usage-unlock-input" type="password"
+               placeholder="bearer token" aria-label="Bearer token" spellcheck="false">
+        <button class="usage-unlock-btn" type="submit">unlock</button>
+        <button class="usage-unlock-btn usage-unlock-clear" type="button" id="usage-unlock-clear">clear</button>
+      </form>
       <p class="usage-unlock-state" id="usage-unlock-state" hidden></p>
     </details>
   </section>

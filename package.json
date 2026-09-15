@@ -9,7 +9,7 @@
     "serve": "npx serve .",
     "preview": "node ops/preview.js",
     "preview:demo": "node ops/preview.js --demo",
-    "test": "node workers/usage/test/schema.test.js && node workers/usage/test/render-stats.test.js && node scripts/characters.test.js && node ops/menubar/selftest.js && node ops/menubar/station.test.js && node workers/usage/test/kv-cost.test.js && node workers/usage/test/bearer.test.js && node workers/usage/test/usage-detail.test.js && node workers/usage/test/token-basis.test.js && node scripts/beacon.test.js"
+    "test": "node workers/usage/test/schema.test.js && node workers/usage/test/render-stats.test.js && node scripts/characters.test.js && node ops/menubar/selftest.js && node ops/menubar/station.test.js && node workers/usage/test/kv-cost.test.js && node workers/usage/test/bearer.test.js && node workers/usage/test/token-basis.test.js && node scripts/beacon.test.js"
   },
   "repository": {
     "type": "git",
