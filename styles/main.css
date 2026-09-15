@@ -699,13 +699,7 @@ body.ask-panel-open .hero-ask.is-docked {
   flex: 0 0 auto;
   background: var(--color-surface);
 }
-.ask-panel-title { display: inline-flex; align-items: center; gap: var(--sp-8); font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
-.ask-panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-yellow); box-shadow: 0 0 0 3px var(--color-yellow-glow); }
-.ask-panel-ai {
-  font-size: var(--fs-10); letter-spacing: var(--tracking-wide); font-weight: var(--fw-medium);
-  color: var(--color-text-faint); border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
-  padding: 1px var(--sp-6); cursor: help;
-}
+.ask-panel-title { font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
 /* Borderless until hovered: the button's job is to be findable, not to draw a
    box around itself while you are trying to read the conversation. */
 .ask-panel-icon {
