@@ -2232,13 +2232,12 @@
   // conversation; without a Worker, each turn falls back to the hand-authored
   // FAQ/card retrieval in window.QA (one-shot, not really conversational).
   const wireAskPanel = (site, board) => {
-    const backdrop = document.getElementById('ask-panel-backdrop');
     const panel = document.getElementById('ask-panel');
     const log = document.getElementById('ask-panel-log');
     const form = document.getElementById('ask-panel-form');
     const input = document.getElementById('ask-panel-input');
     const sendBtn = document.getElementById('ask-panel-send');
-    if (!backdrop || !panel || !log || !form || !input) return null;
+    if (!panel || !log || !form || !input) return null;
     const url = String((site && site.qa && site.qa.workerUrl) || '').trim();
     const cards = (board && board.cards) ? board.cards : [];
     let convo = [];          // [{ role:'user'|'assistant', content }]
@@ -2344,20 +2343,27 @@
         .then(finish);
     };
 
+    /* A side panel, not a modal. The page beside it stays readable, scrollable
+       and clickable — you can open the chat, keep browsing the board, and ask
+       about what you are looking at. That is the whole point of putting it on
+       the side rather than over the top.
+
+       So: no backdrop, no scroll lock, no aria-modal, and focus is NOT trapped
+       inside the panel. */
     const open = (seedQ) => {
       if (!panel.classList.contains('is-open')) {
-        backdrop.hidden = false; panel.hidden = false;
+        panel.hidden = false;
         void panel.offsetWidth;                              // reflow so the transition fires
-        backdrop.classList.add('is-open'); panel.classList.add('is-open');
+        panel.classList.add('is-open');
         document.body.classList.add('ask-panel-open');
         renderLog(false);
       }
       setTimeout(() => { input.focus(); if (seedQ) send(seedQ); }, 50);
     };
     const close = () => {
-      backdrop.classList.remove('is-open'); panel.classList.remove('is-open');
+      panel.classList.remove('is-open');
       document.body.classList.remove('ask-panel-open');
-      setTimeout(() => { if (!panel.classList.contains('is-open')) { backdrop.hidden = true; panel.hidden = true; } }, 220);
+      setTimeout(() => { if (!panel.classList.contains('is-open')) { panel.hidden = true; } }, 220);
     };
     const clearConvo = () => { if (busy) return; convo = []; renderLog(false); input.value = ''; input.focus(); };
 
@@ -2372,8 +2378,14 @@
     });
     document.getElementById('ask-panel-close')?.addEventListener('click', close);
     document.getElementById('ask-panel-clear')?.addEventListener('click', clearConvo);
-    backdrop.addEventListener('click', close);
-    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && panel.classList.contains('is-open')) close(); });
+    /* Escape still closes, but only when focus is actually inside the panel.
+       As a non-modal surface it no longer owns the whole page, so swallowing
+       every Escape would break the palette and the card panel. */
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Escape' || !panel.classList.contains('is-open')) return;
+      if (!panel.contains(document.activeElement)) return;
+      close();
+    });
 
     return { open };
   };

@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=0e40d3ac">
+<link rel="stylesheet" href="styles/main.css?v=4d50f88f">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -901,8 +901,7 @@
        the question). Answers come from the antares-qa Worker (multi-turn);
        behaviour in scripts/render.js (wireAskPanel). It's a transcript, not
        a chatbot UI — and labelled as an AI answering in Antares's voice. -->
-  <div class="ask-panel-backdrop" id="ask-panel-backdrop" hidden></div>
-  <div class="ask-panel" id="ask-panel" role="dialog" aria-modal="true" aria-label="Ask Antares" hidden>
+  <div class="ask-panel" id="ask-panel" role="complementary" aria-label="Ask Antares" hidden>
     <header class="ask-panel-head">
       <!-- The same star as the hero bar, so the control you clicked and the
            panel it opened are visibly one thing. Replaced an earlier glowing
@@ -1006,7 +1005,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=9f3722a7"   defer></script>
+<script src="scripts/render.js?v=0cf491a4"   defer></script>
 <script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=7a43d41d"  defer></script>
 <script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>

@@ -754,13 +754,6 @@ body.ask-panel-open .hero-ask.is-docked {
    a transcript, not a chat-bubble UI; the persistent note labels it as an AI.
    Wired in scripts/render.js (wireAskPanel). Colours are token-driven, so
    light/dark both adapt; full-screen on narrow viewports. */
-.ask-panel-backdrop {
-  position: fixed; inset: 0; z-index: 90;
-  background: rgba(8, 8, 12, 0.62);
-  backdrop-filter: blur(2px);
-  opacity: 0; transition: opacity var(--dur-base);
-}
-.ask-panel-backdrop.is-open { opacity: 1; }
 /* Right-side drawer, not a centred modal. A conversation is a companion to
    the page you are reading, not a thing that replaces it -- the drawer keeps
    the content visible beside it, which is what makes "ask about this" feel
@@ -974,7 +967,32 @@ body.ask-panel-open .hero-ask.is-docked {
   font-size: var(--fs-10);
   color: var(--color-text-faint);
 }
-body.ask-panel-open { overflow: hidden; }
+/* The page keeps scrolling while the panel is open — it is a companion
+   surface, not a modal. Instead of locking the body, squeeze the content
+   column so the panel sits BESIDE it rather than over it, and nothing the
+   visitor was reading ends up hidden behind the drawer. */
+body.ask-panel-open .page,
+body.ask-panel-open .topnav {
+  /* Shift the whole column, do not pad it. `.page` is a centred fixed-width
+     column (max-width + margin:0 auto), so right-padding changes nothing you
+     can see — the column stays where it was and the drawer still covers it.
+     A margin moves the column itself, and unlike `transform` it does NOT
+     create a containing block: a transformed ancestor would capture the
+     docked ask pill's `position: fixed` and strand it off-screen, which is a
+     bug this project has already hit once.
+
+     max() not min(): with negative lengths min() picks the MORE negative
+     value, so min(-210px, -50vw) resolved to -553px on a wide viewport and
+     threw the column off the left edge. */
+  margin-right: min(420px, 50vw);
+}
+.page, .topnav { transition: margin-right var(--dur-base) var(--ease-out); }
+/* Below the drawer's own breakpoint it covers the viewport, so shifting the
+   page would just push content off-screen. */
+@media (max-width: 560px) {
+  body.ask-panel-open .page,
+  body.ask-panel-open .topnav { margin-right: 0; }
+}
 @media (max-width: 560px) {
   .ask-panel { left: 0; top: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; transform: none; }
   .ask-panel.is-open { transform: none; }
