@@ -513,7 +513,7 @@ button:focus-visible,
 .ask-mark path { fill: currentColor; }
 .ask-star-main {
   transform-origin: 50% 50%;
-  animation: ask-star-pulse 2.28s var(--ease-in-out) infinite;
+  animation: ask-star-pulse 3.4s var(--ease-in-out) infinite;
 }
 @keyframes ask-star-pulse {
   0%, 46%, 100% { transform: scale(1);    opacity: 1; }
@@ -526,7 +526,7 @@ button:focus-visible,
 .ask-spark {
   transform-origin: 50% 50%;
   opacity: 0;
-  animation: ask-spark-pop 2.28s var(--ease-out) infinite;
+  animation: ask-spark-pop 3.4s var(--ease-out) infinite;
 }
 .ask-spark-2 { animation-delay: 0.07s; }
 .ask-spark-3 { animation-delay: 0.13s; }
@@ -541,7 +541,7 @@ button:focus-visible,
 .hero-ask-form:focus-within .ask-star-main,
 .hero-ask-form:hover .ask-spark,
 .hero-ask-form:focus-within .ask-spark {
-  animation-duration: 1.3s;
+  animation-duration: 2s;
 }
 /* A looping animation is exactly what this preference asks not to see. The
    star stays; the satellites stay hidden, which is their resting state. */
