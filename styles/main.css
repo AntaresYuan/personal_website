@@ -686,11 +686,15 @@ body.ask-panel-open .hero-ask.is-docked {
 @media (max-width: 560px) {
   .ask-panel { width: 100vw; border-left: none; }
 }
+/* Slim, and it stays put while the log scrolls under it. The header should
+   never compete with the message area — it is chrome, not content. */
 .ask-panel-head {
   display: flex; align-items: center; gap: var(--sp-10);
   padding: var(--sp-12) var(--sp-16);
   border-bottom: var(--bw) solid var(--color-line-soft);
   font-family: var(--font-mono); font-size: var(--fs-13);
+  flex: 0 0 auto;
+  background: var(--color-surface);
 }
 .ask-panel-title { display: inline-flex; align-items: center; gap: var(--sp-8); font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
 .ask-panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-yellow); box-shadow: 0 0 0 3px var(--color-yellow-glow); }
@@ -708,45 +712,121 @@ body.ask-panel-open .hero-ask.is-docked {
 .ask-panel-clear:hover, .ask-panel-close:hover { border-color: var(--color-text-faint); color: var(--color-text); }
 .ask-panel-log {
   flex: 1 1 auto; overflow-y: auto;
-  padding: var(--sp-16);
-  display: flex; flex-direction: column; gap: var(--sp-16);
+  /* Wider side padding than the old 16px: the reply now runs full width, so
+     the gutter is the only thing keeping the text off the drawer edge. */
+  padding: var(--sp-20) var(--sp-20) var(--sp-16);
+  display: flex; flex-direction: column;
+  /* Base gap is the WITHIN-turn spacing; the rule below opens it up at a
+     speaker change. Grouping by proximity is what makes a long thread
+     skimmable — a uniform gap makes every message look equally unrelated. */
+  gap: var(--sp-10);
 }
+/* Speaker change → a visibly larger gap. `+` walks adjacent pairs, so this
+   fires exactly at the boundaries and nowhere else. */
+.ask-msg-you + .ask-msg-bot,
+.ask-msg-bot + .ask-msg-you { margin-top: var(--sp-10); }
 .ask-panel-log:focus { outline: none; }
 .ask-panel-empty { color: var(--color-text-faint); font-size: var(--fs-13); }
-.ask-msg-label {
-  font-family: var(--font-mono); font-size: var(--fs-10); letter-spacing: var(--tracking-wide);
-  text-transform: uppercase; color: var(--color-text-faint); margin-bottom: var(--sp-4);
+/* ── Message stream ───────────────────────────────────────────────────
+   Assistant replies are full-width and unbubbled; only the user's turn gets
+   a bubble. That asymmetry is the whole differentiation — it is what the
+   current generation of AI chat settled on, and it reads as a tool rather
+   than a messaging app. */
+.ask-msg-text {
+  font-size: var(--fs-14);
+  /* 1.6-ish leading for sustained reading of long replies. */
+  line-height: 1.65;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;   /* a pasted URL must not widen the drawer */
 }
-.ask-msg-text { font-size: var(--fs-14); line-height: var(--lh-base); color: var(--color-text); white-space: pre-wrap; }
-.ask-msg-you { align-self: flex-end; max-width: 88%; text-align: right; }
+.ask-msg-you {
+  align-self: flex-end;
+  max-width: 85%;
+  text-align: right;
+}
 .ask-msg-you .ask-msg-text {
   display: inline-block; text-align: left;
   background: var(--color-blue-soft); color: var(--color-text);
-  padding: var(--sp-8) var(--sp-12); border-radius: var(--r-md);
+  padding: var(--sp-8) var(--sp-12);
+  /* Asymmetric corner: the flat bottom-right ties the bubble to its side,
+     the way every current chat client marks the speaker. */
+  border-radius: var(--r-md) var(--r-md) var(--sp-4) var(--r-md);
 }
-.ask-msg-bot .ask-msg-text { color: var(--color-text-dim); }
-.ask-msg-bot.is-thinking .ask-msg-text { color: var(--color-text-faint); font-style: italic; }
+/* Full contrast, full width. The reply is the product; dimming it or capping
+   it at 88% would say otherwise. */
+.ask-msg-bot { align-self: stretch; max-width: 100%; }
+.ask-msg-bot .ask-msg-text { color: var(--color-text); }
+
+/* Three pulsing dots instead of the word "thinking…". A pulse reads as a
+   state the interface is in; italic prose reads as something the model
+   already wrote. */
+.ask-msg-dots { display: inline-flex; gap: 5px; align-items: center; padding: var(--sp-4) 0; }
+.ask-msg-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-text-faint);
+  animation: ask-dot 1.25s ease-in-out infinite;
+}
+.ask-msg-dots span:nth-child(2) { animation-delay: 0.18s; }
+.ask-msg-dots span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ask-dot {
+  0%, 60%, 100% { opacity: 0.28; transform: translateY(0); }
+  30%           { opacity: 1;    transform: translateY(-3px); }
+}
+/* A looping animation is precisely what someone with this preference asked
+   not to see; the dots stay, they just hold still. */
+@media (prefers-reduced-motion: reduce) {
+  .ask-msg-dots span { animation: none; opacity: 0.5; }
+}
+/* ── Composer ─────────────────────────────────────────────────────────
+   A contained field rather than a bare strip along the bottom edge. Every
+   current AI chat draws the composer as one bounded object that lights up on
+   focus — it reads as "this is where you write", which an underline-less
+   input flush against the panel edge does not. */
 .ask-panel-form {
-  display: flex; align-items: center; gap: var(--sp-10);
-  padding: var(--sp-10) var(--sp-12);
+  display: flex; align-items: center; gap: var(--sp-8);
+  padding: var(--sp-12);
   border-top: var(--bw) solid var(--color-line-soft);
+  background: var(--color-surface);
+}
+.ask-panel-field {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center; gap: var(--sp-8);
+  padding: var(--sp-6) var(--sp-8) var(--sp-6) var(--sp-12);
+  border: var(--bw) solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-bg);
+  transition: border-color var(--dur-quick), box-shadow var(--dur-quick);
+}
+.ask-panel-field:focus-within {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px var(--color-blue-soft);
 }
 .ask-panel-input {
   flex: 1 1 auto; min-width: 0; border: 0; background: transparent;
   font-family: var(--font-mono); font-size: var(--fs-13); color: var(--color-text);
-  padding: var(--sp-6) var(--sp-4);
+  padding: var(--sp-4) 0;
 }
 .ask-panel-input::placeholder { color: var(--color-text-faint); }
 .ask-panel-input:focus { outline: none; }
+/* A round icon button, sized to the 32px hit target the rest of the site
+   uses. The arrow says "send" in every chat product on earth, and it stops
+   competing with the uppercase mono chrome in the header. */
 .ask-panel-send {
-  flex: 0 0 auto; padding: var(--sp-6) var(--sp-14);
-  border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
-  background: var(--color-surface-alt); color: var(--color-text-dim);
-  font-family: var(--font-mono); font-size: var(--fs-12); letter-spacing: var(--tracking-wide); text-transform: uppercase;
-  cursor: pointer; transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+  flex: 0 0 auto;
+  width: 30px; height: 30px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%;
+  background: var(--color-blue); color: #fff;
+  font-size: var(--fs-13); line-height: 1;
+  cursor: pointer;
+  transition: opacity var(--dur-quick), transform var(--dur-quick);
 }
-.ask-panel-send:hover { border-color: var(--color-blue); color: var(--color-blue); }
-.ask-panel-send:disabled, .ask-panel-input:disabled { opacity: 0.55; cursor: default; }
+.ask-panel-send:hover:not(:disabled) { transform: scale(1.06); }
+/* Disabled is the streaming state too, so it must look deliberate rather
+   than broken. */
+.ask-panel-send:disabled { opacity: 0.4; cursor: default; }
+.ask-panel-input:disabled { opacity: 0.55; cursor: default; }
 body.ask-panel-open { overflow: hidden; }
 @media (max-width: 560px) {
   .ask-panel { left: 0; top: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; transform: none; }

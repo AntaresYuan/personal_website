@@ -2244,13 +2244,32 @@
     let convo = [];          // [{ role:'user'|'assistant', content }]
     let busy = false;
 
+    /* Message shape follows what Claude / ChatGPT / Cursor converged on. The
+       old version was quietly signalling the wrong thing:
+
+       - The assistant reply is FULL-WIDTH with no bubble. Rounded coloured
+         bubbles read as SMS and undermine the tool framing; the serious AI
+         chats all dropped them. Only the user's turn keeps a bubble, which is
+         what lets the two be told apart without labelling either.
+       - No "ANTARES" tag above every reply. In a two-party conversation the
+         alignment already says who is speaking; a repeated uppercase label is
+         noise. Standalone AI chats skip the assistant avatar and label for
+         exactly this reason.
+       - The reply is full-contrast body text, not dimmed. Dimming it says
+         "secondary", which is backwards — the answer is the product.
+       - "thinking…" in italics becomes three pulsing dots. Italic prose reads
+         as something the model wrote; a pulse reads as a state the interface
+         is in. */
     const renderLog = (pending) => {
       if (!convo.length && !pending) { log.innerHTML = `<p class="ask-panel-empty">Ask me about a project, what I'm building, how I think, or how to reach me — and we can keep going from there.</p>`; return; }
       let html = convo.map((m) => {
         const you = m.role === 'user';
-        return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}"><div class="ask-msg-label">${you ? 'you' : 'antares'}</div><div class="ask-msg-text">${escape(m.content)}</div></div>`;
+        return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}"><div class="ask-msg-text">${escape(m.content)}</div></div>`;
       }).join('');
-      if (pending) html += `<div class="ask-msg ask-msg-bot is-thinking"><div class="ask-msg-label">antares</div><div class="ask-msg-text">thinking…</div></div>`;
+      /* role=status + aria-label because three animated dots convey nothing to
+         a screen reader. `status` is implicitly aria-live=polite, which waits
+         for a pause instead of interrupting mid-sentence. */
+      if (pending) html += `<div class="ask-msg ask-msg-bot is-thinking"><div class="ask-msg-dots" role="status" aria-label="Thinking"><span></span><span></span><span></span></div></div>`;
       log.innerHTML = html;
       log.scrollTop = log.scrollHeight;
     };

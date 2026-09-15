@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=5fda2c1b">
+<link rel="stylesheet" href="styles/main.css?v=c89f4618">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -892,8 +892,15 @@
     </header>
     <div class="ask-panel-log" id="ask-panel-log" tabindex="-1"></div>
     <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
-      <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
-      <button class="ask-panel-send" id="ask-panel-send" type="submit">send</button>
+      <div class="ask-panel-field">
+        <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
+      </div>
+      <!-- An arrow rather than the word "send": universally understood, and it
+           stops competing with the uppercase mono chrome in the header. The
+           accessible name stays on the button. -->
+      <button class="ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">
+        <span aria-hidden="true">↑</span>
+      </button>
     </form>
   </div>
 
@@ -953,7 +960,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=d32e9fb5"   defer></script>
+<script src="scripts/render.js?v=991ac72c"   defer></script>
 <script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=7a43d41d"  defer></script>
 <script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>
