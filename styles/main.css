@@ -690,14 +690,19 @@ body.ask-panel-open .hero-ask.is-docked {
    never compete with the message area — it is chrome, not content. */
 /* Slim chrome that stays out of the way. In every reference the header is a
    small mark, a name, and borderless icon buttons — outlined pill buttons
-   labelled "new" and "✕" are the single most dated thing in a chat header. */
+   labelled "new" and "✕" are the single most dated thing in a chat header.
+
+   No bottom rule. A hard line across the panel announces a seam that does not
+   need announcing; the log simply scrolls under the header and fades out at
+   the edge (see .ask-panel-log's mask). */
 .ask-panel-head {
   display: flex; align-items: center; gap: var(--sp-8);
   padding: var(--sp-12) var(--sp-12) var(--sp-12) var(--sp-16);
-  border-bottom: var(--bw) solid var(--color-line-soft);
   font-family: var(--font-mono); font-size: var(--fs-13);
   flex: 0 0 auto;
   background: var(--color-surface);
+  /* Above the log so the fade passes beneath it rather than over it. */
+  position: relative; z-index: 1;
 }
 .ask-panel-title { font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
 /* Borderless until hovered: the button's job is to be findable, not to draw a
@@ -717,12 +722,19 @@ body.ask-panel-open .hero-ask.is-docked {
   flex: 1 1 auto; overflow-y: auto;
   /* Wider side padding than the old 16px: the reply now runs full width, so
      the gutter is the only thing keeping the text off the drawer edge. */
-  padding: var(--sp-20) var(--sp-20) var(--sp-16);
+  padding: var(--sp-16) var(--sp-20) var(--sp-20);
   display: flex; flex-direction: column;
   /* Base gap is the WITHIN-turn spacing; the rule below opens it up at a
      speaker change. Grouping by proximity is what makes a long thread
      skimmable — a uniform gap makes every message look equally unrelated. */
   gap: var(--sp-10);
+  /* Fade the scrolling content out at both ends instead of drawing rules
+     across the panel. A hard line says "two separate boxes"; a fade says
+     "this continues", which is what is actually true. The mask only bites
+     where content is scrolled past it, so a short thread shows no effect at
+     all. 20px is enough to read as a soft edge without eating a line of text. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
 }
 /* Speaker change → a visibly larger gap. `+` walks adjacent pairs, so this
    fires exactly at the boundaries and nowhere else. */
@@ -811,8 +823,12 @@ body.ask-panel-open .hero-ask.is-docked {
 .ask-panel-form {
   display: block;
   padding: var(--sp-12) var(--sp-16) var(--sp-14);
-  border-top: var(--bw) solid var(--color-line-soft);
   background: var(--color-surface);
+  /* No top rule: the composer is a rounded card already, and a line above it
+     boxes it in twice. It sits over the log instead, which is why the log
+     carries bottom padding — the last message scrolls up behind it rather
+     than being clipped by a seam. */
+  position: relative; z-index: 1;
 }
 .ask-panel-field {
   display: flex; align-items: center; gap: var(--sp-8);
