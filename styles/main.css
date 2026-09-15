@@ -612,6 +612,31 @@ button:focus-visible,
   width: max-content;
   max-width: calc(100vw - var(--sp-24) * 2);
 }
+
+/* Draggable. `touch-action: none` is what makes it work on a touchscreen at
+   all — without it the browser claims the gesture for scrolling and the
+   pointermove events never arrive. */
+.hero-ask.is-docked { touch-action: none; }
+.hero-ask.is-docked .hero-ask-form { cursor: grab; }
+.hero-ask.is-dragging .hero-ask-form { cursor: grabbing; }
+.hero-ask.is-dragging {
+  /* Kill the width/position transitions mid-drag: an eased pill lags behind
+     the pointer and feels broken. Also suppress the hover expansion, since the
+     pointer is by definition over the pill while dragging it. */
+  transition: none;
+}
+.hero-ask.is-dragging .hero-ask-form,
+.hero-ask.is-dragging .hero-ask-input,
+.hero-ask.is-dragging .hero-ask-go { transition: none; }
+.hero-ask.is-dragging:hover .hero-ask-form {
+  width: 52px;
+  padding: 0;
+  border-color: var(--color-border);
+}
+.hero-ask.is-dragging:hover .hero-ask-input,
+.hero-ask.is-dragging:hover .hero-ask-go { width: 0; opacity: 0; overflow: hidden; }
+.hero-ask.is-dragging:hover .ask-mark { width: 100%; }
+/* Once moved, the inline right/bottom must win over the media-query corner. */
 .hero-ask.is-docked .hero-ask-form {
   width: 52px;
   padding: 0;

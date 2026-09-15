@@ -2392,7 +2392,7 @@
 
   // The hero "ask" bar → opens the chat panel, seeded with the question.
   // It also docks: once the hero bar scrolls out of view it re-forms as a
-  // floating pill in the bottom-right, and returns to the hero on scroll back.
+  // floating pill in the bottom-right, draggable to any corner of the viewport.
   const wireHeroAsk = (askPanel) => {
     const wrap = document.getElementById('hero-ask');
     const form = document.getElementById('hero-ask-form');
@@ -2436,6 +2436,131 @@
        pixels below the fold: present in the DOM, invisible on screen. */
     document.body.appendChild(wrap);
     wrap.classList.add('is-docked');
+
+    /* ── Draggable ──────────────────────────────────────────────────────────
+       Parked bottom-right by default, but that is exactly where a page tends
+       to put things worth reading, so the pill has to be movable.
+
+       Position stays expressed as `right`/`bottom`, never converted to
+       `left`/`top`. The pill grows leftward when it expands (52px → 380px), so
+       a left-anchored pill would shove its own input off the right edge of the
+       screen as soon as you focused it. Anchoring to the right edge means the
+       growth happens away from the boundary it is pinned to.
+
+       Drag only starts after the pointer has travelled DRAG_SLOP. Without that
+       threshold every click would register as a zero-distance drag and the
+       pill would stop opening the panel — the failure mode being that a click
+       does nothing at all and looks broken. */
+    const DRAG_SLOP = 4;
+    const EDGE_GAP = 12;
+    const POS_KEY = 'askPillPos';
+
+    const clampPos = (right, bottom) => {
+      const r = wrap.getBoundingClientRect();
+      /* Clamp against the COLLAPSED size, not the current one. Dragging while
+         expanded would otherwise let the 380px form define the limit, and the
+         pill would sit unreachably far off once it shrank back to 52px. */
+      const w = wrap.classList.contains('is-dragging') ? 52 : r.width;
+      const h = 52;
+      return {
+        right: Math.min(Math.max(right, EDGE_GAP), Math.max(EDGE_GAP, innerWidth - w - EDGE_GAP)),
+        bottom: Math.min(Math.max(bottom, EDGE_GAP), Math.max(EDGE_GAP, innerHeight - h - EDGE_GAP))
+      };
+    };
+
+    const applyPos = (pos) => {
+      const c = clampPos(pos.right, pos.bottom);
+      wrap.style.right = c.right + 'px';
+      wrap.style.bottom = c.bottom + 'px';
+      wrap.style.left = 'auto';
+      return c;
+    };
+
+    /* Re-anchor to the nearer horizontal edge, converting `right` into an
+       equivalent `left` when the pill is sitting in the left half. Done only
+       at drop time, never mid-drag: swapping the anchor while the pointer is
+       moving makes the pill jump under the cursor. */
+    const setAnchor = () => {
+      if (!pos) return;
+      const collapsed = 52;
+      const leftPx = innerWidth - pos.right - collapsed;
+      if (leftPx < innerWidth / 2) {
+        wrap.style.left = Math.max(EDGE_GAP, leftPx) + 'px';
+        wrap.style.right = 'auto';
+      } else {
+        wrap.style.left = 'auto';
+        wrap.style.right = pos.right + 'px';
+      }
+    };
+
+    let pos = null;
+    try {
+      const saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null');
+      if (saved && Number.isFinite(saved.right) && Number.isFinite(saved.bottom)) pos = saved;
+    } catch (e) { /* corrupt value — fall back to the CSS corner */ }
+    if (pos) { applyPos(pos); setAnchor(); }
+
+    let drag = null;
+    wrap.addEventListener('pointerdown', (ev) => {
+      /* Only drag by the pill's own body. Once expanded it is a text field and
+         a button, where a press means "put the caret here", not "move me". */
+      if (ev.button !== 0) return;
+      if (wrap.classList.contains('has-draft') || wrap.matches(':focus-within')) return;
+      const r = wrap.getBoundingClientRect();
+      drag = {
+        id: ev.pointerId,
+        startX: ev.clientX, startY: ev.clientY,
+        right: innerWidth - r.right, bottom: innerHeight - r.bottom,
+        moved: false
+      };
+    });
+
+    wrap.addEventListener('pointermove', (ev) => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      const dx = ev.clientX - drag.startX;
+      const dy = ev.clientY - drag.startY;
+      if (!drag.moved) {
+        if (Math.hypot(dx, dy) < DRAG_SLOP) return;
+        drag.moved = true;
+        wrap.classList.add('is-dragging');
+        /* Capture AFTER the slop is crossed. Capturing on pointerdown would
+           swallow the click that opens the panel. */
+        try { wrap.setPointerCapture(drag.id); } catch (e) {}
+      }
+      /* Inverted: dragging right REDUCES the distance to the right edge. */
+      pos = applyPos({ right: drag.right - dx, bottom: drag.bottom - dy });
+      ev.preventDefault();
+    });
+
+    const endDrag = (ev) => {
+      if (!drag || (ev && ev.pointerId !== drag.id)) return;
+      const wasDragging = drag.moved;
+      try { wrap.releasePointerCapture(drag.id); } catch (e) {}
+      drag = null;
+      if (!wasDragging) return;
+      wrap.classList.remove('is-dragging');
+      /* Re-clamp: the collapsed width is only knowable once is-dragging is off,
+         and a drag that ended mid-expand could otherwise leave it out of reach. */
+      if (pos) pos = applyPos(pos);
+      /* Pick the anchor edge by which half it landed in. The pill grows from
+         52px to 380px when it expands, and it grows AWAY from whichever edge
+         it is anchored to. Right-anchored is correct on the right half; keep
+         it there on the left half and expanding drives the input off the left
+         edge (measured: left: -294px). Flipping to a left anchor makes it grow
+         rightward, into the space that is actually available. */
+      setAnchor();
+      try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch (e) {}
+      /* Suppress the click that the browser fires after the drag, or letting go
+         would also open the panel. */
+      wrap.addEventListener('click', (c) => { c.stopPropagation(); c.preventDefault(); },
+        { capture: true, once: true });
+    };
+    wrap.addEventListener('pointerup', endDrag);
+    wrap.addEventListener('pointercancel', endDrag);
+
+    /* A pill parked against one edge would hang off-screen if the window
+       shrank; re-clamping keeps it reachable. */
+    addEventListener('resize', () => { if (pos) { pos = applyPos(pos); setAnchor(); } });
   };
 
   const wireModal = () => {
