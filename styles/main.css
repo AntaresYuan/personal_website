@@ -474,9 +474,81 @@ button:focus-visible,
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--color-yellow);
   line-height: 0;
-  filter: drop-shadow(0 0 5px var(--color-yellow-glow));
+  /* The glow breathes on a longer cycle than the star's twinkle, so the two
+     never sync into a metronome. No static `filter` here on purpose: the
+     keyframes set it on every frame, so one would simply be overridden. */
+  animation: ask-star-glow 6.5s var(--ease-in-out) infinite;
 }
-.ask-mark svg { display: block; }
+/* Animated with CSS rather than shipped as a GIF. A GIF bakes in one colour
+   and one background: this site has 16 skins whose accent runs from #F5C518
+   yellow through #7CFFA0 green to #F2519B pink, so a baked star would stay one
+   colour while everything around it changed, and its opaque rectangle would
+   show as a block on the rounded field (GIF has 1-bit alpha, so the edges
+   alias too). currentColor + keyframes follows every skin for free, stays
+   sharp at any DPI, and costs ~0 bytes.
+
+   Timing is measured from the reference clip, not invented: 83 frames over
+   6.85s containing three identical pulses, peaking at 19%, 50% and 81% of the
+   loop — evenly spaced, each about 1.1s of rise-and-fall with rest between.
+   Hence 2.28s per pulse (6.85 / 3) with the flare late in the cycle.
+
+   The move itself: at the peak the main star dips slightly and three small
+   satellites pop in around it. That dip is what sells it — without it the
+   sparks read as clutter appearing next to a static shape rather than one
+   burst. */
+@keyframes ask-star-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--color-yellow-glow)); }
+  50%      { filter: drop-shadow(0 0 9px var(--color-yellow-glow)); }
+}
+.ask-mark svg {
+  display: block;
+  /* The sparks sit outside the 32x32 box at the flare; without this they are
+     clipped at the viewBox edge. */
+  overflow: visible;
+}
+/* Fill in CSS rather than a fill="currentColor" attribute on every path. The
+   attribute is easy to drop when the markup is regenerated — which is exactly
+   what happened here, silently turning both stars black — and this one rule
+   covers every path in both copies of the mark. */
+.ask-mark path { fill: currentColor; }
+.ask-star-main {
+  transform-origin: 50% 50%;
+  animation: ask-star-pulse 2.28s var(--ease-in-out) infinite;
+}
+@keyframes ask-star-pulse {
+  0%, 46%, 100% { transform: scale(1);    opacity: 1; }
+  62%           { transform: scale(0.88); opacity: 0.95; }
+  78%           { transform: scale(1.04); opacity: 1; }
+}
+/* Satellites are absent for most of the cycle and appear only at the flare.
+   Staggered by a few hundredths so they arrive as a burst rather than in
+   lockstep, which would read as a single scaling group. */
+.ask-spark {
+  transform-origin: 50% 50%;
+  opacity: 0;
+  animation: ask-spark-pop 2.28s var(--ease-out) infinite;
+}
+.ask-spark-2 { animation-delay: 0.07s; }
+.ask-spark-3 { animation-delay: 0.13s; }
+@keyframes ask-spark-pop {
+  0%, 48%, 100% { opacity: 0; transform: scale(0.4); }
+  64%           { opacity: 1; transform: scale(1.1); }
+  76%           { opacity: 0.9; transform: scale(1); }
+  88%           { opacity: 0; transform: scale(0.7); }
+}
+/* Hovering the field is a moment of intent — the whole mark answers faster. */
+.hero-ask-form:hover .ask-star-main,
+.hero-ask-form:focus-within .ask-star-main,
+.hero-ask-form:hover .ask-spark,
+.hero-ask-form:focus-within .ask-spark {
+  animation-duration: 1.3s;
+}
+/* A looping animation is exactly what this preference asks not to see. The
+   star stays; the satellites stay hidden, which is their resting state. */
+@media (prefers-reduced-motion: reduce) {
+  .ask-mark, .ask-star-main, .ask-spark { animation: none; }
+  .ask-spark { opacity: 0; }
+}
 
 .hero-ask-input {
   flex: 1 1 auto;
