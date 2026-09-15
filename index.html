@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=6c9ec656">
+<link rel="stylesheet" href="styles/main.css?v=21443ff3">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -239,13 +239,27 @@
          Wired in scripts/render.js (wireHeroAsk). -->
     <div class="hero-ask" id="hero-ask">
       <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
-        <span class="hero-ask-prompt" aria-hidden="true">$</span>
+        <!-- The mark, not a shell prompt. A four-point star belongs to the
+             same celestial family as the site's crescent brand and its "a star
+             to ship by" line, so it reads as this site's own rather than a
+             generic AI sparkle. In the docked pill it is the whole button. -->
+        <span class="ask-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="17" height="17">
+            <path fill="currentColor" d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z"/>
+          </svg>
+        </span>
         <input class="hero-ask-input" id="hero-ask-input" type="text"
-               placeholder="ask anything about my work…"
+               placeholder="Ask anything about my work…"
                aria-label="Ask this portfolio a question" maxlength="280">
-        <button class="hero-ask-go" id="hero-ask-go" type="submit">ask</button>
+        <!-- Same arrow as the drawer's send button, so the control that opens
+             the conversation looks like the one inside it. -->
+        <button class="hero-ask-go" id="hero-ask-go" type="submit" aria-label="Ask">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
+          </svg>
+        </button>
       </form>
-      <p class="hero-ask-hint">ask anything — opens a conversation</p>
+      <p class="hero-ask-hint">Ask anything — opens a conversation</p>
     </div>
   </header>
 
@@ -886,11 +900,18 @@
   <div class="ask-panel-backdrop" id="ask-panel-backdrop" hidden></div>
   <div class="ask-panel" id="ask-panel" role="dialog" aria-modal="true" aria-label="Ask Antares" hidden>
     <header class="ask-panel-head">
-      <!-- Just the name. The glowing dot read as a status LED and the boxed
-           "AI" chip said the same thing a second time; between them the header
-           was working harder to announce itself than to label the panel. The
-           footer line under the composer already discloses what this is. -->
-      <span class="ask-panel-title">ask Antares</span>
+      <!-- The same star as the hero bar, so the control you clicked and the
+           panel it opened are visibly one thing. Replaced an earlier glowing
+           dot plus boxed "AI" chip, which announced the panel twice; the
+           footer under the composer carries that disclosure now. -->
+      <span class="ask-panel-title">
+        <span class="ask-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="15" height="15">
+            <path fill="currentColor" d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z"/>
+          </svg>
+        </span>
+        ask Antares
+      </span>
       <button class="ask-panel-icon" id="ask-panel-clear" type="button" aria-label="New conversation" title="New conversation">
         <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
           <path d="M8 3.5v9M3.5 8h9"/>

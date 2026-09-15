@@ -442,56 +442,72 @@ button:focus-visible,
   grid-column: 1 / -1;
   margin-top: var(--sp-24);
 }
+/* Same shape as the drawer's composer: ~48px tall, 20px radius, send button
+   inside on the right. It opens that drawer, so looking like a different
+   control was the tell that these were built at different times. */
 .hero-ask-form {
   display: flex;
   align-items: center;
-  gap: var(--sp-10);
-  padding: var(--sp-8) var(--sp-12);
+  gap: var(--sp-8);
+  min-height: 48px;
+  padding: var(--sp-6) var(--sp-6) var(--sp-6) var(--sp-14);
   background: var(--color-surface);
   border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-md);
+  border-radius: 20px;
   transition: border-color var(--dur-quick);
 }
-.hero-ask-form:focus-within { border-color: var(--color-blue); }
-.hero-ask-prompt {
+.hero-ask-form:focus-within { border-color: var(--color-text-faint); }
+/* ── The ask mark ─────────────────────────────────────────────────────
+   A four-point star, sibling to the crescent in the site brand and to the
+   "a star to ship by" line — this site's own mark rather than a borrowed AI
+   sparkle. Replaces the `$` prompt, which said "terminal" in a control whose
+   job is conversation.
+
+   Coloured with the site's yellow and given a soft glow behind it. Deliberately
+   NOT an SVG gradient: that needs a <defs> block with a globally unique id,
+   and this mark renders twice on the page (hero bar + panel header), so two
+   copies of the same id would be invalid and the second could inherit the
+   first's fill. One currentColor plus a drop-shadow does the same job with
+   nothing to keep in sync. */
+.ask-mark {
   flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-14);
-  color: var(--color-text-faint);
-  user-select: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--color-yellow);
+  line-height: 0;
+  filter: drop-shadow(0 0 5px var(--color-yellow-glow));
 }
+.ask-mark svg { display: block; }
+
 .hero-ask-input {
   flex: 1 1 auto;
   min-width: 0;
   border: 0;
   background: transparent;
-  font-family: var(--font-mono);
-  font-size: var(--fs-13);
+  /* Body face, matching the drawer. Mono here read as "type a command". */
+  font-family: inherit;
+  font-size: var(--fs-14);
+  line-height: 1.5;
   color: var(--color-text);
   padding: var(--sp-4) 0;
 }
 .hero-ask-input::placeholder { color: var(--color-text-faint); }
 .hero-ask-input:focus { outline: none; }
+/* Round filled arrow, same as the drawer — not an outlined "ASK" pill. */
 .hero-ask-go {
   flex: 0 0 auto;
-  padding: var(--sp-6) var(--sp-14);
-  border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-sm);
-  background: var(--color-surface-alt);
-  color: var(--color-text-dim);
-  font-family: var(--font-mono);
-  font-size: var(--fs-12);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  width: 34px; height: 34px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%;
+  background: var(--color-text);
+  color: var(--color-surface);
   cursor: pointer;
-  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+  transition: opacity var(--dur-quick);
 }
-.hero-ask-go:hover { border-color: var(--color-blue); color: var(--color-blue); }
+.hero-ask-go:hover { opacity: 0.82; }
+.hero-ask-go:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 2px; }
 .hero-ask-hint {
-  margin-top: var(--sp-6);
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide);
+  margin-top: var(--sp-8);
+  font-size: var(--fs-11);
   color: var(--color-text-faint);
 }
 
@@ -512,7 +528,11 @@ button:focus-visible,
 .hero-ask.is-docked {
   position: fixed;
   right: var(--sp-24);
-  bottom: var(--sp-24);
+  /* Sits ABOVE the ⌘K palette FAB, which also lives at bottom-right. Before
+     this the two overlapped: the pill covered the Commands button entirely,
+     so a control that has been on this site far longer became unclickable the
+     moment the ask bar docked. 20px inset + ~38px tall + 12px breathing room. */
+  bottom: 70px;
   left: auto;
   top: auto;
   z-index: 80;           /* under the panel (91) and its backdrop (90) */
@@ -543,12 +563,13 @@ button:focus-visible,
 }
 /* The glyph is the whole affordance when collapsed, so give it the full
    circle to sit in and grow it to a tappable size. */
-.hero-ask.is-docked .hero-ask-prompt {
-  font-size: var(--fs-17);
-  color: var(--color-text-dim);
+.hero-ask.is-docked .ask-mark {
+  /* Collapsed, the star IS the button, so it takes the full circle. Sized by
+     width rather than font-size — these declarations were written for the `$`
+     character and an SVG ignores font-size. The brand yellow stays; dimming it
+     to text-dim made sense for a prompt glyph, not for the mark. */
   width: 52px;
-  text-align: center;
-  transition: width var(--dur-base) var(--ease-out), font-size var(--dur-base) var(--ease-out);
+  transition: width var(--dur-base) var(--ease-out);
 }
 /* Collapsed, the input and button are zero-width rather than hidden: still in
    the DOM, still holding their value, just not taking space.
@@ -584,11 +605,11 @@ button:focus-visible,
   cursor: auto;
   border-color: var(--color-blue);
 }
-.hero-ask.is-docked:hover .hero-ask-prompt,
-.hero-ask.is-docked:focus-within .hero-ask-prompt,
-.hero-ask.is-docked.has-draft .hero-ask-prompt {
+.hero-ask.is-docked:hover .ask-mark,
+.hero-ask.is-docked:focus-within .ask-mark,
+.hero-ask.is-docked.has-draft .ask-mark {
+  /* Expanded, it shrinks back to a leading mark beside the text. */
   width: auto;
-  font-size: var(--fs-14);
 }
 .hero-ask.is-docked:hover .hero-ask-input,
 .hero-ask.is-docked:focus-within .hero-ask-input,
@@ -608,9 +629,14 @@ button:focus-visible,
 .hero-ask.is-docked:hover .hero-ask-go,
 .hero-ask.is-docked:focus-within .hero-ask-go,
 .hero-ask.is-docked.has-draft .hero-ask-go {
+  /* Restore the round icon button's own box. These lines used to re-apply the
+     old text-button padding, which was right when the control read "ASK" and
+     wrong now that it is a 34px circle — it squashed the arrow to 15px wide
+     and kept the pill from expanding past the collapsed 52px. */
   flex: 0 0 auto;
-  padding: var(--sp-6) var(--sp-14);
-  border-width: var(--bw);
+  width: 34px;
+  padding: 0;
+  border-width: 0;
 }
 /* The hint line belongs to the hero layout; in the dock it would be a caption
    floating under a circle. */
@@ -632,7 +658,7 @@ body.ask-panel-open .hero-ask.is-docked {
    which focus-within already handles. Tuck it in tighter and let it use the
    full width once open. */
 @media (max-width: 560px) {
-  .hero-ask.is-docked { right: var(--sp-16); bottom: var(--sp-16); }
+  .hero-ask.is-docked { right: var(--sp-16); bottom: 66px; }
   .hero-ask.is-docked:focus-within .hero-ask-form,
   .hero-ask.is-docked.has-draft .hero-ask-form {
     width: calc(100vw - var(--sp-16) * 2);
@@ -644,7 +670,7 @@ body.ask-panel-open .hero-ask.is-docked {
    are exactly what someone with this preference asked not to see. */
 @media (prefers-reduced-motion: reduce) {
   .hero-ask.is-docked .hero-ask-form,
-  .hero-ask.is-docked .hero-ask-prompt,
+  .hero-ask.is-docked .ask-mark,
   .hero-ask.is-docked .hero-ask-input,
   .hero-ask.is-docked .hero-ask-go {
     transition: none;
@@ -704,7 +730,7 @@ body.ask-panel-open .hero-ask.is-docked {
   /* Above the log so the fade passes beneath it rather than over it. */
   position: relative; z-index: 1;
 }
-.ask-panel-title { font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
+.ask-panel-title { display: inline-flex; align-items: center; gap: var(--sp-8); font-weight: var(--fw-semibold); color: var(--color-text); margin-right: auto; }
 /* Borderless until hovered: the button's job is to be findable, not to draw a
    box around itself while you are trying to read the conversation. */
 .ask-panel-icon {
