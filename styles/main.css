@@ -688,9 +688,12 @@ body.ask-panel-open .hero-ask.is-docked {
 }
 /* Slim, and it stays put while the log scrolls under it. The header should
    never compete with the message area — it is chrome, not content. */
+/* Slim chrome that stays out of the way. In every reference the header is a
+   small mark, a name, and borderless icon buttons — outlined pill buttons
+   labelled "new" and "✕" are the single most dated thing in a chat header. */
 .ask-panel-head {
-  display: flex; align-items: center; gap: var(--sp-10);
-  padding: var(--sp-12) var(--sp-16);
+  display: flex; align-items: center; gap: var(--sp-8);
+  padding: var(--sp-12) var(--sp-12) var(--sp-12) var(--sp-16);
   border-bottom: var(--bw) solid var(--color-line-soft);
   font-family: var(--font-mono); font-size: var(--fs-13);
   flex: 0 0 auto;
@@ -703,13 +706,19 @@ body.ask-panel-open .hero-ask.is-docked {
   color: var(--color-text-faint); border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
   padding: 1px var(--sp-6); cursor: help;
 }
-.ask-panel-clear, .ask-panel-close {
-  background: none; border: var(--bw) solid var(--color-line); border-radius: var(--r-sm);
-  color: var(--color-text-faint); font: inherit; font-size: var(--fs-11);
-  padding: var(--sp-4) var(--sp-8); cursor: pointer;
-  transition: border-color var(--dur-quick), color var(--dur-quick);
+/* Borderless until hovered: the button's job is to be findable, not to draw a
+   box around itself while you are trying to read the conversation. */
+.ask-panel-icon {
+  flex: 0 0 auto;
+  width: 28px; height: 28px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 0; border-radius: var(--r-sm);
+  color: var(--color-text-faint);
+  cursor: pointer;
+  transition: background var(--dur-quick), color var(--dur-quick);
 }
-.ask-panel-clear:hover, .ask-panel-close:hover { border-color: var(--color-text-faint); color: var(--color-text); }
+.ask-panel-icon:hover { background: var(--color-surface-alt); color: var(--color-text); }
+.ask-panel-icon:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 1px; }
 .ask-panel-log {
   flex: 1 1 auto; overflow-y: auto;
   /* Wider side padding than the old 16px: the reply now runs full width, so
@@ -726,7 +735,22 @@ body.ask-panel-open .hero-ask.is-docked {
 .ask-msg-you + .ask-msg-bot,
 .ask-msg-bot + .ask-msg-you { margin-top: var(--sp-10); }
 .ask-panel-log:focus { outline: none; }
-.ask-panel-empty { color: var(--color-text-faint); font-size: var(--fs-13); }
+.ask-panel-empty { color: var(--color-text-faint); font-size: var(--fs-13); line-height: 1.6; }
+/* Starter chips. "Ask me anything" is the hardest prompt there is; four
+   concrete questions turn an empty panel into something you can click. */
+.ask-starters { display: flex; flex-wrap: wrap; gap: var(--sp-8); margin-top: var(--sp-16); }
+.ask-starter {
+  font: inherit; font-size: var(--fs-12);
+  color: var(--color-text-dim);
+  background: var(--color-surface-alt);
+  border: var(--bw) solid var(--color-line-soft);
+  border-radius: 999px;
+  padding: var(--sp-6) var(--sp-12);
+  cursor: pointer; text-align: left;
+  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+}
+.ask-starter:hover { border-color: var(--color-text-faint); color: var(--color-text); }
+.ask-starter:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 1px; }
 /* ── Message stream ───────────────────────────────────────────────────
    Assistant replies are full-width and unbubbled; only the user's turn gets
    a bubble. That asymmetry is the whole differentiation — it is what the
@@ -779,54 +803,69 @@ body.ask-panel-open .hero-ask.is-docked {
   .ask-msg-dots span { animation: none; opacity: 0.5; }
 }
 /* ── Composer ─────────────────────────────────────────────────────────
-   A contained field rather than a bare strip along the bottom edge. Every
-   current AI chat draws the composer as one bounded object that lights up on
-   focus — it reads as "this is where you write", which an underline-less
-   input flush against the panel edge does not. */
+   One soft rounded card with the send button INSIDE it. Checked against
+   ChatGPT, Claude and Doubao: all three do exactly this, and all three avoid
+   the two things the previous version had.
+
+   Not a 999px pill. A pill with a separate round button beside it is the
+   shape of a search box; a composer is a surface you write into, so it is a
+   rounded rectangle roughly 20px in radius and tall enough to breathe.
+
+   No glow ring on focus. The old `box-shadow: 0 0 0 3px blue` is a 2015
+   Bootstrap tell. These products shift the border a shade and stop there —
+   the cursor already says where focus is. */
 .ask-panel-form {
-  display: flex; align-items: center; gap: var(--sp-8);
-  padding: var(--sp-12);
+  display: block;
+  padding: var(--sp-12) var(--sp-16) var(--sp-14);
   border-top: var(--bw) solid var(--color-line-soft);
   background: var(--color-surface);
 }
 .ask-panel-field {
-  flex: 1 1 auto; min-width: 0;
   display: flex; align-items: center; gap: var(--sp-8);
-  padding: var(--sp-6) var(--sp-8) var(--sp-6) var(--sp-12);
+  min-height: 48px;
+  padding: var(--sp-6) var(--sp-6) var(--sp-6) var(--sp-14);
   border: var(--bw) solid var(--color-line);
-  border-radius: 999px;
+  border-radius: 20px;
   background: var(--color-bg);
-  transition: border-color var(--dur-quick), box-shadow var(--dur-quick);
+  transition: border-color var(--dur-quick);
 }
-.ask-panel-field:focus-within {
-  border-color: var(--color-blue);
-  box-shadow: 0 0 0 3px var(--color-blue-soft);
-}
+.ask-panel-field:focus-within { border-color: var(--color-text-faint); }
 .ask-panel-input {
   flex: 1 1 auto; min-width: 0; border: 0; background: transparent;
-  font-family: var(--font-mono); font-size: var(--fs-13); color: var(--color-text);
+  /* Body font, not mono. Mono in a composer reads as a terminal prompt; the
+     references all use the UI face for what the visitor types. */
+  font-family: inherit;
+  font-size: var(--fs-14); line-height: 1.5;
+  color: var(--color-text);
   padding: var(--sp-4) 0;
 }
 .ask-panel-input::placeholder { color: var(--color-text-faint); }
 .ask-panel-input:focus { outline: none; }
-/* A round icon button, sized to the 32px hit target the rest of the site
-   uses. The arrow says "send" in every chat product on earth, and it stops
-   competing with the uppercase mono chrome in the header. */
+/* Inside the field, flush to its right edge. 34px keeps a comfortable target
+   without crowding the 48px field. */
 .ask-panel-send {
   flex: 0 0 auto;
-  width: 30px; height: 30px; padding: 0;
+  width: 34px; height: 34px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   border: 0; border-radius: 50%;
-  background: var(--color-blue); color: #fff;
-  font-size: var(--fs-13); line-height: 1;
+  background: var(--color-text); color: var(--color-surface);
   cursor: pointer;
-  transition: opacity var(--dur-quick), transform var(--dur-quick);
+  transition: opacity var(--dur-quick), background var(--dur-quick);
 }
-.ask-panel-send:hover:not(:disabled) { transform: scale(1.06); }
-/* Disabled is the streaming state too, so it must look deliberate rather
-   than broken. */
-.ask-panel-send:disabled { opacity: 0.4; cursor: default; }
+.ask-panel-send:hover:not(:disabled) { opacity: 0.82; }
+.ask-panel-send:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 2px; }
+/* Disabled doubles as the in-flight state, so it has to look deliberate
+   rather than broken. */
+.ask-panel-send:disabled { opacity: 0.25; cursor: default; }
 .ask-panel-input:disabled { opacity: 0.55; cursor: default; }
+/* The quiet line every reference carries under the composer. Stated once
+   here rather than stamped on every reply, which becomes noise. */
+.ask-panel-foot {
+  margin-top: var(--sp-8);
+  text-align: center;
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+}
 body.ask-panel-open { overflow: hidden; }
 @media (max-width: 560px) {
   .ask-panel { left: 0; top: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; transform: none; }

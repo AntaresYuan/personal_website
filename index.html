@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=c89f4618">
+<link rel="stylesheet" href="styles/main.css?v=7bd408bf">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -887,20 +887,34 @@
   <div class="ask-panel" id="ask-panel" role="dialog" aria-modal="true" aria-label="Ask Antares" hidden>
     <header class="ask-panel-head">
       <span class="ask-panel-title"><span class="ask-panel-dot" aria-hidden="true"></span>ask Antares<span class="ask-panel-ai" title="An AI answering in Antares's voice, drawn only from this site and his notes — not Antares typing.">AI</span></span>
-      <button class="ask-panel-clear" id="ask-panel-clear" type="button">new</button>
-      <button class="ask-panel-close" id="ask-panel-close" type="button" aria-label="Close">✕</button>
+      <button class="ask-panel-icon" id="ask-panel-clear" type="button" aria-label="New conversation" title="New conversation">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M8 3.5v9M3.5 8h9"/>
+        </svg>
+      </button>
+      <button class="ask-panel-icon" id="ask-panel-close" type="button" aria-label="Close" title="Close">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M4 4l8 8M12 4l-8 8"/>
+        </svg>
+      </button>
     </header>
     <div class="ask-panel-log" id="ask-panel-log" tabindex="-1"></div>
+    <!-- Composer: one soft rounded card with the send button INSIDE it, which
+         is what ChatGPT, Claude and Doubao all do. A pill with the button
+         beside it reads as a search box, not a place to compose. -->
     <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
       <div class="ask-panel-field">
-        <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
+        <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="Ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
+        <button class="ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
+          </svg>
+        </button>
       </div>
-      <!-- An arrow rather than the word "send": universally understood, and it
-           stops competing with the uppercase mono chrome in the header. The
-           accessible name stays on the button. -->
-      <button class="ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">
-        <span aria-hidden="true">↑</span>
-      </button>
+      <!-- Every reference carries a quiet line under the composer. Ours states
+           what the thing actually is, once, instead of repeating a disclaimer
+           on every single reply. -->
+      <p class="ask-panel-foot">AI answers from this site's content — it can be wrong.</p>
     </form>
   </div>
 
@@ -960,7 +974,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=991ac72c"   defer></script>
+<script src="scripts/render.js?v=9f3722a7"   defer></script>
 <script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=7a43d41d"  defer></script>
 <script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>

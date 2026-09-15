@@ -2261,7 +2261,21 @@
          as something the model wrote; a pulse reads as a state the interface
          is in. */
     const renderLog = (pending) => {
-      if (!convo.length && !pending) { log.innerHTML = `<p class="ask-panel-empty">Ask me about a project, what I'm building, how I think, or how to reach me — and we can keep going from there.</p>`; return; }
+      if (!convo.length && !pending) {
+        /* Starter chips, not just a sentence. A tall empty panel with one line
+           of prose gives the visitor nothing to act on, and "ask me anything"
+           is the hardest possible prompt to answer. The questions are taken
+           from the hand-authored FAQ so a click always lands on an answer the
+           offline path can serve even if the Worker is unreachable. */
+        const starters = (window.QA && Array.isArray(window.QA.FAQ) ? window.QA.FAQ : [])
+          .slice(0, 4).map((f) => f.q).filter(Boolean);
+        const chips = starters.length
+          ? `<div class="ask-starters">${starters.map((q) =>
+              `<button class="ask-starter" type="button" data-q="${escape(q)}">${escape(q)}</button>`).join('')}</div>`
+          : '';
+        log.innerHTML = `<p class="ask-panel-empty">Ask me about a project, what I'm building, how I think, or how to reach me — and we can keep going from there.</p>${chips}`;
+        return;
+      }
       let html = convo.map((m) => {
         const you = m.role === 'user';
         return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}"><div class="ask-msg-text">${escape(m.content)}</div></div>`;
@@ -2348,6 +2362,14 @@
     const clearConvo = () => { if (busy) return; convo = []; renderLog(false); input.value = ''; input.focus(); };
 
     form.addEventListener('submit', (ev) => { ev.preventDefault(); const q = input.value.trim(); input.value = ''; if (q) send(q); });
+    /* Delegated, because renderLog() rebuilds the chips on every paint —
+       binding them directly would leave dead listeners behind and miss the
+       set that reappears after "new". */
+    log.addEventListener('click', (ev) => {
+      const chip = ev.target.closest('.ask-starter');
+      if (!chip || busy) return;
+      send(chip.dataset.q || chip.textContent.trim());
+    });
     document.getElementById('ask-panel-close')?.addEventListener('click', close);
     document.getElementById('ask-panel-clear')?.addEventListener('click', clearConvo);
     backdrop.addEventListener('click', close);
