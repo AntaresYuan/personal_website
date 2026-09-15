@@ -2676,7 +2676,12 @@
       wireViewTabs();
       wireModal();
       wireTheme();
-      wireHeroAsk(wireAskPanel(site, board));
+      /* Expose the panel so other surfaces can hand it a question. The command
+         palette needs it for its "ask Antares" row, and palette.js is a
+         separate script with no import path into this closure. */
+      const askPanel = wireAskPanel(site, board);
+      window.ASK_PANEL = askPanel;
+      wireHeroAsk(askPanel);
       wireUsage(site);
     } catch (e) {
       console.error('[render]', e);

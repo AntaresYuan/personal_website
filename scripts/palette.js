@@ -301,12 +301,39 @@
       .map((x) => x.it);
   };
 
+  /* The search box doubles as an ask box. Rather than making the visitor
+     decide up front which one they are using, the typed query is offered BOTH
+     ways: matching content below, and a row at the top that hands the same
+     text to the assistant.
+
+     Only when something is typed — with an empty box there is no question to
+     ask, and a permanent row would just be a second button competing with the
+     floating pill.
+
+     It is a normal item, so arrow keys, hover and Enter reach it through the
+     existing machinery instead of a parallel code path. */
+  const askItem = (q) => ({
+    kind: 'ask',
+    icon: '\u2726',
+    label: `ask Antares — \u201c${q}\u201d`,
+    desc: 'open a conversation in the side panel',
+    meta: 'ask',
+    action: () => {
+      const panel = window.ASK_PANEL;
+      if (panel && typeof panel.open === 'function') panel.open(q);
+    }
+  });
+
   /* ── Rendering ─────────────────────────────────────────────────── */
   let selected = 0;
 
   const render = () => {
     const q = input.value;
-    const matches = filter(q);
+    const typed = q.trim();
+    /* Prepend, not append: a question that matches nothing would otherwise sit
+       below a "no matches" line, which reads as a dead end at exactly the
+       moment the assistant is the useful answer. */
+    const matches = typed ? [askItem(typed), ...filter(q)] : filter(q);
 
     if (matches.length === 0) {
       list.innerHTML = `<li class="palette-empty">no matches for "${escape(q)}"</li>`;
@@ -320,7 +347,8 @@
       const secondLine = (it.kind === 'faq' && it.answer)
         ? `<div class="palette-result-answer">${escape(it.answer)}</div>`
         : (it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : '');
-      return `<li class="palette-result ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
+      const askCls = it.kind === 'ask' ? ' is-ask' : '';
+      return `<li class="palette-result${askCls} ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
         <span class="palette-result-icon" aria-hidden="true">${escape(it.icon)}</span>
         <div class="palette-result-body">
           <div class="palette-result-label">${escape(it.label)}</div>

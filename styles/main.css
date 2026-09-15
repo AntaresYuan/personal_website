@@ -3497,6 +3497,29 @@ body.modal-open { overflow: hidden; }
   cursor: pointer;
   user-select: none;
 }
+
+/* The ask row. It is a different KIND of action from the rows under it —
+   those jump somewhere that already exists, this one starts a conversation —
+   so it gets a tinted panel and a rule beneath it rather than blending into
+   the list. Same grid, so the icon and meta columns still line up. */
+.palette-result.is-ask {
+  background: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  margin-bottom: var(--sp-6);
+}
+.palette-result.is-ask .palette-result-icon { color: var(--color-accent); }
+.palette-result.is-ask .palette-result-label {
+  /* The quoted query is the payload; keep it from wrapping into two lines and
+     shoving the rest of the list down on every keystroke. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-result.is-ask .palette-result-meta {
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+}
 .palette-result.is-selected {
   background: var(--color-yellow-glow);
 }
