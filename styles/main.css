@@ -298,16 +298,18 @@ button:focus-visible,
   justify-content: center;
   width: 28px; height: 28px;
   padding: 0;
-  border: var(--bw) solid var(--color-line);
+  border: 0;
   border-radius: var(--r-sm);
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text-dim);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
-  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+  transition: color var(--dur-quick), background var(--dur-quick);
 }
-.theme-toggle:hover { border-color: var(--color-text-faint); color: var(--color-text); }
+/* Hover has to move the background now — border-color was the only hover
+   affordance, and with the border gone it changed nothing at all. */
+.theme-toggle:hover { color: var(--color-text); background: var(--color-surface-alt); }
 .theme-toggle .tt-icon { display: none; }
 :root:not([data-theme-mode]) .theme-toggle .tt-auto,
 :root[data-theme-mode="auto"]  .theme-toggle .tt-auto  { display: inline; }
@@ -3557,31 +3559,28 @@ body.palette-open { overflow: hidden; }
 .topnav-search {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-6);
+  justify-content: center;
+  /* Icon-only now, so it is a 28px square like .theme-toggle rather than a
+     wider pill sized around a label that no longer exists. The ⌘K shortcut
+     lives in the title attribute — still discoverable, without a second
+     piece of text competing with three bare icons. */
+  width: 28px;
   height: 28px;
-  padding: 0 var(--sp-8);
-  border: var(--bw) solid var(--color-line);
+  padding: 0;
+  /* Borderless at rest. Three boxed controls next to a bare "blog" link made
+     the bar read as four unrelated widgets; the icons are legible on their
+     own, so the box was doing nothing but adding edges. */
+  border: 0;
   border-radius: var(--r-sm);
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text-dim);
   cursor: pointer;
-  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+  transition: color var(--dur-quick), background var(--dur-quick);
 }
-.topnav-search:hover { border-color: var(--color-blue); color: var(--color-text); }
+.topnav-search:hover { color: var(--color-text); background: var(--color-surface-alt); }
 .topnav-search:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 1px; }
 .topnav-search svg { display: block; flex: 0 0 auto; }
-/* The shortcut hint is the discoverability cue for ⌘K; it is decoration for
-   anyone without a physical keyboard, so it goes rather than wrapping. */
-.topnav-search-kbd {
-  font-family: var(--font-mono);
-  font-size: var(--fs-10);
-  color: var(--color-text-faint);
-  line-height: 1;
-}
-@media (max-width: 768px) {
-  .topnav-search-kbd { display: none; }
-  .topnav-search { padding: 0; width: 28px; justify-content: center; }
-}
+
 
 /* ════════════════════════════════════════════════════════════════════════
    AGENT TERMINAL — embedded CLI (dark panel inside light page)
@@ -6105,23 +6104,23 @@ body.skin-companion-on [contenteditable="true"] { cursor: auto; }
   gap: var(--sp-6);
   height: 28px;
   padding: 0 var(--sp-8);
-  border: var(--bw) solid var(--color-line);
+  border: 0;
   border-radius: var(--r-sm);
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text-dim);
   line-height: 1;
   cursor: pointer;
   list-style: none;
-  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
+  transition: color var(--dur-quick), background var(--dur-quick);
 }
 .skin-picker > summary::-webkit-details-marker { display: none; }
 .skin-picker > summary::marker { content: ''; }
 .skin-picker > summary:hover {
-  border-color: var(--color-text-faint);
   color: var(--color-text);
-  background: var(--color-bg-soft);
+  background: var(--color-surface-alt);
 }
-.skin-picker[open] > summary { border-color: var(--color-blue); color: var(--color-text); }
+/* Open state needs to stay legible without a border to lean on. */
+.skin-picker[open] > summary { color: var(--color-text); background: var(--color-surface-alt); }
 .skin-trigger-sw {
   flex: 0 0 auto;
   width: 13px; height: 13px;
