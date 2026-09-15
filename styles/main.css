@@ -495,6 +495,162 @@ button:focus-visible,
   color: var(--color-text-faint);
 }
 
+/* ── The ask bar, docked as a floating pill ───────────────────────────
+   Same element, two shapes. Once the hero bar scrolls out of view the ask
+   affordance re-forms as a circle in the bottom-right; scroll back up and it
+   returns to the hero. One entry point, always reachable, never duplicated.
+
+   Why the SAME element rather than a second, hidden copy: two inputs means
+   two values, and a visitor who types, scrolls, and finds their text gone is
+   being punished for scrolling. Here the input is literally the same node, so
+   the draft survives the transition.
+
+   Collapsed it is a 52px circle showing only the glyph. Hover or focus
+   expands it into a pill wide enough to type in. Width and opacity carry the
+   animation -- not `display` -- so the text never reflows mid-transition and
+   focus is never dropped by an element being removed. */
+.hero-ask.is-docked {
+  position: fixed;
+  right: var(--sp-24);
+  bottom: var(--sp-24);
+  left: auto;
+  top: auto;
+  z-index: 80;           /* under the panel (91) and its backdrop (90) */
+  margin-top: 0;
+  /* `width: auto` on a fixed block resolves against the containing block and
+     then shrink-wraps, which pinned the wrapper at the collapsed form's 52px
+     and silently capped the expanded pill — the form's own `width: 380px`
+     could not exceed its parent. `max-content` lets the wrapper follow the
+     form instead of constraining it. */
+  width: max-content;
+  max-width: calc(100vw - var(--sp-24) * 2);
+}
+.hero-ask.is-docked .hero-ask-form {
+  width: 52px;
+  padding: 0;
+  height: 52px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-card-hover);
+  background: var(--color-surface);
+  overflow: hidden;
+  justify-content: center;
+  gap: 0;
+  cursor: pointer;
+  transition: width var(--dur-base) var(--ease-out),
+              padding var(--dur-base) var(--ease-out),
+              gap var(--dur-base) var(--ease-out),
+              border-color var(--dur-quick);
+}
+/* The glyph is the whole affordance when collapsed, so give it the full
+   circle to sit in and grow it to a tappable size. */
+.hero-ask.is-docked .hero-ask-prompt {
+  font-size: var(--fs-17);
+  color: var(--color-text-dim);
+  width: 52px;
+  text-align: center;
+  transition: width var(--dur-base) var(--ease-out), font-size var(--dur-base) var(--ease-out);
+}
+/* Collapsed, the input and button are zero-width rather than hidden: still in
+   the DOM, still holding their value, just not taking space.
+   `padding: 0` (not just the inline axes) and `flex: 0 0 0` are both required
+   — .hero-ask-go sets `padding: var(--sp-6) var(--sp-14)` and `flex: 0 0 auto`,
+   which otherwise keep the button 28px wide inside a circle that has no room
+   for it. */
+.hero-ask.is-docked .hero-ask-input,
+.hero-ask.is-docked .hero-ask-go {
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: width var(--dur-base) var(--ease-out),
+              opacity var(--dur-quick),
+              padding var(--dur-base) var(--ease-out);
+}
+/* Expanded: hover, keyboard focus, or a draft already typed. Including
+   :focus-within is what makes it keyboard-reachable -- a hover-only control
+   is invisible to anyone tabbing, and unusable on a touchscreen. Keeping it
+   open while `has-draft` is set means it cannot collapse out from under
+   half-typed text when the pointer drifts away. */
+.hero-ask.is-docked:hover .hero-ask-form,
+.hero-ask.is-docked:focus-within .hero-ask-form,
+.hero-ask.is-docked.has-draft .hero-ask-form {
+  width: min(380px, calc(100vw - var(--sp-24) * 2));
+  padding: var(--sp-8) var(--sp-12);
+  gap: var(--sp-10);
+  cursor: auto;
+  border-color: var(--color-blue);
+}
+.hero-ask.is-docked:hover .hero-ask-prompt,
+.hero-ask.is-docked:focus-within .hero-ask-prompt,
+.hero-ask.is-docked.has-draft .hero-ask-prompt {
+  width: auto;
+  font-size: var(--fs-14);
+}
+.hero-ask.is-docked:hover .hero-ask-input,
+.hero-ask.is-docked:focus-within .hero-ask-input,
+.hero-ask.is-docked.has-draft .hero-ask-input,
+.hero-ask.is-docked:hover .hero-ask-go,
+.hero-ask.is-docked:focus-within .hero-ask-go,
+.hero-ask.is-docked.has-draft .hero-ask-go {
+  width: auto;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: visible;
+}
+.hero-ask.is-docked .hero-ask-input { flex: 1 1 auto; }
+.hero-ask.is-docked:hover .hero-ask-input,
+.hero-ask.is-docked:focus-within .hero-ask-input,
+.hero-ask.is-docked.has-draft .hero-ask-input { flex: 1 1 auto; }
+.hero-ask.is-docked:hover .hero-ask-go,
+.hero-ask.is-docked:focus-within .hero-ask-go,
+.hero-ask.is-docked.has-draft .hero-ask-go {
+  flex: 0 0 auto;
+  padding: var(--sp-6) var(--sp-14);
+  border-width: var(--bw);
+}
+/* The hint line belongs to the hero layout; in the dock it would be a caption
+   floating under a circle. */
+.hero-ask.is-docked .hero-ask-hint { display: none; }
+
+/* While the drawer is open the pill has nothing left to do — the drawer has
+   its own input — and at the bottom-right it sits directly on top of that
+   input, eating the clicks meant for it. Hide it for the duration rather than
+   shuffling z-index: two competing "type here" boxes a few pixels apart is a
+   worse problem than either one being missing. */
+body.ask-panel-open .hero-ask.is-docked {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity var(--dur-quick), transform var(--dur-quick);
+}
+
+/* On a phone there is no hover, so the pill can only be opened by tapping --
+   which focus-within already handles. Tuck it in tighter and let it use the
+   full width once open. */
+@media (max-width: 560px) {
+  .hero-ask.is-docked { right: var(--sp-16); bottom: var(--sp-16); }
+  .hero-ask.is-docked:focus-within .hero-ask-form,
+  .hero-ask.is-docked.has-draft .hero-ask-form {
+    width: calc(100vw - var(--sp-16) * 2);
+  }
+}
+
+/* Honour reduced motion: the dock still works, it just appears instead of
+   sliding. Width transitions are the showiest part of this component, so they
+   are exactly what someone with this preference asked not to see. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-ask.is-docked .hero-ask-form,
+  .hero-ask.is-docked .hero-ask-prompt,
+  .hero-ask.is-docked .hero-ask-input,
+  .hero-ask.is-docked .hero-ask-go {
+    transition: none;
+  }
+}
+
 /* ── Ask Antares — the multi-turn chat panel the hero "ask" bar opens ──
    A centred modal (same family as the ⌘K palette / card-detail panel). It's
    a transcript, not a chat-bubble UI; the persistent note labels it as an AI.
@@ -507,20 +663,29 @@ button:focus-visible,
   opacity: 0; transition: opacity var(--dur-base);
 }
 .ask-panel-backdrop.is-open { opacity: 1; }
+/* Right-side drawer, not a centred modal. A conversation is a companion to
+   the page you are reading, not a thing that replaces it -- the drawer keeps
+   the content visible beside it, which is what makes "ask about this" feel
+   attached to the page rather than a detour. */
 .ask-panel {
   position: fixed; z-index: 91;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -48%) scale(0.985);
-  width: min(720px, 92vw);
-  max-height: min(80vh, 720px);
+  top: 0; right: 0; bottom: 0;
+  transform: translateX(16px);
+  width: min(420px, 100vw);
+  max-height: 100vh;
   display: flex; flex-direction: column;
   background: var(--color-surface);
-  border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-lg);
+  border-left: var(--bw) solid var(--color-line);
+  border-radius: 0;
   box-shadow: var(--shadow-card-hover);
   opacity: 0; transition: opacity var(--dur-base), transform var(--dur-base) var(--ease-out);
 }
-.ask-panel.is-open { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.ask-panel.is-open { opacity: 1; transform: translateX(0); }
+/* Full-width sheet on a phone: a 420px drawer on a 390px screen would leave a
+   sliver of unusable page behind it. */
+@media (max-width: 560px) {
+  .ask-panel { width: 100vw; border-left: none; }
+}
 .ask-panel-head {
   display: flex; align-items: center; gap: var(--sp-10);
   padding: var(--sp-12) var(--sp-16);

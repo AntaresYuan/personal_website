@@ -2338,16 +2338,95 @@
   };
 
   // The hero "ask" bar → opens the chat panel, seeded with the question.
+  // It also docks: once the hero bar scrolls out of view it re-forms as a
+  // floating pill in the bottom-right, and returns to the hero on scroll back.
   const wireHeroAsk = (askPanel) => {
+    const wrap = document.getElementById('hero-ask');
     const form = document.getElementById('hero-ask-form');
     const input = document.getElementById('hero-ask-input');
     if (!form || !input || !askPanel) return;
+
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const q = input.value.trim();
       input.value = '';
+      /* Clearing the value does not clear the class -- the pill would stay
+         expanded over an empty field, which reads as "still waiting for you"
+         while the panel is already answering. */
+      wrap?.classList.remove('has-draft');
       askPanel.open(q || undefined);   // empty → just open the panel
     });
+
+    if (!wrap) return;
+
+    /* Keep the pill open while there is text in it, so it cannot collapse and
+       swallow a half-typed question when the pointer wanders off. */
+    input.addEventListener('input', () => {
+      wrap.classList.toggle('has-draft', input.value.trim().length > 0);
+    });
+
+    /* Dock on a sentinel rather than a scroll offset. A scrollY threshold is a
+       guess that breaks the moment the hero's height changes -- a longer
+       headline, a skin with different spacing, a phone in landscape. Watching
+       an element is correct by construction at any size.
+
+       The sentinel is a separate zero-height marker, NOT #hero-ask itself:
+       docking makes #hero-ask `position: fixed`, which would put it
+       permanently inside the viewport, so observing it would immediately
+       un-dock it, which re-docks it, forever. The sentinel stays in normal
+       flow and scrolls away honestly.
+
+       The isTyping guard exists because docking re-styles the field; doing
+       that under an active cursor moves the caret out from under the person
+       using it. */
+    if ('IntersectionObserver' in window) {
+      /* The sentinel does double duty. It is the scroll trigger, and while
+         docked it also holds the hero's grid row open: #hero-ask is a
+         `grid-column: 1 / -1` item, so taking it out of flow would delete a
+         row and make the whole hero jump upward at the exact moment the pill
+         appears. Reserving the measured height keeps the page still. */
+      const sentinel = document.createElement('div');
+      sentinel.setAttribute('aria-hidden', 'true');
+      sentinel.className = 'hero-ask-sentinel';
+      sentinel.style.cssText = 'grid-column:1/-1;height:1px;pointer-events:none;';
+      wrap.insertAdjacentElement('afterend', sentinel);
+
+      const dockWithSpacer = (on) => {
+        if (on && document.activeElement === input) return;
+        if (on && !wrap.classList.contains('is-docked')) {
+          /* Measure BEFORE going fixed — afterwards the height is the pill's.
+             Reserve the bar's height AND its top margin: .hero-ask sets
+             `margin-top: var(--sp-24)`, and a spacer that ignores it leaves
+             the hero ~24px shorter, which reads as a jolt the moment the pill
+             forms. */
+          const cs = getComputedStyle(wrap);
+          sentinel.style.height = wrap.getBoundingClientRect().height + 'px';
+          sentinel.style.marginTop = cs.marginTop;
+          /* Re-home the node on <body>. `position: fixed` is NOT relative to
+             the viewport when any ancestor has a transform, and .hero carries
+             one permanently: its `rise` entrance animation uses fill-mode
+             `both`, so the final transform sticks after the animation ends.
+             Left in place, the pill anchored to the hero box and sat several
+             hundred pixels below the fold — present in the DOM, invisible on
+             screen. Moving the same node keeps its value and listeners. */
+          document.body.appendChild(wrap);
+        } else if (!on && wrap.classList.contains('is-docked')) {
+          // Put it back exactly where it came from: the sentinel is its anchor.
+          sentinel.insertAdjacentElement('beforebegin', wrap);
+          sentinel.style.height = '1px';
+          sentinel.style.marginTop = '0px';
+        }
+        wrap.classList.toggle('is-docked', on);
+      };
+
+      /* rootMargin lifts the trigger line above the fold so the pill forms as
+         the bar leaves, rather than popping in after a visible gap. */
+      const io = new IntersectionObserver(
+        (entries) => { for (const e of entries) dockWithSpacer(!e.isIntersecting); },
+        { rootMargin: '-72px 0px 0px 0px', threshold: 0 }
+      );
+      io.observe(sentinel);
+    }
   };
 
   const wireModal = () => {
