@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=4d50f88f">
+<link rel="stylesheet" href="styles/main.css?v=b670dcfa">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -249,33 +249,6 @@
          With the antares-qa Worker (content/site.json → qa.workerUrl) it
          answers inline; without one it opens the ⌘K palette pre-filled.
          Wired in scripts/render.js (wireHeroAsk). -->
-    <div class="hero-ask" id="hero-ask">
-      <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
-        <!-- The mark, not a shell prompt. A four-point star belongs to the
-             same celestial family as the site's crescent brand and its "a star
-             to ship by" line, so it reads as this site's own rather than a
-             generic AI sparkle. In the docked pill it is the whole button. -->
-        <span class="ask-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="24" height="24">
-            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
-            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
-            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
-            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
-          </svg>
-        </span>
-        <input class="hero-ask-input" id="hero-ask-input" type="text"
-               placeholder="Ask anything about my work…"
-               aria-label="Ask this portfolio a question" maxlength="280">
-        <!-- Same arrow as the drawer's send button, so the control that opens
-             the conversation looks like the one inside it. -->
-        <button class="hero-ask-go" id="hero-ask-go" type="submit" aria-label="Ask">
-          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
-          </svg>
-        </button>
-      </form>
-      <p class="hero-ask-hint">Ask anything — opens a conversation</p>
-    </div>
   </header>
 
   <!-- ── BOARD ───────────────────────────────────────────────────── -->
@@ -901,6 +874,37 @@
        the question). Answers come from the antares-qa Worker (multi-turn);
        behaviour in scripts/render.js (wireAskPanel). It's a transcript, not
        a chatbot UI — and labelled as an AI answering in Antares's voice. -->
+  <!-- The floating ask pill. Always docked and always position:fixed, so it
+       lives beside the panel it opens rather than inside the hero. It used to
+       sit in the hero as a full-width bar and collapse on scroll; that bar was
+       a duplicate entry point to this same panel. -->
+<div class="hero-ask" id="hero-ask">
+      <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
+        <!-- The mark, not a shell prompt. A four-point star belongs to the
+             same celestial family as the site's crescent brand and its "a star
+             to ship by" line, so it reads as this site's own rather than a
+             generic AI sparkle. In the docked pill it is the whole button. -->
+        <span class="ask-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="24" height="24">
+            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
+            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
+            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
+            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
+          </svg>
+        </span>
+        <input class="hero-ask-input" id="hero-ask-input" type="text"
+               placeholder="Ask anything…"
+               aria-label="Ask this portfolio a question" maxlength="280">
+        <!-- Same arrow as the drawer's send button, so the control that opens
+             the conversation looks like the one inside it. -->
+        <button class="hero-ask-go" id="hero-ask-go" type="submit" aria-label="Ask">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+
   <div class="ask-panel" id="ask-panel" role="complementary" aria-label="Ask Antares" hidden>
     <header class="ask-panel-head">
       <!-- The same star as the hero bar, so the control you clicked and the
@@ -1005,7 +1009,7 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="scripts/render.js?v=0cf491a4"   defer></script>
+<script src="scripts/render.js?v=90f37de2"   defer></script>
 <script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=7a43d41d"  defer></script>
 <script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>

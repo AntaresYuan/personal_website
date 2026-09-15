@@ -579,11 +579,6 @@ button:focus-visible,
 }
 .hero-ask-go:hover { opacity: 0.82; }
 .hero-ask-go:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 2px; }
-.hero-ask-hint {
-  margin-top: var(--sp-8);
-  font-size: var(--fs-11);
-  color: var(--color-text-faint);
-}
 
 /* ── The ask bar, docked as a floating pill ───────────────────────────
    Same element, two shapes. Once the hero bar scrolls out of view the ask
@@ -712,7 +707,6 @@ button:focus-visible,
 }
 /* The hint line belongs to the hero layout; in the dock it would be a caption
    floating under a circle. */
-.hero-ask.is-docked .hero-ask-hint { display: none; }
 
 /* While the drawer is open the pill has nothing left to do — the drawer has
    its own input — and at the bottom-right it sits directly on top of that
