@@ -600,11 +600,9 @@ button:focus-visible,
 .hero-ask.is-docked {
   position: fixed;
   right: var(--sp-24);
-  /* Sits ABOVE the ⌘K palette FAB, which also lives at bottom-right. Before
-     this the two overlapped: the pill covered the Commands button entirely,
-     so a control that has been on this site far longer became unclickable the
-     moment the ask bar docked. 20px inset + ~38px tall + 12px breathing room. */
-  bottom: 70px;
+  /* Back to the corner: the ⌘K trigger it used to clear has moved into the
+     top bar, so nothing sits underneath it any more. */
+  bottom: var(--sp-24);
   left: auto;
   top: auto;
   z-index: 80;           /* under the panel (91) and its backdrop (90) */
@@ -730,7 +728,7 @@ body.ask-panel-open .hero-ask.is-docked {
    which focus-within already handles. Tuck it in tighter and let it use the
    full width once open. */
 @media (max-width: 560px) {
-  .hero-ask.is-docked { right: var(--sp-16); bottom: 66px; }
+  .hero-ask.is-docked { right: var(--sp-16); bottom: var(--sp-16); }
   .hero-ask.is-docked:focus-within .hero-ask-form,
   .hero-ask.is-docked.has-draft .hero-ask-form {
     width: calc(100vw - var(--sp-16) * 2);
@@ -3549,45 +3547,40 @@ body.palette-open { overflow: hidden; }
    the ⌘K shortcut exists. Hidden while the palette is open; hidden on touch /
    narrow viewports (no physical keyboard — the palette's content is reachable
    through the visible UI there). */
-.palette-fab {
-  position: fixed;
-  right: var(--sp-20);
-  bottom: var(--sp-20);
-  z-index: 150;
+/* Search / command palette trigger, in the top bar beside the theme and skin
+   controls. It used to be a floating button at bottom-right, which is where
+   the ask pill now docks — two floating entries in one corner meant neither
+   read as primary, and the pill covered this one outright.
+
+   Sized to match .theme-toggle (28px, same border and radius) so the top-bar
+   controls read as one set rather than three unrelated widgets. */
+.topnav-search {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-8);
-  padding: var(--sp-8) var(--sp-12);
-  background: var(--color-surface);
-  border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
-  font-family: var(--font-mono);
-  font-size: var(--fs-12);
-  color: var(--color-text-dim);
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, transform 0.15s;
-}
-.palette-fab:hover,
-.palette-fab:focus-visible {
-  border-color: var(--color-blue);
-  color: var(--color-text);
-  transform: translateY(-1px);
-}
-.palette-fab-kbd {
-  font-family: inherit;
-  font-size: var(--fs-11);
-  padding: 1px var(--sp-6);
-  background: var(--color-bg-soft);
+  gap: var(--sp-6);
+  height: 28px;
+  padding: 0 var(--sp-8);
   border: var(--bw) solid var(--color-line);
   border-radius: var(--r-sm);
-  color: var(--color-text-faint);
+  background: var(--color-surface);
+  color: var(--color-text-dim);
+  cursor: pointer;
+  transition: border-color var(--dur-quick), color var(--dur-quick), background var(--dur-quick);
 }
-body.palette-open .palette-fab,
-body.modal-open .palette-fab { opacity: 0; pointer-events: none; }
-
+.topnav-search:hover { border-color: var(--color-blue); color: var(--color-text); }
+.topnav-search:focus-visible { outline: var(--bw-thick) solid var(--color-blue); outline-offset: 1px; }
+.topnav-search svg { display: block; flex: 0 0 auto; }
+/* The shortcut hint is the discoverability cue for ⌘K; it is decoration for
+   anyone without a physical keyboard, so it goes rather than wrapping. */
+.topnav-search-kbd {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  color: var(--color-text-faint);
+  line-height: 1;
+}
 @media (max-width: 768px) {
-  .palette-fab { display: none; }
+  .topnav-search-kbd { display: none; }
+  .topnav-search { padding: 0; width: 28px; justify-content: center; }
 }
 
 /* ════════════════════════════════════════════════════════════════════════

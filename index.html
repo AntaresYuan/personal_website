@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=87c5a417">
+<link rel="stylesheet" href="styles/main.css?v=ea041d64">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -134,6 +134,19 @@
     <div class="brand"><span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span id="brand-name">Antares Yuan</span></div>
     <div class="topnav-end">
       <a class="topnav-link" href="/blog/">blog</a>
+      <!-- Search / command palette. Lives in the top bar rather than as a
+           second floating button: the ask pill already owns the bottom-right
+           corner once it docks, and two floating entries competing for the
+           same spot meant neither read as primary. -->
+      <button class="topnav-search" id="palette-fab" type="button"
+              title="Search — sections, cards, commands (⌘K)"
+              aria-label="Search (Cmd K)">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="7.2" cy="7.2" r="4.3"/><path d="M10.6 10.6L13.4 13.4"/>
+        </svg>
+        <kbd class="topnav-search-kbd" aria-hidden="true">⌘K</kbd>
+      </button>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">
         <span class="tt-icon tt-auto"  aria-hidden="true">◐</span>
         <span class="tt-icon tt-light" aria-hidden="true">☀</span>
@@ -857,17 +870,6 @@
        Owns the global ⌘K / Ctrl+K shortcut and the floating trigger below.
        Behavior lives in scripts/palette.js.
   ──────────────────────────────────────────────────────────────────── -->
-
-  <!-- Persistent, clickable command-palette trigger — bottom-right. Doubles
-       as the discoverability cue for the ⌘K shortcut. Hidden while the
-       palette is open, and on narrow / touch viewports (no physical keyboard;
-       the palette's content is all reachable via the visible UI anyway). -->
-  <button type="button" class="palette-fab" id="palette-fab"
-          title="Commands — search sections & cards, run terminal commands, ask… (⌘K)"
-          aria-label="Commands — open the command palette (Cmd K)">
-    <span class="palette-fab-label">Commands</span>
-    <kbd class="palette-fab-kbd" aria-hidden="true">⌘K</kbd>
-  </button>
 
   <div class="palette-backdrop" id="palette-backdrop" hidden></div>
   <div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
