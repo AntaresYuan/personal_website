@@ -1516,6 +1516,87 @@ body.ask-panel-open .topnav {
 }
 .topnav-link:hover { color: var(--color-text); }
 .brand-link { color: inherit; text-decoration: none; }
+
+/* ── space switcher (Antares Work ⇄ Antares Personal) ─────────────────────
+   The brand name doubles as the control, the way ChatGPT's product name does.
+   It only looks interactive once scripts/spaces.js confirms there is more than
+   one space — .has-spaces is the gate, so a single-space site keeps a plain
+   wordmark instead of a caret that opens nothing. */
+.brand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+.has-spaces .brand-btn {
+  cursor: pointer;
+  padding: var(--sp-4) var(--sp-8);
+  margin: calc(var(--sp-4) * -1) calc(var(--sp-8) * -1);
+  border-radius: var(--r-sm);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.has-spaces .brand-btn:hover { background: var(--color-surface-alt); }
+.brand-caret {
+  opacity: 0;
+  color: var(--color-text-faint);
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.has-spaces .brand-caret { opacity: 1; }
+.has-spaces .brand-btn[aria-expanded="true"] .brand-caret { transform: rotate(180deg); }
+
+#space-switcher { position: relative; }
+.space-menu {
+  position: absolute;
+  top: calc(100% + var(--sp-8));
+  left: calc(var(--sp-8) * -1);
+  z-index: 120;
+  min-width: 260px;
+  padding: var(--sp-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.space-menu.is-open { opacity: 1; transform: translateY(0); }
+.space-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--sp-10);
+  padding: var(--sp-8) var(--sp-10);
+  border-radius: var(--r-sm);
+  color: inherit;
+  text-decoration: none;
+}
+.space-item:hover { background: var(--color-surface-alt); }
+.space-item-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.space-item-name { font-size: var(--fs-14); font-weight: 500; }
+.space-item-tag {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  /* A tagline that wraps turns a two-row menu into a four-row one and shifts
+     the checkmark column; clip instead. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.space-item-check { color: var(--color-accent); font-size: var(--fs-13); }
+.space-item.is-active .space-item-name { color: var(--color-accent); }
+
+@media (max-width: 560px) {
+  .space-menu { min-width: min(280px, calc(100vw - var(--sp-32))); }
+}
+
 .brand-link:hover .dot { filter: drop-shadow(0 0 8px var(--color-yellow-glow)) brightness(1.12); }
 
 /* ── reading progress bar (post pages only) ───────────────────────────── */

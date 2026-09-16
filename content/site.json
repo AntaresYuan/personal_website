@@ -11,6 +11,23 @@
     "ogImageWidth": "512",
     "ogImageHeight": "512"
   },
+  "spaces": {
+    "active": "work",
+    "items": [
+      {
+        "id": "work",
+        "name": "Antares Work",
+        "tagline": "what I ship — product, agents, code",
+        "href": "/"
+      },
+      {
+        "id": "personal",
+        "name": "Antares Personal",
+        "tagline": "everything else — notes, doodles, life",
+        "href": "/personal/"
+      }
+    ]
+  },
   "footer": {
     "copyright": "© 2026 Antares Yuan",
     "tagline": "This site is a roadmap of how Antares is growing as an AI Builder, not only a resume.",
