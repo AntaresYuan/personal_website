@@ -13,6 +13,9 @@
   },
   "spaces": {
     "active": "work",
+    "autoCopilot": [
+      "work"
+    ],
     "items": [
       {
         "id": "work",

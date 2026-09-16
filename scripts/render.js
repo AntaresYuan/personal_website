@@ -2360,7 +2360,12 @@
 
        So: no backdrop, no scroll lock, no aria-modal, and focus is NOT trapped
        inside the panel. */
-    const open = (seedQ) => {
+    /* `quiet` opens the panel without taking focus. Auto-opening on load and
+       then grabbing the caret would hijack the page from someone who came to
+       read it — and on a phone it summons the keyboard over the content. A
+       panel the visitor opened deliberately still focuses, as before. */
+    const open = (seedQ, opts) => {
+      const quiet = !!(opts && opts.quiet);
       if (!panel.classList.contains('is-open')) {
         panel.hidden = false;
         void panel.offsetWidth;                              // reflow so the transition fires
@@ -2368,9 +2373,14 @@
         document.body.classList.add('ask-panel-open');
         renderLog(false);
       }
+      if (quiet && !seedQ) return;
       setTimeout(() => { input.focus(); if (seedQ) send(seedQ); }, 50);
     };
     const close = () => {
+      /* Record that this was closed on purpose. Without it the panel would
+         reappear on every navigation for someone who keeps dismissing it —
+         auto-open is a default, not a policy. */
+      try { localStorage.setItem('antares.copilot', 'closed'); } catch (e) {}
       panel.classList.remove('is-open');
       document.body.classList.remove('ask-panel-open');
       setTimeout(() => { if (!panel.classList.contains('is-open')) { panel.hidden = true; } }, 220);
@@ -2403,6 +2413,48 @@
   // The hero "ask" bar → opens the chat panel, seeded with the question.
   // It also docks: once the hero bar scrolls out of view it re-forms as a
   // floating pill in the bottom-right, draggable to any corner of the viewport.
+  /* Open the assistant automatically in the spaces configured for it.
+     "Work" is a workspace — the copilot being already there is the point, the
+     same way an IDE opens with its side panel out. Other spaces stay quiet
+     until asked.
+
+     Deliberately conservative about when NOT to fire:
+       - a visitor who closed it stays closed, across visits and navigations
+       - never below the drawer's breakpoint, where it covers the whole
+         viewport and would bury the page behind a chat nobody asked for
+       - never when a deep link already targets something specific (#hash), or
+         when the palette handed over a question — that flow opens the panel
+         itself, with focus, and this would race it
+     Opens in quiet mode, so it does not steal the caret from someone reading. */
+  const autoOpenCopilot = (askPanel, site) => {
+    if (!askPanel || typeof askPanel.open !== 'function') return;
+
+    const cfg = (site && site.spaces) || {};
+    const autoSpaces = cfg.autoCopilot || [];
+    if (!autoSpaces.length) return;
+
+    /* Same longest-prefix rule scripts/spaces.js uses, and for the same
+       reason: "/" is a prefix of every path, so a plain startsWith would
+       report "work" on /personal/ too. */
+    const items = cfg.items || [];
+    let here = null;
+    items.forEach((sp) => {
+      const href = sp.href || '/';
+      if (location.pathname.indexOf(href) === 0 &&
+          (!here || href.length > (here.href || '/').length)) here = sp;
+    });
+    if (!here || autoSpaces.indexOf(here.id) === -1) return;
+
+    let dismissed = false;
+    try { dismissed = localStorage.getItem('antares.copilot') === 'closed'; } catch (e) {}
+    if (dismissed) return;
+
+    if (window.innerWidth <= 560) return;
+    if (location.hash) return;
+
+    askPanel.open(undefined, { quiet: true });
+  };
+
   const wireHeroAsk = (askPanel) => {
     const wrap = document.getElementById('hero-ask');
     const form = document.getElementById('hero-ask-form');
@@ -2692,6 +2744,7 @@
       const askPanel = wireAskPanel(site, board);
       window.ASK_PANEL = askPanel;
       wireHeroAsk(askPanel);
+      autoOpenCopilot(askPanel, site);
       wireUsage(site);
     } catch (e) {
       console.error('[render]', e);
