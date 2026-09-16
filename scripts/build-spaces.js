@@ -36,6 +36,28 @@ if (!personal) {
 const outDir = path.join(root, personal.href.replace(/^\/+|\/+$/g, ''));
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
+/* Personal gets the sections Work does not carry (terminal, contact, agents,
+   comments), spliced back in before </main>.
+
+   They are kept in templates/ rather than stripped out of index.html at build
+   time: index.html is both template and artifact for build-html.js, so a strip
+   there removes them from the repo on the first build and there is nothing
+   left to strip on the second. This direction — Work minimal on disk, Personal
+   assembled — cannot lose content. */
+const fragPath = path.join(root, 'templates/personal-sections.html');
+if (fs.existsSync(fragPath)) {
+  const frag = fs.readFileSync(fragPath, 'utf8')
+    /* Drop the file's own explanatory header; it documents the build, not the
+       page, and would ship to every visitor as dead weight in the HTML. */
+    .replace(/^<!--[\s\S]*?-->\n*/, '');
+  const closeMain = html.lastIndexOf('</main>');
+  if (closeMain !== -1) {
+    html = html.slice(0, closeMain) + frag + '\n  ' + html.slice(closeMain);
+  }
+}
+
+
+
 /* Root-relative, not "../". The page can be reached as /personal/ and as
    /personal, and a relative path resolves differently between the two —
    assets would 404 on whichever form the visitor did not use. */

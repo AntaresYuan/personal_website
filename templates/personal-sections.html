@@ -1,0 +1,127 @@
+<!-- Sections that belong to the Personal space only.
+
+     Cut out of index.html — which is the Work page, and stays minimal by
+     design — and spliced back in by scripts/build-spaces.js.
+
+     They live in a separate file rather than being stripped at build time
+     because index.html is BOTH the template and the artifact for
+     build-html.js. Stripping them there deletes them from the repo on the
+     very first build, and the second build has nothing left to strip —
+     verified the hard way. A one-way cut into this file cannot do that. -->
+
+<!-- ═══ terminal ═══ -->
+  <section class="section terminal-section rise rise-3" id="terminal" aria-label="Agent terminal">
+    <header class="sec-head">
+      <span class="sec-cmd">$ ./agent</span>
+      <span class="sec-title">terminal</span>
+      <span class="sec-meta" id="terminal-meta">type <kbd>help</kbd> · ↑↓ history</span>
+    </header>
+
+    <div class="terminal" id="terminal-root">
+      <div class="terminal-chrome">
+        <span class="terminal-dot d-r"></span>
+        <span class="terminal-dot d-y"></span>
+        <span class="terminal-dot d-g"></span>
+        <span class="terminal-path" id="terminal-path">antares@local: ~</span>
+        <span class="terminal-spacer"></span>
+        <button type="button" class="terminal-action" id="terminal-clear" title="clear (⌃L)">clear</button>
+      </div>
+      <div class="terminal-body" id="terminal-body" tabindex="-1">
+        <!-- history rendered here -->
+        <div class="terminal-line term-prompt-line">
+          <span class="term-prompt">$</span>
+          <input
+            type="text"
+            class="terminal-input"
+            id="terminal-input"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Terminal command"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ═══ contact ═══ -->
+  <!-- ── CONTACT ─────────────────────────────────────────────────── -->
+  <section class="section rise rise-4" id="contact">
+    <header class="sec-head">
+      <span class="sec-cmd" id="contact-cmd">$ ./reach-out</span>
+      <span class="sec-title" id="contact-title">open to:</span>
+    </header>
+    <div class="contact">
+      <p class="contact-intro" id="contact-intro">Currently open to: founder conversations in AI infra &amp; agents, AI PM roles at top product orgs, and contractor work on 0→1 features. <em>Tell me what you&#39;re building.</em></p>
+      <div class="contact-list" id="contact-list"><a href="mailto:chenjy4@uw.edu"><span class="key">email</span><span>chenjy4@uw.edu</span></a><a href="https://www.linkedin.com/in/chenjie-yuan-682b93298/" target="_blank" rel="noopener"><span class="key">linkedin</span><span>Chenjie (Antares) Yuan</span></a><a href="https://github.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">github</span><span>@AntaresYuan</span></a><a href="https://dribbble.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">Dribbblle</span><span>Antares Yuan</span></a></div>
+    </div>
+  </section>
+
+<!-- ═══ agents ═══ -->
+  <section class="section agents-section rise" id="agents" aria-label="For AI agents">
+    <header class="sec-head">
+      <span class="sec-cmd">$ /agents</span>
+      <span class="sec-title">how this site works for AI</span>
+      <span class="sec-meta">three entry points</span>
+    </header>
+
+    <p class="agents-intro">
+      This site is designed to be read by both humans and AI agents. The dashboard, terminal, and detail panels are for you. For an agent, prefer:
+    </p>
+
+    <div class="agents-endpoints">
+      <a href="/llms.txt" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/llms.txt</span>
+        </div>
+        <p>Short summary in plain text per the <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> spec. Best entry point — gist in &lt;1KB.</p>
+      </a>
+
+      <a href="/llms-full.txt" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/llms-full.txt</span>
+        </div>
+        <p>Full content dump — every project card, lens entry, contact info — all plain text. Use when you need depth.</p>
+      </a>
+
+      <a href="/content/board.json" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/content/*.json</span>
+        </div>
+        <p>Raw structured data: <code>profile.json</code>, <code>board.json</code>, <code>lens.json</code>, <code>contact.json</code>. Use for typed access to specific fields.</p>
+      </a>
+    </div>
+
+    <ul class="agents-extras">
+      <li><strong>Stable IDs.</strong> Cards have permanent display IDs (<code>SHIP-01</code>, <code>NOW-01</code>, …) — citable across conversations and durable across content edits.</li>
+      <li><strong>Pre-rendered HTML.</strong> The home page ships with content baked into the initial HTML — readable without executing JavaScript.</li>
+      <li><strong>Open content.</strong> All data lives at <a href="https://github.com/AntaresYuan/personal_website/tree/main/content" target="_blank" rel="noopener">/content</a> on GitHub. Free to scrape, fork, or quote.</li>
+      <li><strong>Build your own.</strong> This whole setup is an open <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">template</a> — “Use this template” on GitHub, <code>npm run reset-content</code>, deploy. There’s a <a href="/blog/">writeup</a> on the why.</li>
+    </ul>
+  </section>
+
+<!-- ═══ comments ═══ -->
+  <section class="section comments-section" aria-label="Comments">
+    <header class="sec-head">
+      <span class="sec-cmd">$ comments</span>
+      <span class="sec-title">notes from readers</span>
+      <span class="sec-meta">via GitHub Discussions</span>
+    </header>
+    <div id="giscus-container">
+      <div class="giscus-lazy"
+        data-repo="AntaresYuan/personal_website"
+        data-repo-id="R_kgDOSYXV8Q"
+        data-category="General"
+        data-category-id="DIC_kwDOSYXV8c4C8tqu"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"></div>
+    </div>
+  </section>

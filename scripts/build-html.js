@@ -231,7 +231,7 @@ const cardHtml = (c) => {
   const tagSlugs = (c.tags ?? []).map((t) => t.toLowerCase()).join('|');
 
   return `
-            <button type="button" class="card" data-id="${escape(c.id)}" data-card-id="${c.displayId}" data-tags="${escape(tagSlugs)}" aria-label="Open details for ${escape(c.title)}">
+            <a class="card" href="/work/${escape(c.slug || '')}/" data-id="${escape(c.id)}" data-card-id="${c.displayId}" data-tags="${escape(tagSlugs)}" aria-label="Open details for ${escape(c.title)}">
               <div class="card-meta-top">
                 <span class="card-id">${c.displayId}</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -247,7 +247,7 @@ const cardHtml = (c) => {
                 ${c.impact ? `<span class="card-impact">${escape(c.impact)}</span>` : ''}
               </div>
               ${links ? `<div class="card-links">${links}</div>` : ''}
-            </button>`;
+            </a>`;
 };
 
 // Filter chips (top 6 tags by frequency, plus the "All" pre-baked in HTML)

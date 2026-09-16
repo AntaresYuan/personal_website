@@ -26,6 +26,7 @@
   /* After build-html: it rewrites index.html in place, and the personal space
      is derived from the finished file. */
   require('./build-spaces');
+  require('./build-work');
   // /usage/ — the full dashboard. After build-html so the homepage skeleton
   // (and its "all charts →" link) is already in place.
   require('./build-usage-page');

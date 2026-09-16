@@ -38,6 +38,10 @@ collections:
   # group is listed (even rarely-edited ones) — both editors serialize an
   # object from exactly the fields declared here, so an omitted sub-field
   # would be dropped from content/site.json on the next save.
+  - divider: true
+    name: "div_work"
+    label: "— WORK —"
+    files: []
   - name: "site"
     label: "Site meta"
     icon: settings          # Sveltia: Material Symbols name; Decap ignores it
@@ -158,6 +162,11 @@ collections:
             summary: "{{fields.status}} · {{fields.title}}"
             fields:
               - { label: "ID (slug)", name: "id",      widget: "string" }
+              # The project's public URL: /work/<slug>/. Exposed because it is
+              # now an address people can share — `id` cannot serve that role,
+              # board.json has duplicate ids (two shipped-2, two now-4).
+              - { label: "URL slug", name: "slug", widget: "string", required: false,
+                  hint: "Published at /work/<slug>/ — changing it breaks shared links" }
               - label: "Status"
                 name: "status"
                 widget: "select"
@@ -229,6 +238,10 @@ collections:
               - { label: "Order (lower = higher up)", name: "order", widget: "number", default: 1 }
 
   # ── Lens: principles ───────────────────────────────────────────────
+  - divider: true
+    name: "div_personal"
+    label: "— PERSONAL —"
+    files: []
   - name: "lens"
     label: "Lens (how I think)"
     icon: lightbulb

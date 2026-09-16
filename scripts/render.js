@@ -260,7 +260,7 @@
         cardIndex.set(displayId, { ...c, displayId });
 
         const html = `
-          <button type="button" class="card" data-id="${escape(c.id)}" data-card-id="${displayId}" data-tags="${escape(tagSlugs)}" aria-label="Open details for ${escape(c.title)}">
+          <a class="card" href="/work/${escape(c.slug || '')}/" data-id="${escape(c.id)}" data-card-id="${displayId}" data-tags="${escape(tagSlugs)}" aria-label="Open details for ${escape(c.title)}">
             <div class="card-meta-top">
               <span class="card-id">${displayId}</span>
               <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -276,7 +276,7 @@
               ${c.impact ? `<span class="card-impact">${escape(c.impact)}</span>` : ''}
             </div>
             ${links ? `<div class="card-links">${links}</div>` : ''}
-          </button>`;
+          </a>`;
         root.insertAdjacentHTML('beforeend', html);
       });
     });
@@ -2452,7 +2452,25 @@
     if (window.innerWidth <= 560) return;
     if (location.hash) return;
 
-    askPanel.open(undefined, { quiet: true });
+    /* On the home page the assistant sits at the BOTTOM, not the side. Work
+       reads as a résumé — one column, top to bottom — and a side drawer that
+       opens on arrival shoves that column sideways before the visitor has read
+       a line. The docked composer stays out of the way until they reach it,
+       and any question they ask promotes it to the side panel (wireHeroAsk).
+       Detail pages do the opposite: there the visitor is already on one
+       subject, so the panel opens beside it. */
+    document.body.classList.add('ask-dock-bottom');
+    /* Clear any saved drag position. The pill writes inline left/right/bottom
+       when dragged, and inline styles beat the stylesheet — a position saved
+       from the corner-pill layout left the bottom composer stuck at the old
+       coordinates (measured: 187px off centre). The centred composer is not
+       draggable, so the stored position has nothing to apply to here. */
+    const pill = document.getElementById('hero-ask');
+    if (pill) {
+      pill.style.removeProperty('left');
+      pill.style.removeProperty('right');
+      pill.style.removeProperty('bottom');
+    }
   };
 
   const wireHeroAsk = (askPanel) => {

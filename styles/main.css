@@ -2004,6 +2004,9 @@ body.blog-post-page .blog-progress {
 }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
+/* Cards are <a> now, not <button>. Two things a button gave for free and a
+   link does not: inherited colour (links default to blue) and no underline. */
+.card { color: inherit; text-decoration: none; }
 .card {
   /* Reset user-agent button styles (rendered as <button> for click + a11y) */
   font: inherit;
@@ -6446,4 +6449,172 @@ body.skin-companion-on [contenteditable="true"] { cursor: auto; }
   .skin-companion,
   .skin-boot,
   .skin-picker { display: none; }
+}
+
+
+/* ── project detail pages (/work/<slug>/) ─────────────────────────────────
+   A reading page, not a dashboard: one column, generous measure, and the ask
+   panel alongside rather than over it. Reuses .page so the space switcher's
+   margin-right shift applies here too without a second rule. */
+.work-detail { max-width: 720px; }
+.wd-crumb {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-24);
+}
+.wd-crumb a { color: inherit; text-decoration: none; }
+.wd-crumb a:hover { color: var(--color-text); }
+
+.wd-head { margin-bottom: var(--sp-24); }
+.wd-status {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  padding: 2px var(--sp-8);
+  border-radius: var(--r-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text-faint);
+  margin-bottom: var(--sp-12);
+}
+.wd-status-shipped { color: var(--color-green, #2E7D32); }
+.wd-status-now { color: var(--color-accent); }
+
+.wd-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-36);
+  line-height: 1.2;
+  margin: 0 0 var(--sp-12);
+}
+.wd-summary {
+  font-size: var(--fs-17);
+  line-height: 1.6;
+  color: var(--color-text-soft);
+  margin: 0 0 var(--sp-8);
+}
+.wd-dates {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+  margin: 0;
+}
+
+.wd-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-24);
+}
+.wd-tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  padding: 3px var(--sp-8);
+  border-radius: 100px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-faint);
+}
+
+.wd-body { font-size: var(--fs-16); line-height: 1.7; }
+.wd-block { margin-top: var(--sp-32); }
+.wd-block-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: 0 0 var(--sp-10);
+}
+.wd-links { display: flex; flex-direction: column; gap: var(--sp-6); }
+.wd-link { color: var(--color-accent); text-decoration: none; font-size: var(--fs-14); }
+.wd-link:hover { text-decoration: underline; }
+
+.wd-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-16);
+  margin-top: var(--sp-48);
+  padding-top: var(--sp-24);
+  border-top: 1px solid var(--color-border);
+}
+.wd-pager-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-12);
+  border-radius: var(--r-sm);
+  color: inherit;
+  text-decoration: none;
+}
+.wd-pager-item:hover { background: var(--color-surface-alt); }
+.wd-pager-next { text-align: right; }
+.wd-pager-dir {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--color-text-faint);
+}
+.wd-pager-title { font-size: var(--fs-14); }
+
+/* The ask panel on a detail page pushes the column, same as elsewhere. */
+body.work-detail-page.ask-panel-open .page,
+body.work-detail-page.ask-panel-open .topnav {
+  margin-right: min(420px, 50vw);
+  transition: margin-right var(--dur-base) var(--ease-out);
+}
+@media (max-width: 560px) {
+  body.work-detail-page.ask-panel-open .page,
+  body.work-detail-page.ask-panel-open .topnav { margin-right: 0; }
+  .wd-pager { grid-template-columns: 1fr; }
+}
+
+
+/* ── home page: assistant docked along the bottom ─────────────────────────
+   Work reads as a résumé, so the assistant waits at the foot of the column
+   instead of opening a drawer that shoves the page sideways on arrival. It
+   only becomes the side panel once a question is asked.
+
+   These rules override the corner-pill geometry, so they must come after it
+   in the file — both target .hero-ask.is-docked at equal specificity and the
+   later one wins. */
+body.ask-dock-bottom .hero-ask.is-docked {
+  left: 50%;
+  right: auto;
+  bottom: var(--sp-24);
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - var(--sp-32)));
+  max-width: none;
+}
+/* Expanded by default here: at the bottom of a reading column it reads as a
+   composer, and a 52px circle you have to discover would waste the position. */
+body.ask-dock-bottom .hero-ask.is-docked .hero-ask-form {
+  width: 100%;
+  padding: var(--sp-8) var(--sp-12);
+  gap: var(--sp-10);
+  cursor: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10);
+}
+body.ask-dock-bottom .hero-ask.is-docked .hero-ask-input,
+body.ask-dock-bottom .hero-ask.is-docked .hero-ask-go {
+  width: auto;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: visible;
+}
+body.ask-dock-bottom .hero-ask.is-docked .hero-ask-input { flex: 1 1 auto; }
+body.ask-dock-bottom .hero-ask.is-docked .ask-mark { width: auto; }
+/* Dragging is for the corner pill; a centred composer has nowhere useful to
+   go, and dragging it would strand it over the text it sits below. */
+body.ask-dock-bottom .hero-ask.is-docked .hero-ask-form { cursor: auto; }
+
+/* Once the side panel opens, the bottom composer would sit under it and
+   duplicate its input. */
+body.ask-dock-bottom.ask-panel-open .hero-ask.is-docked {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  body.ask-dock-bottom .hero-ask.is-docked {
+    width: calc(100vw - var(--sp-24));
+  }
 }
