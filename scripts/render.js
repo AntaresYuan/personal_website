@@ -2752,6 +2752,16 @@
   /* ── Boot ───────────────────────────────────────────────────────── */
   (async () => {
     try {
+      /* The Work page is a pre-rendered one-screen CV. Its content is baked in
+         at build time and it deliberately has none of the dashboard's
+         containers, so the full render pass throws on the first missing
+         element — and the catch below then paints a "content load failed"
+         banner over a page that is actually fine.
+
+         There, only the interactive parts are wired (assistant, theme, skin)
+         and the content pass is skipped. */
+      const cvOnly = document.body.classList.contains('cv-page');
+
       const [site, profile, board, lens, contact, skills] = await Promise.all([
         json('content/site.json'),
         json('content/profile.json'),
@@ -2781,22 +2791,27 @@
             cardIndex.set(displayId, { ...c, displayId });
           });
         });
-      } else {
+      } else if (!cvOnly) {
         renderMeta(site);
         renderHero(profile);
         renderBoard(board);
         renderLens(lens);
         renderContact(contact);
       }
-      // Skills hydrate the same Map regardless of prerender state — the
-      // section is SSR-rendered by build-html.js, runtime just needs the
-      // index for click-to-open and for the cross-surface open-card event.
-      hydrateSkills(skills);
-      // Wire interactive behavior — needed in both prerendered and runtime
-      // modes since build-html.js only emits markup, not event listeners.
-      wireFilterChipClicks();
-      wireViewTabs();
-      wireModal();
+      /* Skills hydrate the same Map regardless of prerender state — the
+         section is SSR-rendered by build-html.js, runtime just needs the
+         index for click-to-open and for the cross-surface open-card event.
+         Skipped on the CV page, which has no skills section to index. */
+      if (!cvOnly) hydrateSkills(skills);
+      /* Wire interactive behavior — needed in both prerendered and runtime
+         modes since build-html.js only emits markup, not event listeners.
+         The board-bound ones are skipped on the CV page: there is no board,
+         no filter chips and no view tabs there to wire. */
+      if (!cvOnly) {
+        wireFilterChipClicks();
+        wireViewTabs();
+        wireModal();
+      }
       wireTheme();
       /* Expose the panel so other surfaces can hand it a question. The command
          palette needs it for its "ask Antares" row, and palette.js is a
@@ -2805,7 +2820,7 @@
       window.ASK_PANEL = askPanel;
       wireHeroAsk(askPanel);
       autoOpenCopilot(askPanel, site);
-      wireUsage(site);
+      if (!cvOnly) wireUsage(site);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');

@@ -6924,13 +6924,21 @@ body.ask-dock-bottom.ask-panel-open .hero-ask.is-docked {
 body.cv-page { overflow: hidden; }          /* the page IS the screen */
 
 .cv {
-  height: calc(100vh - 56px);               /* minus the top bar */
+  /* min-height, not height: the grid sizes to its content and only fills the
+     screen when the content is shorter. A hard height forced the rows to
+     stretch and opened gaps between them. */
+  /* Centre the block in the viewport instead of stacking it at the top. The
+     content is ~900px and the screen is taller, so aligning to the start left
+     600px of dead space under the page — it read as unfinished rather than
+     compact. */
+  min-height: calc(100vh - 56px);
   max-width: 1180px;
   margin: 0 auto;
-  padding: var(--sp-24) var(--sp-32) var(--sp-16);
+  padding: var(--sp-32);
   display: grid;
   grid-template-columns: 250px 1fr 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
+  align-content: center;
   grid-template-areas:
     "rail headline headline"
     "rail exp      proj";
@@ -6943,6 +6951,7 @@ body.cv-page { overflow: hidden; }          /* the page IS the screen */
   grid-area: rail;
   display: flex;
   flex-direction: column;
+  align-self: start;          /* hug the content; do not stretch the row */
   gap: var(--sp-6);
   padding-right: var(--sp-24);
   border-right: 1px solid var(--color-border);
@@ -6979,8 +6988,12 @@ body.cv-page { overflow: hidden; }          /* the page IS the screen */
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-4);
-  margin-top: auto;
+  /* Sits right under the links, not pinned to the bottom. `margin-top: auto`
+     pushed it to the floor of a full-height grid row and left ~360px of empty
+     column in the middle of the page. */
+  margin-top: var(--sp-16);
   padding-top: var(--sp-16);
+  border-top: 1px solid var(--color-border);
 }
 .cv-skill {
   font-family: var(--font-mono);

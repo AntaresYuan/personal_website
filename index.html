@@ -18,7 +18,7 @@
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles/main.css?v=ee07cc93">
+<link rel="stylesheet" href="/styles/main.css?v=9d381364">
 <script>
   /* Inline and first — applying the stored theme after paint flashes the
      wrong palette on every load. */
@@ -60,6 +60,12 @@
       <span class="tt-icon tt-light" aria-hidden="true">☀</span>
       <span class="tt-icon tt-dark" aria-hidden="true">☾</span>
     </button>
+    <!-- Skin picker. skin-runtime.js fills the list; without the container the
+         16 skins are unreachable from this page. -->
+    <details class="skin-picker" id="skin-picker">
+      <summary aria-label="Skin"><span id="skin-current">Paper</span> <span class="skin-caret" aria-hidden="true">⌄</span></summary>
+      <div class="skin-menu" id="skin-menu"></div>
+    </details>
   </div>
 </nav>
 
@@ -130,7 +136,7 @@
           <a href="/work/lark-loom/">
             <span class="cv-proj-t">Lark Loom</span>
             <span class="cv-proj-d">IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.</span>
-            <span class="cv-proj-m"><span class="m-from">65%</span><span class="m-arr" aria-hidden="true">→</span><span class="m-to">80%</span></span>
+            
           </a>
         </li>
         <li class="cv-proj">
@@ -151,14 +157,14 @@
           <a href="/work/coze-multi-agent/">
             <span class="cv-proj-t">Coze Multi-Agent Orchestration</span>
             <span class="cv-proj-d">Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.</span>
-            <span class="cv-proj-m"><span class="m-from">16/30</span><span class="m-arr" aria-hidden="true">→</span><span class="m-to">28/30</span></span>
+            
           </a>
         </li>
         <li class="cv-proj">
           <a href="/work/kaboo/">
             <span class="cv-proj-t">Kaboo — Token Efficiency</span>
             <span class="cv-proj-d">Existing stats answered &quot;how much was consumed&quot;, never &quot;which consumption was wasteful&quot;.</span>
-            <span class="cv-proj-m"><span class="m-to">5</span></span>
+            <span class="cv-proj-m"><span class="m-to">thousands of internal users</span></span>
           </a>
         </li></ol>
   </section>
@@ -238,7 +244,7 @@
 
 <script src="/scripts/beacon.js?v=2dc05071" defer></script>
 <script src="/scripts/qa-faq.js?v=657b3299" defer></script>
-<script src="/scripts/render.js?v=caffe9fe" defer></script>
+<script src="/scripts/render.js?v=0f3da4e1" defer></script>
 <script src="/scripts/palette.js?v=60c99a82" defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2" defer></script>
 <!-- Art before runtime: skin-runtime.js reads what these two define, and

@@ -88,8 +88,19 @@ const expHtml = jobs.map((j) => `
           </ul>
         </article>`).join('');
 
+/* Whatever the headline strip already shows must not be repeated in the
+   project column — the same figure twice reads as a layout bug, not emphasis. */
+const headlineKeys = new Set(headline.map((m) => `${m.label}|${m.to}`));
+
 const projHtml = projects.map((c) => {
-  const top = (c.metrics ?? [])[0];
+  /* Skip metrics already in the headline, and skip bare values whose label is
+     needed to make sense of them: "5" on its own says nothing, while
+     "2 papers" or "42.5%" carries its own unit. */
+  const top = (c.metrics ?? []).find((m) => {
+    if (headlineKeys.has(`${m.label}|${m.to}`)) return false;
+    if (m.from) return true;                       // a pair is self-explanatory
+    return /[%a-zA-Z]/.test(String(m.to ?? ''));   // a lone value needs a unit
+  });
   return `
         <li class="cv-proj">
           <a href="/work/${e(c.slug)}/">
@@ -181,6 +192,12 @@ const html = `<!DOCTYPE html>
       <span class="tt-icon tt-light" aria-hidden="true">☀</span>
       <span class="tt-icon tt-dark" aria-hidden="true">☾</span>
     </button>
+    <!-- Skin picker. skin-runtime.js fills the list; without the container the
+         16 skins are unreachable from this page. -->
+    <details class="skin-picker" id="skin-picker">
+      <summary aria-label="Skin"><span id="skin-current">Paper</span> <span class="skin-caret" aria-hidden="true">⌄</span></summary>
+      <div class="skin-menu" id="skin-menu"></div>
+    </details>
   </div>
 </nav>
 
