@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="/styles/main.css?v=e0f3e0ec">
+<link rel="stylesheet" href="/styles/main.css?v=6f132087">
   <!-- feature-beacon -->
   <script defer src="/scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -841,6 +841,9 @@
     <!-- Composer: one soft rounded card with the send button INSIDE it, which
          is what ChatGPT, Claude and Doubao all do. A pill with the button
          beside it reads as a search box, not a place to compose. -->
+    <!-- Shows the passage a visitor highlighted, above the composer, so it is
+         clear the next question carries that context. Filled by render.js. -->
+    <div class="ask-quote-chip" id="ask-quote-chip" hidden></div>
     <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
       <div class="ask-panel-field">
         <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="Ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
@@ -1030,11 +1033,12 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="/scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="/scripts/render.js?v=1ff0d957"   defer></script>
+<script src="/scripts/render.js?v=caffe9fe"   defer></script>
 <script src="/scripts/terminal.js?v=ef73ed0e" defer></script>
 <script src="/scripts/palette.js?v=60c99a82"  defer></script>
 <script src="/scripts/giscus-lazy.js?v=0521a30c" defer></script>
 <script src="/scripts/spaces.js?v=481ab0ca" defer></script>
+<script src="/scripts/ask-selection.js?v=a629b919" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c"   defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2"        defer></script>
 <script src="/scripts/skin-characters.js?v=b78cfa18" defer></script>

@@ -2287,7 +2287,12 @@
       }
       let html = convo.map((m) => {
         const you = m.role === 'user';
-        return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}"><div class="ask-msg-text">${escape(m.content)}</div></div>`;
+        /* A highlighted passage renders above the question as a quote, not
+           inside it — the visitor asked the question, they did not type the
+           passage, and merging the two makes the log unreadable. */
+        const quote = (you && m.quote)
+          ? `<div class="ask-msg-quote">${escape(m.quote)}</div>` : '';
+        return `<div class="ask-msg ask-msg-${you ? 'you' : 'bot'}">${quote}<div class="ask-msg-text">${escape(m.content)}</div></div>`;
       }).join('');
       /* role=status + aria-label because three animated dots convey nothing to
          a screen reader. `status` is implicitly aria-live=polite, which waits
@@ -2328,17 +2333,49 @@
         : "I don't see that covered here — the roadmap below has what I've shipped and what I'm building.") + tag;
     };
 
-    const send = (raw) => {
+    /* `selection` is text the visitor highlighted on the page. It rides along
+       as context so a question like "what does this mean?" has a referent,
+       without being shown as if they had typed it. */
+    /* Pending quote: set when the visitor picks "Ask about this", consumed by
+       the next send(). Rendered as a dismissible chip so it never silently
+       attaches to a question the visitor thought was about something else. */
+    let pendingQuote = '';
+    const quoteChip = document.getElementById('ask-quote-chip');
+    const renderQuoteChip = () => {
+      if (!quoteChip) return;
+      if (!pendingQuote) { quoteChip.hidden = true; quoteChip.innerHTML = ''; return; }
+      quoteChip.hidden = false;
+      quoteChip.innerHTML =
+        `<span class="ask-quote-text"></span>` +
+        `<button class="ask-quote-x" type="button" aria-label="Remove quoted text">` +
+        `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" ` +
+        `stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>`;
+      /* textContent, not interpolation: the passage is arbitrary page text and
+         may contain < or &. */
+      quoteChip.querySelector('.ask-quote-text').textContent = pendingQuote;
+      quoteChip.querySelector('.ask-quote-x')
+        .addEventListener('click', () => setPendingQuote(''));
+    };
+    const setPendingQuote = (t) => { pendingQuote = String(t || '').slice(0, 1200); renderQuoteChip(); };
+
+    const send = (raw, selection) => {
       const q = String(raw || '').trim().slice(0, 500);
       if (!q || busy) return;
-      convo.push({ role: 'user', content: q });
+      const sel = String(selection || pendingQuote || '').trim().slice(0, 1200);
+      if (pendingQuote) setPendingQuote('');   // consumed by this turn
+      /* Stored on the turn rather than concatenated into the question: the log
+         shows what was asked, and the quote renders as its own block above it.
+         Splicing it into `content` would put the whole passage in the user's
+         bubble as though they had typed it. */
+      convo.push(sel ? { role: 'user', content: q, quote: sel }
+                     : { role: 'user', content: q });
       renderLog(true);
       setBusy(true);
       const finish = (answer) => { convo.push({ role: 'assistant', content: answer }); renderLog(false); setBusy(false); input.focus(); };
       if (!url) { setTimeout(() => finish(offlineAnswer(q)), 220); return; }
       // Send both: `messages` for the multi-turn Worker, `q` so an older
       // single-turn deployment still works (it ignores `messages`).
-      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo }), signal: AbortSignal.timeout(30000) })
+      fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, messages: convo, context: sel ? `The visitor highlighted this passage on the page:\n"${sel}"` : undefined }), signal: AbortSignal.timeout(30000) })
         .then(async (r) => {
           let d = {};
           try { d = await r.json(); } catch (_) { /* non-JSON */ }
@@ -2366,6 +2403,11 @@
        panel the visitor opened deliberately still focuses, as before. */
     const open = (seedQ, opts) => {
       const quiet = !!(opts && opts.quiet);
+      /* A highlighted passage arrives before the question does. Park it and
+         attach it to whatever gets asked next, showing a chip above the
+         composer so it is obvious the question will be about that text and
+         not the page at large. */
+      if (opts && opts.quote) setPendingQuote(String(opts.quote));
       if (!panel.classList.contains('is-open')) {
         panel.hidden = false;
         void panel.offsetWidth;                              // reflow so the transition fires

@@ -51,16 +51,41 @@
                '<span class="ask-msg-dots" role="status" aria-label="Thinking">' +
                '<i></i><i></i><i></i></span></div>';
       }
+      var quoted = (m.role === 'you' && m.quote)
+        ? '<div class="ask-msg-quote">' + esc(m.quote) + '</div>' : '';
       return '<div class="ask-msg ask-msg-' + (m.role === 'you' ? 'you' : 'bot') + '">' +
-             '<div class="ask-msg-text">' + esc(m.text) + '</div></div>';
+             quoted + '<div class="ask-msg-text">' + esc(m.text) + '</div></div>';
     }).join('');
     log.scrollTop = log.scrollHeight;
+  };
+
+  var pendingQuote = '';
+  var quoteChip = document.getElementById('ask-quote-chip');
+  var renderQuoteChip = function () {
+    if (!quoteChip) return;
+    if (!pendingQuote) { quoteChip.hidden = true; quoteChip.innerHTML = ''; return; }
+    quoteChip.hidden = false;
+    quoteChip.innerHTML =
+      '<span class="ask-quote-text"></span>' +
+      '<button class="ask-quote-x" type="button" aria-label="Remove quoted text">' +
+      '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>';
+    /* textContent: the passage is arbitrary page text. */
+    quoteChip.querySelector('.ask-quote-text').textContent = pendingQuote;
+    quoteChip.querySelector('.ask-quote-x')
+      .addEventListener('click', function () { setPendingQuote(''); });
+  };
+  var setPendingQuote = function (t) {
+    pendingQuote = String(t || '').slice(0, 1200);
+    renderQuoteChip();
   };
 
   var send = function (q) {
     if (busy || !q) return;
     busy = true;
-    convo.push({ role: 'you', text: q });
+    var quote = pendingQuote;
+    if (quote) setPendingQuote('');
+    convo.push(quote ? { role: 'you', text: q, quote: quote } : { role: 'you', text: q });
     convo.push({ role: 'bot', pending: true });
     render();
 
@@ -87,7 +112,10 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         q: q,
-        context: card.title ? ('Project: ' + card.title) : undefined,
+        context: [
+          card.title ? ('Project: ' + card.title) : '',
+          quote ? ('The visitor highlighted this passage:\n"' + quote + '"') : ''
+        ].filter(Boolean).join('\n\n') || undefined,
         messages: convo.filter(function (m) { return !m.pending; })
           .map(function (m) { return { role: m.role === 'you' ? 'user' : 'assistant', content: m.text }; })
       })
@@ -144,7 +172,15 @@
   });
 
   /* Expose it so anything else on the page can hand over a question. */
-  window.ASK_PANEL = { open: function (q) { open(false); if (q) send(q); } };
+  /* Same contract as the home page's panel, so scripts/ask-selection.js can
+     drive either without knowing which page it is on. */
+  window.ASK_PANEL = {
+    open: function (q, opts) {
+      if (opts && opts.quote) setPendingQuote(String(opts.quote));
+      open(false);
+      if (q) send(q);
+    }
+  };
 
   fetch('/content/site.json', { cache: 'no-store' })
     .then(function (r) { return r.json(); })

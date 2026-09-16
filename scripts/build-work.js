@@ -42,6 +42,7 @@ const skinsV = hashOf('scripts/skins.js');
 const skinRtV = hashOf('scripts/skin-runtime.js');
 const spacesV = hashOf('scripts/spaces.js');
 const workV = hashOf('scripts/work-detail.js');
+const selV = hashOf('scripts/ask-selection.js');
 
 const STATUS_LABEL = { shipped: 'SHIPPED', now: 'NOW', next: 'NEXT', later: 'LATER' };
 
@@ -200,6 +201,7 @@ function detailPage(card) {
     </span>
   </div>
   <div class="ask-panel-log" id="ask-panel-log" role="log" aria-live="polite"></div>
+  <div class="ask-quote-chip" id="ask-quote-chip" hidden></div>
   <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
     <div class="ask-panel-field">
       <input class="ask-panel-input" id="ask-panel-input" type="text"
@@ -219,6 +221,7 @@ function detailPage(card) {
 <script src="/scripts/skin-runtime.js?v=${skinRtV}" defer></script>
 <script src="/scripts/spaces.js?v=${spacesV}" defer></script>
 <script src="/scripts/work-detail.js?v=${workV}" defer></script>
+<script src="/scripts/ask-selection.js?v=${selV}" defer></script>
 </body>
 </html>
 `;
