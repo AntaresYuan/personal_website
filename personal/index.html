@@ -131,11 +131,6 @@
 
   <!-- ── TOP NAV ─────────────────────────────────────────────────── -->
   <nav class="topnav rise">
-    <!-- Space switcher. Modelled on how ChatGPT switches between ChatGPT and
-         Codex: the product name in the top-left IS the control, and clicking
-         it opens a menu of the available spaces. Keeping it on the brand means
-         no extra chrome in a bar that already holds four controls.
-         Populated from site.json → spaces; behaviour in scripts/spaces.js. -->
     <div class="brand" id="space-switcher">
       <button class="brand-btn" id="space-trigger" type="button"
               aria-haspopup="menu" aria-expanded="false" aria-controls="space-menu">
@@ -174,184 +169,475 @@
         <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
         <div class="skin-menu" role="menu" aria-label="Skin"></div>
       </details>
-      <span class="meta" id="last-updated">updated 2026-09-16</span>
+      <span class="meta" id="last-updated">updated 2026-09-15</span>
     </div>
   </nav>
 
   <!-- ── HERO ────────────────────────────────────────────────────── -->
-  <!-- ── HEADER ───────────────────────────────────────────────────
-       Name, role, contact, résumé downloads. Deliberately short: the proof
-       strip and selected work come next, and a résumé should lead with what
-       was achieved rather than a page of introduction.
+  <header class="hero rise rise-1">
+    <div class="hero-left">
+      <!-- Avatar sits inline on the left of the name/slogan block.
+           Calm by default; swaps to talking on hover/focus/tap. -->
+      <button type="button" class="hero-avatar" id="hero-avatar"
+              aria-label="Avatar — tap or hover to see me say hi">
+        <img class="avatar-img avatar-calm"    id="avatar-calm"    alt="Antares — illustrated portrait" src="/media/avatar-calm.png">
+        <img class="avatar-img avatar-talking" id="avatar-talking" alt="" aria-hidden="true" src="/media/avatar-talking.png">
+      </button>
+      <div class="hero-text">
+        <h1 class="hero-name" id="hero-name">Antares <em>Yuan</em></h1>
+        <p class="hero-slogan" id="hero-slogan">A star to ship by.</p>
+        <div class="hero-meta" id="hero-meta"><span>AI Product Manager</span><span class="sep">·</span><span>Seattle | Beijing · currently working at ByteDance as an AI PM intern</span><span class="sep">·</span><a class="hero-resume" href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a><span class="sep">·</span><a class="hero-resume" lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a><span class="sep">·</span><span class="now-pill">Building in public</span><span class="pill">Pi-Shaped AI PM</span><span class="pill">AI Agent Native</span><span class="pill">0→1</span><span class="pill">HCI Researcher</span><span class="pill">HCDE @ UDub</span></div>
+      </div>
+    </div>
+    <div class="hero-ctas" id="hero-ctas">
+        <a class="cta" href="#terminal">
+          <div>
+            <div class="cta-label">for agents</div>
+            <div class="cta-text">use the CLI</div>
+          </div>
+          <span class="cta-arrow">→</span>
+        </a>
+        <a class="cta" href="#shipped">
+          <div>
+            <div class="cta-label">for HR</div>
+            <div class="cta-text">30-second snapshot</div>
+          </div>
+          <span class="cta-arrow">→</span>
+        </a>
+        <a class="cta" href="#now">
+          <div>
+            <div class="cta-label">for founders</div>
+            <div class="cta-text">what I&#39;m building next</div>
+          </div>
+          <span class="cta-arrow">→</span>
+        </a>
+        <a class="cta" href="#contact">
+          <div>
+            <div class="cta-label">for collaborators</div>
+            <div class="cta-text">let&#39;s talk</div>
+          </div>
+          <span class="cta-arrow">→</span>
+        </a></div>
+    <!-- ── /USAGE — live Claude usage dashboard ──────────────────────
+         Sits above the fold so visitors see "I operate in AI" before
+         anything else. SSR shell renders the header + empty heatmap so
+         first paint has no FOUC; render.js fills the cells from
+         https://usage.antaresyuan.site and refreshes every 60s.
+         Silently hides on fetch failure (don't show a broken widget).
+         Disabled via content/site.json → usage.enabled = false.
+         See workers/usage/README.md + docs/usage-sync.md. -->
+    <section class="section usage-section rise rise-2" id="usage" aria-label="Live AI usage">
+      <h2 class="usage-title">Antares's <em>Token Consumption</em></h2>
+      <div class="usage-views" id="usage-views" role="group" aria-label="Chart view" hidden hidden=""></div>
+      <div class="usage-heatmap-wrap">
+        
+        <div class="usage-heatmap-inner">
+          <div class="usage-heatmap" id="usage-heatmap" role="img" aria-label="One-year activity heatmap"><svg viewBox="0 0 1015 148" width="1015" height="148" preserveAspectRatio="xMinYMin meet" aria-hidden="true"><text x="24" y="45" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Mon</text><text x="24" y="83" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Wed</text><text x="24" y="121" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Fri</text><rect x="30" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/></svg></div>
+          <div class="usage-legend" aria-hidden="true">
+                  <span>Less</span>
+                  <span class="usage-legend-cell usage-legend-empty"></span>
+                  <span class="usage-legend-cell usage-legend-q0"></span>
+                  <span class="usage-legend-cell usage-legend-q1"></span>
+                  <span class="usage-legend-cell usage-legend-q2"></span>
+                  <span class="usage-legend-cell usage-legend-q3"></span>
+                  <span>More</span>
+                </div>
+          <div class="usage-caption" id="usage-caption" hidden hidden=""></div>
+        </div>
+      </div>
+      <div class="usage-stats" id="usage-stats"><span class="usage-stat"><strong>—</strong> tokens</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> sessions</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> days active</span><span class="usage-stat-sep">·</span><span class="usage-stat usage-stat-since">since —</span></div>
+      <div class="usage-flourish">
+        <span class="usage-funfact" id="usage-funfact"></span>
+        <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
+        <a class="usage-more-link" href="/usage/">all charts →</a>
+        <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
+        <span class="usage-foot" id="usage-foot"><span id="usage-live-text">live</span></span>
+      </div>
+    </section>
 
-       The avatar, slogan, identity pills and FOR-X lane cards moved to the
-       Personal space — they say who I am, not what I did. -->
-  <header class="resume-header rise rise-1">
-    <div class="rh-identity">
-      <h1 class="rh-name" id="hero-name">Antares <em>Yuan</em></h1>
-      <p class="rh-role" id="hero-role">AI Product Manager · Agents, evals, 0→1</p>
-    </div>
-    <div class="rh-meta">
-      <span class="rh-where">Seattle | Beijing</span>
-      <span class="rh-sep" aria-hidden="true">·</span>
-      <span class="rh-now">ByteDance, AI PM intern</span>
-      <span class="rh-sep" aria-hidden="true">·</span>
-      <a class="rh-dl" href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a>
-      <a class="rh-dl" lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a>
-    </div>
+    <!-- "Ask this portfolio" — a grounded Q&A, visible above the fold.
+         With the antares-qa Worker (content/site.json → qa.workerUrl) it
+         answers inline; without one it opens the ⌘K palette pre-filled.
+         Wired in scripts/render.js (wireHeroAsk). -->
   </header>
 
-  <!-- ── PROOF STRIP ──────────────────────────────────────────────
-       The first thing on the page: four numbers a reader can check, pulled
-       from the work below. This is the "what's the headline" answer that the
-       old hero never gave. Filled by scripts/build-html.js. -->
-  <section class="proof-strip rise rise-1" id="proof" aria-label="Highlights">
-    <ul class="proof-list" id="proof-list">
-        <li class="proof-item">
-          <span class="pf-val"><span class="pf-from">25.4%</span><span class="pf-arrow" aria-hidden="true">→</span><span class="pf-to">99.5%</span></span>
-          <span class="pf-label">Label usability</span>
-          <span class="pf-src">ByteDance</span>
-        </li>
-        <li class="proof-item">
-          <span class="pf-val"><span class="pf-from">65%</span><span class="pf-arrow" aria-hidden="true">→</span><span class="pf-to">80%</span></span>
-          <span class="pf-label">Memory recall pass rate</span>
-          <span class="pf-src">Lark Loom</span>
-        </li>
-        <li class="proof-item">
-          <span class="pf-val"><span class="pf-from">95s</span><span class="pf-arrow" aria-hidden="true">→</span><span class="pf-to">50s</span></span>
-          <span class="pf-label">Task latency</span>
-          <span class="pf-src">Lark Loom</span>
-        </li>
-        <li class="proof-item">
-          <span class="pf-val"><span class="pf-from">16/30</span><span class="pf-arrow" aria-hidden="true">→</span><span class="pf-to">28/30</span></span>
-          <span class="pf-label">Planning-entry recognition (Seed 2.0 Pro)</span>
-          <span class="pf-src">Coze Multi-Agent Orchestration</span>
-        </li>
-      </ul>
-  </section>
+  <!-- ── BOARD ───────────────────────────────────────────────────── -->
+  <section class="board-section rise rise-2" aria-label="Project board" id="shipped">
 
-  <!-- ── EXPERIENCE ───────────────────────────────────────────────
-       The internship and its KRs — the heaviest entry on the résumé, and one
-       the site previously had nowhere to put. Filled from
-       content/profile.json → experience. -->
-  <section class="section exp-section rise rise-2" id="experience" aria-label="Experience">
-    <header class="sec-head">
-      <span class="sec-cmd">$ cat experience.md</span>
-      <span class="sec-title">experience</span>
-    </header>
-    <div class="exp-list" id="exp-list">
-      <article class="exp-job">
-        <div class="exp-head">
-          <div>
-            <h3 class="exp-org">ByteDance</h3>
-            <p class="exp-role">AI Product Manager (Intern) · Institute of Management Strategy · Hiring Agent</p>
-          </div>
-          <span class="exp-period">2026 — present</span>
+    <!-- toolbar: board name + view tabs + count -->
+    <div class="board-toolbar">
+      <div class="board-toolbar-left">
+        <h2 class="board-name">
+          <span class="board-icon" aria-hidden="true">⊞</span>
+          <span id="board-name-text">Roadmap</span>
+        </h2>
+        <div class="board-views" role="tablist" aria-label="Board view">
+          <button class="view-tab is-active" type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="true" data-view="board">Board</button>
+          <button class="view-tab" type="button" role="tab" id="tab-table" aria-controls="view-table" aria-selected="false" data-view="table">Table</button>
+          <button class="view-tab" type="button" role="tab" id="tab-timeline" aria-controls="view-timeline" aria-selected="false" data-view="timeline">Timeline</button>
+          <button class="view-tab" type="button" role="tab" id="tab-specs" aria-controls="view-specs" aria-selected="false" data-view="specs">Specs</button>
         </div>
-        <p class="exp-summary">Scaling a hiring agent from 1→N: push agent-recommended screening toward senior-recruiter quality, and grow it from a chat tool into an AI-native recruiting workbench.</p>
-        <ul class="exp-krs">
-          <li class="exp-kr">
-            <div class="exp-kr-main">
-              <h4 class="exp-kr-title">Job-category knowledge governance</h4>
-              <p class="exp-kr-body">Attributed 200+ bad cases to the model lacking knowledge of closely related job functions, rooted in JD–Title mismatches depressing match scores. Governed 10,000+ postings into a taxonomy used as structured input for recall and ranking.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Postings governed</span><span class="rm-val"><span class="rm-to">10,000+</span></span></li><li class="rm"><span class="rm-label">Taxonomy</span><span class="rm-val"><span class="rm-to">13 categories / 96 subcategories</span></span></li></ul>
-          </li>
-          <li class="exp-kr">
-            <div class="exp-kr-main">
-              <h4 class="exp-kr-title">Pros/cons label quality</h4>
-              <p class="exp-kr-body">Five iterations over 1k offline data points, fixing 12+ recurring issues, plus a label evaluation system scoring four floor dimensions and one ceiling dimension.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Label usability</span><span class="rm-val"><span class="rm-from">25.4%</span><span class="rm-arrow" aria-hidden="true">→</span><span class="rm-to">99.5%</span></span></li></ul>
-          </li>
-          <li class="exp-kr">
-            <div class="exp-kr-main">
-              <h4 class="exp-kr-title">Stable/variable instruction context</h4>
-              <p class="exp-kr-body">Split instructions into a fixed skeleton and variable slots, issuing prefabricated entry points by user stage — lowering the barrier to use while improving output stability.</p>
-            </div>
-            
-          </li></ul>
+      </div>
+      <div class="board-toolbar-right">
+        <span class="board-stat"><strong id="board-total-count">15</strong> cards</span>
+        <span class="board-stat sep">·</span>
+        <span class="board-stat" id="board-shipped-count">5 shipped</span>
+        <span class="board-stat sep">·</span>
+        <select class="audience-lens" id="audience-lens" aria-label="Audience preset — reorder cards for a particular reader">
+          <option value="everyone" selected>For everyone</option>
+          <option value="hr">For HR</option>
+          <option value="founders">For founders</option>
+          <option value="collaborators">For collaborators</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- filter chips (click to filter by tag) -->
+    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="hackathon project" aria-pressed="false">HACKATHON PROJECT</button><button class="filter-chip" type="button" data-filter="ai agent pm" aria-pressed="false">AI Agent PM</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button></div>
+
+    <!-- columns -->
+    <div class="board" id="board" role="tabpanel" aria-labelledby="tab-board">
+      <article class="column col-shipped" id="col-shipped" aria-labelledby="col-shipped-title">
+        <header class="col-head">
+          <h3 class="col-title" id="col-shipped-title"><span class="col-dot"></span>Shipped</h3>
+          <span class="col-count" data-count="shipped">5</span>
+        </header>
+        <div class="col-cards" data-cards="shipped">
+            <button type="button" class="card" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-01</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Lark Loom</div>
+              <div class="card-summary">The collaborative AI Agent rooted  in the Lark ecosystem.</div>
+              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Delivery Layer Developer</span><span class="tag tag-blue">Collaboration</span><span class="tag">Lark</span><span class="tag tag-blue">Lark AI Challenge for College Students</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-15</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-02" data-tags="hackathon project|ai agent pm|benchmark" aria-label="Open details for Citation Trap">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Citation Trap</div>
+              <div class="card-summary">Agentic RAG Reference Benchmark for Trustworthiness Evaluation</div>
+              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Benchmark</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-15</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://github.com/AntaresYuan/citation-trap" target="_blank" rel="noopener">GitHub ↗</a><a href="https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe" target="_blank" rel="noopener">Run the benchmark ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-03" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-03</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Gmail Plus Plus</div>
+              <div class="card-summary">Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI Builder</span><span class="tag">XGBoost</span><span class="tag tag-blue">Productivity</span><span class="tag">Website</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-04-25</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://gmailplusplus.site" target="_blank" rel="noopener">Try it ↗</a><a href="https://github.com/AntaresYuan/Gmailplusplus" target="_blank" rel="noopener">GitHub ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-04" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-04</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Worth Fly</div>
+              <div class="card-summary">WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI PM</span><span class="tag">0→1</span><span class="tag tag-blue">Explainable AI</span><span class="tag">Website</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-04-10</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
+            </button>
+            <button type="button" class="card" data-id="shipped-4" data-card-id="SHIP-05" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
+              <div class="card-meta-top">
+                <span class="card-id">SHIP-05</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">SusBench</div>
+              <div class="card-summary">Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.</div>
+              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span><span class="tag tag-blue">HCI</span><span class="tag">IUI 2025</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-02-23</span>
+                  <span class="card-comments">0</span>
+                </span>
+                <span class="card-impact">cited by 2 papers</span>
+              </div>
+              <div class="card-links"><a href="https://arxiv.org/pdf/2510.11035" target="_blank" rel="noopener">Paper ↗</a><a href="https://arxiv.org/abs/2510.11035" target="_blank" rel="noopener">DOI ↗</a><a href="https://github.com/SusBench-creator/SusBench" target="_blank" rel="noopener">GitHub ↗</a></div>
+            </button></div>
+      </article>
+
+      <article class="column col-now" id="now" aria-labelledby="col-now-title">
+        <header class="col-head">
+          <h3 class="col-title" id="col-now-title"><span class="col-dot"></span>Now</h3>
+          <span class="col-count" data-count="now">5</span>
+        </header>
+        <div class="col-cards" data-cards="now">
+            <button type="button" class="card" data-id="now-1" data-card-id="NOW-01" data-tags="side project" aria-label="Open details for Landed">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-01</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Landed</div>
+              <div class="card-summary">1</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-2" data-card-id="NOW-02" data-tags="intern project" aria-label="Open details for YiTang Profile Matching Infra">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">YiTang Profile Matching Infra</div>
+              <div class="card-summary">1</div>
+              <div class="card-tags"><span class="tag">INTERN PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-3" data-card-id="NOW-03" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-03</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">ApplyMint</div>
+              <div class="card-summary">ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form</div>
+              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">Job Application</span><span class="tag">Chrome Extension</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-4" data-card-id="NOW-04" data-tags="research project" aria-label="Open details for SleepStreak">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-04</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">SleepStreak</div>
+              <div class="card-summary">Designing Healthier Pre-Sleep Phone Use Experience for Teens &amp; Early Adults</div>
+              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="now-4" data-card-id="NOW-05" data-tags="research project" aria-label="Open details for SusFix">
+              <div class="card-meta-top">
+                <span class="card-id">NOW-05</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">SusFix</div>
+              <div class="card-summary">Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.</div>
+              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>ongoing</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button></div>
+      </article>
+
+      <article class="column col-next" id="col-next" aria-labelledby="col-next-title">
+        <header class="col-head">
+          <h3 class="col-title" id="col-next-title"><span class="col-dot"></span>Next</h3>
+          <span class="col-count" data-count="next">3</span>
+        </header>
+        <div class="col-cards" data-cards="next">
+            <button type="button" class="card" data-id="next-1" data-card-id="NEXT-01" data-tags="career pivot|ai builder|0→1" aria-label="Open details for From PM to Builder">
+              <div class="card-meta-top">
+                <span class="card-id">NEXT-01</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">From PM to Builder</div>
+              <div class="card-summary">Stop briefing engineers — become one. Use solo builder loops to solve real business problems end-to-end, not just spec them.</div>
+              <div class="card-tags"><span class="tag">Career Pivot</span><span class="tag tag-blue">AI Builder</span><span class="tag">0→1</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-09</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="next-2" data-card-id="NEXT-02" data-tags="ai aesthetic|distillation|skills|craft" aria-label="Open details for Make AI worth looking at">
+              <div class="card-meta-top">
+                <span class="card-id">NEXT-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Make AI worth looking at</div>
+              <div class="card-summary">Most AI products inherit the model&#39;s flat default aesthetic. Explore distillation + skill composition to ship AI that&#39;s well-crafted, not just functional.</div>
+              <div class="card-tags"><span class="tag">AI Aesthetic</span><span class="tag tag-blue">Distillation</span><span class="tag">Skills</span><span class="tag tag-blue">Craft</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-09</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="next-3" data-card-id="NEXT-03" data-tags="product ops|data analysis|full-stack pm" aria-label="Open details for Close the product loop">
+              <div class="card-meta-top">
+                <span class="card-id">NEXT-03</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Close the product loop</div>
+              <div class="card-summary">Build operations + data analytics fluency so I own the full product lifecycle — not just the design-and-ship slice.</div>
+              <div class="card-tags"><span class="tag">Product Ops</span><span class="tag tag-blue">Data Analysis</span><span class="tag">Full-stack PM</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-09</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button></div>
+      </article>
+
+      <article class="column col-later" id="col-later" aria-labelledby="col-later-title">
+        <header class="col-head">
+          <h3 class="col-title" id="col-later-title"><span class="col-dot"></span>Later</h3>
+          <span class="col-count" data-count="later">2</span>
+        </header>
+        <div class="col-cards" data-cards="later">
+            <button type="button" class="card" data-id="later-1" data-card-id="LATER-01" data-tags="mission|mass-impact ai|real-world ai" aria-label="Open details for AI for people, not just AI people">
+              <div class="card-meta-top">
+                <span class="card-id">LATER-01</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">AI for people, not just AI people</div>
+              <div class="card-summary">The 1-3 year version of me: shipped AI products that ordinary people — not the early-adopter or AI-insider crowd — use daily to make their lives meaningfully better.</div>
+              <div class="card-tags"><span class="tag">Mission</span><span class="tag tag-blue">Mass-impact AI</span><span class="tag">Real-world AI</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-09</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button>
+            <button type="button" class="card" data-id="later-2" data-card-id="LATER-02" data-tags="human-centered design|agent-friendly|hci × ai|pi-shaped" aria-label="Open details for Human-centered, agent-aware">
+              <div class="card-meta-top">
+                <span class="card-id">LATER-02</span>
+                <span class="card-handle" aria-hidden="true">⋮⋮</span>
+              </div>
+              <div class="card-title">Human-centered, agent-aware</div>
+              <div class="card-summary">Human-centered design stays the foundation. But in the agent era, AI is also a user — and most products still ignore that. The 1-3 year version of me: deep enough AI fluency to design for both humans and the agents acting on their behalf, so the AI actually helps.</div>
+              <div class="card-tags"><span class="tag">Human-centered Design</span><span class="tag tag-blue">Agent-friendly</span><span class="tag">HCI × AI</span><span class="tag tag-blue">Pi-shaped</span></div>
+              <div class="card-footer">
+                <span class="card-footer-left">
+                  <span>2026-05-09</span>
+                  <span class="card-comments">0</span>
+                </span>
+                
+              </div>
+              
+            </button></div>
       </article>
     </div>
-  </section>
 
+    <!-- Table view of the same cards — JS-rendered (scripts/render.js) on the
+         first switch to it. The kanban above stays the SSG-prerendered
+         default, so agents and no-JS visitors see that. -->
+    <div class="board-table-view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden></div>
 
-  <!-- ── BOARD ───────────────────────────────────────────────────── -->
-  <!-- ── EXPERIENCE ───────────────────────────────────────────────
-       The résumé's projects, one line each: title, one sentence, the measured
-       result. Everything else — tags, links, the full write-up — lives on the
-       project's own page.
+    <!-- Spec view — the same cards as a long-form document (every card with its
+         `details` expanded). JS-rendered (scripts/render.js) on first switch. -->
+    <div class="board-spec-view" id="view-specs" role="tabpanel" aria-labelledby="tab-specs" hidden></div>
 
-       This replaces a 338-line board that rendered all 15 cards in full. A
-       board is a workspace; a résumé is a claim list. The board still exists
-       in the Personal space, where browsing is the point.
+    <!-- Timeline view — a horizontal "ship log" / mini-Gantt: every Shipped
+         card as a bar (started → updated) on a real month/year axis, overlapping
+         bars packed into lanes. JS-rendered (scripts/render.js) on first switch. -->
+    <div class="board-timeline-view" id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden></div>
 
-       Filled by scripts/build-html.js from cards with `resume: true`. -->
-  <section class="section resume-section rise rise-2" id="work" aria-label="Selected work">
-    <header class="sec-head">
-      <span class="sec-cmd">$ cat work.md</span>
-      <span class="sec-title">selected work</span>
-      <span class="sec-meta" id="resume-count">5 projects · 4 shipped</span>
-    </header>
-    <ol class="resume-list" id="resume-list">
-        <li class="resume-item">
-          <a class="resume-link" href="/work/lark-loom/">
-            <div class="resume-main">
-              <h3 class="resume-title">Lark Loom</h3>
-              <p class="resume-role">AI PM · ByteDance AI Campus Challenge</p>
-              <p class="resume-line">IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Memory recall pass rate</span><span class="rm-val"><span class="rm-from">65%</span><span class="rm-arrow" aria-hidden="true">→</span><span class="rm-to">80%</span></span></li><li class="rm"><span class="rm-label">Task latency</span><span class="rm-val"><span class="rm-from">95s</span><span class="rm-arrow" aria-hidden="true">→</span><span class="rm-to">50s</span><span class="rm-note">-47pp</span></span></li></ul>
-          </a>
-        </li>
-        <li class="resume-item">
-          <a class="resume-link" href="/work/citation-trap/">
-            <div class="resume-main">
-              <h3 class="resume-title">Citation Trap</h3>
-              <p class="resume-role">DevPost · Honorable Mention</p>
-              <p class="resume-line">Benchmark for RAG answers that cite sources which do not actually support them.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Claude citation trustworthiness</span><span class="rm-val"><span class="rm-to">42.5%</span></span></li><li class="rm"><span class="rm-label">GPT citation trustworthiness</span><span class="rm-val"><span class="rm-to">26.7%</span></span></li><li class="rm"><span class="rm-label">Evidence set</span><span class="rm-val"><span class="rm-to">500 Q / 5,000 distractors</span></span></li></ul>
-          </a>
-        </li>
-        <li class="resume-item">
-          <a class="resume-link" href="/work/susbench/">
-            <div class="resume-main">
-              <h3 class="resume-title">SusBench</h3>
-              <p class="resume-role">IUI’26 · 2nd author</p>
-              <p class="resume-line">Online benchmark for how easily computer-use agents fall for UI dark patterns.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Cited by</span><span class="rm-val"><span class="rm-to">2 papers</span></span></li></ul>
-          </a>
-        </li>
-        <li class="resume-item">
-          <a class="resume-link" href="/work/coze-multi-agent/">
-            <div class="resume-main">
-              <h3 class="resume-title">Coze Multi-Agent Orchestration</h3>
-              <p class="resume-role">AI PM · ByteDance AI Full-Stack Challenge · Top 3</p>
-              <p class="resume-line">Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Planning-entry recognition (Seed 2.0 Pro)</span><span class="rm-val"><span class="rm-from">16/30</span><span class="rm-arrow" aria-hidden="true">→</span><span class="rm-to">28/30</span><span class="rm-note">+40pp</span></span></li></ul>
-          </a>
-        </li>
-        <li class="resume-item">
-          <a class="resume-link" href="/work/kaboo/">
-            <div class="resume-main">
-              <h3 class="resume-title">Kaboo — Token Efficiency</h3>
-              <p class="resume-role">AI PM · ByteDance internal open source</p>
-              <p class="resume-line">Existing stats answered &quot;how much was consumed&quot;, never &quot;which consumption was wasteful&quot;.</p>
-            </div>
-            <ul class="resume-metrics"><li class="rm"><span class="rm-label">Waste categories defined</span><span class="rm-val"><span class="rm-to">5</span></span></li><li class="rm"><span class="rm-label">Reach</span><span class="rm-val"><span class="rm-to">thousands of internal users</span></span></li></ul>
-          </a>
-        </li>
-      </ol>
-    <p class="resume-more"><a href="/personal/#shipped">everything I'm building →</a></p>
   </section>
 
   <!-- ── AGENT TERMINAL ──────────────────────────────────────────────
        Embedded interactive CLI. Same data as the board (content/*.json),
        different surface — for keyboard users and AI agents.
   ──────────────────────────────────────────────────────────────────── -->
+  <section class="section terminal-section rise rise-3" id="terminal" aria-label="Agent terminal">
+    <header class="sec-head">
+      <span class="sec-cmd">$ ./agent</span>
+      <span class="sec-title">terminal</span>
+      <span class="sec-meta" id="terminal-meta">type <kbd>help</kbd> · ↑↓ history</span>
+    </header>
+
+    <div class="terminal" id="terminal-root">
+      <div class="terminal-chrome">
+        <span class="terminal-dot d-r"></span>
+        <span class="terminal-dot d-y"></span>
+        <span class="terminal-dot d-g"></span>
+        <span class="terminal-path" id="terminal-path">antares@local: ~</span>
+        <span class="terminal-spacer"></span>
+        <button type="button" class="terminal-action" id="terminal-clear" title="clear (⌃L)">clear</button>
+      </div>
+      <div class="terminal-body" id="terminal-body" tabindex="-1">
+        <!-- history rendered here -->
+        <div class="terminal-line term-prompt-line">
+          <span class="term-prompt">$</span>
+          <input
+            type="text"
+            class="terminal-input"
+            id="terminal-input"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Terminal command"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ── SKILLS: dotfiles for AI ─────────────────────────────────
        The receipts for the "AI Agent Native" pill — Claude Code skills,
@@ -467,12 +753,67 @@
         </div></div>
   </section>
 
+  <!-- ── CONTACT ─────────────────────────────────────────────────── -->
+  <section class="section rise rise-4" id="contact">
+    <header class="sec-head">
+      <span class="sec-cmd" id="contact-cmd">$ ./reach-out</span>
+      <span class="sec-title" id="contact-title">open to:</span>
+    </header>
+    <div class="contact">
+      <p class="contact-intro" id="contact-intro">Currently open to: founder conversations in AI infra &amp; agents, AI PM roles at top product orgs, and contractor work on 0→1 features. <em>Tell me what you&#39;re building.</em></p>
+      <div class="contact-list" id="contact-list"><a href="mailto:chenjy4@uw.edu"><span class="key">email</span><span>chenjy4@uw.edu</span></a><a href="https://www.linkedin.com/in/chenjie-yuan-682b93298/" target="_blank" rel="noopener"><span class="key">linkedin</span><span>Chenjie (Antares) Yuan</span></a><a href="https://github.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">github</span><span>@AntaresYuan</span></a><a href="https://dribbble.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">Dribbblle</span><span>Antares Yuan</span></a></div>
+    </div>
+  </section>
 
   <!-- ── AGENT-FRIENDLY SURFACES ─────────────────────────────────────
        Documents how AI agents and other machine readers can consume the
        site. Aimed at engineering peers / curious humans — agents
        themselves go straight to the endpoints.
   ──────────────────────────────────────────────────────────────────── -->
+  <section class="section agents-section rise" id="agents" aria-label="For AI agents">
+    <header class="sec-head">
+      <span class="sec-cmd">$ /agents</span>
+      <span class="sec-title">how this site works for AI</span>
+      <span class="sec-meta">three entry points</span>
+    </header>
+
+    <p class="agents-intro">
+      This site is designed to be read by both humans and AI agents. The dashboard, terminal, and detail panels are for you. For an agent, prefer:
+    </p>
+
+    <div class="agents-endpoints">
+      <a href="/llms.txt" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/llms.txt</span>
+        </div>
+        <p>Short summary in plain text per the <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> spec. Best entry point — gist in &lt;1KB.</p>
+      </a>
+
+      <a href="/llms-full.txt" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/llms-full.txt</span>
+        </div>
+        <p>Full content dump — every project card, lens entry, contact info — all plain text. Use when you need depth.</p>
+      </a>
+
+      <a href="/content/board.json" class="agents-card">
+        <div class="agents-card-head">
+          <span class="agents-method">GET</span>
+          <span class="agents-path">/content/*.json</span>
+        </div>
+        <p>Raw structured data: <code>profile.json</code>, <code>board.json</code>, <code>lens.json</code>, <code>contact.json</code>. Use for typed access to specific fields.</p>
+      </a>
+    </div>
+
+    <ul class="agents-extras">
+      <li><strong>Stable IDs.</strong> Cards have permanent display IDs (<code>SHIP-01</code>, <code>NOW-01</code>, …) — citable across conversations and durable across content edits.</li>
+      <li><strong>Pre-rendered HTML.</strong> The home page ships with content baked into the initial HTML — readable without executing JavaScript.</li>
+      <li><strong>Open content.</strong> All data lives at <a href="https://github.com/AntaresYuan/personal_website/tree/main/content" target="_blank" rel="noopener">/content</a> on GitHub. Free to scrape, fork, or quote.</li>
+      <li><strong>Build your own.</strong> This whole setup is an open <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">template</a> — “Use this template” on GitHub, <code>npm run reset-content</code>, deploy. There’s a <a href="/blog/">writeup</a> on the why.</li>
+    </ul>
+  </section>
 
   <!-- ── COMMENTS (Giscus) ───────────────────────────────────────────
        Setup (one-time, owner only):
@@ -482,6 +823,27 @@
        4. Uncomment the <script> block
        Until then, this section renders the empty-state placeholder.
   ──────────────────────────────────────────────────────────────────── -->
+  <section class="section comments-section" aria-label="Comments">
+    <header class="sec-head">
+      <span class="sec-cmd">$ comments</span>
+      <span class="sec-title">notes from readers</span>
+      <span class="sec-meta">via GitHub Discussions</span>
+    </header>
+    <div id="giscus-container">
+      <div class="giscus-lazy"
+        data-repo="AntaresYuan/personal_website"
+        data-repo-id="R_kgDOSYXV8Q"
+        data-category="General"
+        data-category-id="DIC_kwDOSYXV8c4C8tqu"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"></div>
+    </div>
+  </section>
 
   <!-- ── COMMAND PALETTE ─────────────────────────────────────────────
        Search anything: sections, cards, terminal commands, agent endpoints.
@@ -583,9 +945,6 @@
     <!-- Composer: one soft rounded card with the send button INSIDE it, which
          is what ChatGPT, Claude and Doubao all do. A pill with the button
          beside it reads as a search box, not a place to compose. -->
-    <!-- Shows the passage a visitor highlighted, above the composer, so it is
-         clear the next question carries that context. Filled by render.js. -->
-    <div class="ask-quote-chip" id="ask-quote-chip" hidden></div>
     <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
       <div class="ask-panel-field">
         <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="Ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
@@ -650,558 +1009,7 @@
     </span>
   </footer>
 
-<!-- ═══ hero (avatar, slogan, identity pills, FOR-X lanes) ═══
-     Moved off the Work page, which now opens with results instead of an
-     introduction. Kept here because this is where saying who I am is the
-     point. -->
-  <section class="section" aria-label="About">
-  <div class="hero">
-    <div class="hero-left">
-      <!-- Avatar sits inline on the left of the name/slogan block.
-           Calm by default; swaps to talking on hover/focus/tap. -->
-      <button type="button" class="hero-avatar" id="hero-avatar"
-              aria-label="Avatar — tap or hover to see me say hi">
-        <img class="avatar-img avatar-calm"    id="avatar-calm"    alt="Antares — illustrated portrait" src="/media/avatar-calm.png">
-        <img class="avatar-img avatar-talking" id="avatar-talking" alt="" aria-hidden="true" src="/media/avatar-talking.png">
-      </button>
-      <div class="hero-text">
-        <h1 class="hero-name" id="hero-name">Antares <em>Yuan</em></h1>
-        <p class="hero-slogan" id="hero-slogan">A star to ship by.</p>
-        <div class="hero-meta" id="hero-meta"><span>AI Product Manager</span><span class="sep">·</span><span>Seattle | Beijing · currently working at ByteDance as an AI PM intern</span><span class="sep">·</span><a class="hero-resume" href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a><span class="sep">·</span><a class="hero-resume" lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a><span class="sep">·</span><span class="now-pill">Building in public</span><span class="pill">Pi-Shaped AI PM</span><span class="pill">AI Agent Native</span><span class="pill">0→1</span><span class="pill">HCI Researcher</span><span class="pill">HCDE @ UDub</span></div>
-      </div>
-    </div>
-    <div class="hero-ctas" id="hero-ctas">
-        <a class="cta" href="#terminal">
-          <div>
-            <div class="cta-label">for agents</div>
-            <div class="cta-text">use the CLI</div>
-          </div>
-          <span class="cta-arrow">→</span>
-        </a>
-        <a class="cta" href="#shipped">
-          <div>
-            <div class="cta-label">for HR</div>
-            <div class="cta-text">30-second snapshot</div>
-          </div>
-          <span class="cta-arrow">→</span>
-        </a>
-        <a class="cta" href="#now">
-          <div>
-            <div class="cta-label">for founders</div>
-            <div class="cta-text">what I&#39;m building next</div>
-          </div>
-          <span class="cta-arrow">→</span>
-        </a>
-        <a class="cta" href="#contact">
-          <div>
-            <div class="cta-label">for collaborators</div>
-            <div class="cta-text">let&#39;s talk</div>
-          </div>
-          <span class="cta-arrow">→</span>
-        </a></div>
-    <!-- ── /USAGE — live Claude usage dashboard ──────────────────────
-         Sits above the fold so visitors see "I operate in AI" before
-         anything else. SSR shell renders the header + empty heatmap so
-         first paint has no FOUC; render.js fills the cells from
-         https://usage.antaresyuan.site and refreshes every 60s.
-         Silently hides on fetch failure (don't show a broken widget).
-         Disabled via content/site.json → usage.enabled = false.
-         See workers/usage/README.md + docs/usage-sync.md. -->
-    <section class="section usage-section rise rise-2" id="usage" aria-label="Live AI usage">
-      <h2 class="usage-title">Antares's <em>Token Consumption</em></h2>
-      <div class="usage-views" id="usage-views" role="group" aria-label="Chart view" hidden hidden=""></div>
-      <div class="usage-heatmap-wrap">
-        
-        <div class="usage-heatmap-inner">
-          <div class="usage-heatmap" id="usage-heatmap" role="img" aria-label="One-year activity heatmap"><svg viewBox="0 0 1015 148" width="1015" height="148" preserveAspectRatio="xMinYMin meet" aria-hidden="true"><text x="24" y="45" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Mon</text><text x="24" y="83" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Wed</text><text x="24" y="121" class="usage-day-label" text-anchor="end" dominant-baseline="middle">Fri</text><rect x="30" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="30" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="49" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="68" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="87" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="106" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="125" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="144" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="163" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="182" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="201" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="220" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="239" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="258" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="277" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="296" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="315" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="334" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="353" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="372" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="391" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="410" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="429" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="448" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="467" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="486" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="505" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="524" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="543" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="562" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="581" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="600" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="619" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="638" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="657" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="676" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="695" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="714" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="733" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="752" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="771" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="790" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="809" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="828" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="847" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="866" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="885" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="904" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="923" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="942" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="961" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="980" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="18" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="37" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="56" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="75" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="94" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="113" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/><rect x="999" y="132" width="16" height="16" rx="2" class="usage-cell usage-cell-empty"/></svg></div>
-          <div class="usage-legend" aria-hidden="true">
-                  <span>Less</span>
-                  <span class="usage-legend-cell usage-legend-empty"></span>
-                  <span class="usage-legend-cell usage-legend-q0"></span>
-                  <span class="usage-legend-cell usage-legend-q1"></span>
-                  <span class="usage-legend-cell usage-legend-q2"></span>
-                  <span class="usage-legend-cell usage-legend-q3"></span>
-                  <span>More</span>
-                </div>
-          <div class="usage-caption" id="usage-caption" hidden hidden=""></div>
-        </div>
-      </div>
-      <div class="usage-stats" id="usage-stats"><span class="usage-stat"><strong>—</strong> tokens</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> sessions</span><span class="usage-stat-sep">·</span><span class="usage-stat"><strong>—</strong> days active</span><span class="usage-stat-sep">·</span><span class="usage-stat usage-stat-since">since —</span></div>
-      <div class="usage-flourish">
-        <span class="usage-funfact" id="usage-funfact"></span>
-        <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
-        <a class="usage-more-link" href="/usage/">all charts →</a>
-        <span class="usage-stat-sep usage-flourish-sep" aria-hidden="true">·</span>
-        <span class="usage-foot" id="usage-foot"><span id="usage-live-text">live</span></span>
-      </div>
-    </section>
-
-    <!-- "Ask this portfolio" — a grounded Q&A, visible above the fold.
-         With the antares-qa Worker (content/site.json → qa.workerUrl) it
-         answers inline; without one it opens the ⌘K palette pre-filled.
-         Wired in scripts/render.js (wireHeroAsk). -->
-  </div>
-  </section>
-
-<!-- ═══ board (full 17-card workspace) ═══ -->
-  <!-- ── BOARD ───────────────────────────────────────────────────── -->
-  <section class="board-section rise rise-2" aria-label="Project board" id="shipped">
-
-    <!-- toolbar: board name + view tabs + count -->
-    <div class="board-toolbar">
-      <div class="board-toolbar-left">
-        <h2 class="board-name">
-          <span class="board-icon" aria-hidden="true">⊞</span>
-          <span id="board-name-text">Roadmap</span>
-        </h2>
-        <div class="board-views" role="tablist" aria-label="Board view">
-          <button class="view-tab is-active" type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="true" data-view="board">Board</button>
-          <button class="view-tab" type="button" role="tab" id="tab-table" aria-controls="view-table" aria-selected="false" data-view="table">Table</button>
-          <button class="view-tab" type="button" role="tab" id="tab-timeline" aria-controls="view-timeline" aria-selected="false" data-view="timeline">Timeline</button>
-          <button class="view-tab" type="button" role="tab" id="tab-specs" aria-controls="view-specs" aria-selected="false" data-view="specs">Specs</button>
-        </div>
-      </div>
-      <div class="board-toolbar-right">
-        <span class="board-stat"><strong id="board-total-count">15</strong> cards</span>
-        <span class="board-stat sep">·</span>
-        <span class="board-stat" id="board-shipped-count">5 shipped</span>
-        <span class="board-stat sep">·</span>
-        <select class="audience-lens" id="audience-lens" aria-label="Audience preset — reorder cards for a particular reader">
-          <option value="everyone" selected>For everyone</option>
-          <option value="hr">For HR</option>
-          <option value="founders">For founders</option>
-          <option value="collaborators">For collaborators</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- filter chips (click to filter by tag) -->
-    <div class="board-filters" id="board-filters" role="group" aria-label="Filter by tag"><button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter-chip" type="button" data-filter="side project" aria-pressed="false">SIDE PROJECT</button><button class="filter-chip" type="button" data-filter="research project" aria-pressed="false">RESEARCH PROJECT</button><button class="filter-chip" type="button" data-filter="hackathon project" aria-pressed="false">HACKATHON PROJECT</button><button class="filter-chip" type="button" data-filter="ai agent pm" aria-pressed="false">AI Agent PM</button><button class="filter-chip" type="button" data-filter="ai builder" aria-pressed="false">AI Builder</button><button class="filter-chip" type="button" data-filter="website" aria-pressed="false">Website</button></div>
-
-    <!-- columns -->
-    <div class="board" id="board" role="tabpanel" aria-labelledby="tab-board">
-      <article class="column col-shipped" id="col-shipped" aria-labelledby="col-shipped-title">
-        <header class="col-head">
-          <h3 class="col-title" id="col-shipped-title"><span class="col-dot"></span>Shipped</h3>
-          <span class="col-count" data-count="shipped">5</span>
-        </header>
-        <div class="col-cards" data-cards="shipped">
-            <a class="card" href="/work/lark-loom/" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
-              <div class="card-meta-top">
-                <span class="card-id">SHIP-01</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Lark Loom</div>
-              <div class="card-summary">The collaborative AI Agent rooted  in the Lark ecosystem.</div>
-              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Delivery Layer Developer</span><span class="tag tag-blue">Collaboration</span><span class="tag">Lark</span><span class="tag tag-blue">Lark AI Challenge for College Students</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-15</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
-            </a>
-            <a class="card" href="/work/citation-trap/" data-id="shipped-2" data-card-id="SHIP-02" data-tags="hackathon project|ai agent pm|benchmark" aria-label="Open details for Citation Trap">
-              <div class="card-meta-top">
-                <span class="card-id">SHIP-02</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Citation Trap</div>
-              <div class="card-summary">Agentic RAG Reference Benchmark for Trustworthiness Evaluation</div>
-              <div class="card-tags"><span class="tag">HACKATHON PROJECT</span><span class="tag tag-blue">AI Agent PM</span><span class="tag">Benchmark</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-15</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              <div class="card-links"><a href="https://github.com/AntaresYuan/citation-trap" target="_blank" rel="noopener">GitHub ↗</a><a href="https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe" target="_blank" rel="noopener">Run the benchmark ↗</a></div>
-            </a>
-            <a class="card" href="/work/gmail-plus-plus/" data-id="shipped-2" data-card-id="SHIP-03" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
-              <div class="card-meta-top">
-                <span class="card-id">SHIP-03</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Gmail Plus Plus</div>
-              <div class="card-summary">Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI Builder</span><span class="tag">XGBoost</span><span class="tag tag-blue">Productivity</span><span class="tag">Website</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-04-25</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              <div class="card-links"><a href="https://gmailplusplus.site" target="_blank" rel="noopener">Try it ↗</a><a href="https://github.com/AntaresYuan/Gmailplusplus" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a>
-            <a class="card" href="/work/worth-fly/" data-id="shipped-3" data-card-id="SHIP-04" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
-              <div class="card-meta-top">
-                <span class="card-id">SHIP-04</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Worth Fly</div>
-              <div class="card-summary">WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">AI PM</span><span class="tag">0→1</span><span class="tag tag-blue">Explainable AI</span><span class="tag">Website</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-04-10</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a>
-            <a class="card" href="/work/susbench/" data-id="shipped-4" data-card-id="SHIP-05" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
-              <div class="card-meta-top">
-                <span class="card-id">SHIP-05</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">SusBench</div>
-              <div class="card-summary">Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.</div>
-              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span><span class="tag tag-blue">HCI</span><span class="tag">IUI 2025</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-02-23</span>
-                  <span class="card-comments">0</span>
-                </span>
-                <span class="card-impact">cited by 2 papers</span>
-              </div>
-              <div class="card-links"><a href="https://arxiv.org/pdf/2510.11035" target="_blank" rel="noopener">Paper ↗</a><a href="https://arxiv.org/abs/2510.11035" target="_blank" rel="noopener">DOI ↗</a><a href="https://github.com/SusBench-creator/SusBench" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a></div>
-      </article>
-
-      <article class="column col-now" id="now" aria-labelledby="col-now-title">
-        <header class="col-head">
-          <h3 class="col-title" id="col-now-title"><span class="col-dot"></span>Now</h3>
-          <span class="col-count" data-count="now">5</span>
-        </header>
-        <div class="col-cards" data-cards="now">
-            <a class="card" href="/work/landed/" data-id="now-1" data-card-id="NOW-01" data-tags="side project" aria-label="Open details for Landed">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-01</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Landed</div>
-              <div class="card-summary">1</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/yitang-profile-matching-infra/" data-id="now-2" data-card-id="NOW-02" data-tags="intern project" aria-label="Open details for YiTang Profile Matching Infra">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-02</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">YiTang Profile Matching Infra</div>
-              <div class="card-summary">1</div>
-              <div class="card-tags"><span class="tag">INTERN PROJECT</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/applymint/" data-id="now-3" data-card-id="NOW-03" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-03</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">ApplyMint</div>
-              <div class="card-summary">ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form</div>
-              <div class="card-tags"><span class="tag">SIDE PROJECT</span><span class="tag tag-blue">Job Application</span><span class="tag">Chrome Extension</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/sleepstreak/" data-id="now-4" data-card-id="NOW-04" data-tags="research project" aria-label="Open details for SleepStreak">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-04</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">SleepStreak</div>
-              <div class="card-summary">Designing Healthier Pre-Sleep Phone Use Experience for Teens &amp; Early Adults</div>
-              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/susfix/" data-id="now-4" data-card-id="NOW-05" data-tags="research project" aria-label="Open details for SusFix">
-              <div class="card-meta-top">
-                <span class="card-id">NOW-05</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">SusFix</div>
-              <div class="card-summary">Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.</div>
-              <div class="card-tags"><span class="tag">RESEARCH PROJECT</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>ongoing</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a></div>
-      </article>
-
-      <article class="column col-next" id="col-next" aria-labelledby="col-next-title">
-        <header class="col-head">
-          <h3 class="col-title" id="col-next-title"><span class="col-dot"></span>Next</h3>
-          <span class="col-count" data-count="next">3</span>
-        </header>
-        <div class="col-cards" data-cards="next">
-            <a class="card" href="/work/from-pm-to-builder/" data-id="next-1" data-card-id="NEXT-01" data-tags="career pivot|ai builder|0→1" aria-label="Open details for From PM to Builder">
-              <div class="card-meta-top">
-                <span class="card-id">NEXT-01</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">From PM to Builder</div>
-              <div class="card-summary">Stop briefing engineers — become one. Use solo builder loops to solve real business problems end-to-end, not just spec them.</div>
-              <div class="card-tags"><span class="tag">Career Pivot</span><span class="tag tag-blue">AI Builder</span><span class="tag">0→1</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-09</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/make-ai-worth-looking-at/" data-id="next-2" data-card-id="NEXT-02" data-tags="ai aesthetic|distillation|skills|craft" aria-label="Open details for Make AI worth looking at">
-              <div class="card-meta-top">
-                <span class="card-id">NEXT-02</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Make AI worth looking at</div>
-              <div class="card-summary">Most AI products inherit the model&#39;s flat default aesthetic. Explore distillation + skill composition to ship AI that&#39;s well-crafted, not just functional.</div>
-              <div class="card-tags"><span class="tag">AI Aesthetic</span><span class="tag tag-blue">Distillation</span><span class="tag">Skills</span><span class="tag tag-blue">Craft</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-09</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/close-the-product-loop/" data-id="next-3" data-card-id="NEXT-03" data-tags="product ops|data analysis|full-stack pm" aria-label="Open details for Close the product loop">
-              <div class="card-meta-top">
-                <span class="card-id">NEXT-03</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Close the product loop</div>
-              <div class="card-summary">Build operations + data analytics fluency so I own the full product lifecycle — not just the design-and-ship slice.</div>
-              <div class="card-tags"><span class="tag">Product Ops</span><span class="tag tag-blue">Data Analysis</span><span class="tag">Full-stack PM</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-09</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a></div>
-      </article>
-
-      <article class="column col-later" id="col-later" aria-labelledby="col-later-title">
-        <header class="col-head">
-          <h3 class="col-title" id="col-later-title"><span class="col-dot"></span>Later</h3>
-          <span class="col-count" data-count="later">2</span>
-        </header>
-        <div class="col-cards" data-cards="later">
-            <a class="card" href="/work/ai-for-people-not-just-ai-people/" data-id="later-1" data-card-id="LATER-01" data-tags="mission|mass-impact ai|real-world ai" aria-label="Open details for AI for people, not just AI people">
-              <div class="card-meta-top">
-                <span class="card-id">LATER-01</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">AI for people, not just AI people</div>
-              <div class="card-summary">The 1-3 year version of me: shipped AI products that ordinary people — not the early-adopter or AI-insider crowd — use daily to make their lives meaningfully better.</div>
-              <div class="card-tags"><span class="tag">Mission</span><span class="tag tag-blue">Mass-impact AI</span><span class="tag">Real-world AI</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-09</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a>
-            <a class="card" href="/work/human-centered-agent-aware/" data-id="later-2" data-card-id="LATER-02" data-tags="human-centered design|agent-friendly|hci × ai|pi-shaped" aria-label="Open details for Human-centered, agent-aware">
-              <div class="card-meta-top">
-                <span class="card-id">LATER-02</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">Human-centered, agent-aware</div>
-              <div class="card-summary">Human-centered design stays the foundation. But in the agent era, AI is also a user — and most products still ignore that. The 1-3 year version of me: deep enough AI fluency to design for both humans and the agents acting on their behalf, so the AI actually helps.</div>
-              <div class="card-tags"><span class="tag">Human-centered Design</span><span class="tag tag-blue">Agent-friendly</span><span class="tag">HCI × AI</span><span class="tag tag-blue">Pi-shaped</span></div>
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>2026-05-09</span>
-                  <span class="card-comments">0</span>
-                </span>
-                
-              </div>
-              
-            </a></div>
-      </article>
-    </div>
-
-    <!-- Table view of the same cards — JS-rendered (scripts/render.js) on the
-         first switch to it. The kanban above stays the SSG-prerendered
-         default, so agents and no-JS visitors see that. -->
-    <div class="board-table-view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden></div>
-
-    <!-- Spec view — the same cards as a long-form document (every card with its
-         `details` expanded). JS-rendered (scripts/render.js) on first switch. -->
-    <div class="board-spec-view" id="view-specs" role="tabpanel" aria-labelledby="tab-specs" hidden></div>
-
-    <!-- Timeline view — a horizontal "ship log" / mini-Gantt: every Shipped
-         card as a bar (started → updated) on a real month/year axis, overlapping
-         bars packed into lanes. JS-rendered (scripts/render.js) on first switch. -->
-    <div class="board-timeline-view" id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden></div>
-
-  </section>
-
-<!-- ═══ terminal ═══ -->
-  <section class="section terminal-section rise rise-3" id="terminal" aria-label="Agent terminal">
-    <header class="sec-head">
-      <span class="sec-cmd">$ ./agent</span>
-      <span class="sec-title">terminal</span>
-      <span class="sec-meta" id="terminal-meta">type <kbd>help</kbd> · ↑↓ history</span>
-    </header>
-
-    <div class="terminal" id="terminal-root">
-      <div class="terminal-chrome">
-        <span class="terminal-dot d-r"></span>
-        <span class="terminal-dot d-y"></span>
-        <span class="terminal-dot d-g"></span>
-        <span class="terminal-path" id="terminal-path">antares@local: ~</span>
-        <span class="terminal-spacer"></span>
-        <button type="button" class="terminal-action" id="terminal-clear" title="clear (⌃L)">clear</button>
-      </div>
-      <div class="terminal-body" id="terminal-body" tabindex="-1">
-        <!-- history rendered here -->
-        <div class="terminal-line term-prompt-line">
-          <span class="term-prompt">$</span>
-          <input
-            type="text"
-            class="terminal-input"
-            id="terminal-input"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            aria-label="Terminal command"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-<!-- ═══ contact ═══ -->
-  <!-- ── CONTACT ─────────────────────────────────────────────────── -->
-  <section class="section rise rise-4" id="contact">
-    <header class="sec-head">
-      <span class="sec-cmd" id="contact-cmd">$ ./reach-out</span>
-      <span class="sec-title" id="contact-title">open to:</span>
-    </header>
-    <div class="contact">
-      <p class="contact-intro" id="contact-intro">Currently open to: founder conversations in AI infra &amp; agents, AI PM roles at top product orgs, and contractor work on 0→1 features. <em>Tell me what you&#39;re building.</em></p>
-      <div class="contact-list" id="contact-list"><a href="mailto:chenjy4@uw.edu"><span class="key">email</span><span>chenjy4@uw.edu</span></a><a href="https://www.linkedin.com/in/chenjie-yuan-682b93298/" target="_blank" rel="noopener"><span class="key">linkedin</span><span>Chenjie (Antares) Yuan</span></a><a href="https://github.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">github</span><span>@AntaresYuan</span></a><a href="https://dribbble.com/AntaresYuan" target="_blank" rel="noopener"><span class="key">Dribbblle</span><span>Antares Yuan</span></a></div>
-    </div>
-  </section>
-
-<!-- ═══ agents ═══ -->
-  <section class="section agents-section rise" id="agents" aria-label="For AI agents">
-    <header class="sec-head">
-      <span class="sec-cmd">$ /agents</span>
-      <span class="sec-title">how this site works for AI</span>
-      <span class="sec-meta">three entry points</span>
-    </header>
-
-    <p class="agents-intro">
-      This site is designed to be read by both humans and AI agents. The dashboard, terminal, and detail panels are for you. For an agent, prefer:
-    </p>
-
-    <div class="agents-endpoints">
-      <a href="/llms.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms.txt</span>
-        </div>
-        <p>Short summary in plain text per the <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> spec. Best entry point — gist in &lt;1KB.</p>
-      </a>
-
-      <a href="/llms-full.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms-full.txt</span>
-        </div>
-        <p>Full content dump — every project card, lens entry, contact info — all plain text. Use when you need depth.</p>
-      </a>
-
-      <a href="/content/board.json" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/content/*.json</span>
-        </div>
-        <p>Raw structured data: <code>profile.json</code>, <code>board.json</code>, <code>lens.json</code>, <code>contact.json</code>. Use for typed access to specific fields.</p>
-      </a>
-    </div>
-
-    <ul class="agents-extras">
-      <li><strong>Stable IDs.</strong> Cards have permanent display IDs (<code>SHIP-01</code>, <code>NOW-01</code>, …) — citable across conversations and durable across content edits.</li>
-      <li><strong>Pre-rendered HTML.</strong> The home page ships with content baked into the initial HTML — readable without executing JavaScript.</li>
-      <li><strong>Open content.</strong> All data lives at <a href="https://github.com/AntaresYuan/personal_website/tree/main/content" target="_blank" rel="noopener">/content</a> on GitHub. Free to scrape, fork, or quote.</li>
-      <li><strong>Build your own.</strong> This whole setup is an open <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">template</a> — “Use this template” on GitHub, <code>npm run reset-content</code>, deploy. There’s a <a href="/blog/">writeup</a> on the why.</li>
-    </ul>
-  </section>
-
-<!-- ═══ comments ═══ -->
-  <section class="section comments-section" aria-label="Comments">
-    <header class="sec-head">
-      <span class="sec-cmd">$ comments</span>
-      <span class="sec-title">notes from readers</span>
-      <span class="sec-meta">via GitHub Discussions</span>
-    </header>
-    <div id="giscus-container">
-      <div class="giscus-lazy"
-        data-repo="AntaresYuan/personal_website"
-        data-repo-id="R_kgDOSYXV8Q"
-        data-category="General"
-        data-category-id="DIC_kwDOSYXV8c4C8tqu"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="preferred_color_scheme"
-        data-lang="en"></div>
-    </div>
-  </section>
-
-  </main>
+</main>
 
 <!-- defer keeps these out of the critical path on slow mobile networks.
      Pre-rendered HTML means no script is needed for first paint; these
@@ -1213,12 +1021,11 @@
 <script src="/scripts/terminal.js?v=ef73ed0e" defer></script>
 <script src="/scripts/palette.js?v=60c99a82"  defer></script>
 <script src="/scripts/giscus-lazy.js?v=0521a30c" defer></script>
-<script src="/scripts/spaces.js?v=481ab0ca" defer></script>
-<script src="/scripts/ask-selection.js?v=a629b919" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c"   defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2"        defer></script>
 <script src="/scripts/skin-characters.js?v=b78cfa18" defer></script>
 <script src="/scripts/skin-diva.js?v=4bfce5f2" defer></script>
 <script src="/scripts/skin-runtime.js?v=b502cee2" defer></script>
+<script src="/scripts/spaces.js?v=481ab0ca" defer></script>
 </body>
 </html>

@@ -1,20 +1,170 @@
-<!-- Sections that belong to the Personal space only.
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  Forked it? A visible link back is genuinely appreciated — it keeps the lineage clear
+  so the original doesn't get mistaken for the copy. See the repo's README.
+-->
+<!--
+  GENERATED — do not edit by hand.
+  Source of truth: content/*.json (and the structural template in this file).
+  Regenerate: `node scripts/build.js`
+-->
+<html data-prerendered="true" lang="en">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antares Yuan</title>
+<meta name="description" content="AI Product Manager. A living roadmap of what I&#39;ve shipped, what I&#39;m building, and where I&#39;m going.">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://antaresyuan.site">
 
-     Cut out of index.html — which is the Work page, and stays minimal by
-     design — and spliced back in by scripts/build-spaces.js.
+<!-- ── Theme + favicon ───────────────────────────────────────────── -->
+<meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="media/avatar-calm.png">
+<!-- llmstxt.org — agent-readable summary + full content dump -->
+<link rel="alternate" type="text/plain" href="/llms.txt"      title="LLM-readable summary">
+<link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM-readable full content">
+<link rel="alternate" type="application/rss+xml" href="/blog/feed.xml" title="Blog — RSS feed">
 
-     They live in a separate file rather than being stripped at build time
-     because index.html is BOTH the template and the artifact for
-     build-html.js. Stripping them there deletes them from the repo on the
-     very first build, and the second build has nothing left to strip —
-     verified the hard way. A one-way cut into this file cannot do that. -->
+<!-- ── Open Graph / Twitter ──────────────────────────────────────── -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antaresyuan.site">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Antares Yuan">
+<meta property="og:description" content="AI Product Manager. A living roadmap of what I&#39;ve shipped, what I&#39;m building, and where I&#39;m going.">
+<meta property="og:image" content="https://antaresyuan.site/media/avatar-calm.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Antares — illustrated portrait">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Antares Yuan">
+<meta name="twitter:description" content="AI Product Manager. A living roadmap of what I&#39;ve shipped, what I&#39;m building, and where I&#39;m going.">
+<meta name="twitter:image" content="https://antaresyuan.site/media/avatar-calm.png">
 
-<!-- ═══ hero (avatar, slogan, identity pills, FOR-X lanes) ═══
-     Moved off the Work page, which now opens with results instead of an
-     introduction. Kept here because this is where saying who I am is the
-     point. -->
-  <section class="section" aria-label="About">
-  <div class="hero">
+<!-- ── JSON-LD Person schema (rebuilt from content/profile.json) ─── -->
+<script type="application/ld+json" id="ld-person">{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Antares Yuan",
+  "alternateName": "Chenjie (Antares) Yuan",
+  "url": "https://antaresyuan.site",
+  "jobTitle": "AI Product Manager",
+  "description": "A star to ship by.",
+  "image": "https://antaresyuan.site/media/avatar-calm.png",
+  "knowsAbout": [
+    "Pi-Shaped AI PM",
+    "AI Agent Native",
+    "0→1",
+    "HCI Researcher",
+    "HCDE @ UDub"
+  ],
+  "sameAs": [
+    "https://www.linkedin.com/in/chenjie-yuan-682b93298/",
+    "https://github.com/AntaresYuan",
+    "https://dribbble.com/AntaresYuan"
+  ]
+}</script>
+
+<!-- ── Fonts (truly non-blocking) ────────────────────────────────────
+     The print/onload trick: media="print" makes the browser fetch the
+     stylesheet but NOT block render (since it's not for screen). Once
+     loaded, the onload handler swaps media to "all" so the fonts apply.
+     Falls back to a regular <noscript> link if JS is off.
+     Saves the full ~2.1s of render-blocking time on mobile. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap"
+      media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap"></noscript>
+
+<!-- Avatar is the LCP candidate — preload so it starts downloading
+     immediately, in parallel with stylesheet + JS, instead of waiting
+     until CSS resolves the .avatar-img background-image rule. -->
+<link rel="preload" as="image" href="media/avatar-calm.png" fetchpriority="high">
+
+<!-- The Roadmap → Timeline view lazy-loads vis-timeline (≈540 KB) the first
+     time it's opened — prefetch it at idle so that switch isn't network-blocked.
+     (Keep ?v= in sync with VIS_TIMELINE_VER in scripts/render.js.) -->
+<link rel="prefetch" as="script" href="vendor/vis-timeline/vis-timeline-graph2d.min.js?v=8.5.1">
+<link rel="prefetch" as="style"  href="vendor/vis-timeline/vis-timeline-graph2d.min.css?v=8.5.1">
+
+<!-- Theme: a localStorage override ('light' | 'dark'), else the OS preference.
+     Runs synchronously, before the stylesheet, so <html data-theme> is set
+     before first paint — no flash. data-theme-mode (auto|light|dark) drives
+     the topnav toggle's icon; scripts/render.js wires the click + keeps "auto"
+     tracking the OS. -->
+<script>
+  (function () {
+    var d = document.documentElement, m = 'auto';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+    // Skin: an optional palette on top of light/dark. Same reason this runs
+    // here — <html data-skin> must be set before the stylesheet paints.
+    // The id list is duplicated from scripts/skins.js on purpose: that file
+    // is deferred, and validating here keeps a stale localStorage value from
+    // half-styling the page.
+    try {
+      var s = localStorage.getItem('skin');
+      if (s && ['meadow', 'solar', 'press', 'dossier', 'blueprint', 'terminal', 'hud', 'neon', 'dusk', 'observatory', 'abyss', 'dumpling', 'vocal', 'workshop', 'hereva'].indexOf(s) >= 0) d.setAttribute('data-skin', s);
+    } catch (e) {}
+  })();
+</script>
+
+<link rel="stylesheet" href="styles/main.css?v=beac88a9">
+  <!-- feature-beacon -->
+  <script defer src="scripts/beacon.js?v=2dc05071"></script>
+  <!-- /feature-beacon -->
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<main class="page" id="main-content">
+
+  <!-- ── TOP NAV ─────────────────────────────────────────────────── -->
+  <nav class="topnav rise">
+    <div class="brand"><span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span id="brand-name">Antares Yuan</span></div>
+    <div class="topnav-end">
+      <a class="topnav-link" href="/blog/">blog</a>
+      <!-- Search / command palette. Lives in the top bar rather than as a
+           second floating button: the ask pill already owns the bottom-right
+           corner once it docks, and two floating entries competing for the
+           same spot meant neither read as primary. -->
+      <button class="topnav-search" id="palette-fab" type="button"
+              title="Search — sections, cards, commands (⌘K)"
+              aria-label="Search (Cmd K)">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="7.2" cy="7.2" r="4.3"/><path d="M10.6 10.6L13.4 13.4"/>
+        </svg>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">
+        <span class="tt-icon tt-auto"  aria-hidden="true">◐</span>
+        <span class="tt-icon tt-light" aria-hidden="true">☀</span>
+        <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
+      </button>
+      <!-- Skin picker — alternate palettes (+ ambient effects and a cursor
+           companion on some). A <details> so it opens, closes and takes
+           keyboard/Esc for free; options are injected by
+           scripts/skin-runtime.js from the registry in scripts/skins.js. -->
+      <details class="skin-picker" id="skin-picker">
+        <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
+        <div class="skin-menu" role="menu" aria-label="Skin"></div>
+      </details>
+      <span class="meta" id="last-updated">updated 2026-09-15</span>
+    </div>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────────────── -->
+  <header class="hero rise rise-1">
     <div class="hero-left">
       <!-- Avatar sits inline on the left of the name/slogan block.
            Calm by default; swaps to talking on hover/focus/tap. -->
@@ -99,10 +249,8 @@
          With the antares-qa Worker (content/site.json → qa.workerUrl) it
          answers inline; without one it opens the ⌘K palette pre-filled.
          Wired in scripts/render.js (wireHeroAsk). -->
-  </div>
-  </section>
+  </header>
 
-<!-- ═══ board (full 17-card workspace) ═══ -->
   <!-- ── BOARD ───────────────────────────────────────────────────── -->
   <section class="board-section rise rise-2" aria-label="Project board" id="shipped">
 
@@ -145,7 +293,7 @@
           <span class="col-count" data-count="shipped">5</span>
         </header>
         <div class="col-cards" data-cards="shipped">
-            <a class="card" href="/work/lark-loom/" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
+            <button type="button" class="card" data-id="shipped-1" data-card-id="SHIP-01" data-tags="hackathon project|ai agent pm|delivery layer developer|collaboration|lark|lark ai challenge for college students" aria-label="Open details for Lark Loom">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -161,8 +309,8 @@
                 
               </div>
               <div class="card-links"><a href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub(in Chinese) ↗</a><a href="https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr" target="_blank" rel="noopener">Lark AI Challenge(in Chinese) ↗</a></div>
-            </a>
-            <a class="card" href="/work/citation-trap/" data-id="shipped-2" data-card-id="SHIP-02" data-tags="hackathon project|ai agent pm|benchmark" aria-label="Open details for Citation Trap">
+            </button>
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-02" data-tags="hackathon project|ai agent pm|benchmark" aria-label="Open details for Citation Trap">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-02</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -178,8 +326,8 @@
                 
               </div>
               <div class="card-links"><a href="https://github.com/AntaresYuan/citation-trap" target="_blank" rel="noopener">GitHub ↗</a><a href="https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe" target="_blank" rel="noopener">Run the benchmark ↗</a></div>
-            </a>
-            <a class="card" href="/work/gmail-plus-plus/" data-id="shipped-2" data-card-id="SHIP-03" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
+            </button>
+            <button type="button" class="card" data-id="shipped-2" data-card-id="SHIP-03" data-tags="side project|ai builder|xgboost|productivity|website" aria-label="Open details for Gmail Plus Plus">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-03</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -195,8 +343,8 @@
                 
               </div>
               <div class="card-links"><a href="https://gmailplusplus.site" target="_blank" rel="noopener">Try it ↗</a><a href="https://github.com/AntaresYuan/Gmailplusplus" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a>
-            <a class="card" href="/work/worth-fly/" data-id="shipped-3" data-card-id="SHIP-04" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
+            </button>
+            <button type="button" class="card" data-id="shipped-3" data-card-id="SHIP-04" data-tags="side project|ai pm|0→1|explainable ai|website" aria-label="Open details for Worth Fly">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-04</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -212,8 +360,8 @@
                 
               </div>
               <div class="card-links"><a href="https://worthfly.vercel.app" target="_blank" rel="noopener">Demo ↗</a><a href="https://github.com/AntaresYuan/Worthfly" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a>
-            <a class="card" href="/work/susbench/" data-id="shipped-4" data-card-id="SHIP-05" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
+            </button>
+            <button type="button" class="card" data-id="shipped-4" data-card-id="SHIP-05" data-tags="research project|hci|iui 2025" aria-label="Open details for SusBench">
               <div class="card-meta-top">
                 <span class="card-id">SHIP-05</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -229,7 +377,7 @@
                 <span class="card-impact">cited by 2 papers</span>
               </div>
               <div class="card-links"><a href="https://arxiv.org/pdf/2510.11035" target="_blank" rel="noopener">Paper ↗</a><a href="https://arxiv.org/abs/2510.11035" target="_blank" rel="noopener">DOI ↗</a><a href="https://github.com/SusBench-creator/SusBench" target="_blank" rel="noopener">GitHub ↗</a></div>
-            </a></div>
+            </button></div>
       </article>
 
       <article class="column col-now" id="now" aria-labelledby="col-now-title">
@@ -238,7 +386,7 @@
           <span class="col-count" data-count="now">5</span>
         </header>
         <div class="col-cards" data-cards="now">
-            <a class="card" href="/work/landed/" data-id="now-1" data-card-id="NOW-01" data-tags="side project" aria-label="Open details for Landed">
+            <button type="button" class="card" data-id="now-1" data-card-id="NOW-01" data-tags="side project" aria-label="Open details for Landed">
               <div class="card-meta-top">
                 <span class="card-id">NOW-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -254,8 +402,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/yitang-profile-matching-infra/" data-id="now-2" data-card-id="NOW-02" data-tags="intern project" aria-label="Open details for YiTang Profile Matching Infra">
+            </button>
+            <button type="button" class="card" data-id="now-2" data-card-id="NOW-02" data-tags="intern project" aria-label="Open details for YiTang Profile Matching Infra">
               <div class="card-meta-top">
                 <span class="card-id">NOW-02</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -271,8 +419,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/applymint/" data-id="now-3" data-card-id="NOW-03" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
+            </button>
+            <button type="button" class="card" data-id="now-3" data-card-id="NOW-03" data-tags="side project|job application|chrome extension" aria-label="Open details for ApplyMint">
               <div class="card-meta-top">
                 <span class="card-id">NOW-03</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -288,8 +436,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/sleepstreak/" data-id="now-4" data-card-id="NOW-04" data-tags="research project" aria-label="Open details for SleepStreak">
+            </button>
+            <button type="button" class="card" data-id="now-4" data-card-id="NOW-04" data-tags="research project" aria-label="Open details for SleepStreak">
               <div class="card-meta-top">
                 <span class="card-id">NOW-04</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -305,8 +453,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/susfix/" data-id="now-4" data-card-id="NOW-05" data-tags="research project" aria-label="Open details for SusFix">
+            </button>
+            <button type="button" class="card" data-id="now-4" data-card-id="NOW-05" data-tags="research project" aria-label="Open details for SusFix">
               <div class="card-meta-top">
                 <span class="card-id">NOW-05</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -322,7 +470,7 @@
                 
               </div>
               
-            </a></div>
+            </button></div>
       </article>
 
       <article class="column col-next" id="col-next" aria-labelledby="col-next-title">
@@ -331,7 +479,7 @@
           <span class="col-count" data-count="next">3</span>
         </header>
         <div class="col-cards" data-cards="next">
-            <a class="card" href="/work/from-pm-to-builder/" data-id="next-1" data-card-id="NEXT-01" data-tags="career pivot|ai builder|0→1" aria-label="Open details for From PM to Builder">
+            <button type="button" class="card" data-id="next-1" data-card-id="NEXT-01" data-tags="career pivot|ai builder|0→1" aria-label="Open details for From PM to Builder">
               <div class="card-meta-top">
                 <span class="card-id">NEXT-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -347,8 +495,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/make-ai-worth-looking-at/" data-id="next-2" data-card-id="NEXT-02" data-tags="ai aesthetic|distillation|skills|craft" aria-label="Open details for Make AI worth looking at">
+            </button>
+            <button type="button" class="card" data-id="next-2" data-card-id="NEXT-02" data-tags="ai aesthetic|distillation|skills|craft" aria-label="Open details for Make AI worth looking at">
               <div class="card-meta-top">
                 <span class="card-id">NEXT-02</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -364,8 +512,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/close-the-product-loop/" data-id="next-3" data-card-id="NEXT-03" data-tags="product ops|data analysis|full-stack pm" aria-label="Open details for Close the product loop">
+            </button>
+            <button type="button" class="card" data-id="next-3" data-card-id="NEXT-03" data-tags="product ops|data analysis|full-stack pm" aria-label="Open details for Close the product loop">
               <div class="card-meta-top">
                 <span class="card-id">NEXT-03</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -381,7 +529,7 @@
                 
               </div>
               
-            </a></div>
+            </button></div>
       </article>
 
       <article class="column col-later" id="col-later" aria-labelledby="col-later-title">
@@ -390,7 +538,7 @@
           <span class="col-count" data-count="later">2</span>
         </header>
         <div class="col-cards" data-cards="later">
-            <a class="card" href="/work/ai-for-people-not-just-ai-people/" data-id="later-1" data-card-id="LATER-01" data-tags="mission|mass-impact ai|real-world ai" aria-label="Open details for AI for people, not just AI people">
+            <button type="button" class="card" data-id="later-1" data-card-id="LATER-01" data-tags="mission|mass-impact ai|real-world ai" aria-label="Open details for AI for people, not just AI people">
               <div class="card-meta-top">
                 <span class="card-id">LATER-01</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -406,8 +554,8 @@
                 
               </div>
               
-            </a>
-            <a class="card" href="/work/human-centered-agent-aware/" data-id="later-2" data-card-id="LATER-02" data-tags="human-centered design|agent-friendly|hci × ai|pi-shaped" aria-label="Open details for Human-centered, agent-aware">
+            </button>
+            <button type="button" class="card" data-id="later-2" data-card-id="LATER-02" data-tags="human-centered design|agent-friendly|hci × ai|pi-shaped" aria-label="Open details for Human-centered, agent-aware">
               <div class="card-meta-top">
                 <span class="card-id">LATER-02</span>
                 <span class="card-handle" aria-hidden="true">⋮⋮</span>
@@ -423,7 +571,7 @@
                 
               </div>
               
-            </a></div>
+            </button></div>
       </article>
     </div>
 
@@ -443,7 +591,10 @@
 
   </section>
 
-<!-- ═══ terminal ═══ -->
+  <!-- ── AGENT TERMINAL ──────────────────────────────────────────────
+       Embedded interactive CLI. Same data as the board (content/*.json),
+       different surface — for keyboard users and AI agents.
+  ──────────────────────────────────────────────────────────────────── -->
   <section class="section terminal-section rise rise-3" id="terminal" aria-label="Agent terminal">
     <header class="sec-head">
       <span class="sec-cmd">$ ./agent</span>
@@ -478,7 +629,120 @@
     </div>
   </section>
 
-<!-- ═══ contact ═══ -->
+  <!-- ── SKILLS: dotfiles for AI ─────────────────────────────────
+       The receipts for the "AI Agent Native" pill — Claude Code skills,
+       configs, and agent-infra Antares built to multiply his own AI work.
+       Header + list are filled by build-html.js from content/skills.json.
+       Each row is a real <button> with data-card-id="SKILL-NN"; clicking
+       opens the same side-panel modal the board cards use (render.js
+       hydrates skills into cardIndex on boot). -->
+  <section class="section skills-section rise rise-3" id="skills">
+    <header class="sec-head">
+      <span class="sec-cmd"   id="skills-cmd">$ ls ~/skills</span>
+      <span class="sec-title" id="skills-title">/skills</span>
+      <span class="sec-meta"  id="skills-meta">dotfiles for AI — what I built to multiply my own AI work</span>
+    </header>
+    <ul class="skills-list" id="skills-list">
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-01" aria-label="Open details for /devloop">
+            <span class="skill-id">SKILL-01</span>
+            <span class="skill-name">/devloop</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">github ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-02" aria-label="Open details for /ai-pm-resume">
+            <span class="skill-id">SKILL-02</span>
+            <span class="skill-name">/ai-pm-resume</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">github ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-03" aria-label="Open details for /interview-sim">
+            <span class="skill-id">SKILL-03</span>
+            <span class="skill-name">/interview-sim</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">github ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-04" aria-label="Open details for /log">
+            <span class="skill-id">SKILL-04</span>
+            <span class="skill-name">/log</span>
+            <span class="skill-cat">Claude Code Skill</span>
+            <span class="skill-summary">When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-05" aria-label="Open details for Claude Credit Watchdog">
+            <span class="skill-id">SKILL-05</span>
+            <span class="skill-name">Claude Credit Watchdog</span>
+            <span class="skill-cat">Claude Code Plugin</span>
+            <span class="skill-summary">A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="https://claude-credit-watchdog.netlify.app" target="_blank" rel="noopener">Download ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">GitHub ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li>
+        <li class="skill-row">
+          <button type="button" class="skill-link" data-card-id="SKILL-06" aria-label="Open details for agent-brief.txt">
+            <span class="skill-id">SKILL-06</span>
+            <span class="skill-name">agent-brief.txt</span>
+            <span class="skill-cat">agent infra</span>
+            <span class="skill-summary">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</span>
+          </button>
+          <div class="skill-row-side">
+            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">GitHub ↗</a>
+            <span class="skill-arrow" aria-hidden="true">→</span>
+          </div>
+        </li></ul>
+  </section>
+
+  <!-- ── LENS: how I think ───────────────────────────────────────── -->
+  <section class="section rise rise-3" id="lens">
+    <header class="sec-head">
+      <span class="sec-cmd" id="lens-cmd">$ grep -i</span>
+      <span class="sec-title" id="lens-title">how_i_think.md</span>
+      <span class="sec-meta" id="lens-meta">principles · updated occasionally</span>
+    </header>
+    <div class="lens" id="lens-list">
+        <div class="lens-card">
+          <div class="lens-num">/ 01</div>
+          <div class="lens-text">Evals before features.<em>If you can&#39;t measure it, you&#39;re shipping vibes.</em></div>
+        </div>
+        <div class="lens-card">
+          <div class="lens-num">/ 02</div>
+          <div class="lens-text">The model is one input.<em>Latency, UX, and trust often matter more than benchmark deltas.</em></div>
+        </div>
+        <div class="lens-card">
+          <div class="lens-num">/ 03</div>
+          <div class="lens-text">Demos lie. Production tells the truth.<em>Watch the long tail.</em></div>
+        </div>
+        <div class="lens-card">
+          <div class="lens-num">/ 04</div>
+          <div class="lens-text">A great PM removes ambiguity. Models add it back.<em>The job is balance.</em></div>
+        </div></div>
+  </section>
+
   <!-- ── CONTACT ─────────────────────────────────────────────────── -->
   <section class="section rise rise-4" id="contact">
     <header class="sec-head">
@@ -491,7 +755,11 @@
     </div>
   </section>
 
-<!-- ═══ agents ═══ -->
+  <!-- ── AGENT-FRIENDLY SURFACES ─────────────────────────────────────
+       Documents how AI agents and other machine readers can consume the
+       site. Aimed at engineering peers / curious humans — agents
+       themselves go straight to the endpoints.
+  ──────────────────────────────────────────────────────────────────── -->
   <section class="section agents-section rise" id="agents" aria-label="For AI agents">
     <header class="sec-head">
       <span class="sec-cmd">$ /agents</span>
@@ -537,7 +805,14 @@
     </ul>
   </section>
 
-<!-- ═══ comments ═══ -->
+  <!-- ── COMMENTS (Giscus) ───────────────────────────────────────────
+       Setup (one-time, owner only):
+       1. Enable GitHub Discussions on the repo
+       2. Visit https://giscus.app and configure for AntaresYuan/personal_website
+       3. Paste the generated data-repo-id and data-category-id below
+       4. Uncomment the <script> block
+       Until then, this section renders the empty-state placeholder.
+  ──────────────────────────────────────────────────────────────────── -->
   <section class="section comments-section" aria-label="Comments">
     <header class="sec-head">
       <span class="sec-cmd">$ comments</span>
@@ -559,3 +834,187 @@
         data-lang="en"></div>
     </div>
   </section>
+
+  <!-- ── COMMAND PALETTE ─────────────────────────────────────────────
+       Search anything: sections, cards, terminal commands, agent endpoints.
+       Owns the global ⌘K / Ctrl+K shortcut and the floating trigger below.
+       Behavior lives in scripts/palette.js.
+  ──────────────────────────────────────────────────────────────────── -->
+
+  <div class="palette-backdrop" id="palette-backdrop" hidden></div>
+  <div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+    <div class="palette-header">
+      <span class="palette-icon" aria-hidden="true">⌘</span>
+      <input
+        type="text"
+        class="palette-input"
+        id="palette-input"
+        placeholder="Search · or just ask…"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Search"
+        aria-controls="palette-results"
+        aria-autocomplete="list"
+      />
+      <kbd class="palette-kbd" aria-hidden="true">esc</kbd>
+    </div>
+    <ul class="palette-results" id="palette-results" role="listbox" aria-label="Results"></ul>
+    <div class="palette-footer">
+      <span><kbd>↑↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> open</span>
+      <span><kbd>esc</kbd> close</span>
+    </div>
+  </div>
+
+  <!-- ── ASK ANTARES — multi-turn chat panel ─────────────────────────
+       Opened by the hero "ask" bar (typing there → this panel opens with
+       the question). Answers come from the antares-qa Worker (multi-turn);
+       behaviour in scripts/render.js (wireAskPanel). It's a transcript, not
+       a chatbot UI — and labelled as an AI answering in Antares's voice. -->
+  <!-- The floating ask pill. Always docked and always position:fixed, so it
+       lives beside the panel it opens rather than inside the hero. It used to
+       sit in the hero as a full-width bar and collapse on scroll; that bar was
+       a duplicate entry point to this same panel. -->
+<div class="hero-ask" id="hero-ask">
+      <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
+        <!-- The mark, not a shell prompt. A four-point star belongs to the
+             same celestial family as the site's crescent brand and its "a star
+             to ship by" line, so it reads as this site's own rather than a
+             generic AI sparkle. In the docked pill it is the whole button. -->
+        <span class="ask-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="24" height="24">
+            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
+            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
+            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
+            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
+          </svg>
+        </span>
+        <input class="hero-ask-input" id="hero-ask-input" type="text"
+               placeholder="Ask anything…"
+               aria-label="Ask this portfolio a question" maxlength="280">
+        <!-- Same arrow as the drawer's send button, so the control that opens
+             the conversation looks like the one inside it. -->
+        <button class="hero-ask-go" id="hero-ask-go" type="submit" aria-label="Ask">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+  <div class="ask-panel" id="ask-panel" role="complementary" aria-label="Ask Antares" hidden>
+    <header class="ask-panel-head">
+      <!-- The same star as the hero bar, so the control you clicked and the
+           panel it opened are visibly one thing. Replaced an earlier glowing
+           dot plus boxed "AI" chip, which announced the panel twice; the
+           footer under the composer carries that disclosure now. -->
+      <span class="ask-panel-title">
+        <span class="ask-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="21" height="21">
+            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
+            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
+            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
+            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
+          </svg>
+        </span>
+        ask Antares
+      </span>
+      <button class="ask-panel-icon" id="ask-panel-clear" type="button" aria-label="New conversation" title="New conversation">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M8 3.5v9M3.5 8h9"/>
+        </svg>
+      </button>
+      <button class="ask-panel-icon" id="ask-panel-close" type="button" aria-label="Close" title="Close">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M4 4l8 8M12 4l-8 8"/>
+        </svg>
+      </button>
+    </header>
+    <div class="ask-panel-log" id="ask-panel-log" tabindex="-1"></div>
+    <!-- Composer: one soft rounded card with the send button INSIDE it, which
+         is what ChatGPT, Claude and Doubao all do. A pill with the button
+         beside it reads as a search box, not a place to compose. -->
+    <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+      <div class="ask-panel-field">
+        <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="Ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
+        <button class="ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
+          </svg>
+        </button>
+      </div>
+      <!-- Every reference carries a quiet line under the composer. Ours states
+           what the thing actually is, once, instead of repeating a disclaimer
+           on every single reply. -->
+      <p class="ask-panel-foot">AI answers from this site's content — it can be wrong.</p>
+    </form>
+  </div>
+
+  <!-- ── CARD DETAIL PANEL ──────────────────────────────────────────
+       Slides in from the right when a card is clicked. Closes on ESC,
+       backdrop click, or X. ↑/↓ navigates between cards. URL hash syncs
+       (#card/SHIP-01) for deep linking.
+       On <768px viewports the panel becomes a full-screen sheet.
+  ──────────────────────────────────────────────────────────────────── -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden></div>
+  <div class="card-modal" id="card-modal" role="dialog" aria-modal="false" aria-labelledby="modal-title" aria-hidden="true">
+    <header class="panel-header">
+      <div class="panel-nav-group">
+        <button type="button" class="panel-nav" id="panel-prev" aria-label="Previous card (↑)" title="↑ prev">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 9l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="panel-nav" id="panel-next" aria-label="Next card (↓)" title="↓ next">
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="panel-position" id="panel-position"></span>
+      </div>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close (Esc)" title="esc">×</button>
+    </header>
+    <div class="panel-body">
+      <div class="modal-meta-top">
+        <span class="modal-id" id="modal-id"></span>
+        <span class="modal-status" id="modal-status"></span>
+      </div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <p class="modal-summary" id="modal-summary"></p>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div class="modal-details" id="modal-details"></div>
+      <div class="modal-foot">
+        <span class="modal-updated" id="modal-updated"></span>
+        <span class="modal-impact"  id="modal-impact"></span>
+      </div>
+      <div class="modal-links" id="modal-links"></div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <span id="footer-copyright">© 2026 Antares Yuan · <em>This site is a roadmap of how Antares is growing as an AI Builder, not only a resume.</em></span>
+    <span>
+      <a href="/admin/">edit</a> ·
+      <a href="https://github.com/AntaresYuan/personal_website"
+         title="Open-source template — fork it freely; a link back is appreciated">source</a> ·
+      <a href="/llms.txt" title="agent-readable summary">/llms.txt</a>
+    </span>
+  </footer>
+
+</main>
+
+<!-- defer keeps these out of the critical path on slow mobile networks.
+     Pre-rendered HTML means no script is needed for first paint; these
+     just add interactivity (modal, terminal, ⌘K palette, hero "ask"). They
+     execute in document order after parse — qa-faq.js (the shared FAQ +
+     retrieval) must come before render.js / palette.js. -->
+<script src="scripts/qa-faq.js?v=657b3299"      defer></script>
+<script src="scripts/render.js?v=636cba39"   defer></script>
+<script src="scripts/terminal.js?v=3ad94f49" defer></script>
+<script src="scripts/palette.js?v=addcbda0"  defer></script>
+<script src="scripts/giscus-lazy.js?v=0521a30c" defer></script>
+<script src="scripts/doodle.js?v=3d1f7d5c"   defer></script>
+<script src="scripts/skins.js?v=3be8d6c2"        defer></script>
+<script src="scripts/skin-characters.js?v=b78cfa18" defer></script>
+<script src="scripts/skin-diva.js?v=4bfce5f2" defer></script>
+<script src="scripts/skin-runtime.js?v=b502cee2" defer></script>
+</body>
+</html>
