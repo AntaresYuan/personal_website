@@ -31,7 +31,12 @@
     }[c]));
 
   const json = async (p) => {
-    const r = await fetch(p, { cache: 'no-store' });
+    /* Root-relative. Content paths are written as 'content/*.json', which is
+       correct at "/" and 404s from any subdirectory — /personal/ mirrors the
+       home page and ran this same code one level down, asking for
+       /personal/content/*.json. Absolute URLs pass through untouched. */
+    const url = /^(?:[a-z]+:)?\/\//i.test(p) || p.startsWith('/') ? p : `/${p}`;
+    const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) throw new Error(`${p}: ${r.status}`);
     return r.json();
   };

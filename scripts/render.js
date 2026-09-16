@@ -17,7 +17,17 @@
   };
 
   const json = async (path) => {
-    const res = await fetch(path, { cache: 'no-store' });
+    /* Resolve content paths from the site root, not the current directory.
+       These are written as 'content/*.json' — relative — which is correct at
+       "/" and 404s everywhere else. /personal/ mirrors the home page, so it
+       ran the same code from one level down and asked for
+       /personal/content/profile.json, which does not exist: the page rendered
+       with an error banner and empty charts.
+
+       Only bare relative paths are touched; absolute URLs and paths that are
+       already root-relative pass through untouched. */
+    const url = /^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith('/') ? path : `/${path}`;
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`);
     return res.json();
   };
