@@ -480,6 +480,94 @@ html = replaceInner(html, 'giscus-container', `\n      ${giscusInner}\n    `);
     `${resumeCards.length} projects · ${shipped} shipped`);
 }
 
+/* ── Proof strip ───────────────────────────────────────────────────────────
+   The first thing on the page. Four results a reader can check, lifted from
+   the work below so they are never out of sync with it.
+
+   This exists because the page used to open with a screen of introduction —
+   avatar, slogan, five identity pills, four navigation cards — and a reader
+   reached the bottom of the fold without learning a single thing that had
+   been achieved. A résumé leads with the claim. */
+{
+  const pick = [];
+
+  /* Experience first: the internship's numbers are the strongest, and they
+     were not on the site at all before. */
+  (profile.experience ?? []).forEach((job) => {
+    (job.highlights ?? []).forEach((h) => {
+      (h.metrics ?? []).forEach((m) => {
+        if (m.from && m.to) pick.push({ ...m, src: job.org });
+      });
+    });
+  });
+
+  /* Then project metrics, preferring before/after pairs — movement is a
+     stronger claim than a standalone figure. */
+  const projectMetrics = (board.cards ?? [])
+    .filter((c) => c.resume)
+    .flatMap((c) => (c.metrics ?? []).map((m) => ({ ...m, src: c.title })));
+  projectMetrics.filter((m) => m.from).forEach((m) => pick.push(m));
+  projectMetrics.filter((m) => !m.from).forEach((m) => pick.push(m));
+
+  const items = pick.slice(0, 4).map((m) => {
+    const val = m.from
+      ? `<span class="pf-from">${escape(m.from)}</span>` +
+        `<span class="pf-arrow" aria-hidden="true">→</span>` +
+        `<span class="pf-to">${escape(m.to)}</span>`
+      : `<span class="pf-to">${escape(m.to)}</span>`;
+    return `
+        <li class="proof-item">
+          <span class="pf-val">${val}</span>
+          <span class="pf-label">${escape(m.label)}</span>
+          <span class="pf-src">${escape(m.src)}</span>
+        </li>`;
+  }).join('');
+
+  html = replaceInner(html, 'proof-list', items + '\n      ');
+}
+
+/* ── Experience ────────────────────────────────────────────────────────────
+   The internship, with its KRs. Rendered from content/profile.json rather
+   than hard-coded, so it is editable in the CMS like everything else. */
+{
+  const jobs = (profile.experience ?? []).map((job) => {
+    const hl = (job.highlights ?? []).map((h) => {
+      const metrics = (h.metrics ?? []).map((m) => {
+        const val = m.from
+          ? `<span class="rm-from">${escape(m.from)}</span>` +
+            `<span class="rm-arrow" aria-hidden="true">→</span>` +
+            `<span class="rm-to">${escape(m.to)}</span>`
+          : `<span class="rm-to">${escape(m.to)}</span>`;
+        return `<li class="rm"><span class="rm-label">${escape(m.label)}</span>` +
+               `<span class="rm-val">${val}</span></li>`;
+      }).join('');
+      return `
+          <li class="exp-kr">
+            <div class="exp-kr-main">
+              <h4 class="exp-kr-title">${escape(h.title)}</h4>
+              <p class="exp-kr-body">${escape(h.body)}</p>
+            </div>
+            ${metrics ? `<ul class="resume-metrics">${metrics}</ul>` : ''}
+          </li>`;
+    }).join('');
+
+    return `
+      <article class="exp-job">
+        <div class="exp-head">
+          <div>
+            <h3 class="exp-org">${escape(job.org)}</h3>
+            <p class="exp-role">${escape(job.role)}${job.team ? ` · ${escape(job.team)}` : ''}</p>
+          </div>
+          <span class="exp-period">${escape(job.period ?? '')}</span>
+        </div>
+        ${job.summary ? `<p class="exp-summary">${escape(job.summary)}</p>` : ''}
+        ${hl ? `<ul class="exp-krs">${hl}</ul>` : ''}
+      </article>`;
+  }).join('');
+
+  html = replaceInner(html, 'exp-list', jobs + '\n    ');
+}
+
 // <title> + description / OG / Twitter meta from site.json
 const setMetaContent = (selector, content) => {
   const re = new RegExp(`(<meta\\s+${selector}\\s+content=")[^"]*(")`, 'i');

@@ -45,5 +45,46 @@
       "anchor": "#contact",
       "note": "open to founder convos & contracts"
     }
+  ],
+  "experience": [
+    {
+      "org": "ByteDance",
+      "team": "Institute of Management Strategy · Hiring Agent",
+      "role": "AI Product Manager (Intern)",
+      "period": "2026 — present",
+      "summary": "Scaling a hiring agent from 1→N: push agent-recommended screening toward senior-recruiter quality, and grow it from a chat tool into an AI-native recruiting workbench.",
+      "highlights": [
+        {
+          "title": "Job-category knowledge governance",
+          "body": "Attributed 200+ bad cases to the model lacking knowledge of closely related job functions, rooted in JD–Title mismatches depressing match scores. Governed 10,000+ postings into a taxonomy used as structured input for recall and ranking.",
+          "metrics": [
+            {
+              "label": "Postings governed",
+              "to": "10,000+"
+            },
+            {
+              "label": "Taxonomy",
+              "to": "13 categories / 96 subcategories"
+            }
+          ]
+        },
+        {
+          "title": "Pros/cons label quality",
+          "body": "Five iterations over 1k offline data points, fixing 12+ recurring issues, plus a label evaluation system scoring four floor dimensions and one ceiling dimension.",
+          "metrics": [
+            {
+              "label": "Label usability",
+              "from": "25.4%",
+              "to": "99.5%"
+            }
+          ]
+        },
+        {
+          "title": "Stable/variable instruction context",
+          "body": "Split instructions into a fixed skeleton and variable slots, issuing prefabricated entry points by user stage — lowering the barrier to use while improving output stability.",
+          "metrics": []
+        }
+      ]
+    }
   ]
 }

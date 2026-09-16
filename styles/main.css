@@ -6792,3 +6792,124 @@ body.ask-dock-bottom.ask-panel-open .hero-ask.is-docked {
   .resume-metrics { text-align: left; min-width: 0; flex-direction: row; flex-wrap: wrap; gap: var(--sp-12); }
   .rm-val { justify-content: flex-start; }
 }
+
+
+/* ── résumé header ────────────────────────────────────────────────────────
+   Name and role, then one line of context. The old hero ran a full screen
+   before showing anything achieved; this is ~4 lines so the proof strip
+   lands above the fold. */
+.resume-header {
+  padding: var(--sp-48) 0 var(--sp-24);
+  border-bottom: 1px solid var(--color-border);
+}
+.rh-name {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.05;
+  margin: 0 0 var(--sp-6);
+}
+.rh-name em { font-style: italic; color: var(--color-accent); }
+.rh-role {
+  font-size: var(--fs-16);
+  color: var(--color-text-soft);
+  margin: 0 0 var(--sp-12);
+}
+.rh-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
+}
+.rh-sep { opacity: 0.5; }
+.rh-dl { color: var(--color-accent); text-decoration: none; }
+.rh-dl:hover { text-decoration: underline; }
+
+/* ── proof strip ──────────────────────────────────────────────────────────
+   Four checkable results, directly under the name. This is the answer to
+   "what am I looking at" that the page previously withheld until the reader
+   had scrolled past an entire introduction. */
+.proof-strip { padding: var(--sp-24) 0; border-bottom: 1px solid var(--color-border); }
+.proof-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-24);
+}
+.proof-item { display: flex; flex-direction: column; gap: 2px; }
+.pf-val {
+  font-family: var(--font-mono);
+  font-size: var(--fs-20);
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+}
+.pf-from { color: var(--color-text-faint); text-decoration: line-through; opacity: 0.65; font-size: var(--fs-14); }
+.pf-arrow { color: var(--color-text-faint); font-size: var(--fs-14); }
+.pf-to { color: var(--color-accent); font-weight: 600; }
+.pf-label {
+  font-size: var(--fs-12);
+  color: var(--color-text-soft);
+  line-height: 1.35;
+}
+.pf-src {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* ── experience ───────────────────────────────────────────────────────────
+   Same two-column rhythm as selected work — prose left, numbers right — so
+   the page has one scanning pattern rather than two. */
+.exp-job { padding-bottom: var(--sp-8); }
+.exp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  flex-wrap: wrap;
+}
+.exp-org { font-family: var(--font-serif); font-size: var(--fs-20); margin: 0; }
+.exp-role {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+  margin: 2px 0 0;
+}
+.exp-period { font-family: var(--font-mono); font-size: var(--fs-12); color: var(--color-text-faint); }
+.exp-summary {
+  font-size: var(--fs-14);
+  line-height: 1.6;
+  color: var(--color-text-soft);
+  margin: var(--sp-10) 0 var(--sp-16);
+  max-width: 62ch;
+}
+.exp-krs { list-style: none; margin: 0; padding: 0; }
+.exp-kr {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-32);
+  align-items: start;
+  padding: var(--sp-12) 0;
+  border-top: 1px solid var(--color-border);
+}
+.exp-kr-main { min-width: 0; }
+.exp-kr-title { font-size: var(--fs-14); font-weight: 600; margin: 0 0 2px; }
+.exp-kr-body {
+  font-size: var(--fs-13);
+  line-height: 1.6;
+  color: var(--color-text-soft);
+  margin: 0;
+  max-width: 62ch;
+}
+
+@media (max-width: 640px) {
+  .exp-kr { grid-template-columns: 1fr; gap: var(--sp-8); }
+}
