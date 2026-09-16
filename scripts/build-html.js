@@ -423,6 +423,63 @@ const giscusInner = giscusReady
   : `<p class="comments-placeholder">Comments will appear here once Giscus is wired up — see <a href="https://github.com/AntaresYuan/personal_website/issues/49">#49</a>.</p>`;
 html = replaceInner(html, 'giscus-container', `\n      ${giscusInner}\n    `);
 
+/* ── Selected work (résumé list) ───────────────────────────────────────────
+   One line per project: title, one sentence, the measured result. The board
+   with all 17 cards, their tags and their links moved to the Personal space —
+   a board is a workspace you browse, a résumé is a short list of claims you
+   can check. Anything cut from here is still on the project's own page.
+
+   Only cards flagged `resume: true` appear, so which projects make the cut is
+   a content decision in board.json rather than a code change. */
+{
+  const resumeCards = (board.cards ?? [])
+    .filter((c) => c.resume && c.slug)
+    .sort((a, b) => {
+      /* Shipped work first — it is the part a reader can verify. Within a
+         status, the order field keeps the author's intended sequence. */
+      const rank = { shipped: 0, now: 1, next: 2, later: 3 };
+      const d = (rank[a.status] ?? 9) - (rank[b.status] ?? 9);
+      return d || (a.order ?? 99) - (b.order ?? 99);
+    });
+
+  const metricHtml = (m) => {
+    /* A before/after pair reads as movement; a lone value is just a figure.
+       Rendering them differently keeps "65% → 80%" from looking like two
+       unrelated numbers. */
+    const val = m.from
+      ? `<span class="rm-from">${escape(m.from)}</span>` +
+        `<span class="rm-arrow" aria-hidden="true">→</span>` +
+        `<span class="rm-to">${escape(m.to)}</span>`
+      : `<span class="rm-to">${escape(m.to)}</span>`;
+    const note = m.note ? `<span class="rm-note">${escape(m.note)}</span>` : '';
+    return `<li class="rm"><span class="rm-label">${escape(m.label)}</span>` +
+           `<span class="rm-val">${val}${note}</span></li>`;
+  };
+
+  const rows = resumeCards.map((c) => {
+    const metrics = (c.metrics ?? []).slice(0, 3);
+    return `
+        <li class="resume-item">
+          <a class="resume-link" href="/work/${escape(c.slug)}/">
+            <div class="resume-main">
+              <h3 class="resume-title">${escape(c.title)}</h3>
+              ${c.role ? `<p class="resume-role">${escape(c.role)}</p>` : ''}
+              ${c.oneLine ? `<p class="resume-line">${escape(c.oneLine)}</p>` : ''}
+            </div>
+            ${metrics.length
+              ? `<ul class="resume-metrics">${metrics.map(metricHtml).join('')}</ul>`
+              : ''}
+          </a>
+        </li>`;
+  }).join('');
+
+  html = replaceInner(html, 'resume-list', rows + '\n      ');
+
+  const shipped = resumeCards.filter((c) => c.status === 'shipped').length;
+  html = replaceInner(html, 'resume-count',
+    `${resumeCards.length} projects · ${shipped} shipped`);
+}
+
 // <title> + description / OG / Twitter meta from site.json
 const setMetaContent = (selector, content) => {
   const re = new RegExp(`(<meta\\s+${selector}\\s+content=")[^"]*(")`, 'i');

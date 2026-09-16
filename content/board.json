@@ -29,7 +29,23 @@
       "started": "2026-04-17",
       "updated": "2026-05-15",
       "present": false,
-      "order": 1
+      "order": 1,
+      "resume": true,
+      "role": "AI PM · ByteDance AI Campus Challenge",
+      "oneLine": "IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.",
+      "metrics": [
+        {
+          "label": "Memory recall pass rate",
+          "from": "65%",
+          "to": "80%"
+        },
+        {
+          "label": "Task latency",
+          "from": "95s",
+          "to": "50s",
+          "note": "-47pp"
+        }
+      ]
     },
     {
       "id": "shipped-2",
@@ -57,7 +73,24 @@
       "started": "2026-04-17",
       "updated": "2026-05-15",
       "present": false,
-      "order": 1
+      "order": 1,
+      "resume": true,
+      "role": "DevPost · Honorable Mention",
+      "oneLine": "Benchmark for RAG answers that cite sources which do not actually support them.",
+      "metrics": [
+        {
+          "label": "Claude citation trustworthiness",
+          "to": "42.5%"
+        },
+        {
+          "label": "GPT citation trustworthiness",
+          "to": "26.7%"
+        },
+        {
+          "label": "Evidence set",
+          "to": "500 Q / 5,000 distractors"
+        }
+      ]
     },
     {
       "id": "shipped-2",
@@ -146,7 +179,16 @@
       ],
       "started": "2025-08-21",
       "updated": "2026-02-23",
-      "order": 4
+      "order": 4,
+      "resume": true,
+      "role": "IUI’26 · 2nd author",
+      "oneLine": "Online benchmark for how easily computer-use agents fall for UI dark patterns.",
+      "metrics": [
+        {
+          "label": "Cited by",
+          "to": "2 papers"
+        }
+      ]
     },
     {
       "id": "now-1",
@@ -321,6 +363,68 @@
       "links": [],
       "updated": "2026-05-09",
       "order": 2
+    },
+    {
+      "id": "shipped-6",
+      "slug": "coze-multi-agent",
+      "status": "shipped",
+      "title": "Coze Multi-Agent Orchestration",
+      "resume": true,
+      "role": "AI PM · ByteDance AI Full-Stack Challenge · Top 3",
+      "oneLine": "Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.",
+      "summary": "Lower the barrier for AI-coding novices to complete complex tasks and improve orchestration reuse for experienced users, through workflows tailored to each development task.",
+      "details": "Choosing the wrong multi-agent workflow wastes the execution cost of every downstream node, so success was defined as accurately identifying applicable boundaries and distinguishing easily-confused scenarios. Defined metadata for task type, applicable scenarios, agent roles, I/O, process nodes and constraints, and built a 30-case evaluation set including confusable items. Bad-case attribution pointed at insufficient model knowledge, so the engineering layer gained 5-shot examples with positive/negative cases and reasoning explanations, using an ICE-structured prompt with schema-structured output to avoid hallucination.",
+      "impact": "Shipped workflow recommendations, a visual editor and a template marketplace. Top 3 at the challenge.",
+      "metrics": [
+        {
+          "label": "Planning-entry recognition (Seed 2.0 Pro)",
+          "from": "16/30",
+          "to": "28/30",
+          "note": "+40pp"
+        }
+      ],
+      "tags": [
+        "HACKATHON PROJECT",
+        "AI Agent PM",
+        "Multi-Agent",
+        "Coze"
+      ],
+      "links": [],
+      "started": "2026-06-01",
+      "updated": "2026-07-01",
+      "order": 6
+    },
+    {
+      "id": "now-6",
+      "slug": "kaboo",
+      "status": "now",
+      "title": "Kaboo — Token Efficiency",
+      "resume": true,
+      "role": "AI PM · ByteDance internal open source",
+      "oneLine": "Existing stats answered \"how much was consumed\", never \"which consumption was wasteful\".",
+      "summary": "Token-consumption analytics platform. Led the Token Efficiency Leaderboard and the efficiency analysis module, now covering thousands of internal users.",
+      "details": "Defined judgment criteria for five waste categories — ineffective retries, redundant tool definitions, redundant context, cache misses and over-provisioned model selection. Designed a diagnostic scheme that collects only structured metadata, never task content, and normalised cross-model cost with an Effective Tokens metric.",
+      "impact": "Covering thousands of internal users.",
+      "metrics": [
+        {
+          "label": "Waste categories defined",
+          "to": "5"
+        },
+        {
+          "label": "Reach",
+          "to": "thousands of internal users"
+        }
+      ],
+      "tags": [
+        "INTERN PROJECT",
+        "AI PM",
+        "Open Source",
+        "Observability"
+      ],
+      "links": [],
+      "started": "2026-06-01",
+      "present": true,
+      "order": 6
     }
   ]
 }

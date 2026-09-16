@@ -69,6 +69,14 @@ Links:
   - Paper: https://arxiv.org/pdf/2510.11035
   - DOI: https://arxiv.org/abs/2510.11035
   - GitHub: https://github.com/SusBench-creator/SusBench
+
+## SHIP-06 · SHIPPED · Coze Multi-Agent Orchestration
+Lower the barrier for AI-coding novices to complete complex tasks and improve orchestration reuse for experienced users, through workflows tailored to each development task.
+Impact: Shipped workflow recommendations, a visual editor and a template marketplace. Top 3 at the challenge.
+Tags: HACKATHON PROJECT, AI Agent PM, Multi-Agent, Coze
+Updated: 2026-07-01
+
+Choosing the wrong multi-agent workflow wastes the execution cost of every downstream node, so success was defined as accurately identifying applicable boundaries and distinguishing easily-confused scenarios. Defined metadata for task type, applicable scenarios, agent roles, I/O, process nodes and constraints, and built a 30-case evaluation set including confusable items. Bad-case attribution pointed at insufficient model knowledge, so the engineering layer gained 5-shot examples with positive/negative cases and reasoning explanations, using an ICE-structured prompt with schema-structured output to avoid hallucination.
 # Now
 
 ## NOW-01 · NOW · Landed
@@ -94,6 +102,13 @@ Tags: RESEARCH PROJECT
 ## NOW-05 · NOW · SusFix
 Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
 Tags: RESEARCH PROJECT
+
+## NOW-06 · NOW · Kaboo — Token Efficiency
+Token-consumption analytics platform. Led the Token Efficiency Leaderboard and the efficiency analysis module, now covering thousands of internal users.
+Impact: Covering thousands of internal users.
+Tags: INTERN PROJECT, AI PM, Open Source, Observability
+
+Defined judgment criteria for five waste categories — ineffective retries, redundant tool definitions, redundant context, cache misses and over-provisioned model selection. Designed a diagnostic scheme that collects only structured metadata, never task content, and normalised cross-model cost with an Effective Tokens metric.
 # Next
 
 ## NEXT-01 · NEXT · From PM to Builder
