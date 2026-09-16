@@ -395,8 +395,20 @@ if (site.analytics?.featureBeacon === true) {
 // #giscus-container with either the live script or the placeholder.
 const giscus = site.giscus ?? {};
 const giscusReady = giscus.repo && giscus.repoId && giscus.category && giscus.categoryId;
+/* Loaded lazily, not on page load. `async` only means "do not block parsing";
+   the request still fires immediately, and giscus reliably became the last
+   thing to finish — measured on production, loadEventEnd landed within 1ms of
+   giscus's final response on three consecutive runs (1366/1366, 1282/1281,
+   1982/1982). The comments sit ~4458px down a ~960px viewport, so almost
+   nobody who pays that cost ever sees them, and when the cross-border request
+   stalls it surfaces as ERR_TIMED_OUT in the console.
+
+   So the config is parked on a placeholder div and the real <script> is
+   injected once the section comes within a screen of the viewport. Emitting
+   the attributes here rather than in the loader keeps site.json the single
+   source of truth for the giscus settings. */
 const giscusInner = giscusReady
-  ? `<script src="https://giscus.app/client.js"
+  ? `<div class="giscus-lazy"
         data-repo="${escape(giscus.repo)}"
         data-repo-id="${escape(giscus.repoId)}"
         data-category="${escape(giscus.category)}"
@@ -407,9 +419,7 @@ const giscusInner = giscusReady
         data-emit-metadata="0"
         data-input-position="${escape(giscus.inputPosition ?? 'top')}"
         data-theme="${escape(giscus.theme ?? 'light')}"
-        data-lang="en"
-        crossorigin="anonymous"
-        async></script>`
+        data-lang="en"></div>`
   : `<p class="comments-placeholder">Comments will appear here once Giscus is wired up — see <a href="https://github.com/AntaresYuan/personal_website/issues/49">#49</a>.</p>`;
 html = replaceInner(html, 'giscus-container', `\n      ${giscusInner}\n    `);
 
@@ -600,7 +610,7 @@ const crypto = require('crypto');
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js', 'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js', 'scripts/skin-characters.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js', 'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js', 'scripts/skin-characters.js', 'scripts/giscus-lazy.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),

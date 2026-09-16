@@ -123,8 +123,13 @@ const BLOG_JS = `<script>
 
 const giscus = site.giscus ?? {};
 const giscusReady = giscus.repo && giscus.repoId && giscus.category && giscus.categoryId;
+/* A placeholder, not the script — scripts/giscus-lazy.js swaps it for the real
+   <script> once the section nears the viewport. Even on a post, where comments
+   are part of the content rather than a footer afterthought, they sit below
+   the article and the widget was consistently the last request to finish,
+   holding the load event open behind a cross-border round trip. */
 const giscusBlock = giscusReady
-  ? `<script src="https://giscus.app/client.js"
+  ? `<div class="giscus-lazy"
         data-repo="${e(giscus.repo)}"
         data-repo-id="${e(giscus.repoId)}"
         data-category="${e(giscus.category)}"
@@ -135,9 +140,8 @@ const giscusBlock = giscusReady
         data-emit-metadata="0"
         data-input-position="bottom"
         data-theme="${e(giscus.theme ?? 'preferred_color_scheme')}"
-        data-lang="en"
-        crossorigin="anonymous"
-        async></script>`
+        data-lang="en"></div>
+     <script src="/scripts/giscus-lazy.js" defer></script>`
   : '<p class="blog-comments-off">Comments aren’t configured for this site yet.</p>';
 
 /* ── page shell — shared head/topnav/footer ───────────────────────────── */
