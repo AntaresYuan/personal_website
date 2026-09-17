@@ -88,33 +88,81 @@ const expHtml = jobs.map((j) => `
           </ul>
         </article>`).join('');
 
-/* Whatever the headline strip already shows must not be repeated in the
-   project column — the same figure twice reads as a layout bug, not emphasis. */
-const headlineKeys = new Set(headline.map((m) => `${m.label}|${m.to}`));
+/* Category, derived from the tags already on the card rather than a second
+   field to keep in sync. Order matters: INTERN wins over the others because a
+   shipped internal project is the stronger claim. */
+const categoryOf = (c) => {
+  const t = (c.tags ?? []).map((x) => String(x).toUpperCase());
+  if (t.some((x) => x.includes('INTERN'))) return 'intern proj';
+  if (t.some((x) => x.includes('RESEARCH') || x.includes('BENCHMARK'))) return 'benchmark';
+  if (t.some((x) => x.includes('HACKATHON'))) return 'hackathon';
+  if (t.some((x) => x.includes('SIDE'))) return 'side proj';
+  return 'project';
+};
 
-const projHtml = projects.map((c) => {
-  /* Skip metrics already in the headline, and skip bare values whose label is
-     needed to make sense of them: "5" on its own says nothing, while
-     "2 papers" or "42.5%" carries its own unit. */
-  const top = (c.metrics ?? []).find((m) => {
-    if (headlineKeys.has(`${m.label}|${m.to}`)) return false;
-    if (m.from) return true;                       // a pair is self-explanatory
-    return /[%a-zA-Z]/.test(String(m.to ?? ''));   // a lone value needs a unit
-  });
+/* Cards are deliberately not all one width. Equal tiles give every project the
+   same weight and make the reader scan all of them to find the two that carry
+   the résumé; size is the ranking. Widest first, so the ranking reads as
+   ranking rather than as an alternating pattern. */
+const SIZE_RANK = { lg: 0, md: 1, sm: 2 };
+const ranked = [...projects].sort((a, b) =>
+  (SIZE_RANK[a.size] ?? 1) - (SIZE_RANK[b.size] ?? 1));
+
+/* Each card shows its own leading metric — including one the headline strip
+   also shows.
+
+   De-duplicating against the headline was right when the two sat side by side
+   in one screen, where the repeat read as a layout bug. In this layout they are
+   a section apart, and suppressing the overlap had a worse effect: Lark Loom
+   and Coze, the two widest cards, had every metric taken by the headline and so
+   rendered with an empty footer, while the smallest card kept its number. The
+   size ranking inverted — the cards claiming the most attention showed the
+   least. A summary strip repeating a figure from the item below it is ordinary;
+   an empty headline slot on your strongest project is not. */
+const projHtml = ranked.map((c) => {
+  const top = (c.metrics ?? [])[0];
+  const cat = categoryOf(c);
+  const applied = (c.applied ?? []).map((s) =>
+    `<span class="wcard-sk">${e(s)}</span>`).join('');
   return `
-        <li class="cv-proj">
-          <a href="/work/${e(c.slug)}/">
-            <span class="cv-proj-t">${e(c.title)}</span>
-            <span class="cv-proj-d">${e(c.oneLine ?? c.summary ?? '')}</span>
-            ${top ? `<span class="cv-proj-m">${metricPair(top)}</span>` : ''}
-          </a>
-        </li>`;
+          <li><a class="wcard wcard-${e(c.size ?? 'md')}" href="/work/${e(c.slug)}/">
+            <span class="wcard-top">
+              <span class="wcard-tag wcard-tag-${cat.replace(/\s+/g, '-')}">${e(cat)}</span>
+              ${c.status === 'shipped' ? '<span class="wcard-badge">shipped</span>' : ''}
+            </span>
+            <span class="wcard-t">${e(c.title)}</span>
+            <span class="wcard-d">${e(c.oneLine ?? c.summary ?? '')}</span>
+            ${applied ? `<span class="wcard-sks">${applied}</span>` : ''}
+            <span class="wcard-foot">
+              ${top ? `<span class="wcard-m">${metricPair(top, 'wcard')}</span>
+              <span class="wcard-ml" title="${e(top.label)}">${e(top.label)}</span>` : ''}
+            </span>
+          </a></li>`;
 }).join('');
 
-/* Skills collapse from a 1,310px section into one line of labels — on a
-   résumé this is a keyword list, not a catalogue. */
-const skillNames = (skills.items ?? []).map((s) => e(s.name ?? s.title ?? '')).filter(Boolean);
-const skillHtml = skillNames.map((n) => `<span class="cv-skill">${n}</span>`).join('');
+/* Skills means the AI skills I authored and run — packaged Claude Code skills,
+   plugins, agent infra — not a list of techniques I claim to know. Techniques
+   live per-project on the cards above, where they can be checked against an
+   outcome. */
+const skillHtml = (skills.items ?? [])
+  .slice()
+  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+  .map((s) => {
+    const href = (s.links ?? []).find((l) => /github/i.test(l.label ?? ''))?.href;
+    const tag = e(s.category ?? 'skill').toLowerCase();
+    const open = href
+      ? `<a class="wcard wcard-skill" href="${e(href)}" target="_blank" rel="noopener">`
+      : '<span class="wcard wcard-skill">';
+    return `
+          <li>${open}
+            <span class="wcard-top">
+              <span class="wcard-tag wcard-tag-skill">${tag}</span>
+              ${href ? '<span class="wcard-badge">github ↗</span>' : ''}
+            </span>
+            <span class="wcard-t wcard-t-mono">${e(s.name ?? s.title ?? '')}</span>
+            <span class="wcard-d">${e(s.summary ?? '')}</span>
+          ${href ? '</a>' : '</span>'}</li>`;
+  }).join('');
 
 const v = {
   css: hashOf('styles/main.css'),
@@ -202,34 +250,54 @@ const html = `<!DOCTYPE html>
 </nav>
 
 <main class="cv">
-  <!-- Left rail: who, where, how to reach me, and the way deeper. -->
-  <aside class="cv-rail">
-    <h1 class="cv-name">Antares <em>Yuan</em></h1>
-    <p class="cv-role">${e(profile.role ?? '')}</p>
-    <p class="cv-loc">${e(profile.location ?? '')}</p>
-    <p class="cv-status">${e(profile.status ?? '')}</p>
-    <div class="cv-links">
-      <a href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a>
-      <a lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a>
+  <!-- Identity and the live number, side by side. -->
+  <header class="cv-top">
+    <div class="cv-id">
+      <h1 class="cv-name">Antares <em>Yuan</em></h1>
+      <p class="cv-claim">Every AI product I build, I can tell you<br>
+        <b>exactly what moved, and by how much.</b></p>
+      <p class="cv-role">${e(profile.role ?? '')}</p>
+      <p class="cv-meta">
+        <span>${e(profile.location ?? '')}</span>
+        <a href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a>
+        <a lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a>
+        <span>${e(profile.status ?? '')}</span>
+      </p>
     </div>
-    <div class="cv-skills">${skillHtml}</div>
-    <p class="cv-deeper"><a href="/personal/">the full workspace →</a></p>
-  </aside>
+    <!-- Live usage: the one thing here that is still running as you read it. -->
+    <a class="cv-usage" href="/usage/">
+      <span class="cv-usage-n" id="cv-usage-total">—</span>
+      <span class="cv-usage-l" id="cv-usage-sub">tokens</span>
+      <span class="cv-spark" id="cv-usage-spark" aria-hidden="true"></span>
+      <span class="cv-usage-go">all charts →</span>
+    </a>
+  </header>
 
   <!-- Headline numbers: the first thing read, and all checkable. -->
   <section class="cv-headline" aria-label="Highlights">
     <ul class="hl-list">${headlineHtml}</ul>
   </section>
 
-  <section class="cv-col" aria-label="Experience">
+  <section class="cv-block" aria-label="Experience">
     <h2 class="cv-h">experience</h2>
     ${expHtml}
   </section>
 
-  <section class="cv-col" aria-label="Selected work">
-    <h2 class="cv-h">selected work</h2>
-    <ol class="cv-projs">${projHtml}</ol>
+  <section class="cv-block" aria-label="Selected work">
+    <h2 class="cv-h">projects<span class="cv-lead">${ranked.length}, each with a number attached — scroll for more →</span></h2>
+    <div class="wrail-wrap"><ol class="wrail">${projHtml}</ol></div>
   </section>
+
+  <section class="cv-block" aria-label="Skills">
+    <h2 class="cv-h">skills<span class="cv-lead">AI skills I wrote and use daily</span></h2>
+    <div class="wrail-wrap"><ul class="wrail">${skillHtml}</ul></div>
+  </section>
+
+  <footer class="cv-coda">
+    <span>Hand-written — no framework, no build step beyond a script.</span>
+    <span>The token counter is a CLI on every machine I work from, reporting to a Worker.</span>
+    <span>The rest of me — skins, terminal, what I read — is over in <a href="/personal/">Antares Personal →</a></span>
+  </footer>
 </main>
 
 <!-- The assistant. Docked bottom-right; asking promotes it to a side panel. -->

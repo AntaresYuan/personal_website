@@ -45,6 +45,12 @@
           "to": "50s",
           "note": "-47pp"
         }
+      ],
+      "size": "lg",
+      "applied": [
+        "agent memory",
+        "RAG",
+        "model tiering"
       ]
     },
     {
@@ -90,6 +96,12 @@
           "label": "Evidence set",
           "to": "500 Q / 5,000 distractors"
         }
+      ],
+      "size": "md",
+      "applied": [
+        "benchmark design",
+        "LLM-as-Judge",
+        "RAG"
       ]
     },
     {
@@ -188,6 +200,12 @@
           "label": "Cited by",
           "to": "2 papers"
         }
+      ],
+      "size": "sm",
+      "applied": [
+        "benchmark design",
+        "computer-use agents",
+        "study design"
       ]
     },
     {
@@ -392,7 +410,13 @@
       "links": [],
       "started": "2026-06-01",
       "updated": "2026-07-01",
-      "order": 6
+      "order": 6,
+      "size": "lg",
+      "applied": [
+        "eval-set design",
+        "bad-case analysis",
+        "prompt engineering"
+      ]
     },
     {
       "id": "now-6",
@@ -407,12 +431,12 @@
       "impact": "Covering thousands of internal users.",
       "metrics": [
         {
-          "label": "Waste categories defined",
-          "to": "5"
+          "to": "5 categories",
+          "label": "Token waste defined"
         },
         {
-          "label": "Reach",
-          "to": "thousands of internal users"
+          "to": "thousands",
+          "label": "Internal users reached"
         }
       ],
       "tags": [
@@ -424,7 +448,13 @@
       "links": [],
       "started": "2026-06-01",
       "present": true,
-      "order": 6
+      "order": 6,
+      "size": "md",
+      "applied": [
+        "metric design",
+        "cost modelling",
+        "privacy-safe telemetry"
+      ]
     }
   ]
 }

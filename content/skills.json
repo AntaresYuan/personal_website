@@ -89,10 +89,6 @@
         {
           "label": "/agent-brief.txt",
           "href": "/agent-brief.txt"
-        },
-        {
-          "label": "GitHub",
-          "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
       "order": 6

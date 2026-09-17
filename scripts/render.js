@@ -1757,6 +1757,50 @@
     return `&asymp; ${multiple.toLocaleString()}&times; ${ref.label} this month`;
   };
 
+  /* The Work CV shows one live number, not the whole dashboard: the total, the
+     active-day count, and a sparkline. Separate from wireUsage because that one
+     drives a 52-week heatmap and four stat blocks this page does not have — and
+     because a failure here must leave the em-dash placeholder rather than
+     rendering a confident zero. */
+  const wireCvUsage = (site) => {
+    const cfg = site && site.usage;
+    const nEl = document.getElementById('cv-usage-total');
+    const sEl = document.getElementById('cv-usage-sub');
+    const kEl = document.getElementById('cv-usage-spark');
+    if (!nEl || !cfg || cfg.enabled === false || !cfg.endpoint) return;
+
+    const compact = (n) => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B'
+                        : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M'
+                        : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n);
+
+    fetch(cfg.endpoint.replace(/\/+$/, '') + '/', { mode: 'cors' })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then((data) => {
+        /* Use cellTokens, the same basis the dashboard and the menu bar use
+           (input + output + cache read + cache creation + reasoning, falling
+           back to `tokens` for v1-CLI rows). Summing `tokens` here instead
+           would put a different headline figure on the front page than on
+           /usage/ — two numbers for one quantity, on one site. */
+        const days = (data.days || []).filter((d) => d && cellTokens(d) > 0);
+        if (!days.length) return;                       // keep the placeholder
+        const total = days.reduce((a, d) => a + cellTokens(d), 0);
+        const sessions = days.reduce((a, d) => a + (d.sessions || 0), 0);
+        nEl.textContent = compact(total);
+        if (sEl) sEl.textContent = `tokens · ${days.length} days · ${sessions} sessions`;
+
+        if (kEl) {
+          /* Last 8 weeks, scaled to the window's own peak so a quiet stretch
+             still reads as activity rather than a flat line. */
+          const recent = days.slice(-56);
+          const peak = Math.max.apply(null, recent.map(cellTokens)) || 1;
+          kEl.innerHTML = recent.map((d) =>
+            `<i style="height:${Math.max(2, Math.round((cellTokens(d) / peak) * 22))}px"></i>`
+          ).join('');
+        }
+      })
+      .catch((e) => { console.warn('[cv-usage]', e.message); });
+  };
+
   const wireUsage = (site) => {
     /* Honour a pinned footer.lastUpdated here, not only in renderMeta.
        renderMeta runs ONLY in the non-prerendered branch, so on a prerendered
@@ -2821,6 +2865,7 @@
       wireHeroAsk(askPanel);
       autoOpenCopilot(askPanel, site);
       if (!cvOnly) wireUsage(site);
+      if (cvOnly) wireCvUsage(site);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');
