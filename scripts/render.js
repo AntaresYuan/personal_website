@@ -1789,13 +1789,19 @@
         if (sEl) sEl.textContent = `tokens · ${days.length} days · ${sessions} sessions`;
 
         if (kEl) {
-          /* Last 8 weeks, scaled to the window's own peak so a quiet stretch
-             still reads as activity rather than a flat line. */
+          /* Square-root scale, not linear. One outlier day is several times the
+             median here, and on a linear scale that single bar takes the full
+             height while every other day collapses to the 2px floor — a flat
+             noise band that says nothing about rhythm. sqrt keeps the peak
+             tallest while leaving ordinary days visibly different from each
+             other, which is the only reason to draw this at all. */
           const recent = days.slice(-56);
-          const peak = Math.max.apply(null, recent.map(cellTokens)) || 1;
-          kEl.innerHTML = recent.map((d) =>
-            `<i style="height:${Math.max(2, Math.round((cellTokens(d) / peak) * 22))}px"></i>`
-          ).join('');
+          const vals = recent.map(cellTokens);
+          const peak = Math.max.apply(null, vals) || 1;
+          kEl.innerHTML = vals.map((v) => {
+            const h = 3 + Math.round(Math.sqrt(v / peak) * 21);
+            return `<i style="height:${h}px"></i>`;
+          }).join('');
         }
       })
       .catch((e) => { console.warn('[cv-usage]', e.message); });
