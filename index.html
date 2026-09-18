@@ -18,7 +18,7 @@
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles/main.css?v=8348314d">
+<link rel="stylesheet" href="/styles/main.css?v=f5efe509">
 <script>
   /* Inline and first — applying the stored theme after paint flashes the
      wrong palette on every load. */
@@ -115,7 +115,11 @@
   </section>
 
   <section class="cv-block" aria-label="Experience">
-    <h2 class="cv-h">experience</h2>
+    <header class="sec-head">
+      <span class="sec-cmd">$ cat experience</span>
+      <span class="sec-title">experience</span>
+      <span class="sec-meta">2026 — present</span>
+    </header>
     
         <article class="cv-job">
           <div class="cv-job-head">
@@ -139,125 +143,133 @@
   </section>
 
   <section class="cv-block" aria-label="Selected work">
-    <h2 class="cv-h">projects<span class="cv-lead">5, each with a number attached — scroll for more →</span></h2>
-    <div class="wrail-wrap"><ol class="wrail">
-          <li><a class="wcard wcard-lg" href="/work/lark-loom/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-hackathon">hackathon</span>
-              <span class="wcard-badge">shipped</span>
-            </span>
-            <span class="wcard-t">Lark Loom</span>
-            <span class="wcard-d">IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.</span>
-            <span class="wcard-sks"><span class="wcard-sk">agent memory</span><span class="wcard-sk">RAG</span><span class="wcard-sk">model tiering</span></span>
-            <span class="wcard-foot">
-              <span class="wcard-m"><span class="wcard-from">65%</span><span class="wcard-arr" aria-hidden="true">→</span><span class="wcard-to">80%</span></span>
-              <span class="wcard-ml" title="Memory recall pass rate">Memory recall pass rate</span>
-            </span>
+    <header class="sec-head">
+      <span class="sec-cmd">$ ls projects</span>
+      <span class="sec-title">projects</span>
+      <span class="sec-meta">5 shown · scroll →</span>
+    </header>
+    <div class="rail-wrap"><ol class="rail">
+          <li><a class="card rail-card rail-lg" href="/work/lark-loom/">
+            <div class="card-meta-top">
+              <span class="card-id">PROJ-01 · hackathon</span>
+              <span class="card-id">shipped</span>
+            </div>
+            <div class="card-title">Lark Loom</div>
+            <div class="card-summary">IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.</div>
+            <div class="card-tags"><span class="tag">agent memory</span><span class="tag tag-blue">RAG</span><span class="tag">model tiering</span></div>
+            <div class="card-footer">
+              <span class="rail-metric"><span class="m-from">65%</span><span class="m-arr" aria-hidden="true">→</span><span class="m-to">80%</span></span>
+              <span class="rail-metric-l">Memory recall pass rate</span>
+            </div>
           </a></li>
-          <li><a class="wcard wcard-lg" href="/work/coze-multi-agent/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-hackathon">hackathon</span>
-              <span class="wcard-badge">shipped</span>
-            </span>
-            <span class="wcard-t">Coze Multi-Agent Orchestration</span>
-            <span class="wcard-d">Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.</span>
-            <span class="wcard-sks"><span class="wcard-sk">eval-set design</span><span class="wcard-sk">bad-case analysis</span><span class="wcard-sk">prompt engineering</span></span>
-            <span class="wcard-foot">
-              <span class="wcard-m"><span class="wcard-from">16/30</span><span class="wcard-arr" aria-hidden="true">→</span><span class="wcard-to">28/30</span></span>
-              <span class="wcard-ml" title="Planning-entry recognition (Seed 2.0 Pro)">Planning-entry recognition (Seed 2.0 Pro)</span>
-            </span>
+          <li><a class="card rail-card rail-lg" href="/work/coze-multi-agent/">
+            <div class="card-meta-top">
+              <span class="card-id">PROJ-02 · hackathon</span>
+              <span class="card-id">shipped</span>
+            </div>
+            <div class="card-title">Coze Multi-Agent Orchestration</div>
+            <div class="card-summary">Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.</div>
+            <div class="card-tags"><span class="tag">eval-set design</span><span class="tag tag-blue">bad-case analysis</span><span class="tag">prompt engineering</span></div>
+            <div class="card-footer">
+              <span class="rail-metric"><span class="m-from">16/30</span><span class="m-arr" aria-hidden="true">→</span><span class="m-to">28/30</span></span>
+              <span class="rail-metric-l">Planning-entry recognition (Seed 2.0 Pro)</span>
+            </div>
           </a></li>
-          <li><a class="wcard wcard-md" href="/work/citation-trap/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-benchmark">benchmark</span>
-              <span class="wcard-badge">shipped</span>
-            </span>
-            <span class="wcard-t">Citation Trap</span>
-            <span class="wcard-d">Benchmark for RAG answers that cite sources which do not actually support them.</span>
-            <span class="wcard-sks"><span class="wcard-sk">benchmark design</span><span class="wcard-sk">LLM-as-Judge</span><span class="wcard-sk">RAG</span></span>
-            <span class="wcard-foot">
-              <span class="wcard-m"><span class="wcard-to">42.5%</span></span>
-              <span class="wcard-ml" title="Claude citation trustworthiness">Claude citation trustworthiness</span>
-            </span>
+          <li><a class="card rail-card rail-md" href="/work/citation-trap/">
+            <div class="card-meta-top">
+              <span class="card-id">PROJ-03 · benchmark</span>
+              <span class="card-id">shipped</span>
+            </div>
+            <div class="card-title">Citation Trap</div>
+            <div class="card-summary">Benchmark for RAG answers that cite sources which do not actually support them.</div>
+            <div class="card-tags"><span class="tag">benchmark design</span><span class="tag tag-blue">LLM-as-Judge</span><span class="tag">RAG</span></div>
+            <div class="card-footer">
+              <span class="rail-metric"><span class="m-to">42.5%</span></span>
+              <span class="rail-metric-l">Claude citation trustworthiness</span>
+            </div>
           </a></li>
-          <li><a class="wcard wcard-md" href="/work/kaboo/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-intern-proj">intern proj</span>
+          <li><a class="card rail-card rail-md" href="/work/kaboo/">
+            <div class="card-meta-top">
+              <span class="card-id">PROJ-04 · intern proj</span>
               
-            </span>
-            <span class="wcard-t">Kaboo — Token Efficiency</span>
-            <span class="wcard-d">Existing stats answered &quot;how much was consumed&quot;, never &quot;which consumption was wasteful&quot;.</span>
-            <span class="wcard-sks"><span class="wcard-sk">metric design</span><span class="wcard-sk">cost modelling</span><span class="wcard-sk">privacy-safe telemetry</span></span>
-            <span class="wcard-foot">
-              <span class="wcard-m"><span class="wcard-to">5 categories</span></span>
-              <span class="wcard-ml" title="Token waste defined">Token waste defined</span>
-            </span>
+            </div>
+            <div class="card-title">Kaboo — Token Efficiency</div>
+            <div class="card-summary">Existing stats answered &quot;how much was consumed&quot;, never &quot;which consumption was wasteful&quot;.</div>
+            <div class="card-tags"><span class="tag">metric design</span><span class="tag tag-blue">cost modelling</span><span class="tag">privacy-safe telemetry</span></div>
+            <div class="card-footer">
+              <span class="rail-metric"><span class="m-to">5 categories</span></span>
+              <span class="rail-metric-l">Token waste defined</span>
+            </div>
           </a></li>
-          <li><a class="wcard wcard-sm" href="/work/susbench/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-benchmark">benchmark</span>
-              <span class="wcard-badge">shipped</span>
-            </span>
-            <span class="wcard-t">SusBench</span>
-            <span class="wcard-d">Online benchmark for how easily computer-use agents fall for UI dark patterns.</span>
-            <span class="wcard-sks"><span class="wcard-sk">benchmark design</span><span class="wcard-sk">computer-use agents</span><span class="wcard-sk">study design</span></span>
-            <span class="wcard-foot">
-              <span class="wcard-m"><span class="wcard-to">2 papers</span></span>
-              <span class="wcard-ml" title="Cited by">Cited by</span>
-            </span>
+          <li><a class="card rail-card rail-sm" href="/work/susbench/">
+            <div class="card-meta-top">
+              <span class="card-id">PROJ-05 · benchmark</span>
+              <span class="card-id">shipped</span>
+            </div>
+            <div class="card-title">SusBench</div>
+            <div class="card-summary">Online benchmark for how easily computer-use agents fall for UI dark patterns.</div>
+            <div class="card-tags"><span class="tag">benchmark design</span><span class="tag tag-blue">computer-use agents</span><span class="tag">study design</span></div>
+            <div class="card-footer">
+              <span class="rail-metric"><span class="m-to">2 papers</span></span>
+              <span class="rail-metric-l">Cited by</span>
+            </div>
           </a></li></ol></div>
   </section>
 
   <section class="cv-block" aria-label="Skills">
-    <h2 class="cv-h">skills<span class="cv-lead">AI skills I wrote and use daily</span></h2>
-    <div class="wrail-wrap"><ul class="wrail">
-          <li><a class="wcard wcard-skill" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">claude code skill</span>
-              <span class="wcard-badge">github ↗</span>
-            </span>
-            <span class="wcard-t wcard-t-mono">/devloop</span>
-            <span class="wcard-d">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</span>
+    <header class="sec-head">
+      <span class="sec-cmd">$ ls ~/skills</span>
+      <span class="sec-title">skills</span>
+      <span class="sec-meta">authored &amp; in daily use</span>
+    </header>
+    <div class="rail-wrap"><ul class="rail">
+          <li><a class="card rail-card rail-skill" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-01 · Claude Code skill</span>
+              <span class="card-id">github ↗</span>
+            </div>
+            <div class="card-title card-title-mono">/devloop</div>
+            <div class="card-summary">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</div>
           </a></li>
-          <li><a class="wcard wcard-skill" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">claude code skill</span>
-              <span class="wcard-badge">github ↗</span>
-            </span>
-            <span class="wcard-t wcard-t-mono">/ai-pm-resume</span>
-            <span class="wcard-d">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</span>
+          <li><a class="card rail-card rail-skill" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-02 · Claude Code skill</span>
+              <span class="card-id">github ↗</span>
+            </div>
+            <div class="card-title card-title-mono">/ai-pm-resume</div>
+            <div class="card-summary">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</div>
           </a></li>
-          <li><a class="wcard wcard-skill" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">claude code skill</span>
-              <span class="wcard-badge">github ↗</span>
-            </span>
-            <span class="wcard-t wcard-t-mono">/interview-sim</span>
-            <span class="wcard-d">synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output</span>
+          <li><a class="card rail-card rail-skill" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-03 · Claude Code skill</span>
+              <span class="card-id">github ↗</span>
+            </div>
+            <div class="card-title card-title-mono">/interview-sim</div>
+            <div class="card-summary">synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output</div>
           </a></li>
-          <li><span class="wcard wcard-skill">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">claude code skill</span>
+          <li><span class="card rail-card rail-skill">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-04 · Claude Code Skill</span>
               
-            </span>
-            <span class="wcard-t wcard-t-mono">/log</span>
-            <span class="wcard-d">When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.</span>
+            </div>
+            <div class="card-title card-title-mono">/log</div>
+            <div class="card-summary">When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.</div>
           </span></li>
-          <li><a class="wcard wcard-skill" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">claude code plugin</span>
-              <span class="wcard-badge">github ↗</span>
-            </span>
-            <span class="wcard-t wcard-t-mono">Claude Credit Watchdog</span>
-            <span class="wcard-d">A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.</span>
+          <li><a class="card rail-card rail-skill" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-05 · Claude Code Plugin</span>
+              <span class="card-id">github ↗</span>
+            </div>
+            <div class="card-title card-title-mono">Claude Credit Watchdog</div>
+            <div class="card-summary">A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.</div>
           </a></li>
-          <li><span class="wcard wcard-skill">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">agent infra</span>
+          <li><span class="card rail-card rail-skill">
+            <div class="card-meta-top">
+              <span class="card-id">SKILL-06 · agent infra</span>
               
-            </span>
-            <span class="wcard-t wcard-t-mono">agent-brief.txt</span>
-            <span class="wcard-d">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</span>
+            </div>
+            <div class="card-title card-title-mono">agent-brief.txt</div>
+            <div class="card-summary">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</div>
           </span></li></ul></div>
   </section>
 

@@ -6913,291 +6913,194 @@ body.ask-dock-bottom.ask-panel-open .hero-ask.is-docked {
 @media (max-width: 640px) {
   .exp-kr { grid-template-columns: 1fr; gap: var(--sp-8); }
 }
-
 /* ══ Work: résumé onepage ═════════════════════════════════════════════════
-   A résumé that still reads as this website. Every colour, size, radius and
-   shadow below comes from the tokens at the top of this file, so Work and
-   Personal stay one design system rather than two skins that happen to share
-   a domain — and so all 16 skins retint this page for free.
+   Work is the same website as Personal, so it is built from the same
+   components: .card, .card-id, .card-title, .card-summary, .tag, .card-footer,
+   .sec-head / .sec-cmd / .sec-title. The previous attempt invented a parallel
+   .wcard vocabulary with its own radius, padding, shadow and pill styles, and
+   the two spaces ended up looking like two different products.
 
-   Structure: identity + the live token counter, four headline numbers, then
-   experience, a rail of project cards, a rail of authored AI skills. Depth
-   lives at /work/<slug>/ where the copilot opens beside it.
-
-   Projects are deliberately not all one width. Equal tiles give every project
-   the same weight and force the reader to scan all of them to find the two
-   that carry the résumé; size is the ranking. */
+   What is genuinely new here is only the arrangement: a hero that pairs the
+   claim with the live token counter, a headline strip of four numbers, and two
+   horizontal rails. Everything inside a card is inherited. */
 
 .cv {
-  /* 920px, not the site's full 1280px. The content is a résumé — a name, four
-     numbers, three KR lines — and at 1280 it was 769px of text stranded in a
-     1280px shell, with the experience metrics flung to an edge a third of a
-     screen away from the label they belong to. Prose width is what makes a
-     label and its number read as one row. */
-  max-width: 920px;
+  /* Personal runs full --w-page because a 4-column board needs it. A résumé is
+     prose: at 1280 the experience metrics sat a third of a screen from the
+     label they belong to. */
+  max-width: 980px;
   margin: 0 auto;
-  padding: var(--sp-32) var(--sp-32) var(--sp-64);
+  padding: var(--sp-40) var(--sp-32) var(--sp-64);
   box-sizing: border-box;
 }
 
-/* ── identity + live usage ── */
+/* ── hero ── */
 .cv-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--sp-40);
   align-items: start;
+  margin-bottom: var(--sp-48);
 }
 .cv-name {
   font-family: var(--font-serif);
-  /* At 28px the name was barely larger than a project card title and the page
-     had no focal point — the eye landed nowhere and started scanning. A résumé
-     opens on the person. */
-  font-size: clamp(34px, 4.4vw, 46px);
+  /* Personal's hero name is --fs-display; this is a notch down because Work
+     also has to fit a claim line, but it still has to be the focal point. */
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: var(--fw-regular);
   line-height: var(--lh-tight);
   letter-spacing: var(--tracking-tight);
-  margin: 0 0 var(--sp-10);
+  margin: 0 0 var(--sp-12);
 }
 .cv-name em { font-style: italic; color: var(--color-accent); }
 
-/* The claim the rest of the page is evidence for. It outranks the role line
-   typographically because the role is the ordinary part. */
+/* The claim the rest of the page is evidence for. Serif italic matches the
+   "A star to ship by." tagline slot on Personal. */
 .cv-claim {
   font-family: var(--font-serif);
   font-size: var(--fs-19);
   line-height: var(--lh-snug);
-  margin: 0 0 var(--sp-10);
-  max-width: 30em;
+  margin: 0 0 var(--sp-14);
+  max-width: 32em;
 }
 .cv-claim b {
   font-weight: var(--fw-semibold);
-  box-shadow: inset 0 -0.4em 0 var(--color-yellow-glow);
+  box-shadow: inset 0 -0.38em 0 var(--color-yellow-soft);
 }
 .cv-role { font-size: var(--fs-13); color: var(--color-text-dim); margin: 0 0 var(--sp-8); }
 .cv-meta {
-  display: flex; flex-wrap: wrap; align-items: center;
-  gap: var(--sp-10);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-10);
   font-family: var(--font-mono); font-size: var(--fs-11);
   color: var(--color-text-faint); margin: 0;
 }
 .cv-meta a { color: var(--color-accent); text-decoration: none; }
 .cv-meta a:hover { text-decoration: underline; }
 
-.cv-usage {
-  text-align: right; text-decoration: none; color: inherit;
-  display: block; flex: none;
-}
+/* Live usage. The one thing on the page still running as you read it. */
+.cv-usage { text-align: right; text-decoration: none; color: inherit; display: block; }
 .cv-usage-n {
-  display: block;
-  font-family: var(--font-mono); font-size: var(--fs-22);
+  display: block; font-family: var(--font-mono); font-size: var(--fs-28);
   font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tight);
 }
-.cv-usage-l {
-  display: block;
-  font-family: var(--font-mono); font-size: var(--fs-10);
+.cv-usage-l, .cv-usage-go {
+  display: block; font-family: var(--font-mono); font-size: var(--fs-10);
   letter-spacing: var(--tracking-wide); text-transform: uppercase;
   color: var(--color-text-faint);
 }
 .cv-spark {
   display: flex; align-items: flex-end; justify-content: flex-end;
-  gap: 1.5px; height: 24px; margin-top: var(--sp-8);
+  gap: 1.5px; height: 26px; margin-top: var(--sp-10);
 }
-.cv-spark i {
-  display: block; width: 3px; border-radius: 1px;
-  background: var(--color-yellow); opacity: .85;
-}
-.cv-usage-go {
-  display: block; margin-top: var(--sp-6);
-  font-family: var(--font-mono); font-size: var(--fs-10);
-  color: var(--color-text-faint);
-}
+.cv-spark i { display: block; width: 3px; border-radius: 1px; background: var(--color-yellow); }
+.cv-usage-go { margin-top: var(--sp-8); text-transform: none; letter-spacing: 0; }
 .cv-usage:hover .cv-usage-go { color: var(--color-accent); }
 
 /* ── headline numbers ── */
-.cv-headline { margin-top: var(--sp-32); }
+.cv-headline { margin-bottom: var(--sp-48); }
 .hl-list {
   list-style: none; margin: 0; padding: var(--sp-16) 0;
   border-top: var(--bw) solid var(--color-line);
   border-bottom: var(--bw) solid var(--color-line);
-  /* auto, not 1fr. Four equal columns made each cell 380px wide to hold 62px of
-     text — 84% air — so the four numbers read as four isolated islands instead
-     of one strip. Sizing to content and spacing them apart keeps them related. */
-  display: flex; flex-wrap: wrap; gap: var(--sp-32) var(--sp-48);
+  /* Content-sized, not four equal columns: equal columns made each cell 380px
+     wide to hold 62px of text, so the numbers read as isolated islands. */
+  display: flex; flex-wrap: wrap; gap: var(--sp-24) var(--sp-48);
 }
-.hl { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.hl-val { font-family: var(--font-mono); font-size: var(--fs-17); white-space: nowrap; }
-.hl-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .6; font-size: var(--fs-13); }
-.hl-arr  { color: var(--color-text-faint); font-size: var(--fs-13); margin: 0 2px; }
+.hl { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hl-val { font-family: var(--font-mono); font-size: var(--fs-19); white-space: nowrap; }
+.hl-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .55; font-size: var(--fs-13); }
+.hl-arr  { color: var(--color-text-faint); font-size: var(--fs-13); margin: 0 3px; }
 .hl-to   { color: var(--color-accent); font-weight: var(--fw-semibold); }
 .hl-label {
   font-family: var(--font-mono); font-size: var(--fs-10);
   letter-spacing: var(--tracking-wide); text-transform: uppercase;
   color: var(--color-text-faint);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ── section chrome ── */
-.cv-block { margin-top: var(--sp-40); }
-.cv-h {
-  font-family: var(--font-mono); font-size: var(--fs-10);
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--color-text-faint);
-  margin: 0 0 var(--sp-14);
-  display: flex; align-items: baseline; gap: var(--sp-10);
-}
-.cv-h::after { content: ""; flex: 1; height: 1px; background: var(--color-line); }
-.cv-lead {
-  font-family: var(--font-sans); font-size: var(--fs-11);
-  letter-spacing: 0; text-transform: none; font-style: italic;
-  color: var(--color-text-faint);
-}
+.cv-block { margin-bottom: var(--sp-48); }
 
 /* ── experience ── */
-.cv-job + .cv-job { margin-top: var(--sp-16); }
+.cv-job + .cv-job { margin-top: var(--sp-20); }
 .cv-job-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-10); }
-.cv-job-head h3 { font-family: var(--font-serif); font-size: var(--fs-17); margin: 0; }
+.cv-job-head h3 { font-family: var(--font-serif); font-size: var(--fs-19); font-weight: var(--fw-regular); margin: 0; }
 .cv-when { font-family: var(--font-mono); font-size: var(--fs-11); color: var(--color-text-faint); }
 .cv-job-role {
   font-family: var(--font-mono); font-size: var(--fs-11);
-  color: var(--color-text-faint); margin: 2px 0 var(--sp-8);
+  color: var(--color-text-faint); margin: 3px 0 var(--sp-10);
 }
 .cv-krs { list-style: none; margin: 0; padding: 0; }
 .cv-krs li {
-  /* A dotted leader, the way a résumé or a contents page does it. Without it
-     the label sits at the left and the number at the right with dead space
-     between, and the eye has to guess that the two belong to the same row. */
   display: flex; align-items: baseline; gap: var(--sp-10);
-  padding: var(--sp-6) 0;
+  padding: var(--sp-8) 0;
   border-top: var(--bw) solid var(--color-line-soft);
 }
-/* Only rows that actually end in a number get a leader. A dotted line running
-   to an empty right edge points at nothing and reads as a missing value. */
+/* Only rows that end in a number get a leader; one running to an empty edge
+   points at nothing and reads as a missing value. */
 .cv-krs li:has(.cv-kr-m)::after {
   content: ""; order: 1; flex: 1 1 auto; min-width: var(--sp-16);
   align-self: center; height: 2px;
-  /* A repeating dot image rather than a dotted border: a 1px border rounds to
-     sub-pixel under browser zoom and disappears entirely, which is exactly how
-     it failed the first time. This keeps the dots at a fixed size. */
+  /* A dot image, not a 1px dotted border — the border rounds to sub-pixel under
+     browser zoom and vanishes, which is how it failed the first time. */
   background-image: radial-gradient(circle, var(--color-line) 1px, transparent 1px);
-  background-size: 5px 2px;
-  background-repeat: repeat-x;
-  opacity: .85;
+  background-size: 5px 2px; background-repeat: repeat-x; opacity: .8;
 }
 .cv-krs li > .cv-kr-m { order: 2; }
 .cv-kr-t { font-size: var(--fs-13); min-width: 0; }
 .cv-kr-m { font-family: var(--font-mono); font-size: var(--fs-12); white-space: nowrap; }
-.cv-kr-m .m-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .6; }
-.cv-kr-m .m-arr  { color: var(--color-text-faint); margin: 0 2px; }
+.cv-kr-m .m-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .55; }
+.cv-kr-m .m-arr  { color: var(--color-text-faint); margin: 0 3px; }
 .cv-kr-m .m-to   { color: var(--color-accent); font-weight: var(--fw-semibold); }
 
-/* ── card rails ───────────────────────────────────────────────────────────
+/* ── rails ───────────────────────────────────────────────────────────────
    Full-bleed so cards run past the right edge of the reading column: the card
-   cut by the viewport is the affordance that says "there is more". No gradient
-   fade — a fade has to know whether the rail is scrolled to the end, and when
-   it gets that wrong it claims there is more to see when there is not. */
-.wrail-wrap { margin: 0 calc(-1 * var(--sp-32)); }
-.wrail {
+   cut by the viewport is the affordance that says there is more. No gradient
+   fade — a fade has to know whether the rail is at its end, and when it gets
+   that wrong it claims there is more to see when there is not. */
+.rail-wrap { margin: 0 calc(-1 * var(--sp-32)); }
+.rail {
   list-style: none; margin: 0;
-  padding: 2px var(--sp-32) var(--sp-14);
+  padding: 2px var(--sp-32) var(--sp-16);
   display: flex; gap: var(--sp-12);
-  overflow-x: auto; scroll-snap-type: x proximity;
-  scrollbar-width: none;
+  overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
 }
-.wrail::-webkit-scrollbar { display: none; }
-.wrail > li { display: flex; flex: 0 0 auto; }
+.rail::-webkit-scrollbar { display: none; }
+.rail > li { display: flex; flex: 0 0 auto; }
 
-.wcard {
+/* Everything visual comes from .card; this only sets width and rail behaviour. */
+.rail-card {
   flex: 1 0 auto; scroll-snap-align: start;
   display: flex; flex-direction: column;
-  background: var(--color-surface);
-  border: var(--bw) solid var(--color-line);
-  border-radius: var(--r-lg);
-  padding: var(--sp-14) var(--sp-14) var(--sp-12);
-  text-decoration: none; color: inherit;
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--dur-quick) var(--ease-out),
-              box-shadow var(--dur-quick) var(--ease-out),
-              transform var(--dur-quick) var(--ease-out);
+  text-align: left; text-decoration: none; color: inherit;
 }
-a.wcard:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
+.rail-card .card-summary { flex: 1 0 auto; }
+/* Three widths, by how much the project carries. Equal tiles give every
+   project the same weight; size is the ranking. */
+.rail-lg { width: 372px; }
+.rail-md { width: 288px; }
+.rail-sm { width: 232px; }
+.rail-lg .card-title { font-size: var(--fs-16); }
+.rail-skill { width: 246px; background: var(--color-bg-soft); }
+a.rail-skill:hover { background: var(--color-surface); }
+/* The category + number line has to stay one line. Wrapped, it pushes the
+   github marker onto its own row and the card header reads as two headers. */
+.rail-card .card-meta-top { gap: var(--sp-8); }
+.rail-card .card-id {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }
-a.wcard:hover .wcard-t { color: var(--color-accent); }
+.rail-card .card-id + .card-id { flex: none; margin-left: auto; }
+.card-title-mono { font-family: var(--font-mono); letter-spacing: var(--tracking-tight); }
 
-/* Three widths, by how much the project carries. */
-.wcard-lg { width: 384px; }
-.wcard-md { width: 296px; }
-.wcard-sm { width: 236px; }
-.wcard-lg .wcard-t { font-size: var(--fs-17); }
-.wcard-lg .wcard-d { font-size: var(--fs-13); }
-.wcard-lg .wcard-m { font-size: var(--fs-17); }
-.wcard-sm .wcard-d { font-size: var(--fs-12); }
-
-.wcard-top { display: flex; align-items: center; gap: var(--sp-6); margin-bottom: var(--sp-8); }
-.wcard-tag {
-  font-family: var(--font-mono); font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide); text-transform: uppercase;
-  padding: 2.5px var(--sp-8); border-radius: 100px;
-  background: var(--color-bg-soft); color: var(--color-text-dim);
+.rail-metric { font-family: var(--font-mono); font-size: var(--fs-13); color: var(--color-text); }
+.rail-metric .m-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .55; }
+.rail-metric .m-arr  { color: var(--color-text-faint); margin: 0 2px; }
+.rail-metric .m-to   { color: var(--color-accent); font-weight: var(--fw-semibold); }
+.rail-metric-l {
+  text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 48%;
 }
-.wcard-tag-intern-proj { background: var(--color-blue-soft);   color: var(--color-blue-deep); }
-.wcard-tag-benchmark   { background: var(--color-bg-soft);     color: var(--color-success); }
-.wcard-tag-hackathon   { background: var(--color-yellow-glow); color: var(--color-warn); }
-.wcard-tag-skill       { background: var(--color-surface-alt); color: var(--color-text-dim); }
-.wcard-badge {
-  margin-left: auto;
-  font-family: var(--font-mono); font-size: var(--fs-10); color: var(--color-text-faint);
-}
-
-.wcard-t { font-size: var(--fs-14); font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
-.wcard-t-mono { font-family: var(--font-mono); letter-spacing: var(--tracking-tight); }
-.wcard-d {
-  font-size: var(--fs-12); color: var(--color-text-dim);
-  line-height: var(--lh-snug); margin-top: var(--sp-8);
-}
-
-/* Techniques applied on THIS project — the skills rail below is a different
-   thing entirely (skills I authored), so these stay visually quieter. */
-.wcard-sks { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-10); }
-.wcard-sk {
-  font-family: var(--font-mono); font-size: var(--fs-10);
-  color: var(--color-text-faint);
-  border: var(--bw) solid var(--color-line-soft);
-  border-radius: var(--r-sm); padding: 2px var(--sp-6);
-}
-
-.wcard-foot { margin-top: auto; padding-top: var(--sp-12); min-width: 0; }
-.wcard-m {
-  font-family: var(--font-mono); font-size: var(--fs-14); display: block;
-  /* Values like "thousands of internal users" are prose, not a figure; let them
-     shrink rather than blow the card's width out. */
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.wcard-from { color: var(--color-text-faint); text-decoration: line-through; opacity: .6; font-size: var(--fs-12); }
-.wcard-arr  { color: var(--color-text-faint); margin: 0 2px; }
-.wcard-to   { color: var(--color-accent); font-weight: var(--fw-semibold); }
-.wcard-ml {
-  display: block; margin-top: 1px;
-  font-family: var(--font-mono); font-size: var(--fs-10);
-  letter-spacing: var(--tracking-wide); text-transform: uppercase;
-  color: var(--color-text-faint);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-/* Authored skills: same rail, but tinted and dashed so two stacked rails do
-   not read as one long list. These are tools, not case studies. */
-.wcard-skill {
-  width: 244px;
-  background: var(--color-bg-soft);
-  border-style: dashed;
-  box-shadow: none;
-}
-a.wcard-skill:hover { background: var(--color-surface); border-style: solid; }
 
 /* ── coda ── */
 .cv-coda {
-  margin-top: var(--sp-48); padding-top: var(--sp-16);
+  padding-top: var(--sp-16);
   border-top: var(--bw) solid var(--color-line);
   display: flex; flex-direction: column; gap: 3px;
   font-family: var(--font-mono); font-size: var(--fs-11);
@@ -7207,11 +7110,11 @@ a.wcard-skill:hover { background: var(--color-surface); border-style: solid; }
 .cv-coda a:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
-  .cv { padding: var(--sp-16) var(--sp-16) var(--sp-64); }
-  .cv-top { grid-template-columns: 1fr; gap: var(--sp-20); }
+  .cv { padding: var(--sp-24) var(--sp-16) var(--sp-64); }
+  .cv-top { grid-template-columns: 1fr; gap: var(--sp-20); margin-bottom: var(--sp-32); }
   .cv-usage { text-align: left; }
   .cv-spark { justify-content: flex-start; }
-  .hl-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-16); }
-  .wrail-wrap { margin: 0 calc(-1 * var(--sp-16)); }
-  .wrail { padding-left: var(--sp-16); padding-right: var(--sp-16); }
+  .hl-list { gap: var(--sp-16) var(--sp-24); }
+  .rail-wrap { margin: 0 calc(-1 * var(--sp-16)); }
+  .rail { padding-left: var(--sp-16); padding-right: var(--sp-16); }
 }

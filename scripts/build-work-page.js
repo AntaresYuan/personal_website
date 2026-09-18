@@ -108,59 +108,53 @@ const SIZE_RANK = { lg: 0, md: 1, sm: 2 };
 const ranked = [...projects].sort((a, b) =>
   (SIZE_RANK[a.size] ?? 1) - (SIZE_RANK[b.size] ?? 1));
 
-/* Each card shows its own leading metric — including one the headline strip
-   also shows.
-
-   De-duplicating against the headline was right when the two sat side by side
-   in one screen, where the repeat read as a layout bug. In this layout they are
-   a section apart, and suppressing the overlap had a worse effect: Lark Loom
-   and Coze, the two widest cards, had every metric taken by the headline and so
-   rendered with an empty footer, while the smallest card kept its number. The
-   size ranking inverted — the cards claiming the most attention showed the
-   least. A summary strip repeating a figure from the item below it is ordinary;
-   an empty headline slot on your strongest project is not. */
-const projHtml = ranked.map((c) => {
+/* Cards use the site's own .card / .card-id / .card-title / .card-summary /
+   .tag / .card-footer components — the same ones the Personal board is built
+   from. The previous version invented a parallel .wcard vocabulary with its own
+   radius, padding, shadow and tag pills, which is why Work and Personal looked
+   like two different products. Width is the only thing that varies here. */
+const projHtml = ranked.map((c, i) => {
   const top = (c.metrics ?? [])[0];
   const cat = categoryOf(c);
-  const applied = (c.applied ?? []).map((s) =>
-    `<span class="wcard-sk">${e(s)}</span>`).join('');
+  const applied = (c.applied ?? []).map((s, j) =>
+    `<span class="tag${j % 2 ? ' tag-blue' : ''}">${e(s)}</span>`).join('');
+  const num = `PROJ-${String(i + 1).padStart(2, '0')}`;
   return `
-          <li><a class="wcard wcard-${e(c.size ?? 'md')}" href="/work/${e(c.slug)}/">
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-${cat.replace(/\s+/g, '-')}">${e(cat)}</span>
-              ${c.status === 'shipped' ? '<span class="wcard-badge">shipped</span>' : ''}
-            </span>
-            <span class="wcard-t">${e(c.title)}</span>
-            <span class="wcard-d">${e(c.oneLine ?? c.summary ?? '')}</span>
-            ${applied ? `<span class="wcard-sks">${applied}</span>` : ''}
-            <span class="wcard-foot">
-              ${top ? `<span class="wcard-m">${metricPair(top, 'wcard')}</span>
-              <span class="wcard-ml" title="${e(top.label)}">${e(top.label)}</span>` : ''}
-            </span>
+          <li><a class="card rail-card rail-${e(c.size ?? 'md')}" href="/work/${e(c.slug)}/">
+            <div class="card-meta-top">
+              <span class="card-id">${num} · ${e(cat)}</span>
+              ${c.status === 'shipped' ? '<span class="card-id">shipped</span>' : ''}
+            </div>
+            <div class="card-title">${e(c.title)}</div>
+            <div class="card-summary">${e(c.oneLine ?? c.summary ?? '')}</div>
+            ${applied ? `<div class="card-tags">${applied}</div>` : ''}
+            <div class="card-footer">
+              ${top ? `<span class="rail-metric">${metricPair(top, 'm')}</span>
+              <span class="rail-metric-l">${e(top.label)}</span>` : ''}
+            </div>
           </a></li>`;
 }).join('');
 
 /* Skills means the AI skills I authored and run — packaged Claude Code skills,
    plugins, agent infra — not a list of techniques I claim to know. Techniques
-   live per-project on the cards above, where they can be checked against an
-   outcome. */
+   live per-project on the cards above, where each sits next to an outcome. */
 const skillHtml = (skills.items ?? [])
   .slice()
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
-  .map((s) => {
+  .map((s, i) => {
     const href = (s.links ?? []).find((l) => /github/i.test(l.label ?? ''))?.href;
-    const tag = e(s.category ?? 'skill').toLowerCase();
+    const num = `SKILL-${String(i + 1).padStart(2, '0')}`;
     const open = href
-      ? `<a class="wcard wcard-skill" href="${e(href)}" target="_blank" rel="noopener">`
-      : '<span class="wcard wcard-skill">';
+      ? `<a class="card rail-card rail-skill" href="${e(href)}" target="_blank" rel="noopener">`
+      : '<span class="card rail-card rail-skill">';
     return `
           <li>${open}
-            <span class="wcard-top">
-              <span class="wcard-tag wcard-tag-skill">${tag}</span>
-              ${href ? '<span class="wcard-badge">github ↗</span>' : ''}
-            </span>
-            <span class="wcard-t wcard-t-mono">${e(s.name ?? s.title ?? '')}</span>
-            <span class="wcard-d">${e(s.summary ?? '')}</span>
+            <div class="card-meta-top">
+              <span class="card-id">${num} · ${e(s.category ?? 'skill')}</span>
+              ${href ? '<span class="card-id">github ↗</span>' : ''}
+            </div>
+            <div class="card-title card-title-mono">${e(s.name ?? s.title ?? '')}</div>
+            <div class="card-summary">${e(s.summary ?? '')}</div>
           ${href ? '</a>' : '</span>'}</li>`;
   }).join('');
 
@@ -279,18 +273,30 @@ const html = `<!DOCTYPE html>
   </section>
 
   <section class="cv-block" aria-label="Experience">
-    <h2 class="cv-h">experience</h2>
+    <header class="sec-head">
+      <span class="sec-cmd">$ cat experience</span>
+      <span class="sec-title">experience</span>
+      <span class="sec-meta">${e(jobs[0]?.period ?? '')}</span>
+    </header>
     ${expHtml}
   </section>
 
   <section class="cv-block" aria-label="Selected work">
-    <h2 class="cv-h">projects<span class="cv-lead">${ranked.length}, each with a number attached — scroll for more →</span></h2>
-    <div class="wrail-wrap"><ol class="wrail">${projHtml}</ol></div>
+    <header class="sec-head">
+      <span class="sec-cmd">$ ls projects</span>
+      <span class="sec-title">projects</span>
+      <span class="sec-meta">${ranked.length} shown · scroll →</span>
+    </header>
+    <div class="rail-wrap"><ol class="rail">${projHtml}</ol></div>
   </section>
 
   <section class="cv-block" aria-label="Skills">
-    <h2 class="cv-h">skills<span class="cv-lead">AI skills I wrote and use daily</span></h2>
-    <div class="wrail-wrap"><ul class="wrail">${skillHtml}</ul></div>
+    <header class="sec-head">
+      <span class="sec-cmd">$ ls ~/skills</span>
+      <span class="sec-title">skills</span>
+      <span class="sec-meta">authored &amp; in daily use</span>
+    </header>
+    <div class="rail-wrap"><ul class="rail">${skillHtml}</ul></div>
   </section>
 
   <footer class="cv-coda">
