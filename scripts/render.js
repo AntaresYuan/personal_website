@@ -2089,10 +2089,16 @@
       stopTimers();
       refetchTimer = setInterval(refetch, REFETCH_MS);
       liveTickTimer = setInterval(updateLiveLabel, LABEL_TICK_MS);
-      // Fun-fact rotates locally without refetching the API.
-      factRotateTimer = setInterval(() => {
-        if (lastCells) factEl.innerHTML = renderFunFact(lastCells);
-      }, FUNFACT_ROTATE_MS);
+      // Fun-fact rotates locally without refetching the API. Off on Work for
+      // the same reason the view carousel is: nothing in that hero should move
+      // on its own. This is a second, independent timer — silencing the view
+      // rotation alone still left this line cycling every 7s, which reads as
+      // "the heatmap keeps changing" even though the chart itself is static.
+      if (!document.body.classList.contains('work-space')) {
+        factRotateTimer = setInterval(() => {
+          if (lastCells) factEl.innerHTML = renderFunFact(lastCells);
+        }, FUNFACT_ROTATE_MS);
+      }
     };
     const stopTimers = () => {
       if (refetchTimer)    { clearInterval(refetchTimer);    refetchTimer = null; }
