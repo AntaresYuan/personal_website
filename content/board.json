@@ -29,29 +29,7 @@
       "started": "2026-04-17",
       "updated": "2026-05-15",
       "present": false,
-      "order": 1,
-      "resume": true,
-      "role": "AI PM · ByteDance AI Campus Challenge",
-      "oneLine": "IM-based long-horizon collaboration agent — the whole project lifecycle in one conversation.",
-      "metrics": [
-        {
-          "label": "Memory recall pass rate",
-          "from": "65%",
-          "to": "80%"
-        },
-        {
-          "label": "Task latency",
-          "from": "95s",
-          "to": "50s",
-          "note": "-47pp"
-        }
-      ],
-      "size": "lg",
-      "applied": [
-        "agent memory",
-        "RAG",
-        "model tiering"
-      ]
+      "order": 1
     },
     {
       "id": "shipped-2",
@@ -79,30 +57,7 @@
       "started": "2026-04-17",
       "updated": "2026-05-15",
       "present": false,
-      "order": 1,
-      "resume": true,
-      "role": "DevPost · Honorable Mention",
-      "oneLine": "Benchmark for RAG answers that cite sources which do not actually support them.",
-      "metrics": [
-        {
-          "label": "Claude citation trustworthiness",
-          "to": "42.5%"
-        },
-        {
-          "label": "GPT citation trustworthiness",
-          "to": "26.7%"
-        },
-        {
-          "label": "Evidence set",
-          "to": "500 Q / 5,000 distractors"
-        }
-      ],
-      "size": "md",
-      "applied": [
-        "benchmark design",
-        "LLM-as-Judge",
-        "RAG"
-      ]
+      "order": 1
     },
     {
       "id": "shipped-2",
@@ -191,22 +146,7 @@
       ],
       "started": "2025-08-21",
       "updated": "2026-02-23",
-      "order": 4,
-      "resume": true,
-      "role": "IUI’26 · 2nd author",
-      "oneLine": "Online benchmark for how easily computer-use agents fall for UI dark patterns.",
-      "metrics": [
-        {
-          "label": "Cited by",
-          "to": "2 papers"
-        }
-      ],
-      "size": "sm",
-      "applied": [
-        "benchmark design",
-        "computer-use agents",
-        "study design"
-      ]
+      "order": 4
     },
     {
       "id": "now-1",
@@ -387,7 +327,6 @@
       "slug": "coze-multi-agent",
       "status": "shipped",
       "title": "Coze Multi-Agent Orchestration",
-      "resume": true,
       "role": "AI PM · ByteDance AI Full-Stack Challenge · Top 3",
       "oneLine": "Multi-agent workflow orchestration — recommend the right flow instead of making users compose one.",
       "summary": "Lower the barrier for AI-coding novices to complete complex tasks and improve orchestration reuse for experienced users, through workflows tailored to each development task.",
@@ -410,20 +349,13 @@
       "links": [],
       "started": "2026-06-01",
       "updated": "2026-07-01",
-      "order": 6,
-      "size": "lg",
-      "applied": [
-        "eval-set design",
-        "bad-case analysis",
-        "prompt engineering"
-      ]
+      "order": 6
     },
     {
       "id": "now-6",
       "slug": "kaboo",
       "status": "now",
       "title": "Kaboo — Token Efficiency",
-      "resume": true,
       "role": "AI PM · ByteDance internal open source",
       "oneLine": "Existing stats answered \"how much was consumed\", never \"which consumption was wasteful\".",
       "summary": "Token-consumption analytics platform. Led the Token Efficiency Leaderboard and the efficiency analysis module, now covering thousands of internal users.",
@@ -448,13 +380,7 @@
       "links": [],
       "started": "2026-06-01",
       "present": true,
-      "order": 6,
-      "size": "md",
-      "applied": [
-        "metric design",
-        "cost modelling",
-        "privacy-safe telemetry"
-      ]
+      "order": 6
     }
   ]
 }

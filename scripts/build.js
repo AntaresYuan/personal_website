@@ -21,16 +21,11 @@
   // from a fresh clone without dev deps must still get a working site.
   try { require('./gen-characters'); } catch (e) { console.log('  (characters skipped: ' + ((e && e.message) || e) + ')'); }
 
-  /* build-html.js still owns the shared pieces other builders read; the Work
-     page itself is now generated wholesale by build-work-page.js below. */
   require('./build-html');
   require('./build-blog');
   /* After build-html: it rewrites index.html in place, and the personal space
      is derived from the finished file. */
   require('./build-spaces');
-  /* After build-spaces: Personal is built from its own template and must be
-     written before index.html is overwritten with the one-screen CV. */
-  require('./build-work-page');
   require('./build-work');
   // /usage/ — the full dashboard. After build-html so the homepage skeleton
   // (and its "all charts →" link) is already in place.

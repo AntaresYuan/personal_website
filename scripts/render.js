@@ -1757,56 +1757,6 @@
     return `&asymp; ${multiple.toLocaleString()}&times; ${ref.label} this month`;
   };
 
-  /* The Work CV shows one live number, not the whole dashboard: the total, the
-     active-day count, and a sparkline. Separate from wireUsage because that one
-     drives a 52-week heatmap and four stat blocks this page does not have — and
-     because a failure here must leave the em-dash placeholder rather than
-     rendering a confident zero. */
-  const wireCvUsage = (site) => {
-    const cfg = site && site.usage;
-    const nEl = document.getElementById('cv-usage-total');
-    const sEl = document.getElementById('cv-usage-sub');
-    const kEl = document.getElementById('cv-usage-spark');
-    if (!nEl || !cfg || cfg.enabled === false || !cfg.endpoint) return;
-
-    const compact = (n) => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B'
-                        : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M'
-                        : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n);
-
-    fetch(cfg.endpoint.replace(/\/+$/, '') + '/', { mode: 'cors' })
-      .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
-      .then((data) => {
-        /* Use cellTokens, the same basis the dashboard and the menu bar use
-           (input + output + cache read + cache creation + reasoning, falling
-           back to `tokens` for v1-CLI rows). Summing `tokens` here instead
-           would put a different headline figure on the front page than on
-           /usage/ — two numbers for one quantity, on one site. */
-        const days = (data.days || []).filter((d) => d && cellTokens(d) > 0);
-        if (!days.length) return;                       // keep the placeholder
-        const total = days.reduce((a, d) => a + cellTokens(d), 0);
-        const sessions = days.reduce((a, d) => a + (d.sessions || 0), 0);
-        nEl.textContent = compact(total);
-        if (sEl) sEl.textContent = `tokens · ${days.length} days · ${sessions} sessions`;
-
-        if (kEl) {
-          /* Square-root scale, not linear. One outlier day is several times the
-             median here, and on a linear scale that single bar takes the full
-             height while every other day collapses to the 2px floor — a flat
-             noise band that says nothing about rhythm. sqrt keeps the peak
-             tallest while leaving ordinary days visibly different from each
-             other, which is the only reason to draw this at all. */
-          const recent = days.slice(-56);
-          const vals = recent.map(cellTokens);
-          const peak = Math.max.apply(null, vals) || 1;
-          kEl.innerHTML = vals.map((v) => {
-            const h = 3 + Math.round(Math.sqrt(v / peak) * 21);
-            return `<i style="height:${h}px"></i>`;
-          }).join('');
-        }
-      })
-      .catch((e) => { console.warn('[cv-usage]', e.message); });
-  };
-
   const wireUsage = (site) => {
     /* Honour a pinned footer.lastUpdated here, not only in renderMeta.
        renderMeta runs ONLY in the non-prerendered branch, so on a prerendered
@@ -2802,16 +2752,6 @@
   /* ── Boot ───────────────────────────────────────────────────────── */
   (async () => {
     try {
-      /* The Work page is a pre-rendered one-screen CV. Its content is baked in
-         at build time and it deliberately has none of the dashboard's
-         containers, so the full render pass throws on the first missing
-         element — and the catch below then paints a "content load failed"
-         banner over a page that is actually fine.
-
-         There, only the interactive parts are wired (assistant, theme, skin)
-         and the content pass is skipped. */
-      const cvOnly = document.body.classList.contains('cv-page');
-
       const [site, profile, board, lens, contact, skills] = await Promise.all([
         json('content/site.json'),
         json('content/profile.json'),
@@ -2841,27 +2781,22 @@
             cardIndex.set(displayId, { ...c, displayId });
           });
         });
-      } else if (!cvOnly) {
+      } else {
         renderMeta(site);
         renderHero(profile);
         renderBoard(board);
         renderLens(lens);
         renderContact(contact);
       }
-      /* Skills hydrate the same Map regardless of prerender state — the
-         section is SSR-rendered by build-html.js, runtime just needs the
-         index for click-to-open and for the cross-surface open-card event.
-         Skipped on the CV page, which has no skills section to index. */
-      if (!cvOnly) hydrateSkills(skills);
-      /* Wire interactive behavior — needed in both prerendered and runtime
-         modes since build-html.js only emits markup, not event listeners.
-         The board-bound ones are skipped on the CV page: there is no board,
-         no filter chips and no view tabs there to wire. */
-      if (!cvOnly) {
-        wireFilterChipClicks();
-        wireViewTabs();
-        wireModal();
-      }
+      // Skills hydrate the same Map regardless of prerender state — the
+      // section is SSR-rendered by build-html.js, runtime just needs the
+      // index for click-to-open and for the cross-surface open-card event.
+      hydrateSkills(skills);
+      // Wire interactive behavior — needed in both prerendered and runtime
+      // modes since build-html.js only emits markup, not event listeners.
+      wireFilterChipClicks();
+      wireViewTabs();
+      wireModal();
       wireTheme();
       /* Expose the panel so other surfaces can hand it a question. The command
          palette needs it for its "ask Antares" row, and palette.js is a
@@ -2870,8 +2805,7 @@
       window.ASK_PANEL = askPanel;
       wireHeroAsk(askPanel);
       autoOpenCopilot(askPanel, site);
-      if (!cvOnly) wireUsage(site);
-      if (cvOnly) wireCvUsage(site);
+      wireUsage(site);
     } catch (e) {
       console.error('[render]', e);
       const main = document.querySelector('main');
