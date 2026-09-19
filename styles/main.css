@@ -6767,8 +6767,18 @@ body.work-space .hero .usage-heatmap-wrap { margin-bottom: 0; }
 body.work-space .hero .usage-stats { margin-top: 0; }
 body.work-space .hero .hstat-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: var(--sp-10) var(--sp-20);
+  /* Three columns. Two ran 149px tall against a 93px calendar, so the stats
+     rather than the chart set the block height and shrinking the squares
+     bought nothing; four fitted the height but pushed the row past the right
+     edge of the viewport. Three clears both. */
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  gap: var(--sp-8) var(--sp-16);
+}
+/* The dividers and padding above each cell suit a full-width strip; in the
+   hero they add ~40px of height for no information. */
+body.work-space .hero .hstat-cell {
+  border-top: 0;
+  padding-top: 0;
 }
 body.work-space .hero .hstat-cell { white-space: nowrap; }
 body.work-space .hero .usage-stat-sep { display: none; }

@@ -1193,7 +1193,12 @@
     // looking like a bar chart. With ~11 weeks this lands at 22px → ~290px
     // of grid, which then centres rather than being upscaled to 900px.
     const targetGridW = 860 - HEATMAP_LEFT_LABEL;
-    const cell = Math.max(9, Math.min(22, Math.floor((targetGridW - (cols - 1) * HEATMAP_GAP) / cols)));
+    /* Work caps the square at 13px rather than 22px. On Personal the calendar
+       is a full-width section and 22px reads as a calendar; in Work's hero
+       column the same squares make a 175px-tall block that dominates a header
+       whose other content is three lines of text. Same grid, less bulk. */
+    const cellMax = document.body.classList.contains('work-space') ? 13 : 22;
+    const cell = Math.max(9, Math.min(cellMax, Math.floor((targetGridW - (cols - 1) * HEATMAP_GAP) / cols)));
     const gridW = cols * cell + (cols - 1) * HEATMAP_GAP;
     const gridH = HEATMAP_ROWS * cell + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
     const w = HEATMAP_LEFT_LABEL + gridW;
