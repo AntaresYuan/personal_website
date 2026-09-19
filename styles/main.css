@@ -6747,6 +6747,39 @@ body.work-space .hero .usage-title {
 }
 body.work-space .hero .usage-views { justify-content: flex-start; }
 
+/* Calendar left, numbers right. render.js narrows Work to the single calendar
+   view (usage.viewsWork) and hides the tab bar on its own when fewer than two
+   views are offered, so the row is chart + table rather than chart + tabs. */
+body.work-space .hero .usage-section {
+  display: grid;
+  grid-template-columns: max-content minmax(150px, max-content);
+  align-items: start;
+  column-gap: var(--sp-32);
+}
+body.work-space .hero .usage-title { grid-column: 1 / -1; }
+body.work-space .hero .usage-views { grid-column: 1 / -1; }
+body.work-space .hero .usage-heatmap-wrap { margin-bottom: 0; }
+/* The numbers are a flex row of .hstat-cell inside .hstat-grid — eight cells
+   that need ~520px side by side. In a side column they stack into two tidy
+   columns instead. Targeting .usage-stats alone did nothing: its only children
+   are the grid and the "tracking since" line, so the width came from a level
+   further in. */
+body.work-space .hero .usage-stats { margin-top: 0; }
+body.work-space .hero .hstat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: var(--sp-10) var(--sp-20);
+}
+body.work-space .hero .hstat-cell { white-space: nowrap; }
+body.work-space .hero .usage-stat-sep { display: none; }
+
+@media (max-width: 1100px) {
+  body.work-space .hero .usage-section { grid-template-columns: 1fr; }
+  body.work-space .hero .usage-stats { margin-top: var(--sp-20); }
+  body.work-space .hero .hstat-grid { display: flex; flex-wrap: wrap; }
+  body.work-space .hero .usage-stat-sep { display: inline; }
+}
+
 @media (max-width: 1100px) {
   /* Below this the two columns cannot both hold their content, so the hero
      stacks and the usage section runs full width again. */

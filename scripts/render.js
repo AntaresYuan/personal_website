@@ -1811,7 +1811,13 @@
     // full set, so a typo degrades to "show everything" rather than to a
     // blank section.
     const pickViews = () => {
-      const want = Array.isArray(cfg.views) ? cfg.views : null;
+      /* Work narrows this to the calendar via usage.viewsWork. Both spaces load
+         the same site.json, so the split has to happen here rather than in the
+         config — Personal still offers all three. */
+      const workOnly = document.body.classList.contains('work-space')
+        && Array.isArray(cfg.viewsWork) && cfg.viewsWork.length;
+      const want = workOnly ? cfg.viewsWork
+                 : (Array.isArray(cfg.views) ? cfg.views : null);
       if (!want || !want.length) return VIEWS;
       const chosen = want
         .map((id) => VIEWS.find((v) => v.id === id))

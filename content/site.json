@@ -60,6 +60,9 @@
       "calendar",
       "trend"
     ],
-    "defaultView": "rhythm"
+    "defaultView": "rhythm",
+    "viewsWork": [
+      "calendar"
+    ]
   }
 }
