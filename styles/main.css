@@ -6717,3 +6717,40 @@ body.work-space .hero-name {
    containers so they cannot contribute margin. */
 body.work-space .hero-slogan:empty,
 body.work-space .hero-ctas:empty { display: none; }
+
+/* The usage section sits in the hero's right column on Work. The calendar is
+   ~740px of grid, so the column has to be sized for it rather than the 240px
+   the audience CTAs used to need — and the hero switches from bottom-aligned
+   (which suited short CTA cards) to top-aligned, so the name and the chart
+   start on the same line. */
+body.work-space .hero {
+  /* max-content for the usage column, not minmax(0, auto): with a 0 floor the
+     track collapsed to 0px and the section wrapped under the name instead of
+     beside it. The identity column takes what is left. */
+  grid-template-columns: minmax(220px, 1fr) max-content;
+  align-items: start;
+  gap: var(--sp-40);
+}
+body.work-space .hero .usage-section {
+  margin-bottom: 0;
+  /* .section carries grid-column: 1 / -1 so full-width sections span the page
+     grid. Inside the hero that made the block cover both tracks, leaving the
+     second one 0px wide and the chart stacked under the name. */
+  grid-column: 2;
+}
+/* Title and view tabs are centred for a full-width section; in a side column
+   they should line up with the chart's left edge. */
+body.work-space .hero .usage-title {
+  text-align: left;
+  font-size: var(--fs-17);
+  margin-bottom: var(--sp-10);
+}
+body.work-space .hero .usage-views { justify-content: flex-start; }
+
+@media (max-width: 1100px) {
+  /* Below this the two columns cannot both hold their content, so the hero
+     stacks and the usage section runs full width again. */
+  body.work-space .hero { grid-template-columns: 1fr; }
+  body.work-space .hero .usage-title { text-align: center; }
+  body.work-space .hero .usage-views { justify-content: center; }
+}

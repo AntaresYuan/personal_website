@@ -117,7 +117,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/main.css?v=3c768e9e">
+<link rel="stylesheet" href="styles/main.css?v=17235ca4">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -188,15 +188,6 @@
         <div class="hero-meta" id="hero-meta"><a class="hero-resume" href="/media/Antares_PM_resume__4_3.pdf" target="_blank" rel="noopener">résumé&nbsp;↓</a><span class="sep">·</span><a class="hero-resume" lang="zh" href="/media/袁晨杰产品简历(MultiAgent 6.19).pdf" target="_blank" rel="noopener">简历&nbsp;↓</a><span class="pill">AI Product Manager</span><span class="pill">HCDE @ UW</span><span class="pill">Ex ByteDance</span></div>
       </div>
     </div>
-    <div class="hero-ctas" id="hero-ctas"></div>
-    <!-- ── /USAGE — live Claude usage dashboard ──────────────────────
-         Sits above the fold so visitors see "I operate in AI" before
-         anything else. SSR shell renders the header + empty heatmap so
-         first paint has no FOUC; render.js fills the cells from
-         https://usage.antaresyuan.site and refreshes every 60s.
-         Silently hides on fetch failure (don't show a broken widget).
-         Disabled via content/site.json → usage.enabled = false.
-         See workers/usage/README.md + docs/usage-sync.md. -->
     <section class="section usage-section rise rise-2" id="usage" aria-label="Live AI usage">
       <h2 class="usage-title">Antares's <em>Token Consumption</em></h2>
       <div class="usage-views" id="usage-views" role="group" aria-label="Chart view" hidden hidden=""></div>
@@ -225,6 +216,15 @@
         <span class="usage-foot" id="usage-foot"><span id="usage-live-text">live</span></span>
       </div>
     </section>
+    <!-- ── /USAGE — live Claude usage dashboard ──────────────────────
+         Sits above the fold so visitors see "I operate in AI" before
+         anything else. SSR shell renders the header + empty heatmap so
+         first paint has no FOUC; render.js fills the cells from
+         https://usage.antaresyuan.site and refreshes every 60s.
+         Silently hides on fetch failure (don't show a broken widget).
+         Disabled via content/site.json → usage.enabled = false.
+         See workers/usage/README.md + docs/usage-sync.md. -->
+    
 
     <!-- "Ask this portfolio" — a grounded Q&A, visible above the fold.
          With the antares-qa Worker (content/site.json → qa.workerUrl) it

@@ -489,7 +489,10 @@ html = replaceInner(html, 'hero-name',   heroNameHtml());
    container collapses to nothing. */
 html = replaceInner(html, 'hero-slogan', '');
 html = replaceInner(html, 'hero-meta',   heroMetaWorkHtml());
-html = replaceInner(html, 'hero-ctas',   '');
+/* No hero-ctas on Work: the usage section now occupies the hero's right column,
+   so the container is gone from the markup rather than emptied. replaceInner
+   warns on a missing id, and a build that cries wolf every run is a build whose
+   warnings stop being read. */
 
 // Avatar src — set image attributes + alt
 if (profile.avatar?.calm) {
