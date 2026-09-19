@@ -195,27 +195,18 @@ const heroNameHtml = () => {
 // — each empty ⇒ that link is omitted.
 const resumeLink = (href, label, lang) =>
   `<span class="sep">·</span><a class="hero-resume"${lang ? ` lang="${lang}"` : ''} href="${escape(href)}" target="_blank" rel="noopener">${label}&nbsp;↓</a>`;
-const heroMetaHtml = () => {
+/* Work keeps only the two résumé downloads and the tags. The role, the
+   location and the "currently working at…" status line all restate what the
+   résumé itself says, and on a page whose job is to hand over a CV they are
+   read past rather than read. Personal renders from its own template and keeps
+   the full row. */
+const heroMetaWorkHtml = () => {
   const parts = [];
-  if (profile.role)      parts.push(`<span>${escape(profile.role)}</span>`);
-  if (profile.location)  parts.push(`<span class="sep">·</span><span>${escape(profile.location)}</span>`);
-  if (profile.resumeEn)  parts.push(resumeLink(profile.resumeEn, 'résumé'));
-  if (profile.resumeZh)  parts.push(resumeLink(profile.resumeZh, '简历', 'zh'));
-  if (profile.status)    parts.push(`<span class="sep">·</span><span class="now-pill">${escape(profile.status)}</span>`);
+  if (profile.resumeEn) parts.push(resumeLink(profile.resumeEn, 'résumé').replace('<span class="sep">·</span>', ''));
+  if (profile.resumeZh) parts.push(resumeLink(profile.resumeZh, '简历', 'zh'));
   (profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
   return parts.join('');
 };
-
-// Hero CTAs
-const heroCtasHtml = () =>
-  (profile.ctas ?? []).map((c) => `
-        <a class="cta" href="${escape(c.anchor || '#')}">
-          <div>
-            <div class="cta-label">${escape(c.audience ?? '')}</div>
-            <div class="cta-text">${escape(c.label ?? '')}</div>
-          </div>
-          <span class="cta-arrow">→</span>
-        </a>`).join('');
 
 // One card -> button HTML (matches render.js exactly, including data-attrs)
 const cardHtml = (c) => {
@@ -489,9 +480,12 @@ html = replaceInner(html, 'last-updated', `updated ${escape(lastUpdated)}`);
 
 // Hero
 html = replaceInner(html, 'hero-name',   heroNameHtml());
-html = replaceInner(html, 'hero-slogan', escape(profile.slogan ?? ''));
-html = replaceInner(html, 'hero-meta',   heroMetaHtml());
-html = replaceInner(html, 'hero-ctas',   heroCtasHtml());
+/* Slogan and the audience CTAs are emptied rather than removed: the elements
+   stay so Personal's template and this one keep the same shape, and an empty
+   container collapses to nothing. */
+html = replaceInner(html, 'hero-slogan', '');
+html = replaceInner(html, 'hero-meta',   heroMetaWorkHtml());
+html = replaceInner(html, 'hero-ctas',   '');
 
 // Avatar src — set image attributes + alt
 if (profile.avatar?.calm) {

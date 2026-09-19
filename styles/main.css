@@ -6699,3 +6699,21 @@ body.ask-dock-bottom.ask-panel-open .hero-ask.is-docked {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ══ Work space overrides ═════════════════════════════════════════════════
+   Scoped to body.work-space so Personal, which renders from its own template
+   with a bare <body>, is untouched. Only the hero differs — everything below
+   it is the same page in both spaces. */
+
+/* The display size suits Personal, where the name is the page's subject. Work
+   opens on a name too, but the hero is now just name + downloads + tags, and
+   at 64px that trio reads as a poster rather than a header. */
+body.work-space .hero-name {
+  font-size: clamp(30px, 3.6vw, 40px);
+  margin-bottom: var(--sp-14);
+}
+
+/* Slogan and the audience CTAs are emptied by build-html.js; hide the empty
+   containers so they cannot contribute margin. */
+body.work-space .hero-slogan:empty,
+body.work-space .hero-ctas:empty { display: none; }
