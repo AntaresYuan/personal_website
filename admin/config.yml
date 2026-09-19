@@ -128,10 +128,16 @@ collections:
               - { label: "Calm (default)",   name: "calm",    widget: "image" }
               - { label: "Talking (on hover/tap)", name: "talking", widget: "image" }
               - { label: "Alt text",         name: "alt",     widget: "string" }
-          - label: "Tags"
+          - label: "Tags (Personal hero)"
             name: "tags"
             widget: "list"
             field: { label: "Tag", name: "tag", widget: "string" }
+          - label: "Tags (Work hero)"
+            name: "tagsWork"
+            widget: "list"
+            required: false
+            field: { label: "Tag", name: "tag", widget: "string" }
+            hint: "Shown on the Work space only. Leave empty to reuse the Personal tags."
           - label: "Audience CTAs (3 entries)"
             name: "ctas"
             widget: "list"

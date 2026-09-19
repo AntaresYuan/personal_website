@@ -204,7 +204,11 @@ const heroMetaWorkHtml = () => {
   const parts = [];
   if (profile.resumeEn) parts.push(resumeLink(profile.resumeEn, 'résumé').replace('<span class="sep">·</span>', ''));
   if (profile.resumeZh) parts.push(resumeLink(profile.resumeZh, '简历', 'zh'));
-  (profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
+  /* tagsWork, falling back to tags. Work wants the three a recruiter scans for
+     — role, school, last employer — where Personal's five describe how I work.
+     Kept as its own field because Personal's row is frozen in its template, so
+     repointing `tags` would leave the CMS disagreeing with that page. */
+  (profile.tagsWork ?? profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
   return parts.join('');
 };
 
