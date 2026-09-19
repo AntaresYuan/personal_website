@@ -1845,7 +1845,12 @@
     const ROTATE_MS = 5000;
     let rotateTimer = null;
     let rotatePaused = false;
-    let rotateDisabled = false;
+    /* Work never rotates, whatever it is offered. Today it happens to show a
+       single view, which would stop the carousel on its own — but that is a
+       side effect of the current config, not the rule, and adding a second
+       view back would silently revive it. Stated here instead so the intent
+       survives that change. Nothing ever clears this flag. */
+    let rotateDisabled = document.body.classList.contains('work-space');
 
     // Respect the OS "reduce motion" setting: an unattended 5s swap is
     // exactly the kind of motion that setting exists to suppress.
