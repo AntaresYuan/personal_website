@@ -86,7 +86,6 @@
 <!-- Avatar is the LCP candidate — preload so it starts downloading
      immediately, in parallel with stylesheet + JS, instead of waiting
      until CSS resolves the .avatar-img background-image rule. -->
-<link rel="preload" as="image" href="media/avatar-calm.png" fetchpriority="high">
 
 <!-- The Roadmap → Timeline view lazy-loads vis-timeline (≈540 KB) the first
      time it's opened — prefetch it at idle so that switch isn't network-blocked.
@@ -181,13 +180,8 @@
   <!-- ── HERO ────────────────────────────────────────────────────── -->
   <header class="hero rise rise-1">
     <div class="hero-left">
-      <!-- Avatar sits inline on the left of the name/slogan block.
-           Calm by default; swaps to talking on hover/focus/tap. -->
-      <button type="button" class="hero-avatar" id="hero-avatar"
-              aria-label="Avatar — tap or hover to see me say hi">
-        <img class="avatar-img avatar-calm"    id="avatar-calm"    alt="Antares — illustrated portrait" src="media/avatar-calm.png">
-        <img class="avatar-img avatar-talking" id="avatar-talking" alt="" aria-hidden="true" src="media/avatar-talking.png">
-      </button>
+      <!-- No avatar in Work. Personal keeps it; templates/personal.html is a
+           separate file, so this removal does not reach it. -->
       <div class="hero-text">
         <h1 class="hero-name" id="hero-name">Antares <em>Yuan</em></h1>
         <p class="hero-slogan" id="hero-slogan">A star to ship by.</p>
