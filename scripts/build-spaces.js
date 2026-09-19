@@ -39,6 +39,71 @@ if (!fs.existsSync(tplPath)) {
 
 let html = fs.readFileSync(tplPath, 'utf8');
 
+/* Re-render the board from the freshly built Work page rather than shipping the
+   copy frozen into the template.
+
+   The template is a verbatim capture of the page as it stood at 67bda15, which
+   means its board is a snapshot of content/board.json as it was that day. Add a
+   project and Work picks it up while Personal silently keeps the old set — which
+   is exactly what happened: board.json reached 17 cards and Personal was still
+   showing 15, missing Coze and Kaboo.
+
+   build-html.js has already written index.html from the current JSON by the time
+   this runs (build.js orders it that way), so the board there is authoritative.
+   Lifting that one block keeps everything else about the template intact. */
+const workPath = path.join(root, 'index.html');
+if (fs.existsSync(workPath)) {
+  const work = fs.readFileSync(workPath, 'utf8');
+  const boardOf = (src) => {
+    /* Exact class="board", not a \b word-boundary match: \b treats the hyphen
+       in board-toolbar / board-section as a boundary, so a looser pattern grabs
+       the toolbar and the swap silently does nothing. */
+    const open = src.search(/<div class="board"/);
+    if (open < 0) return null;
+    // Walk the divs so a nested one cannot end the block early.
+    const tags = /<div\b|<\/div>/g;
+    tags.lastIndex = open;
+    let depth = 0, m;
+    while ((m = tags.exec(src))) {
+      depth += m[0] === '</div>' ? -1 : 1;
+      if (depth === 0) return src.slice(open, m.index + m[0].length);
+    }
+    return null;
+  };
+  const fresh = boardOf(work);
+  const stale = boardOf(html);
+  if (fresh && stale) {
+    html = html.replace(stale, fresh);
+  } else {
+    // Better a visible warning than a page that quietly serves last month's
+    // projects; the board is the main thing this page is for.
+    console.log('  (personal board NOT refreshed — markup did not match; check build-html.js)');
+  }
+
+  /* Same staleness applies to every other server-rendered list in the template.
+     The skills block still carried a link that content/skills.json no longer
+     has, so Personal shipped 8 skill links against Work's 7. Refresh each list
+     from the built page by its container id. */
+  const blockOf = (src, id) => {
+    const open = src.search(new RegExp(`<[a-z]+[^>]*\\sid="${id}"`));
+    if (open < 0) return null;
+    const tag = /^<([a-z]+)/.exec(src.slice(open))[1];
+    const tags = new RegExp(`<${tag}\\b|</${tag}>`, 'g');
+    tags.lastIndex = open;
+    let depth = 0, m;
+    while ((m = tags.exec(src))) {
+      depth += m[0].startsWith('</') ? -1 : 1;
+      if (depth === 0) return src.slice(open, m.index + m[0].length);
+    }
+    return null;
+  };
+  ['skills-list', 'lens-list', 'contact-list'].forEach((id) => {
+    const a = blockOf(work, id);
+    const b = blockOf(html, id);
+    if (a && b && a !== b) html = html.replace(b, a);
+  });
+}
+
 /* Cache-bust the same assets build-html.js does. Without this the page would
    ship whatever hash was frozen into the template when it was captured, and a
    CSS change would not reach visitors who had the old file cached. */
