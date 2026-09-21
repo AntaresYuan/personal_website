@@ -195,10 +195,6 @@ const card = (id, title, note) => `      <section class="ucard" id="ucard-${id}"
    Safe to publish: POST without the bearer is 401 (verified), so the
    endpoint and repo URL are not secrets. Only the bearer is. */
 const REPO_URL = 'https://github.com/AntaresYuan/personal_website';
-const step = (n, title, body) => `      <li class="ucli-step">
-        <h3 class="ucli-step-title"><span class="ucli-step-n">${n}</span>${e(title)}</h3>
-${body}
-      </li>`;
 const cmd = (c, label) => `        <button class="ucli-cmd" type="button" data-copy="${e(c)}"${label ? ` aria-label="${e(label)}"` : ''}><code><span class="ucli-dollar">$</span> ${e(c)}</code><span class="ucli-copy" aria-hidden="true">copy</span></button>`;
 
 function cliSection() {
@@ -207,20 +203,25 @@ function cliSection() {
     <p class="usage-cli-lead">These numbers come from a small agent that reads local
       Claude Code and Codex transcripts and posts daily totals here. It's multi-device:
       each machine owns its own slot, so several Macs merge instead of overwriting.
-      Setting up another one takes three commands.</p>
+      One command installs it.</p>
 
-    <ol class="ucli-steps">
-${step(1, 'Clone the repo', cmd(`git clone ${REPO_URL}.git && cd personal_website`))}
-${step(2, 'Run the setup script', cmd('./ops/setup-sync.sh') + `
-        <p class="ucli-note">Detects which tools are installed, pins this machine's
-          device slot, then asks for the shared bearer — the endpoint rejects every
-          write without it. The key is checked against the Worker before it's stored,
-          so a mistyped one fails here instead of silently 401-ing on every later run.
-          Local scan and dry-run come before anything is uploaded. Re-runnable.</p>`)}
-${step(3, 'Check what it found', cmd('node scripts/sync-usage.js --stats') + `
-        <p class="ucli-note">Local breakdown, no network. <code>--doctor</code> checks
-          the config, the secret and the endpoint if something looks off.</p>`)}
-    </ol>
+    <div class="ucli-oneline">
+${cmd('curl -fsSL https://antaresyuan.site/install.sh | sh', 'install command')}
+        <p class="ucli-note">Downloads just the agent (not the whole site) into
+          <code>~/.local/share/antares-usage</code>, drops an <code>antares-usage</code>
+          command in <code>~/.local/bin</code>, then walks you through setup: it detects
+          which tools are installed, pins this machine's device slot, and asks for the
+          shared bearer — checked against the Worker before it's stored, so a mistyped
+          key fails right there instead of silently 401-ing on every later run. Local
+          scan and dry-run come before anything uploads. Re-runnable.</p>
+    </div>
+
+    <p class="usage-cli-after">Then, any time:</p>
+    <ul class="ucli-cmds">
+      <li>${cmd('antares-usage stats')}<span class="ucli-inline-note">local breakdown, no network</span></li>
+      <li>${cmd('antares-usage doctor')}<span class="ucli-inline-note">check config, secret and endpoint</span></li>
+      <li>${cmd('antares-usage sync')}<span class="ucli-inline-note">upload the latest totals now</span></li>
+    </ul>
 
     <p class="usage-cli-foot">Needs macOS (keychain + launchd) and Node. The bearer isn't
       on this page by design — read it off a machine that's already syncing:

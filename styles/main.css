@@ -3025,48 +3025,44 @@ body.modal-open { overflow: hidden; }
   max-width: var(--w-prose);
   margin: 0 0 var(--sp-24);
 }
-.ucli-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  /* minmax(0, 1fr), not the implicit `auto`: an auto track is floored at the
-     items' min-content width, so the long clone URL inside a step blew the
-     track out past the container (measured: 732px items in a 610px track).
-     body has overflow-x:hidden, so instead of a scrollbar the copy button
-     just got clipped off the right edge — visible in a screenshot but NOT
-     in document.scrollWidth, which that same hidden overflow clamps. */
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--sp-16);
-}
-.ucli-step {
+/* The install command now stands alone in a bordered card. Replaced the
+   numbered .ucli-step* set when the three-step flow collapsed to one curl. */
+.ucli-oneline {
   border: var(--bw) solid var(--color-line);
   border-radius: var(--r-md);
   padding: var(--sp-16) var(--sp-20);
   background: var(--color-surface);
-  min-width: 0;   /* let the step shrink; its code block scrolls instead */
+  min-width: 0;
 }
-.ucli-step-title {
-  display: flex;
+.usage-cli-after {
+  font-size: var(--fs-13);
+  color: var(--color-text-dim);
+  margin: var(--sp-24) 0 var(--sp-12);
+}
+/* The follow-up commands: each row is one copy button plus a plain-language
+   gloss. minmax(0, …) on the button column so a command never blows the row
+   out past the container (the clone-URL clipping the old steps hit). */
+.ucli-cmds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-8);
+}
+.ucli-cmds > li {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) 1fr;
   align-items: center;
   gap: var(--sp-12);
-  font-size: var(--fs-13);
-  font-weight: var(--fw-semibold);
-  margin: 0 0 var(--sp-12);
 }
-/* Fixed-size counter so a 1-digit and a 2-digit step stay aligned. */
-.ucli-step-n {
-  flex: 0 0 auto;
-  display: inline-grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
-  background: var(--color-yellow-glow);
-  border: var(--bw) solid var(--color-yellow);
+.ucli-inline-note {
+  font-size: var(--fs-12);
+  color: var(--color-text-faint);
   font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  font-weight: var(--fw-semibold);
+}
+@media (max-width: 560px) {
+  /* Stack the gloss under its command instead of squeezing two columns. */
+  .ucli-cmds > li { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
 }
 .ucli-cmd {
   display: flex;
