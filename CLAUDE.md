@@ -9,8 +9,8 @@
 
 ### `[hidden] { display: none !important; }` is load-bearing
 
-The reset at the top of `styles/main.css` makes the `hidden` HTML attribute
-work. Without it, an author rule like `.foo { display: flex }` beats the UA
+The reset at the top of `styles/main.css` (and of `styles/work.css`) makes
+the `hidden` HTML attribute work. Without it, an author rule like `.foo { display: flex }` beats the UA
 `[hidden] { display: none }` (cascade origin: author > UA), and elements
 marked `hidden` in markup still get laid out. On mobile, full-viewport panels
 (`.ask-panel`, `.palette`, `.modal-backdrop`, `.card-modal`) then become
@@ -80,12 +80,26 @@ leaving the live site one full rebuild behind every CMS edit. The paths
 filter alone is enough to prevent re-trigger loops (the bot commit only
 touches artifacts, which aren't watched).
 
+### Work and Personal share content, not markup or styles
+
+- **Work** (`/`): `index.html` + `styles/work.css` + `scripts/work.js`, filled
+  from `content/work.json` (+ `profile.json`, `site.json`). Does **not** load
+  `main.css` or `render.js` — no skins, no board, no terminal.
+- **Personal** (`/personal/`): `templates/personal.html` + `styles/main.css` +
+  `scripts/render.js`. `build-spaces.js` re-renders its lists (board, chips,
+  counts, skills, lens, contact) from JSON via `scripts/lib/personal-blocks.js`.
+
+A style or behaviour change for one space goes in that space's files only.
+Glass (`.glass`) is for the navigation/control layer — never content cards,
+never glass on glass. Refraction (`data-lens`) is Chromium-only by design;
+other engines get the blur-and-rim fallback.
+
 ### `index.html` is BOTH source template AND artifact
 
-`scripts/build-html.js` mutates `index.html` in-place every build:
+`scripts/build-html.js` mutates `index.html` (the Work home) in-place every build:
 
 - Edit: the structural markup, anchors, placeholder containers (e.g.
-  `<div id="skills-list"></div>`). New section blocks go in the template
+  `<ul id="project-track"></ul>`). New section blocks go in the template
   area between sibling sections.
 - Don't edit by hand: anything inside `replaceInner` / `replaceInnerOpenMatch`
   targets — build-html will overwrite on next run.
@@ -108,11 +122,11 @@ enforces it client-side; the GET response strips anything but the daily total.
 Full hard-line list lives in `workers/usage/README.md` § "Privacy contract — read
 first, do not bend".
 
-The `/usage` section sits **inside the `.hero` grid** (between `.hero-ctas`
-and `.hero-ask`) with `grid-column: 1 / -1` spanning both columns. Heatmap
-constants (`HEATMAP_COLS=52`, `HEATMAP_CELL=16`, etc.) are duplicated in
-`scripts/build-html.js` and `scripts/render.js` — keep them in lockstep
-or the SSR shell and client render mismatch on first paint.
+On Personal the `/usage` section sits **inside the `.hero` grid** with
+`grid-column: 1 / -1`; its heatmap SSR shell is frozen in
+`templates/personal.html` and redrawn by `scripts/render.js`. On Work it is
+the hero's middle column (`#usage`), drawn entirely by `scripts/work.js` —
+no SSR shell to keep in lockstep. Both hide on a failed fetch.
 
 **Worker GET is edge-cached.** `workers/usage/src/index.js` stashes the
 assembled JSON in `caches.default` for `GET_CACHE_TTL_S` (60s). POST handler

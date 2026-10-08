@@ -19,16 +19,20 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
 │   ├── doodles.json        ← special-day "doodles" — the moon mark becomes a glyph (holidays, birthday…)
 │   ├── skills.json         ← /skills section ("dotfiles for AI") — Claude Code skills, agent infra, configs I use
+│   ├── work.json           ← Work home: name, message, update line, featured projects, site rail
 │   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/tags/draft + Markdown body)
-├── styles/main.css         ← design tokens + dashboard styles
+├── styles/main.css         ← Personal: design tokens + dashboard styles
+├── styles/work.css         ← Work home: Liquid Glass controls + layout (standalone)
 ├── scripts/
-│   ├── render.js           ← runtime: hydrates the page for interactive use
+│   ├── render.js           ← runtime: hydrates Personal for interactive use
+│   ├── work.js             ← runtime: Work home (usage chart, carousel, ask, glass)
 │   ├── terminal.js         ← runtime: embedded Agent Terminal
 │   ├── palette.js          ← runtime: ⌘K command palette
 │   ├── doodle.js           ← runtime: the brand mark = tonight's moon phase (or a doodle)
 │   ├── qa-faq.js           ← runtime: shared FAQ + retrieval (palette + "ask")
 │   ├── lib/blog.js         ← shared: load + render content/blog/*.md (frontmatter + Markdown)
-│   ├── build-html.js       ← build:   pre-renders content into index.html
+│   ├── build-html.js       ← build:   pre-renders content/work.json into index.html (Work home)
+│   ├── build-spaces.js     ← build:   /personal/ from templates/personal.html + content/*.json
 │   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ from content/blog/*.md
 │   ├── build-og.js         ← build:   renders a 1200×630 social card (PNG) per post
 │   ├── build-glyphs.js     ← build:   regen /glyphs (a gallery of the doodle glyphs)
@@ -53,7 +57,8 @@ SOURCE (edit these — directly or via /admin/)
 └── favicon.svg
 
 ARTIFACTS (generated — do not hand-edit)
-├── index.html              ← built by scripts/build-html.js
+├── index.html              ← built by scripts/build-html.js (Work home)
+├── personal/index.html     ← built by scripts/build-spaces.js
 ├── blog/                   ← built by scripts/build-blog.js (index.html + <slug>/index.html)
 ├── glyphs.html             ← built by scripts/build-glyphs.js (the doodle-glyph gallery, /glyphs)
 ├── llms.txt                ← built by scripts/build-llms.js
@@ -227,6 +232,7 @@ See [Issue #39](https://github.com/AntaresYuan/personal_website/issues/39) for t
 - **Palette:** warm yellow (`#F5C518`) primary, cobalt blue (`#2347D9`) accent, cream (`#FAF7F0`) background.
 - **Type:** Inter (body) · Fraunces (display) · JetBrains Mono (accent).
 - All tokens live in `styles/main.css` `:root`. Edit there to retheme globally.
+- **Work home** (`/`) is its own page with its own stylesheet, `styles/work.css`: system type (SF Pro, Inter elsewhere), light/dark/auto only, and Apple's Liquid Glass treatment on the navigation layer — rail, space switch, appearance, carousel arrows, ask composer. Its tokens live in that file's `:root`.
 
 ## License & attribution
 

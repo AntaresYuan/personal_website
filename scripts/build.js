@@ -21,10 +21,10 @@
   // from a fresh clone without dev deps must still get a working site.
   try { require('./gen-characters'); } catch (e) { console.log('  (characters skipped: ' + ((e && e.message) || e) + ')'); }
 
+  // Work home (index.html), then Personal (/personal/ from its own template).
+  // The two share content/*.json but no markup or styles.
   require('./build-html');
   require('./build-blog');
-  /* After build-html: it rewrites index.html in place, and the personal space
-     is derived from the finished file. */
   require('./build-spaces');
   require('./build-work');
   // /usage/ — the full dashboard. After build-html so the homepage skeleton

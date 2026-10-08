@@ -1,0 +1,63 @@
+{
+  "name": {
+    "first": "Antares",
+    "middle": "Chenjie",
+    "last": "Yuan",
+    "native": "袁晨杰"
+  },
+  "resume": {
+    "en": "Résumé",
+    "zh": "简历"
+  },
+  "message": {
+    "title": "A message from Antares",
+    "body": "I build AI products by treating myself like one — versioned, measured, always shipping. Right now I'm open to AI PM roles at top product orgs, founder conversations in AI infra & agents, and 0→1 contract work. Tell me what you're building."
+  },
+  "update": {
+    "date": "2026-10-07",
+    "text": "I'm working on ApplyMint, SusFix and the Kaboo token-efficiency leaderboard."
+  },
+  "projects": {
+    "title": "Projects",
+    "placeholders": 5,
+    "items": []
+  },
+  "nav": [
+    {
+      "id": "home",
+      "label": "Home",
+      "href": "/",
+      "icon": "home"
+    },
+    {
+      "id": "projects",
+      "label": "Projects",
+      "href": "",
+      "icon": "folder"
+    },
+    {
+      "id": "skills",
+      "label": "AI Skills",
+      "href": "",
+      "icon": "spark"
+    },
+    {
+      "id": "gallery",
+      "label": "Gallery",
+      "href": "",
+      "icon": "image"
+    },
+    {
+      "id": "writing",
+      "label": "Writing",
+      "href": "/blog/",
+      "icon": "doc"
+    },
+    {
+      "id": "about",
+      "label": "About me",
+      "href": "",
+      "icon": "avatar"
+    }
+  ]
+}

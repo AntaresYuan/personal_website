@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════
-   build-html.js — pre-render content/*.json into index.html.
+   build-html.js — pre-render the Work home page (index.html).
 
-   Why: the runtime renderer (scripts/render.js) populates the page from
-   JSON in the browser. Agents that don't execute JS (Claude Code, search
-   crawlers, plain curl) get an empty shell otherwise. This script bakes
-   the same content into the static HTML so a no-JS reader sees the slogan,
-   every card, lens entries, and contact info immediately.
+   Why: agents that don't execute JS (Claude Code, search crawlers, plain
+   curl) would otherwise get an empty shell. This bakes the content from
+   content/work.json + profile.json + site.json into the static HTML.
 
    Strategy: walk known element IDs in the existing index.html and replace
-   their innerHTML with the same markup render.js would emit. Idempotent —
-   re-running with unchanged content produces an identical file.
+   their innerHTML. Idempotent — re-running with unchanged content produces
+   an identical file.
+
+   Work and Personal no longer share markup or styles. Work is this page,
+   styled by styles/work.css and driven by scripts/work.js. Personal is built
+   by build-spaces.js from templates/personal.html and keeps styles/main.css
+   and scripts/render.js.
 
    Run:
      node scripts/build-html.js
@@ -18,307 +21,119 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const { escape, replaceInner, setAttr } = require('./lib/html-replace');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 
 const site    = read('content/site.json');
 const profile = read('content/profile.json');
-const board   = read('content/board.json');
+const work    = read('content/work.json');
 
-// "updated <date>" in the topnav — auto (last-commit date) unless pinned in
-// site.json. See scripts/last-updated.js. render.js leaves #last-updated alone
-// unless footer.lastUpdated is set.
-const lastUpdated = require('./last-updated');
-const lens    = read('content/lens.json');
-const contact = read('content/contact.json');
-// /skills — the "dotfiles for AI" section (between #terminal and #lens).
-// Optional file: if a fork drops content/skills.json, the section quietly
-// stays empty; the source-of-truth for that fallback is here.
-const skills = (() => {
-  try { return read('content/skills.json'); }
-  catch { return { head: {}, items: [] }; }
-})();
-
-/* ── Helpers ──────────────────────────────────────────────────────────── */
-const escape = (s) =>
-  String(s ?? '').replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
-
-// Match the exact set of tags render.js's safeRich allows (em / strong / br)
-const safeRich = (s) => escape(s).replace(/&lt;(\/?(em|strong|br)\s*\/?)&gt;/gi, '<$1>');
-
-// Replace innerHTML of an element matched by `openRe`. The regex must
-// capture the tag name as group 1. Walks the HTML balancing same-name
-// opens/closes so nested same-tag elements (e.g. divs inside divs) are
-// handled correctly — that matters on re-runs where the previous build
-// already populated the container.
-const replaceInnerOpenMatch = (html, openRe, content, label) => {
-  const openMatch = openRe.exec(html);
-  if (!openMatch) {
-    console.warn(`[build-html] no element matched: ${label}`);
-    return html;
-  }
-  const tagName = openMatch[1].toLowerCase();
-  const contentStart = openMatch.index + openMatch[0].length;
-
-  const openTagRe  = new RegExp(`<${tagName}\\b[^>]*>`, 'gi');
-  const closeTagRe = new RegExp(`</${tagName}\\s*>`, 'gi');
-
-  let depth = 1;
-  let pos = contentStart;
-  while (depth > 0) {
-    openTagRe.lastIndex  = pos;
-    closeTagRe.lastIndex = pos;
-    const nextOpen  = openTagRe.exec(html);
-    const nextClose = closeTagRe.exec(html);
-    if (!nextClose) {
-      console.warn(`[build-html] unterminated <${tagName}> for ${label}`);
-      return html;
-    }
-    if (nextOpen && nextOpen.index < nextClose.index) {
-      depth++;
-      pos = nextOpen.index + nextOpen[0].length;
-    } else {
-      depth--;
-      if (depth === 0) {
-        return html.slice(0, contentStart) + content + html.slice(nextClose.index);
-      }
-      pos = nextClose.index + nextClose[0].length;
-    }
-  }
-  return html;
+/* ── Rail icons ───────────────────────────────────────────────────────────
+   Hand-drawn 24px strokes (CLAUDE.md: UI icons are SVG, never emoji). Stroke
+   colour and width come from work.css, so one set serves both themes. */
+const ICONS = {
+  home:   '<path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/>',
+  folder: '<path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/>',
+  spark:  '<rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/>',
+  image:  '<rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/>',
+  doc:    '<path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/>',
 };
 
-const replaceInner = (html, id, content) =>
-  replaceInnerOpenMatch(
-    html,
-    new RegExp(`<([a-zA-Z][a-zA-Z0-9]*)([^>]*\\sid=["']${id}["'][^>]*)>`, 'i'),
-    content,
-    `id="${id}"`
-  );
-
-// Set or replace an attribute on the element with the given id.
-const setAttr = (html, id, attr, value) => {
-  const re = new RegExp(
-    `<([a-zA-Z][a-zA-Z0-9]*)([^>]*\\sid=["']${id}["'][^>]*)>`,
-    'i'
-  );
-  return html.replace(re, (m, tag, attrs) => {
-    const attrRe = new RegExp(`\\s${attr}=["'][^"']*["']`);
-    const newAttrs = attrRe.test(attrs)
-      ? attrs.replace(attrRe, ` ${attr}="${value}"`)
-      : attrs + ` ${attr}="${value}"`;
-    return `<${tag}${newAttrs}>`;
-  });
-};
-
-/* ── /usage heatmap — empty SSR shell ─────────────────────────────────
-   12 cols × 7 rows × 12px cells with 2px gaps. render.js builds the
-   live version with the same viewBox + cell math, so there's no layout
-   shift when data lands. Empty cells use a CSS class instead of a fill
-   attribute, so theme tokens drive the color (dark mode just works).
-   ────────────────────────────────────────────────────────────────── */
-// GitHub-style year strip: 52 weeks × 7 days. Cells 10px with 2px gap →
-// ~620px wide × 82px tall, plus a 12px top band for month labels. Same
-// constants as scripts/render.js, in lockstep — must match or the SSR
-// shell and the client-rendered version mismatch on first paint.
-const HEATMAP_COLS = 52;
-const HEATMAP_ROWS = 7;
-const HEATMAP_CELL = 16;
-const HEATMAP_GAP  = 3;
-const HEATMAP_LABEL_BAND = 18;   // top: month-name strip
-const HEATMAP_LEFT_LABEL = 30;   // left: Mon/Wed/Fri row labels
-const DAY_LABELS = [null, 'Mon', null, 'Wed', null, 'Fri', null];
-function emptyHeatmapSvg() {
-  const gridW = HEATMAP_COLS * HEATMAP_CELL + (HEATMAP_COLS - 1) * HEATMAP_GAP;
-  const gridH = HEATMAP_ROWS * HEATMAP_CELL + (HEATMAP_ROWS - 1) * HEATMAP_GAP;
-  const w = HEATMAP_LEFT_LABEL + gridW;
-  const h = HEATMAP_LABEL_BAND + gridH;
-  const rects = [];
-  for (let c = 0; c < HEATMAP_COLS; c++) {
-    for (let r = 0; r < HEATMAP_ROWS; r++) {
-      const x = HEATMAP_LEFT_LABEL + c * (HEATMAP_CELL + HEATMAP_GAP);
-      const y = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP);
-      rects.push(`<rect x="${x}" y="${y}" width="${HEATMAP_CELL}" height="${HEATMAP_CELL}" rx="2" class="usage-cell usage-cell-empty"/>`);
-    }
-  }
-  const dayLabels = [];
-  for (let r = 0; r < HEATMAP_ROWS; r++) {
-    if (!DAY_LABELS[r]) continue;
-    const yRow = HEATMAP_LABEL_BAND + r * (HEATMAP_CELL + HEATMAP_GAP) + HEATMAP_CELL / 2;
-    dayLabels.push(`<text x="${HEATMAP_LEFT_LABEL - 6}" y="${yRow}" class="usage-day-label" text-anchor="end" dominant-baseline="middle">${DAY_LABELS[r]}</text>`);
-  }
-  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMinYMin meet" aria-hidden="true">${dayLabels.join('')}${rects.join('')}</svg>`;
-}
-
-/* ── Card index (mirrors render.js) ───────────────────────────────────── */
-const ID_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
-const pad2 = (n) => String(n).padStart(2, '0');
-
-// Card end-date helper: mirrors render.js. `present: true` means "no fixed
-// end date, still active" — for sort and display purposes the card behaves
-// like today; for the chip text it shows 'ongoing' instead of a date.
-const todayISO = () => new Date().toISOString().slice(0, 10);
-const cardEndKey  = (c) => (c && c.present) ? todayISO() : (c?.updated ?? '');
-const cardEndText = (c) => (c && c.present) ? 'ongoing'   : (c?.updated ?? '');
-
-const allCards = () => {
-  const cards = (board.cards ?? []).slice().sort((a, b) => {
-    const ao = a.order ?? 99, bo = b.order ?? 99;
-    if (ao !== bo) return ao - bo;
-    return cardEndKey(b).localeCompare(cardEndKey(a));
-  });
-  const cols = ['shipped', 'now', 'next', 'later'];
-  const out = [];
-  cols.forEach((col) => {
-    cards.filter(c => c.status === col).forEach((c, i) => {
-      out.push({ ...c, displayId: `${ID_PREFIX[col]}-${pad2(i + 1)}` });
-    });
-  });
-  return out;
-};
-
-/* ── Per-region renderers ─────────────────────────────────────────────── */
-
-// Hero name with optional accent
-const heroNameHtml = () => {
-  const accent = profile.nameAccent
-    ? ` <em>${escape(profile.nameAccent)}</em>`
-    : '';
-  return escape(profile.name) + accent;
-};
-
-// Hero meta row: role · location · [résumé ↓] · [简历 ↓] · status · pills(tags).
-// `profile.resumeEn` / `profile.resumeZh` (paths set via the CMS file widgets)
-// — each empty ⇒ that link is omitted.
-const resumeLink = (href, label, lang) =>
-  `<span class="sep">·</span><a class="hero-resume"${lang ? ` lang="${lang}"` : ''} href="${escape(href)}" target="_blank" rel="noopener">${label}&nbsp;↓</a>`;
-/* Work keeps only the two résumé downloads and the tags. The role, the
-   location and the "currently working at…" status line all restate what the
-   résumé itself says, and on a page whose job is to hand over a CV they are
-   read past rather than read. Personal renders from its own template and keeps
-   the full row. */
-const heroMetaWorkHtml = () => {
-  const parts = [];
-  if (profile.resumeEn) parts.push(resumeLink(profile.resumeEn, 'résumé').replace('<span class="sep">·</span>', ''));
-  if (profile.resumeZh) parts.push(resumeLink(profile.resumeZh, '简历', 'zh'));
-  /* tagsWork, falling back to tags. Work wants the three a recruiter scans for
-     — role, school, last employer — where Personal's five describe how I work.
-     Kept as its own field because Personal's row is frozen in its template, so
-     repointing `tags` would leave the CMS disagreeing with that page. */
-  (profile.tagsWork ?? profile.tags ?? []).forEach((t) => parts.push(`<span class="pill">${escape(t)}</span>`));
-  return parts.join('');
-};
-
-// One card -> button HTML (matches render.js exactly, including data-attrs)
-const cardHtml = (c) => {
-  const tags = (c.tags ?? []).map((t, i) =>
-    `<span class="tag${i % 2 ? ' tag-blue' : ''}">${escape(t)}</span>`
-  ).join('');
-
-  const links = (c.links ?? [])
-    .filter(l => l.href && l.href !== '#')
-    .map((l) => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)} ↗</a>`)
-    .join('');
-
-  const tagSlugs = (c.tags ?? []).map((t) => t.toLowerCase()).join('|');
-
-  return `
-            <a class="card" href="/work/${escape(c.slug || '')}/" data-id="${escape(c.id)}" data-card-id="${c.displayId}" data-tags="${escape(tagSlugs)}" aria-label="Open details for ${escape(c.title)}">
-              <div class="card-meta-top">
-                <span class="card-id">${c.displayId}</span>
-                <span class="card-handle" aria-hidden="true">⋮⋮</span>
-              </div>
-              <div class="card-title">${escape(c.title)}</div>
-              ${c.summary ? `<div class="card-summary">${safeRich(c.summary)}</div>` : ''}
-              ${tags ? `<div class="card-tags">${tags}</div>` : ''}
-              <div class="card-footer">
-                <span class="card-footer-left">
-                  <span>${escape(cardEndText(c))}</span>
-                  <span class="card-comments">0</span>
-                </span>
-                ${c.impact ? `<span class="card-impact">${escape(c.impact)}</span>` : ''}
-              </div>
-              ${links ? `<div class="card-links">${links}</div>` : ''}
-            </a>`;
-};
-
-// Filter chips (top 6 tags by frequency, plus the "All" pre-baked in HTML)
-const filterChipsHtml = () => {
-  const cards = allCards();
-  const counts = new Map();
-  cards.forEach((c) => (c.tags ?? []).forEach((t) => {
-    counts.set(t, (counts.get(t) ?? 0) + 1);
-  }));
-  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([t]) => t);
-  const allChip = `<button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">All</button>`;
-  const tagChips = top.map((tag) =>
-    `<button class="filter-chip" type="button" data-filter="${escape(tag.toLowerCase())}" aria-pressed="false">${escape(tag)}</button>`
-  ).join('');
-  return allChip + tagChips;
-};
-
-// Lens items
-const lensListHtml = () =>
-  (lens.items ?? []).map((it) => {
-    const aside = it.aside ? `<em>${escape(it.aside)}</em>` : '';
+const railHtml = () => (work.nav ?? []).map((item) => {
+  const isHome = item.href === '/';
+  const label = escape(item.label ?? item.id);
+  const glyph = item.icon === 'avatar'
+    ? `<img class="rail-avatar" src="${escape(profile.avatar?.calm ?? '')}" alt="" width="32" height="32" decoding="async">`
+    : `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[item.icon] ?? ICONS.doc}</svg>`;
+  /* No href yet = the page has not been built. It stays in the rail so the
+     shape of the site is visible, but as a disabled item rather than a link
+     to a 404. */
+  if (!item.href) {
     return `
-        <div class="lens-card">
-          <div class="lens-num">${escape(it.num ?? '')}</div>
-          <div class="lens-text">${escape(it.main ?? '')}${aside}</div>
-        </div>`;
-  }).join('');
-
-// Skills — one alias-style row per item. Sort by `order` (then by name) so
-// the SKILL-NN ids stay stable. Each row is a real <button> carrying the
-// data-card-id render.js's modal click handler listens for. Empty state =
-// nothing renders (the section header still shows, intentionally — it's a
-// signal to a fork-er that this slot exists and where to fill it).
-const skillsSorted = () => (skills.items ?? []).slice().sort((a, b) =>
-  (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
-const skillDisplayId = (idx) => `SKILL-${pad2(idx + 1)}`;
-const skillRowHtml = (s, idx) => {
-  const id = skillDisplayId(idx);
-  // External links live OUTSIDE the modal-opening button so they're real <a>
-  // hit targets (an <a> inside a <button> is invalid HTML and would either
-  // fail or steal the click). The arrow is a sibling of the links — it's a
-  // pure visual cue that the row also opens a modal; the click goes via the
-  // .skill-link button next to it.
-  const linksHtml = (s.links ?? [])
-    .filter((l) => l && l.href && l.href !== '#')
-    .map((l) => `<a class="skill-extlink" href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label ?? l.href)} ↗</a>`)
-    .join('');
+    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="${escape(item.id)}" data-label="${label} · soon" aria-label="${label} (coming soon)">${glyph}</span></li>`;
+  }
   return `
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="${escape(id)}" aria-label="Open details for ${escape(s.name ?? '')}">
-            <span class="skill-id">${escape(id)}</span>
-            <span class="skill-name">${escape(s.name ?? '')}</span>
-            ${s.category ? `<span class="skill-cat">${escape(s.category)}</span>` : ''}
-            <span class="skill-summary">${escape(s.summary ?? '')}</span>
-          </button>
-          <div class="skill-row-side">
-            ${linksHtml}
-            <span class="skill-arrow" aria-hidden="true">→</span>
+    <li><a class="rail-item${isHome ? ' is-active' : ''}" href="${escape(item.href)}"${isHome ? ' aria-current="page"' : ''} data-id="${escape(item.id)}" data-label="${label}" aria-label="${label}">${glyph}</a></li>`;
+}).join('') + '\n  ';
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+const nameHtml = () => {
+  const n = work.name ?? {};
+  const first = escape(n.first ?? profile.name ?? '');
+  const last  = escape(n.last ?? profile.nameAccent ?? '');
+  const mid   = n.middle ? ` <span class="name-mid">(${escape(n.middle)})</span>` : '';
+  return `${first}${mid} ${last}`;
+};
+
+const downloadIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v11M7 11.5l5 5 5-5M6 19.5h12"/></svg>';
+const resumeLinksHtml = () => {
+  const labels = work.resume ?? {};
+  const links = [];
+  if (profile.resumeEn) links.push(`<a class="dl" href="${escape(profile.resumeEn)}" target="_blank" rel="noopener">${escape(labels.en ?? 'Résumé')}${downloadIcon}</a>`);
+  if (profile.resumeZh) links.push(`<a class="dl" lang="zh-CN" href="${escape(profile.resumeZh)}" target="_blank" rel="noopener">${escape(labels.zh ?? 'CV (Chinese)')}${downloadIcon}</a>`);
+  return links.join('');
+};
+
+const tagsHtml = () => (profile.tagsWork ?? profile.tags ?? [])
+  .map((t) => `<li class="tag">${escape(t)}</li>`).join('');
+
+/* ── Update line ──────────────────────────────────────────────────────── */
+const shortDate = (iso) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso ?? '')) return '';
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+};
+
+/* ── Projects ─────────────────────────────────────────────────────────────
+   Real cards once work.json → projects.items is filled; until then a row of
+   labelled placeholders so the layout can be judged with the content missing. */
+const PLACEHOLDER_HUES = [222, 262, 28, 162, 336, 196];
+const projectCardHtml = (p, i) => {
+  const hue = PLACEHOLDER_HUES[i % PLACEHOLDER_HUES.length];
+  const num = String(i + 1).padStart(2, '0');
+  if (!p) {
+    return `
+        <li class="project-card is-placeholder" style="--hue: ${hue}">
+          <div class="project-cover" aria-hidden="true"><span class="project-num">${num}</span></div>
+          <div class="project-body">
+            <span class="project-chip">Placeholder</span>
+            <h3 class="project-title">Project title</h3>
+            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
           </div>
         </li>`;
+  }
+  const cover = p.cover
+    ? `<img src="${escape(p.cover)}" alt="" loading="lazy" decoding="async">`
+    : `<span class="project-num">${num}</span>`;
+  const chip = p.kind ? `<span class="project-chip">${escape(p.kind)}</span>` : '';
+  return `
+        <li class="project-card" style="--hue: ${hue}">
+          <a class="project-link" href="${escape(p.href ?? '#')}">
+            <div class="project-cover" aria-hidden="true">${cover}</div>
+            <div class="project-body">
+              ${chip}
+              <h3 class="project-title">${escape(p.title ?? '')}</h3>
+              ${p.summary ? `<p class="project-summary">${escape(p.summary)}</p>` : ''}
+            </div>
+          </a>
+        </li>`;
 };
-const skillsListHtml = () => skillsSorted().map(skillRowHtml).join('');
+const projectsHtml = () => {
+  const items = work.projects?.items ?? [];
+  const list = items.length
+    ? items.map(projectCardHtml)
+    : Array.from({ length: work.projects?.placeholders ?? 4 }, (_, i) => projectCardHtml(null, i));
+  return list.join('') + '\n      ';
+};
 
-// Contact list
-const contactListHtml = () =>
-  (contact.items ?? []).map((it) => {
-    const tgt = it.href?.startsWith('http') ? ` target="_blank" rel="noopener"` : '';
-    return `<a href="${escape(it.href ?? '#')}"${tgt}><span class="key">${escape(it.key ?? '')}</span><span>${escape(it.label ?? '')}</span></a>`;
-  }).join('');
-
-// Footer copyright (mirrors render.js)
 const footerHtml = () => {
   const parts = [];
   if (site.footer?.copyright) parts.push(escape(site.footer.copyright));
-  if (site.footer?.tagline)   parts.push(`<em>${escape(site.footer.tagline)}</em>`);
-  return parts.join(' · ');
+  parts.push(`<a href="/llms.txt">llms.txt</a>`);
+  parts.push(`<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a>`);
+  return parts.join('<span aria-hidden="true"> · </span>');
 };
 
 /* ── Apply replacements ───────────────────────────────────────────────── */
@@ -341,26 +156,11 @@ html = html.replace(
 html = html.replace(/[ \t]*<meta name="generator"[^>]*>\s*\n?/i, '');
 html = html.replace(/(<head\b[^>]*>)/i, `$1\n<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">`);
 
-// Mark as prerendered so render.js can short-circuit DOM population
-html = html.replace(/<html\b[^>]*>/, (m) => {
-  if (/data-prerendered=/.test(m)) return m.replace(/data-prerendered="[^"]*"/, 'data-prerendered="true"');
-  return m.replace(/<html/, '<html data-prerendered="true"');
-});
-
 // ── Cloudflare Web Analytics ──────────────────────────────────────────
-/* Strip any prior beacon (idempotent), then inject before </head> if
-   site.analytics.cfAnalyticsToken is set. No script when empty.
-
-   LEAVE THE TOKEN EMPTY while the zone is proxied through Cloudflare.
-   Web Analytics is already enabled on this zone and Cloudflare injects
-   beacon.min.js AT THE EDGE, so setting the token here loads the same
-   beacon twice and every pageview is counted twice. Verified 2026-09:
-   the edge-injected tag is absent from `curl` with a default Accept
-   header and present with a browser-like one, which is why an earlier
-   check for it here came up empty and concluded it was not installed.
-
-   Set the token only if the site ever moves off Cloudflare's proxy (or
-   automatic injection is turned off in the dashboard). */
+/* LEAVE THE TOKEN EMPTY while the zone is proxied through Cloudflare: Web
+   Analytics is enabled on this zone and Cloudflare injects beacon.min.js AT
+   THE EDGE, so setting the token here would count every pageview twice. Set
+   it only if the site ever moves off Cloudflare's proxy. */
 html = html.replace(/[ \t]*<!--\s*cf-analytics\s*-->[\s\S]*?<!--\s*\/cf-analytics\s*-->\n?/g, '');
 const cfToken = site.analytics?.cfAnalyticsToken?.trim();
 if (cfToken) {
@@ -369,54 +169,14 @@ if (cfToken) {
 }
 
 // ── Feature beacon (own counters) ─────────────────────────────────────
-/* Counts which site features get touched (skins, terminal, charts, Q&A).
-   Separate from Cloudflare's beacon above, which does pageviews and Web
-   Vitals — this one answers "does anyone use the thing I built", which no
-   hosted analytics can, because only this codebase knows what a "skin
-   pick" is.
-
-   Gated on site.analytics.featureBeacon so the whole thing can be turned
-   off from content, exactly like the Cloudflare token. Stripped and
-   re-injected each build so toggling it off actually removes the tag
-   rather than leaving a stale one behind. */
+/* Counts which site features get touched. Gated on
+   site.analytics.featureBeacon and stripped + re-injected each build so
+   turning it off actually removes the tag. */
 html = html.replace(/[ \t]*<!--\s*feature-beacon\s*-->[\s\S]*?<!--\s*\/feature-beacon\s*-->\n?/g, '');
 if (site.analytics?.featureBeacon === true) {
   const bBlock = `  <!-- feature-beacon -->\n  <script defer src="scripts/beacon.js"></script>\n  <!-- /feature-beacon -->\n`;
   html = html.replace('</head>', `${bBlock}</head>`);
 }
-
-// ── Giscus (GitHub Discussions comments) ──────────────────────────────
-// Replace the @giscus marker (or any prior injected block) inside the
-// #giscus-container with either the live script or the placeholder.
-const giscus = site.giscus ?? {};
-const giscusReady = giscus.repo && giscus.repoId && giscus.category && giscus.categoryId;
-/* Loaded lazily, not on page load. `async` only means "do not block parsing";
-   the request still fires immediately, and giscus reliably became the last
-   thing to finish — measured on production, loadEventEnd landed within 1ms of
-   giscus's final response on three consecutive runs (1366/1366, 1282/1281,
-   1982/1982). The comments sit ~4458px down a ~960px viewport, so almost
-   nobody who pays that cost ever sees them, and when the cross-border request
-   stalls it surfaces as ERR_TIMED_OUT in the console.
-
-   So the config is parked on a placeholder div and the real <script> is
-   injected once the section comes within a screen of the viewport. Emitting
-   the attributes here rather than in the loader keeps site.json the single
-   source of truth for the giscus settings. */
-const giscusInner = giscusReady
-  ? `<div class="giscus-lazy"
-        data-repo="${escape(giscus.repo)}"
-        data-repo-id="${escape(giscus.repoId)}"
-        data-category="${escape(giscus.category)}"
-        data-category-id="${escape(giscus.categoryId)}"
-        data-mapping="${escape(giscus.mapping ?? 'pathname')}"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="${escape(giscus.inputPosition ?? 'top')}"
-        data-theme="${escape(giscus.theme ?? 'light')}"
-        data-lang="en"></div>`
-  : `<p class="comments-placeholder">Comments will appear here once Giscus is wired up — see <a href="https://github.com/AntaresYuan/personal_website/issues/49">#49</a>.</p>`;
-html = replaceInner(html, 'giscus-container', `\n      ${giscusInner}\n    `);
 
 // <title> + description / OG / Twitter meta from site.json
 const setMetaContent = (selector, content) => {
@@ -436,15 +196,15 @@ const absoluteUrl = (relPath) => {
 
 if (site.meta?.title) {
   html = html.replace(/<title>[^<]*<\/title>/i, `<title>${escape(site.meta.title)}</title>`);
-  setMetaContent('property="og:title"',      site.meta.title);
-  setMetaContent('name="twitter:title"',     site.meta.title);
+  setMetaContent('property="og:title"',  site.meta.title);
+  setMetaContent('name="twitter:title"', site.meta.title);
 }
 if (site.meta?.description) {
-  setMetaContent('name="description"',          site.meta.description);
-  setMetaContent('property="og:description"',   site.meta.description);
-  setMetaContent('name="twitter:description"',  site.meta.description);
+  setMetaContent('name="description"',         site.meta.description);
+  setMetaContent('property="og:description"',  site.meta.description);
+  setMetaContent('name="twitter:description"', site.meta.description);
 }
-if (site.meta?.author)   setMetaContent('name="author"',          site.meta.author);
+if (site.meta?.author)   setMetaContent('name="author"', site.meta.author);
 if (site.meta?.url) {
   setMetaContent('property="og:url"', site.meta.url);
   setLinkHref('canonical',            site.meta.url);
@@ -461,6 +221,7 @@ if (site.meta?.ogImageWidth)  setMetaContent('property="og:image:width"',  site.
 if (site.meta?.ogImageHeight) setMetaContent('property="og:image:height"', site.meta.ogImageHeight);
 
 // JSON-LD Person schema — rebuilt from profile + contact + site
+const contact = (() => { try { return read('content/contact.json'); } catch { return { items: [] }; } })();
 const sameAs = (contact.items ?? [])
   .map((i) => i.href)
   .filter((h) => h && /^https?:\/\//i.test(h));
@@ -471,147 +232,58 @@ const personLd = {
   alternateName: site.meta?.author,
   url: site.meta?.url,
   jobTitle: profile.role,
-  description: profile.slogan,
+  description: work.message?.body ?? profile.slogan,
   image: absoluteUrl(site.meta?.ogImage ?? profile.avatar?.calm),
   knowsAbout: profile.tags ?? [],
   ...(sameAs.length ? { sameAs } : {}),
 };
 html = replaceInner(html, 'ld-person', JSON.stringify(personLd, null, 2));
 
-// Topnav brand + last-updated
-html = replaceInner(html, 'brand-name', escape(site.meta?.title?.split('—')[0]?.trim() ?? ''));
-html = replaceInner(html, 'last-updated', `updated ${escape(lastUpdated)}`);
+// Rail + hero
+html = replaceInner(html, 'rail-list',   railHtml());
+html = replaceInner(html, 'hero-name',   nameHtml());
+html = replaceInner(html, 'hero-native', escape(work.name?.native ?? ''));
+html = replaceInner(html, 'hero-links',  resumeLinksHtml());
+html = replaceInner(html, 'hero-tags',   tagsHtml());
 
-// Hero
-html = replaceInner(html, 'hero-name',   heroNameHtml());
-/* Slogan and the audience CTAs are emptied rather than removed: the elements
-   stay so Personal's template and this one keep the same shape, and an empty
-   container collapses to nothing. */
-html = replaceInner(html, 'hero-slogan', '');
-html = replaceInner(html, 'hero-meta',   heroMetaWorkHtml());
-/* No hero-ctas on Work: the usage section now occupies the hero's right column,
-   so the container is gone from the markup rather than emptied. replaceInner
-   warns on a missing id, and a build that cries wolf every run is a build whose
-   warnings stop being read. */
+// Message column
+html = replaceInner(html, 'message-title', escape(work.message?.title ?? ''));
+html = replaceInner(html, 'message-body',  escape(work.message?.body ?? ''));
 
-// Avatar src — set image attributes + alt
-if (profile.avatar?.calm) {
-  html = setAttr(html, 'avatar-calm',    'src', profile.avatar.calm);
-  if (profile.avatar.alt) html = setAttr(html, 'avatar-calm', 'alt', profile.avatar.alt);
-}
-if (profile.avatar?.talking) {
-  html = setAttr(html, 'avatar-talking', 'src', profile.avatar.talking);
+// Update line — hidden outright when there is nothing to say, rather than
+// shipping an empty pill with a dot in it.
+const upd = work.update ?? {};
+if (upd.text) {
+  html = replaceInner(html, 'update-text', escape(upd.text));
+  html = replaceInner(html, 'update-date', escape(shortDate(upd.date)));
+  html = setAttr(html, 'update-date', 'datetime', escape(upd.date ?? ''));
+  html = html.replace(/(<div class="update" id="update")\s+hidden(="")?/, '$1');
+} else {
+  html = setAttr(html, 'update', 'hidden', '');
 }
 
-// Board cards by status + counts + total + filter chips
-const cards = allCards();
-['shipped', 'now', 'next', 'later'].forEach((col) => {
-  const filtered = cards.filter(c => c.status === col);
-  const inner = filtered.length === 0
-    ? `<div class="col-empty">no cards yet</div>`
-    : filtered.map(cardHtml).join('');
+// Projects
+html = replaceInner(html, 'projects-title', escape(work.projects?.title ?? 'Projects'));
+html = replaceInner(html, 'project-track',  projectsHtml());
 
-  // .col-cards container is identified by data-cards="X" attribute.
-  html = replaceInnerOpenMatch(
-    html,
-    new RegExp(`<(div)([^>]*\\sdata-cards="${col}"[^>]*)>`, 'i'),
-    inner,
-    `data-cards="${col}"`
-  );
-
-  // Count badge — span with data-count="X"
-  html = replaceInnerOpenMatch(
-    html,
-    new RegExp(`<(span)([^>]*\\sdata-count="${col}"[^>]*)>`, 'i'),
-    String(filtered.length),
-    `data-count="${col}"`
-  );
-});
-html = replaceInner(html, 'board-total-count', String(cards.length));
-html = replaceInner(html, 'board-shipped-count',
-  `${cards.filter(c => c.status === 'shipped').length} shipped`
-);
-
-// Filter chips: replace the children inside #board-filters
-html = replaceInner(html, 'board-filters', filterChipsHtml());
-
-// Skills header + list (between #terminal and #lens). Header uses the same
-// fallback strings the template ships with, so an empty file still renders
-// a tasteful header pointing the reader at /admin/.
-if (skills.head) {
-  if (skills.head.cmd   != null) html = replaceInner(html, 'skills-cmd',   escape(skills.head.cmd));
-  if (skills.head.title != null) html = replaceInner(html, 'skills-title', escape(skills.head.title));
-  if (skills.head.meta  != null) html = replaceInner(html, 'skills-meta',  escape(skills.head.meta));
-}
-html = replaceInner(html, 'skills-list', skillsListHtml());
-
-// Lens header + list
-if (lens.head) {
-  html = replaceInner(html, 'lens-cmd',   escape(lens.head.cmd ?? ''));
-  html = replaceInner(html, 'lens-title', escape(lens.head.title ?? ''));
-  html = replaceInner(html, 'lens-meta',  escape(lens.head.meta ?? ''));
-}
-html = replaceInner(html, 'lens-list', lensListHtml());
-
-// Contact header + intro + list
-if (contact.head) {
-  html = replaceInner(html, 'contact-cmd',   escape(contact.head.cmd ?? ''));
-  html = replaceInner(html, 'contact-title', escape(contact.head.title ?? ''));
-}
-html = replaceInner(html, 'contact-intro', safeRich(contact.intro ?? ''));
-html = replaceInner(html, 'contact-list',  contactListHtml());
-
-// /usage — live AI usage dashboard (#149/#152). SSR shell renders the
-// header + empty heatmap grid so first paint has no FOUC and a no-JS
-// reader sees the section's structure without a broken widget.
-// render.js fills the live data on boot, then refetches every 60s. If
-// site.usage.enabled is false (a fork without the Worker bound), hide
-// the section entirely — the structure stays in the markup for grep but
-// nothing renders.
-if (site.usage?.enabled === false) {
+// Live usage: the endpoint rides on the element so work.js needs no extra
+// fetch of site.json before it can start. Off entirely when disabled.
+if (site.usage?.enabled === false || !site.usage?.endpoint) {
   html = setAttr(html, 'usage', 'hidden', '');
 } else {
-  // Empty 12×7 SVG grid — render.js replaces this innerHTML with the
-  // shaded version on first fetch success. Same viewBox + cell math so
-  // there's no layout shift.
-  html = replaceInner(html, 'usage-heatmap', emptyHeatmapSvg());
-  // Skeleton stats — em-dashes that match the post-fetch layout so the
-  // row doesn't jump when real numbers land.
-  html = replaceInner(html, 'usage-stats',
-    [
-      `<span class="usage-stat"><strong>—</strong> tokens</span>`,
-      `<span class="usage-stat-sep">·</span>`,
-      `<span class="usage-stat"><strong>—</strong> sessions</span>`,
-      `<span class="usage-stat-sep">·</span>`,
-      `<span class="usage-stat"><strong>—</strong> days active</span>`,
-      `<span class="usage-stat-sep">·</span>`,
-      `<span class="usage-stat usage-stat-since">since —</span>`,
-    ].join(''));
-  // View tabs and the per-view caption start empty and hidden: render.js
-  // fills them once it knows which views the Worker actually published, so
-  // a fork with only the v1 four scalars shows no chrome for views it can't
-  // draw. Reset here so a stale build can't leave tabs in the markup.
-  html = replaceInner(html, 'usage-views', '');
-  html = setAttr(html, 'usage-views', 'hidden', '');
-  html = replaceInner(html, 'usage-caption', '');
-  html = setAttr(html, 'usage-caption', 'hidden', '');
+  html = setAttr(html, 'usage', 'data-endpoint', escape(site.usage.endpoint));
 }
+html = setAttr(html, 'ask', 'data-qa', escape(site.qa?.workerUrl ?? ''));
 
-// Footer
-html = replaceInner(html, 'footer-copyright', footerHtml());
+html = replaceInner(html, 'footer', footerHtml());
 
-// Cache-bust the runtime assets: append a content hash as `?v=` to each
-// <script src="scripts/*.js"> and to the <link rel="stylesheet" href="styles/main.css">.
-// index.html is served must-revalidate (so it's always fresh) but the .js/.css
-// files get a longer CDN TTL — without this, a fresh index.html can pair with a
-// stale render.js *or* a stale main.css (which leaves new views, e.g. the
-// timeline, rendering completely unstyled). Idempotent: an existing `?v=` is
-// re-derived from the current file content each build.
-const crypto = require('crypto');
+// Cache-bust the runtime assets: append a content hash as `?v=`. index.html is
+// served must-revalidate but .js/.css get a longer CDN TTL — without this a
+// fresh page can pair with a stale stylesheet. Idempotent.
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/render.js', 'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js', 'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js', 'scripts/skin-characters.js', 'scripts/giscus-lazy.js', 'scripts/spaces.js', 'scripts/ask-selection.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/work.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
@@ -619,7 +291,7 @@ const hashOf = (rel) => crypto.createHash('sha1')
   );
 });
 {
-  const rel = 'styles/main.css';
+  const rel = 'styles/work.css';
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`href="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
@@ -629,4 +301,4 @@ const hashOf = (rel) => crypto.createHash('sha1')
 
 /* ── Write ────────────────────────────────────────────────────────────── */
 fs.writeFileSync(tplPath, html);
-console.log(`✓ wrote index.html     (${fs.statSync(tplPath).size} bytes, ${cards.length} cards inlined)`);
+console.log(`✓ wrote index.html     (${fs.statSync(tplPath).size} bytes, Work home)`);
