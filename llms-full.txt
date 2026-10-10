@@ -161,7 +161,12 @@ Building a product from scratch, the skills run **value → flow → entity → 
 
 An adaptation of [SmileLiuuuu/ai-pm](https://github.com/SmileLiuuuu/ai-pm), released under the same CC BY-NC 4.0 license. The methodology comes from v1; v3 splits it into independently callable skills.
 
-## SKILL-02 · /devloop · Claude Code skill
+## SKILL-02 · Agent Memory Hub · Agent infra
+A Markdown-and-Git memory layer with MCP tools for durable context, scoped recall, consolidation, and cross-agent handoffs.
+Links:
+  - Site: https://antaresyuan.github.io/agent-memory-hub-site/
+
+## SKILL-03 · /devloop · Claude Code skill
 autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next
 Links:
   - github: https://github.com/AntaresYuan/claude-devloop
@@ -193,7 +198,12 @@ Cleared 8 issues on this very site overnight, one PAT, fully unattended.
 
 Claude Code skill at `~/.claude/skills/devloop/`. Reusable across any git repo.
 
-## SKILL-03 · /ai-pm-resume · Claude Code skill
+## SKILL-04 · /iterate · Claude Code skill
+Reads a skill's run logs, accumulates recurring friction, and proposes a SKILL.md pull request when the evidence is strong enough — never auto-merging.
+Links:
+  - GitHub: https://github.com/AntaresYuan/claude-skill-iterate
+
+## SKILL-05 · /ai-pm-resume · Claude Code skill
 AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation
 Links:
   - github: https://github.com/AntaresYuan/ai-pm-resume
@@ -223,7 +233,7 @@ aren't in the source. If you give it `built X`, you get `built X` — not
 
 Claude Code skill at `~/.claude/skills/ai-pm-resume/`.
 
-## SKILL-04 · /interview-sim · Claude Code skill
+## SKILL-06 · /interview-sim · Claude Code skill
 synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output
 Links:
   - github: https://github.com/AntaresYuan/claude-skill-interview-sim
@@ -260,135 +270,11 @@ UX-research synthetic interviews are everywhere now, but most of them read like 
 
 Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
 
-## SKILL-05 · /log · Claude Code Skill
-When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.
-Links:
-  - /agent-brief.txt: /agent-brief.txt
-
-What this thing actually does
-
-  While you're working on a project in Claude Code, it keeps a journal in the background. When the project ends, that
-  journal turns into a blog draft with one command.
-
-  ---
-  The three files
-  
-  Stream (stream.md) — every time you hit enter, one line lands here (timestamp + first 300 chars of your prompt). When
-  the session ends (/clear or terminal close), a summary block is appended: how many prompts you sent, which tools got
-  used, what files git shows changed. You don't read this one — it's noisy, it's source material.
-
-  ▎ Why log in real-time instead of only at session end: if Claude Code runs for 4 hours and then crashes, at least your
-  ▎  prompts survive.
-
-  Digest (digest.md) — this is the file you actually read. Fourteen sections (Decisions / Failures / AI-trust-broke /
-  Assumptions / Reversals / Surprises / Quotes / Lucky breaks / ...). Two ways stuff gets in:
-  - You drop a thought: /log note "that call was emotional, I didn't run the numbers" — agent decides which section(s)
-  it belongs to and writes it in
-  - You want to clean up: /log digest — agent scans whatever's new in the stream and sorts it into the right sections
-  
-  Blog draft (blog-draft.md) — at project end, /log blog runs. Agent only reads the digest (never the stream), spits out
-   a ~1000-word draft, leaning hard on Reversals / AI-trust-broke / Surprises / Quotes for narrative tension.
-
-  ---
-  Starting a new project
-  
-  Inside the project directory, type /log start <name>. From then on, any Claude Code session launched from that
-  directory (or any subdirectory) auto-logs to that project's files.
-
-  Joining a project that's already in flight: add --backfill. The agent goes through your Claude Code transcript history
-   + git log + README + ~/research/<name>/, picks out high-signal events, and writes them into the digest with
-  [backfilled] tags. (Stream doesn't get backfilled — backfilled raw data is just noise.) Your yitang project was
-  already done this way.
-
-  ---
-  Multiple terminals don't cross-contaminate
-  
-  Terminal A in ~/Downloads/一堂, Terminal B in ~/projects/lark-loom — each logs to its own project. The agent looks at
-  the launch directory to figure out which journal to write to. Unbound directories log nothing — which is why this 
-  current session (launched from your home dir) won't end up in any journal.
-
-  ---
-  Filter
-  
-  Prompts shorter than 5 visible characters get skipped (好 / 继续 / ok / yes / y / n) — pure filler that would just
-  dilute the signal. If you genuinely want a short instruction captured, use /log note "..." — that bypasses the filter
-  and goes straight into the digest. Threshold is tunable via export LOG_STREAM_MIN_CHARS=N.
-
-  ---
-  The rest of the commands
-  
- Command           │    What it does                             │
- /log list                  │ List all projects with state (active / paused / archived)            │
-/log open <name>           │ Open a project's digest in your editor                               │
- /log pause / /log resume   │ Stop or resume recording for the current directory                   │
-/log archive <name>        │ Mark a project finished (data stays, just status flips)              │
-/log ingest <path-or-text> │ Pull external material (advisor emails, Figma notes) into the digest │
-/log status                │ Show which project is bound to the current directory                 │
-  
-  ---
-  What it doesn't do
-  
-  - Doesn't read private files, doesn't upload anything — fully local
-  - The background hook never calls an LLM (it's fast, costs nothing, and no API key has to live in the hook
-  environment)
-  - All LLM-powered work (classification, blog drafting) happens inside your interactive Claude Code session — you see
-  it happen
-  - Doesn't make decisions for you, doesn't write code for you
-
-  ---
-  One diagram
-  
-  You working normally
-     │
-     │   each prompt ─────────────► Stream  (raw, you don't read)
-     │                                  │
-     │                                  │ /log digest
-     │                                  ▼
-     │   /log note "..." ─────────► Digest  (14 sections, you read)
-     │                                  │
-     │   project ends                   │ /log blog
-     │   ↓                              ▼
-     └───────────────────────────► Blog draft  (you edit)
-
-## SKILL-06 · Claude Credit Watchdog · Claude Code Plugin
+## SKILL-07 · Claude Credit Watchdog · Claude Code Plugin
 A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
 Links:
   - Download: https://claude-credit-watchdog.netlify.app
   - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
-
-## SKILL-07 · agent-brief.txt · agent infra
-off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
-Links:
-  - /agent-brief.txt: /agent-brief.txt
-
-## What it is
-
-A single text file at `/agent-brief.txt` — built from `content/agent-brief.json`
-by `scripts/build-agent-brief.js`. Publicly fetchable, but not linked from
-any visible page on the site.
-
-## Why
-
-The site's QA Worker grounds answers in `/llms-full.txt` (the public site
-content — projects, principles, contact). But there are nuances I want an
-agent to know — context on a project, judgement on a tradeoff, what I'm
-open to right now — that don't belong on a public page. `agent-brief.txt`
-is where I put those. The Worker fetches both files and folds them into
-the grounding context, so an answer can lean on the brief without making
-it public reading material.
-
-## Edit via
-
-`/admin/` → **Assistant knowledge** collection. Each entry is a note with a
-title and body. The build flattens them into the txt file.
-
-## Why this is a skill, not just a feature
-
-Most personal sites either over-share (everything goes on the page) or
-under-share (nothing for an agent to ground on). `agent-brief.txt` is a
-third thing: a private-ish channel for agent-targeted context. Once you
-have it, every assistant answering questions about you gets richer without
-cluttering your public page.
 
 # Lens — how I think
 

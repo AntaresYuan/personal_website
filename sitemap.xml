@@ -171,6 +171,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://antaresyuan.site/about/</loc>
+    <lastmod>2026-10-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://antaresyuan.site/projects/agentic-hiring/</loc>
     <lastmod>2026-10-10</lastmod>
     <priority>0.6</priority>
@@ -192,41 +197,6 @@
   </url>
   <url>
     <loc>https://antaresyuan.site/projects/susbench/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/agent-brief/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/ai-pm-resume/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/claude-credit-watchdog/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/devloop/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/eynap/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/interview-sim/</loc>
-    <lastmod>2026-10-10</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://antaresyuan.site/skills/logger/</loc>
     <lastmod>2026-10-10</lastmod>
     <priority>0.6</priority>
   </url>
