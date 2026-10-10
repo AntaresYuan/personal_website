@@ -90,29 +90,30 @@ const rest = items.filter((s) => s !== featured);
 const cats = [...new Set(items.map((s) => catKey(s.category)))];
 
 /* The featured kit. With a `cover` (a banner, e.g. the kit's own site hero)
-   the card stacks: the banner whole on top — its words are the point, so it
-   is never cropped — and the body below it in two columns; the summary then
-   stands in for the tagline, which the banner already says. Without one, the
-   hue panel and icon sit beside the body. */
+   the card stacks: a compact, intentionally cropped banner on top and the
+   body below it in two columns; the summary then stands in for the tagline,
+   which the banner already says. Without one, the hue panel and icon sit
+   beside the body. A featured item with its own site points there directly. */
+const featuredHref = featured?.site || featured?.url;
+const featuredLinkAttrs = featured?.site ? ' target="_blank" rel="noopener"' : '';
 const featuredHtml = featured ? `
     <section class="featured${featured.cover ? ' has-cover' : ''}" aria-label="Featured">
       ${featured.cover
-        ? `<a class="featured-cover" href="${featured.url}" tabindex="-1"><img src="${e(featured.cover)}" alt="${e(featured.name)}: ${e(featured.tagline || '')}" decoding="async"></a>`
+        ? `<a class="featured-cover" href="${e(featuredHref)}"${featuredLinkAttrs} tabindex="-1"><img src="${e(featured.cover)}" alt="${e(featured.name)}: ${e(featured.tagline || '')}" decoding="async"></a>`
         : `<div class="featured-art" style="--hue: ${featured.hue ?? 222}" aria-hidden="true">
         ${iconOf(featured, 'xl')}
       </div>`}
       <div class="featured-body">
         <div class="featured-main">
           <p class="featured-kicker">Featured · ${e(featured.category || '')}</p>
-          <h2 class="featured-title"><a href="${featured.url}">${e(featured.name)}</a></h2>
+          <h2 class="featured-title"><a href="${e(featuredHref)}"${featuredLinkAttrs}>${e(featured.name)}</a></h2>
           <p class="featured-tagline">${e((featured.cover ? featured.summary : featured.tagline) || featured.summary || '')}</p>
           ${statsRow(featured)}
         </div>
         <div class="featured-side">
           ${installBox(featured)}
           <div class="skill-actions">
-            <a class="btn btn-primary" href="${featured.url}">Details</a>
-            ${featured.site ? `<a class="btn" href="${e(featured.site)}" target="_blank" rel="noopener">Site${ARROW}</a>` : ''}
+            <a class="btn btn-primary" href="${e(featuredHref)}"${featuredLinkAttrs}>Visit site${ARROW}</a>
             ${featured.repo ? `<a class="btn" href="${e(featured.repo)}" target="_blank" rel="noopener">GitHub${ARROW}</a>` : ''}
           </div>
         </div>
