@@ -11,6 +11,9 @@
     "ogImageWidth": "512",
     "ogImageHeight": "512"
   },
+  "features": {
+    "about": false
+  },
   "spaces": {
     "active": "work",
     "autoCopilot": [

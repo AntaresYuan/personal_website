@@ -13,13 +13,24 @@ assert(!/[\u4e00-\u9fff]/.test(clientSource), 'keep public source ASCII-only; us
 
 const requiredPages = [
   'index.html',
-  'about/index.html',
   'gallery/index.html',
   'personal/index.html',
   'projects/index.html',
   'skills/index.html',
   'usage/index.html',
 ];
+const site = JSON.parse(fs.readFileSync(path.join(root, 'content/site.json'), 'utf8'));
+if (site.features?.about !== false) {
+  requiredPages.push('about/index.html');
+} else {
+  const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const about = fs.readFileSync(path.join(root, 'about/index.html'), 'utf8');
+  const redirects = fs.readFileSync(path.join(root, '_redirects'), 'utf8');
+  assert(!home.includes('data-id="about"'), 'disabled About must not appear in the rail');
+  assert(about.includes('name="robots" content="noindex,nofollow"'));
+  assert(about.includes("location.replace('/')"));
+  assert(redirects.includes('/about/* / 302'));
+}
 const workPages = fs.readdirSync(path.join(root, 'work')).map((slug) => `work/${slug}/index.html`);
 requiredPages.push(...workPages);
 requiredPages.forEach((relative) => {
