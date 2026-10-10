@@ -143,27 +143,23 @@
   }
 
   /* ── Rail ─────────────────────────────────────────────────────────────
-     The selection lozenge rests on the current page and glides to whatever
-     the pointer or keyboard is on. Items without a page yet ("soon") give a
+     The selection lozenge marks the current page and stays there while other
+     items are hovered or focused. Items without a page yet ("soon") give a
      small shake instead of navigating. */
   var rail = $('rail');
   if (rail) {
     var items = [].slice.call(rail.querySelectorAll('.rail-item'));
     var active = rail.querySelector('.rail-item.is-active');
-    var moveBlob = function (el) {
+    var placeBlob = function (el) {
       if (!el) return;
       rail.style.setProperty('--blob-x', el.offsetLeft + 'px');
       rail.style.setProperty('--blob-y', el.offsetTop + 'px');
     };
-    var rest = function () { moveBlob(active); };
     if (active) {
-      rest();
+      placeBlob(active);
       requestAnimationFrame(function () { rail.classList.add('is-ready'); });
     }
     items.forEach(function (el) {
-      el.addEventListener('pointerenter', function () { moveBlob(el); });
-      el.addEventListener('focus', function () { moveBlob(el); });
-      el.addEventListener('blur', rest);
       if (el.classList.contains('is-soon')) {
         var nudge = function () {
           if (reduceMotion.matches || !el.animate) return;
@@ -176,8 +172,7 @@
         el.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); nudge(); } });
       }
     });
-    rail.addEventListener('pointerleave', rest);
-    var relayout = function () { requestAnimationFrame(rest); };
+    var relayout = function () { requestAnimationFrame(function () { placeBlob(active); }); };
     window.addEventListener('resize', relayout);
     if (phone.addEventListener) phone.addEventListener('change', relayout);
   }
