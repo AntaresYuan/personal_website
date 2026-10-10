@@ -7,7 +7,8 @@ const root = path.join(__dirname, '..');
 const middlewareSource = fs.readFileSync(path.join(root, 'functions/_middleware.js'), 'utf8');
 const clientSource = fs.readFileSync(path.join(root, 'scripts/i18n.js'), 'utf8');
 
-assert(clientSource.includes("var COOKIE = 'site_lang'"));
+assert(clientSource.includes("var COOKIE = 'site_lang_pref'"));
+assert(clientSource.includes("var GEO_COOKIE = 'site_geo_lang'"));
 assert(clientSource.includes('dataLanguageToggle') || clientSource.includes('languageToggle'));
 assert(!/[\u4e00-\u9fff]/.test(clientSource), 'keep public source ASCII-only; use Unicode escapes');
 
@@ -53,18 +54,25 @@ requiredPages.forEach((relative) => {
 
   const china = await run('CN');
   assert.equal(china.headers.get('Content-Language'), 'zh-Hans');
-  assert.match(china.headers.get('Set-Cookie'), /site_lang=zh/);
+  assert.match(china.headers.get('Set-Cookie'), /site_geo_lang=zh/);
 
   const taiwan = await run('TW');
   assert.equal(taiwan.headers.get('Content-Language'), 'zh-Hans');
 
   const usa = await run('US');
   assert.equal(usa.headers.get('Content-Language'), 'en');
-  assert.match(usa.headers.get('Set-Cookie'), /site_lang=en/);
+  assert.match(usa.headers.get('Set-Cookie'), /site_geo_lang=en/);
 
-  const override = await run('CN', 'site_lang=en');
+  const override = await run('CN', 'site_lang_pref=en');
   assert.equal(override.headers.get('Content-Language'), 'en');
   assert.equal(override.headers.get('Set-Cookie'), null);
+
+  const moved = await run('CN', 'site_geo_lang=en');
+  assert.equal(moved.headers.get('Content-Language'), 'zh-Hans');
+  assert.match(moved.headers.get('Set-Cookie'), /site_geo_lang=zh/);
+
+  const oldAutomaticCookie = await run('CN', 'site_lang=en');
+  assert.equal(oldAutomaticCookie.headers.get('Content-Language'), 'zh-Hans');
 
   console.log('i18n tests passed');
 })().catch((error) => {

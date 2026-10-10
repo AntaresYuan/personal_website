@@ -4,7 +4,8 @@
 (function () {
   'use strict';
 
-  var COOKIE = 'site_lang';
+  var COOKIE = 'site_lang_pref';
+  var GEO_COOKIE = 'site_geo_lang';
   var YEAR = 31536000;
   var ZH = Object.freeze({
     'Skip to content': '\u8df3\u5230\u4e3b\u8981\u5185\u5bb9',
@@ -201,6 +202,31 @@
     'HACKATHON PROJECT': '\u9ed1\u5ba2\u677e\u9879\u76ee',
     'RESEARCH PROJECT': '\u7814\u7a76\u9879\u76ee',
     'INTERN PROJECT': '\u5b9e\u4e60\u9879\u76ee',
+    'ByteDance': '\u5b57\u8282\u8df3\u52a8',
+    'Internal Open Source': '\u5185\u90e8\u5f00\u6e90',
+    'Token Efficiency': 'Token \u6548\u7387',
+    'AI Agent': 'AI Agent',
+    'Intern Project': '\u5b9e\u4e60\u9879\u76ee',
+    'Staged rollout': '\u5206\u9636\u6bb5\u4e0a\u7ebf',
+    'Lark Campus AI Challenge': '\u98de\u4e66\u6821\u56ed AI \u6311\u6218\u8d5b',
+    'Memory & Retrieval': '\u8bb0\u5fc6\u4e0e\u68c0\u7d22',
+    'ByteDance AI Full-Stack Challenge': '\u5b57\u8282\u8df3\u52a8 AI \u5168\u6808\u6311\u6218\u8d5b',
+    'Agent Orchestration': 'Agent \u7f16\u6392',
+    'Top 3': '\u524d\u4e09\u540d',
+    'Research': '\u7814\u7a76',
+    'Computer-Use Agents': '\u8ba1\u7b97\u673a\u64cd\u4f5c Agent',
+    'Benchmark': '\u57fa\u51c6\u8bc4\u6d4b',
+    'Company': '\u516c\u53f8',
+    'Project': '\u9879\u76ee',
+    'My part': '\u6211\u8d1f\u8d23\u7684\u90e8\u5206',
+    'Reach': '\u8986\u76d6',
+    'Event': '\u8d5b\u4e8b',
+    'Users': '\u7528\u6237',
+    'Model': '\u6a21\u578b',
+    'Models': '\u6a21\u578b',
+    'Venue': '\u53d1\u8868\u4f1a\u8bae',
+    'Authorship': '\u4f5c\u8005\u8d21\u732e',
+    'Institution': '\u673a\u6784',
     'Career Pivot': '\u804c\u4e1a\u8f6c\u578b',
     'Job Application': '\u6c42\u804c',
     'Chrome Extension': 'Chrome \u6269\u5c55',
@@ -252,8 +278,8 @@
     '/personal/': 'Antares Yuan \u00b7 \u4e2a\u4eba'
   };
 
-  function readCookie() {
-    var match = document.cookie.match(new RegExp('(?:^|;\\s*)' + COOKIE + '=(en|zh)(?:;|$)'));
+  function readCookie(name) {
+    var match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=(en|zh)(?:;|$)'));
     return match ? match[1] : '';
   }
 
@@ -266,7 +292,7 @@
   if (queryLanguage === 'en' || queryLanguage === 'zh') writeCookie(queryLanguage);
   var language = queryLanguage === 'en' || queryLanguage === 'zh'
     ? queryLanguage
-    : (readCookie() || (/^zh(?:-|$)/i.test(navigator.language || '') ? 'zh' : 'en'));
+    : (readCookie(COOKIE) || readCookie(GEO_COOKIE) || (/^zh(?:-|$)/i.test(navigator.language || '') ? 'zh' : 'en'));
 
   document.documentElement.lang = language === 'zh' ? 'zh-Hans' : 'en';
   document.documentElement.dataset.language = language;
