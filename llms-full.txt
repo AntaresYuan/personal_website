@@ -141,7 +141,27 @@ Updated: 2026-05-09
 
 What I built to multiply my own AI work.
 
-## SKILL-01 · /devloop · Claude Code skill
+## SKILL-01 · Eynap · Claude Code skill kit
+An AI PM skill kit: one orchestrator that routes by stage, six skills from research to PRD, and one shared foundation every skill reads.
+Links:
+  - Site: https://antaresyuan.github.io/eynap-site/
+  - GitHub: https://github.com/AntaresYuan/eynap
+
+## What it is
+
+Research, framing, PRD, entity state machines, design handoff — each written down in a form an AI can read, so an agent can carry a PM's work. One orchestrator decides the stage, routes to a skill and checks the gate; the skills cover value, flow, entity, design, PRD and research; and a shared foundation holds memory, preferences, naming, protocols, host differences and wording rules.
+
+Call the one you need directly — no need to run the whole pipeline.
+
+## The chain
+
+Building a product from scratch, the skills run **value → flow → entity → design → prd**. The PRD comes last because its journey, entity and interaction chapters *are* those outputs. Research is called on demand, not run first.
+
+## Credits
+
+An adaptation of [SmileLiuuuu/ai-pm](https://github.com/SmileLiuuuu/ai-pm), released under the same CC BY-NC 4.0 license. The methodology comes from v1; v3 splits it into independently callable skills.
+
+## SKILL-02 · /devloop · Claude Code skill
 autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next
 Links:
   - github: https://github.com/AntaresYuan/claude-devloop
@@ -173,7 +193,7 @@ Cleared 8 issues on this very site overnight, one PAT, fully unattended.
 
 Claude Code skill at `~/.claude/skills/devloop/`. Reusable across any git repo.
 
-## SKILL-02 · /ai-pm-resume · Claude Code skill
+## SKILL-03 · /ai-pm-resume · Claude Code skill
 AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation
 Links:
   - github: https://github.com/AntaresYuan/ai-pm-resume
@@ -203,7 +223,7 @@ aren't in the source. If you give it `built X`, you get `built X` — not
 
 Claude Code skill at `~/.claude/skills/ai-pm-resume/`.
 
-## SKILL-03 · /interview-sim · Claude Code skill
+## SKILL-04 · /interview-sim · Claude Code skill
 synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output
 Links:
   - github: https://github.com/AntaresYuan/claude-skill-interview-sim
@@ -240,7 +260,7 @@ UX-research synthetic interviews are everywhere now, but most of them read like 
 
 Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
 
-## SKILL-04 · /log · Claude Code Skill
+## SKILL-05 · /log · Claude Code Skill
 When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.
 Links:
   - /agent-brief.txt: /agent-brief.txt
@@ -330,13 +350,13 @@ What this thing actually does
      │   ↓                              ▼
      └───────────────────────────► Blog draft  (you edit)
 
-## SKILL-05 · Claude Credit Watchdog · Claude Code Plugin
+## SKILL-06 · Claude Credit Watchdog · Claude Code Plugin
 A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
 Links:
   - Download: https://claude-credit-watchdog.netlify.app
   - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
 
-## SKILL-06 · agent-brief.txt · agent infra
+## SKILL-07 · agent-brief.txt · agent infra
 off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page
 Links:
   - /agent-brief.txt: /agent-brief.txt
@@ -1382,7 +1402,7 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-09-21 from content/*.json. Last site update: 2026-09-20
+Generated 2026-10-10 from content/*.json. Last site update: 2026-10-10
 
 
 ---
