@@ -38,6 +38,7 @@ const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
 
 const cssV = hashOf('styles/main.css');
+const i18nV = hashOf('scripts/i18n.js');
 const skinsV = hashOf('scripts/skins.js');
 const skinRtV = hashOf('scripts/skin-runtime.js');
 const spacesV = hashOf('scripts/spaces.js');
@@ -217,6 +218,7 @@ function detailPage(card) {
 </div>
 
 <script>window.WORK_CARD = ${JSON.stringify({ slug: card.slug, title: card.title, status: card.status })};</script>
+<script src="/scripts/i18n.js?v=${i18nV}" defer></script>
 <script src="/scripts/skins.js?v=${skinsV}" defer></script>
 <script src="/scripts/skin-runtime.js?v=${skinRtV}" defer></script>
 <script src="/scripts/spaces.js?v=${spacesV}" defer></script>
