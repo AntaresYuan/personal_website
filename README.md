@@ -29,6 +29,7 @@ SOURCE (edit these — directly or via /admin/)
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates Personal for interactive use
 │   ├── work.js             ← runtime: Work home (usage chart, carousel, ask, glass)
+│   ├── i18n.js             ← runtime: English/Chinese UI, language switch + persisted preference
 │   ├── buddy.js            ← runtime: the felt avatar in the ask capsule (frames + moods)
 │   ├── gallery.js          ← runtime: the /gallery/ lightbox
 │   ├── board.js            ← runtime: whiteboards in case studies (Feishu-board style)
@@ -62,6 +63,8 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── decap-oauth/        ← Cloudflare Worker: GitHub OAuth proxy for /admin/
 │   ├── qa/                 ← Cloudflare Worker: the "ask" assistant (Workers AI)
 │   └── comments/           ← Cloudflare Worker + D1: reactions + comments on Writing posts
+├── functions/
+│   └── _middleware.js      ← Pages middleware: initial language from visitor country
 ├── cli/                    ← `npx antares-cv` — the terminal résumé
 ├── vendor/                 ← vendored: Sveltia CMS, vis-timeline, resvg-wasm + fonts/ (for the OG cards)
 ├── package.json            ← `npm run build` / `reset-content` / `serve` — no dependencies
@@ -151,6 +154,13 @@ Plus: project cards (`SHIP-01`, `NOW-01`, …) and `/skills` entries (`SKILL-01`
 npx serve .
 # open http://localhost:3000
 ```
+
+Append `?lang=zh` or `?lang=en` to preview either language locally. On
+Cloudflare Pages, `functions/_middleware.js` chooses Chinese for visitors in
+CN, HK, MO and TW on their first request and English elsewhere. The language
+switch stores a one-year `site_lang` cookie, so an explicit visitor choice
+always overrides the country default. Long-form Writing bodies stay in their
+original language and show a short notice in Chinese mode.
 
 ## Edit content
 

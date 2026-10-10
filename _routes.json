@@ -1,1 +1,27 @@
-{ "version": 1, "include": [], "exclude": [] }
+{
+  "version": 1,
+  "include": [
+    "/",
+    "/about/*",
+    "/blog/*",
+    "/gallery/*",
+    "/personal/*",
+    "/projects/*",
+    "/skills/*",
+    "/usage/*",
+    "/work/*"
+  ],
+  "exclude": [
+    "/admin/*",
+    "/board-editor/*",
+    "/content/*",
+    "/media/*",
+    "/scripts/*",
+    "/styles/*",
+    "/vendor/*",
+    "/workers/*",
+    "/cli/*",
+    "/blog/feed.xml",
+    "/blog/*/og.png"
+  ]
+}

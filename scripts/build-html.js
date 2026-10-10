@@ -218,7 +218,7 @@ html = replaceInner(html, 'footer', shell.footerInner());
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/i18n.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),

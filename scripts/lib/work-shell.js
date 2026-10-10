@@ -136,7 +136,7 @@ const THEME_INIT = `<script>
   })();
 </script>`;
 const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-const SCRIPTS = ['scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'];
+const SCRIPTS = ['scripts/i18n.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'];
 
 /* ── Whole page, for the generated Work pages ─────────────────────────────
    The home page is a template filled in place by build-html.js instead, but
