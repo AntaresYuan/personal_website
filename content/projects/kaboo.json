@@ -2,7 +2,7 @@
   "title": "Kaboo",
   "slug": "kaboo",
   "order": 2,
-  "kind": "ByteDance · Internal Open Source · Token Efficiency",
+  "kind": "ByteDance · Internal Open Source · Token Efficiency · 10K+ DAU",
   "logo": "/media/logos/bytedance.svg",
   "placeholder": false,
   "summary": "An open-source token-analysis project inside ByteDance, built without hand-offs: I raised the problem, designed the Token Efficiency Leaderboard, tested it and shipped it myself.",
