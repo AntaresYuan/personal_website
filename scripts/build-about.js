@@ -16,6 +16,30 @@ const work = read('content/work.json');
 const contact = read('content/contact.json');
 const SITE_URL = (site.meta?.url ?? 'https://example.com').replace(/\/$/, '');
 
+if (site.features?.about === false) {
+  const outDir = path.join(root, 'about');
+  fs.mkdirSync(outDir, { recursive: true });
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="refresh" content="0;url=/">
+<link rel="canonical" href="${SITE_URL}/">
+<title>Redirecting to Antares Yuan</title>
+</head>
+<body>
+<p>About is temporarily unavailable. <a href="/">Return home</a>.</p>
+<script>location.replace('/');</script>
+</body>
+</html>
+`;
+  fs.writeFileSync(path.join(outDir, 'index.html'), html);
+  console.log(`✓ wrote about/         (${html.length} bytes, disabled → home)`);
+  return;
+}
+
 const tags = (profile.tagsWork ?? []).map((tag) => `<li>${e(tag)}</li>`).join('');
 const contactLinks = (contact.items ?? []).map((item) => {
   const external = /^https?:\/\//.test(item.href || '');

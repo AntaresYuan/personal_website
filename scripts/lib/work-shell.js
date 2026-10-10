@@ -34,7 +34,10 @@ const ICONS = {
    that does not exist yet and renders as a disabled "soon" item. */
 const railItemsHtml = (active) => {
   const work = read('content/work.json');
-  return (work.nav ?? []).map((item) => {
+  const site = read('content/site.json');
+  const items = (work.nav ?? []).filter((item) =>
+    item.id !== 'about' || site.features?.about !== false);
+  return items.map((item) => {
     const label = escape(item.label ?? item.id);
     const glyph = item.icon === 'avatar'
       ? '<img class="rail-avatar" src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">'
