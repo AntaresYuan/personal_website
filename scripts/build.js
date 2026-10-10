@@ -25,6 +25,9 @@
   // The two share content/*.json but no markup or styles.
   require('./build-html');
   require('./build-blog');
+  require('./build-gallery');        // /gallery/ — Work space
+  require('./build-skills-page');    // /skills/  — Work space
+  require('./build-projects');       // /projects/ — Work space
   require('./build-spaces');
   require('./build-work');
   // /usage/ — the full dashboard. After build-html so the homepage skeleton

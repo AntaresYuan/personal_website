@@ -72,7 +72,11 @@
 
     opts.forEach(function (opt) {
       opt.addEventListener('click', function (ev) {
-        if (opt.classList.contains('is-active')) { ev.preventDefault(); return; }
+        // Same space: from a sub-page (Writing, Gallery…) "Work" still goes home.
+        if (opt.classList.contains('is-active')) {
+          if (location.pathname === opt.getAttribute('href')) ev.preventDefault();
+          return;
+        }
         if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;   // new tab: let it go
         ev.preventDefault();
         opts.forEach(function (o) { o.classList.toggle('is-active', o === opt); });
@@ -90,9 +94,11 @@
      three options and back. */
   var themeSwitch = $('theme-switch');
   var sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  // No stored choice = dark: Work reads best dark. "auto" is stored like the
+  // others, so it survives the default (and Personal, which shares the key).
   var storedMode = function () {
-    try { var t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark') ? t : 'auto'; }
-    catch (e) { return 'auto'; }
+    try { var t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark' || t === 'auto') ? t : 'dark'; }
+    catch (e) { return 'dark'; }
   };
   var applyMode = function (m) {
     root.setAttribute('data-theme-mode', m);
@@ -122,7 +128,7 @@
       b.addEventListener('click', function (ev) {
         ev.stopPropagation();
         var m = b.getAttribute('data-mode');
-        try { if (m === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', m); } catch (e) {}
+        try { localStorage.setItem('theme', m); } catch (e) {}
         applyMode(m);
         setThemeOpen(false);
         current.focus({ preventScroll: true });
@@ -183,7 +189,7 @@
   var usage = $('usage');
   var chartEl = $('usage-chart');
   var BARS = 28;
-  var CHART_H = 118;
+  var CHART_H = 84;
 
   var fmtCompact = function (n) {
     if (!isFinite(n) || n <= 0) return '0';
@@ -223,7 +229,7 @@
   var drawChart = function () {
     if (!chartEl) return;
     var W = Math.max(200, Math.round(chartEl.clientWidth || 320));
-    var top = 16, bottom = 18, H = CHART_H;
+    var top = 14, bottom = 2, H = CHART_H;     // room for the avg label; no axis row
     var plotH = H - top - bottom;
     var slot = W / BARS;
     var barW = Math.max(3, Math.min(14, slot * 0.6));
@@ -245,15 +251,8 @@
     if (series && avg > 0) {
       var ay = top + plotH - (avg / max) * plotH;
       out.push('<line class="avg" x1="0" x2="' + W + '" y1="' + ay.toFixed(1) + '" y2="' + ay.toFixed(1) + '"/>');
-      out.push('<text class="avg-label" x="' + W + '" y="' + (ay - 5).toFixed(1) + '" text-anchor="end">avg ' + fmtCompact(avg) + '</text>');
-    }
-    if (series) {
-      [0, 7, 14, 21].forEach(function (i) {
-        if (!data[i] || !data[i].date) return;
-        out.push('<text class="axis" x="' + (i * slot + slot / 2 - barW / 2).toFixed(1) + '" y="' + (H - 3) + '">' +
-          escape(dayLabel(data[i].date, { month: 'short', day: 'numeric' })) + '</text>');
-      });
-      out.push('<text class="axis" x="' + W + '" y="' + (H - 3) + '" text-anchor="end">Today</text>');
+      // Left end: the right end is today, usually the tallest bar of the lot.
+      out.push('<text class="avg-label" x="0" y="' + (ay - 5).toFixed(1) + '">avg ' + fmtCompact(avg) + '</text>');
     }
     chartEl.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + out.join('') + '</svg>';
     chartEl.classList.toggle('is-skeleton', !series);
@@ -348,8 +347,9 @@
 
           series = days.slice(-BARS).map(function (d) { return { date: d.date, v: dayTokens(d) }; });
           drawChart();
-          var range = $('usage-range');
-          if (range && data.updated) range.textContent = ago(data.updated).replace(/^u/, 'U');
+          // Freshness lives in the title link's tooltip.
+          var titleLink = usage.querySelector('.col-link');
+          if (titleLink && data.updated) titleLink.title = 'All charts · ' + ago(data.updated);
         })
         .catch(function (e) {
           // Quietly gone, never broken. Console is for whoever maintains it.
@@ -377,14 +377,18 @@
       if (c.length < 2) return c[0] ? c[0].offsetWidth : track.clientWidth;
       return c[1].offsetLeft - c[0].offsetLeft;
     };
+    // How many cards fit the column. The track itself runs to the window
+    // edges, so its own width would overcount.
+    var column = track.closest('.projects') || track;
+    var perView = function (s) { return Math.max(1, Math.floor((column.clientWidth + 20) / s)); };
     var sync = function () {
       var n = cards().length;
       var s = step() || 1;
       var first = Math.round(track.scrollLeft / s);
-      var visible = Math.max(1, Math.floor((track.clientWidth + 8) / s));
+      var visible = perView(s);
       var atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
-      if (prev) prev.hidden = track.scrollLeft < 8;
-      if (next) next.hidden = atEnd || n <= visible;
+      if (prev) { prev.disabled = track.scrollLeft < 8; prev.hidden = n <= visible; }
+      if (next) { next.disabled = atEnd; next.hidden = n <= visible; }
       if (count) {
         var a = Math.min(n, first + 1);
         var b = atEnd ? n : Math.min(n, first + visible);
@@ -393,8 +397,7 @@
     };
     var go = function (dir) {
       var s = step();
-      var visible = Math.max(1, Math.floor((track.clientWidth + 8) / s));
-      track.scrollBy({ left: dir * s * visible, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+      track.scrollBy({ left: dir * s * perView(s), behavior: reduceMotion.matches ? 'auto' : 'smooth' });
     };
     if (prev) prev.addEventListener('click', function () { go(-1); });
     if (next) next.addEventListener('click', function () { go(1); });
@@ -412,6 +415,63 @@
     sync();
   }
 
+  /* ── Filters ──────────────────────────────────────────────────────────
+     Any [data-filter-for="<list id>"] row of [data-filter] buttons filters
+     that list's [data-tags] items (pipe-separated, lower-case). Shared by
+     Writing, Gallery and AI Skills. */
+  doc.querySelectorAll('[data-filter-for]').forEach(function (group) {
+    var list = $(group.getAttribute('data-filter-for'));
+    if (!list) return;
+    group.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-filter]');
+      if (!b) return;
+      var f = b.getAttribute('data-filter');
+      group.querySelectorAll('[data-filter]').forEach(function (x) {
+        var on = x === b;
+        x.classList.toggle('is-on', on);
+        x.setAttribute('aria-pressed', String(on));
+      });
+      list.querySelectorAll('[data-tags]').forEach(function (item) {
+        var tags = (item.getAttribute('data-tags') || '').split('|');
+        item.hidden = f !== 'all' && tags.indexOf(f) < 0;
+      });
+      list.classList.toggle('is-filtered', f !== 'all');
+    });
+  });
+
+  /* ── Copy and search ──────────────────────────────────────────────────
+     [data-copy] buttons copy their value (install commands); a
+     [data-search-for="<list id>"] field narrows that list's [data-search]
+     items, alongside any active filter chip. */
+  doc.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-copy]');
+    if (!b) return;
+    var text = b.getAttribute('data-copy');
+    var done = function () {
+      var label = b.querySelector('span');
+      var was = label ? label.textContent : '';
+      b.classList.add('is-done');
+      if (label) label.textContent = 'Copied';
+      setTimeout(function () { b.classList.remove('is-done'); if (label) label.textContent = was; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
+  });
+  doc.querySelectorAll('[data-search-for]').forEach(function (field) {
+    var list = $(field.getAttribute('data-search-for'));
+    if (!list) return;
+    var empty = $(list.id + '-empty');
+    field.addEventListener('input', function () {
+      var q = field.value.trim().toLowerCase();
+      var shown = 0;
+      list.querySelectorAll('[data-search]').forEach(function (item) {
+        var miss = q && item.getAttribute('data-search').indexOf(q) < 0;
+        item.classList.toggle('is-searched-out', !!miss);
+        if (!miss && !item.hidden) shown++;
+      });
+      if (empty) empty.hidden = shown > 0;
+    });
+  });
+
   /* ── Avatar mood ──────────────────────────────────────────────────────
      The ask avatar's state, published for whatever draws it — a still image
      today, an animated 3D buddy later. Sets data-mood on #ask-avatar and
@@ -421,7 +481,10 @@
      Moods: idle · hello · listening · thinking · talking · happy */
   var avatarEl = $('ask-avatar');
   var avatarTimer = 0;
-  var restMood = function () { return $('ask') && $('ask').classList.contains('is-open') ? 'listening' : 'idle'; };
+  var restMood = function () {
+    var open = ($('ask') && $('ask').classList.contains('is-open')) || ($('ask-panel') && $('ask-panel').classList.contains('is-open'));
+    return open ? 'listening' : 'idle';
+  };
   var setMood = function (m, ms) {
     if (!avatarEl) return;
     clearTimeout(avatarTimer);
@@ -432,38 +495,60 @@
   var getMood = function () { return avatarEl ? avatarEl.getAttribute('data-mood') : 'idle'; };
 
   /* ── Ask Antares ──────────────────────────────────────────────────────
-     One glass shape with three states: a capsule at rest, a composer with
-     suggestions once focused, and a conversation sheet once something is
-     asked. Answers come from the qa Worker; the hand-written FAQ
+     Two surfaces. The composer docked at the bottom is for asking: a capsule
+     at rest, wider once focused, with suggested questions floating above it.
+     Answers open in a side panel on the right, which pushes the page aside
+     (body.ask-panel-open re-margins the layout) rather than covering what
+     the visitor was reading; the avatar moves into the panel's header while
+     it is open. Answers come from the qa Worker; the hand-written FAQ
      (scripts/qa-faq.js) answers when the Worker cannot be reached — common
      on mainland-China networks. */
   var ask = $('ask');
-  if (ask) {
+  var panel = $('ask-panel');
+  if (ask && panel) {
     var form = $('ask-form');
     var input = $('ask-input');
     var send = $('ask-send');
     var suggest = $('ask-suggest');
-    var sheet = $('ask-sheet');
     var log = $('ask-log');
+    var pForm = $('ask-panel-form');
+    var pInput = $('ask-panel-input');
+    var pSend = $('ask-panel-send');
+    var avatarHome = $('ask-avatar') && $('ask-avatar').parentNode;
+    var avatarSlot = $('ask-panel-avatar');
     var qaUrl = (ask.getAttribute('data-qa') || '').trim();
     var convo = [];
     var busy = false;
     var boardCards = null;
 
     var isOpen = function () { return ask.classList.contains('is-open'); };
-    var updateSend = function () { send.disabled = busy || !input.value.trim(); };
+    var panelOpen = function () { return panel.classList.contains('is-open'); };
+    var updateSend = function () {
+      send.disabled = busy || !input.value.trim();
+      pSend.disabled = busy || !pInput.value.trim();
+    };
+    var starters = function (n) {
+      var faq = (window.QA && Array.isArray(window.QA.FAQ)) ? window.QA.FAQ : [];
+      return faq.slice(0, n).map(function (f) { return f.q; }).filter(Boolean);
+    };
+    var chip = function (q) {
+      var label = q.charAt(0).toUpperCase() + q.slice(1);
+      return '<button class="ask-chip glass" type="button" data-q="' + escape(q) + '">' + escape(label) + '</button>';
+    };
 
     var renderSuggest = function () {
-      var faq = (window.QA && Array.isArray(window.QA.FAQ)) ? window.QA.FAQ : [];
-      var qs = faq.slice(0, 3).map(function (f) { return f.q; }).filter(Boolean);
+      var qs = starters(3);
       if (!qs.length || convo.length) { suggest.hidden = true; return; }
-      suggest.innerHTML = qs.map(function (q) {
-        return '<button class="ask-chip" type="button" data-q="' + escape(q) + '">' + escape(q) + '</button>';
-      }).join('');
+      suggest.innerHTML = qs.map(chip).join('');
       suggest.hidden = false;
     };
 
     var renderLog = function (pending) {
+      if (!convo.length && !pending) {
+        log.innerHTML = '<p class="ask-empty">Ask about a project, what I’m building, how I think, or how to reach me.</p>' +
+          '<div class="ask-starters">' + starters(4).map(chip).join('') + '</div>';
+        return;
+      }
       var html = convo.map(function (m) {
         return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + '</div>';
       }).join('');
@@ -474,22 +559,49 @@
       log.scrollTop = log.scrollHeight;
     };
 
+    /* Composer */
     var open = function () {
       if (isOpen()) return;
       ask.classList.add('is-open');
       doc.body.classList.add('ask-open');
-      if (convo.length) { sheet.hidden = false; ask.classList.add('is-chat'); renderLog(busy); }
-      else renderSuggest();
+      renderSuggest();
       updateSend();
       if (!busy) setMood('listening');
     };
     var close = function () {
-      ask.classList.remove('is-open', 'is-chat');
+      ask.classList.remove('is-open');
       doc.body.classList.remove('ask-open');
-      sheet.hidden = true;
       suggest.hidden = true;
       if (doc.activeElement && ask.contains(doc.activeElement)) doc.activeElement.blur();
+      if (!busy && !panelOpen()) setMood('idle');
+    };
+
+    /* Panel */
+    var moveAvatar = function (into) {
+      var av = $('ask-avatar');
+      if (!av) return;
+      if (into && avatarSlot) avatarSlot.appendChild(av);
+      else if (!into && avatarHome) avatarHome.insertBefore(av, avatarHome.firstChild);
+    };
+    var panelTimer = 0;
+    var openPanel = function () {
+      if (panelOpen()) return;
+      clearTimeout(panelTimer);
+      close();
+      panel.hidden = false;
+      void panel.offsetWidth;                     // reflow so the slide-in runs
+      panel.classList.add('is-open');
+      doc.body.classList.add('ask-panel-open');
+      moveAvatar(true);
+      renderLog(busy);
+    };
+    var closePanel = function () {
+      if (!panelOpen()) return;
+      panel.classList.remove('is-open');
+      doc.body.classList.remove('ask-panel-open');
+      moveAvatar(false);
       if (!busy) setMood('idle');
+      panelTimer = setTimeout(function () { if (!panelOpen()) panel.hidden = true; }, 420);
     };
 
     var loadCards = function () {
@@ -513,11 +625,10 @@
       if (!q || busy) return;
       convo.push({ role: 'user', content: q });
       input.value = '';
+      pInput.value = '';
       busy = true;
       updateSend();
-      suggest.hidden = true;
-      sheet.hidden = false;
-      ask.classList.add('is-chat');
+      openPanel();
       renderLog(true);
       setMood('thinking');
 
@@ -544,15 +655,18 @@
         setMood('talking');
         setTimeout(function () { if (getMood() === 'talking') setMood('happy', 900); }, talk);
         updateSend();
-        if (isOpen()) input.focus({ preventScroll: true });
+        if (panelOpen()) pInput.focus({ preventScroll: true });
       });
     };
 
     input.addEventListener('focus', open);
-    input.addEventListener('input', function () {
-      updateSend();
-      if (!busy && avatarEl) avatarEl.dispatchEvent(new CustomEvent('avatar:nod'));
+    [input, pInput].forEach(function (field) {
+      field.addEventListener('input', function () {
+        updateSend();
+        if (!busy && avatarEl) avatarEl.dispatchEvent(new CustomEvent('avatar:nod'));
+      });
     });
+    pInput.addEventListener('focus', function () { if (!busy) setMood('listening'); });
     // Say hello when the pointer comes over the resting capsule.
     $('ask-shell').addEventListener('pointerenter', function (ev) {
       if (isOpen() || ev.pointerType === 'touch') return;
@@ -562,33 +676,38 @@
     $('ask-shell').addEventListener('click', function (ev) {
       if (!isOpen() && !ev.target.closest('button[type="submit"]')) input.focus();
     });
-    $('ask-avatar').addEventListener('click', function () { input.focus(); });
+    $('ask-avatar').addEventListener('click', function () { if (!panelOpen()) input.focus(); });
     form.addEventListener('submit', function (ev) { ev.preventDefault(); ask$(input.value); });
-    suggest.addEventListener('click', function (ev) {
-      var chip = ev.target.closest('.ask-chip');
-      if (chip) ask$(chip.getAttribute('data-q'));
+    pForm.addEventListener('submit', function (ev) { ev.preventDefault(); ask$(pInput.value); });
+    [suggest, log].forEach(function (box) {
+      box.addEventListener('click', function (ev) {
+        var c = ev.target.closest('.ask-chip');
+        if (c) ask$(c.getAttribute('data-q'));
+      });
     });
-    $('ask-close').addEventListener('click', function (ev) { ev.stopPropagation(); close(); });
+    $('ask-close').addEventListener('click', closePanel);
     $('ask-new').addEventListener('click', function () {
       if (busy) return;
       convo = [];
-      sheet.hidden = true;
-      ask.classList.remove('is-chat');
-      renderSuggest();
-      input.focus();
+      renderLog(false);
+      pInput.focus();
     });
-    // Clicking away folds it back down; the conversation is kept and comes
-    // back the next time the composer opens.
+    // Clicking away folds the composer down. The panel is not modal: it stays
+    // until closed, so the page beside it can be read and clicked.
     doc.addEventListener('pointerdown', function (ev) {
       if (isOpen() && !ask.contains(ev.target)) close();
     });
     doc.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape' && isOpen()) { close(); return; }
-      // "/" jumps to the composer, as on most search-first sites.
-      if (ev.key === '/' && !isOpen() && !/^(INPUT|TEXTAREA|SELECT)$/.test((doc.activeElement || {}).tagName || '')) {
-        ev.preventDefault();
-        input.focus();
+      if (ev.key !== 'Escape') {
+        // "/" jumps to the composer, as on most search-first sites.
+        if (ev.key === '/' && !isOpen() && !/^(INPUT|TEXTAREA|SELECT)$/.test((doc.activeElement || {}).tagName || '')) {
+          ev.preventDefault();
+          (panelOpen() ? pInput : input).focus();
+        }
+        return;
       }
+      if (isOpen()) { close(); return; }
+      if (panelOpen() && panel.contains(doc.activeElement)) closePanel();
     });
   }
 
@@ -656,13 +775,37 @@
       var feImage = doc.createElementNS(SVGNS, 'feImage');
       feImage.setAttribute('result', 'map');
       feImage.setAttribute('preserveAspectRatio', 'none');
-      var feDisp = doc.createElementNS(SVGNS, 'feDisplacementMap');
-      feDisp.setAttribute('in', 'SourceGraphic');
-      feDisp.setAttribute('in2', 'map');
-      feDisp.setAttribute('xChannelSelector', 'R');
-      feDisp.setAttribute('yChannelSelector', 'G');
       filter.appendChild(feImage);
-      filter.appendChild(feDisp);
+      /* Chromatic aberration: red, green and blue are each bent by a slightly
+         different amount, then recombined, so the rim picks up the faint
+         colour fringe real glass has. */
+      var CHANNELS = [
+        ['R', '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0', 1.0],
+        ['G', '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0', 1.07],
+        ['B', '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0', 1.14],
+      ];
+      var disps = CHANNELS.map(function (ch) {
+        var d = doc.createElementNS(SVGNS, 'feDisplacementMap');
+        d.setAttribute('in', 'SourceGraphic');
+        d.setAttribute('in2', 'map');
+        d.setAttribute('xChannelSelector', 'R');
+        d.setAttribute('yChannelSelector', 'G');
+        d.setAttribute('result', 'd' + ch[0]);
+        var m = doc.createElementNS(SVGNS, 'feColorMatrix');
+        m.setAttribute('in', 'd' + ch[0]);
+        m.setAttribute('type', 'matrix');
+        m.setAttribute('values', ch[1]);
+        m.setAttribute('result', 'c' + ch[0]);
+        filter.appendChild(d);
+        filter.appendChild(m);
+        return { el: d, k: ch[2] };
+      });
+      var b1 = doc.createElementNS(SVGNS, 'feBlend');
+      b1.setAttribute('in', 'cR'); b1.setAttribute('in2', 'cG'); b1.setAttribute('mode', 'screen'); b1.setAttribute('result', 'rg');
+      var b2 = doc.createElementNS(SVGNS, 'feBlend');
+      b2.setAttribute('in', 'rg'); b2.setAttribute('in2', 'cB'); b2.setAttribute('mode', 'screen');
+      filter.appendChild(b1);
+      filter.appendChild(b2);
       defs.appendChild(filter);
 
       var lastKey = '';
@@ -673,12 +816,15 @@
         var key = w + 'x' + h + 'r' + r;
         if (key === lastKey) return;
         lastKey = key;
-        var band = Math.max(8, Math.min(r * 0.9, 26));
+        // A wide, strong bend: the lens reaches a good way in from the rim.
+        // The displacement stays at or under the band width — past that the
+        // mapping folds back on itself and what is behind shows up mirrored.
+        var band = Math.max(10, Math.min(r, 32));
         ['x', 'y'].forEach(function (a) { filter.setAttribute(a, '0'); feImage.setAttribute(a, '0'); });
         filter.setAttribute('width', w); filter.setAttribute('height', h);
         feImage.setAttribute('width', w); feImage.setAttribute('height', h);
         feImage.setAttribute('href', lensMap(w, h, r, band));
-        feDisp.setAttribute('scale', String(Math.round(band * 1.4)));
+        disps.forEach(function (d) { d.el.setAttribute('scale', String(Math.round(band * 0.95 * d.k))); });
         el.classList.add('has-lens');
         el.style.setProperty('--lens', 'url(#' + id + ')');
       };

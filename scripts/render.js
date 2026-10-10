@@ -1019,7 +1019,7 @@
       refreshLabel(themeStored());
       btn.addEventListener('click', () => {
         const next = THEME_MODES[(THEME_MODES.indexOf(themeStored()) + 1) % THEME_MODES.length];
-        try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (_) { /* noop */ }
+        try { localStorage.setItem('theme', next); } catch (_) { /* noop */ }  // 'auto' too: Work's default is dark
         applyTheme(next);
         refreshLabel(next);
       });

@@ -19,13 +19,21 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── agent-brief.json    ← off-site notes that feed the "ask" assistant
 │   ├── doodles.json        ← special-day "doodles" — the moon mark becomes a glyph (holidays, birthday…)
 │   ├── skills.json         ← /skills section ("dotfiles for AI") — Claude Code skills, agent infra, configs I use
-│   ├── work.json           ← Work home: name, message, update line, featured projects, site rail
+│   ├── work.json           ← Work home: name, message, update line, projects heading, site rail
+│   ├── projects/*.json     ← one file per project: card + /projects/<slug>/ case study (CMS: Projects)
+│   ├── gallery.json        ← /gallery/ — pieces, pictures, captions
+│   ├── boards/*.json       ← whiteboards a project embeds (projects/<slug>.json → board)
 │   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/tags/draft + Markdown body)
 ├── styles/main.css         ← Personal: design tokens + dashboard styles
 ├── styles/work.css         ← Work home: Liquid Glass controls + layout (standalone)
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates Personal for interactive use
 │   ├── work.js             ← runtime: Work home (usage chart, carousel, ask, glass)
+│   ├── buddy.js            ← runtime: the felt avatar in the ask capsule (frames + moods)
+│   ├── gallery.js          ← runtime: the /gallery/ lightbox
+│   ├── board.js            ← runtime: whiteboards in case studies (Feishu-board style)
+│   ├── board-editor.js     ← runtime: the /board-editor/ (save via `npm run board`)
+│   ├── lib/work-shell.js   ← shared: rail, top controls, ask, footer, <head> for every Work page
 │   ├── terminal.js         ← runtime: embedded Agent Terminal
 │   ├── palette.js          ← runtime: ⌘K command palette
 │   ├── doodle.js           ← runtime: the brand mark = tonight's moon phase (or a doodle)
@@ -33,7 +41,10 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── lib/blog.js         ← shared: load + render content/blog/*.md (frontmatter + Markdown)
 │   ├── build-html.js       ← build:   pre-renders content/work.json into index.html (Work home)
 │   ├── build-spaces.js     ← build:   /personal/ from templates/personal.html + content/*.json
-│   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ from content/blog/*.md
+│   ├── build-blog.js       ← build:   renders /blog/ + /blog/<slug>/ (Writing, on the Work shell)
+│   ├── build-gallery.js    ← build:   renders /gallery/ from content/gallery.json
+│   ├── build-projects.js   ← build:   renders /projects/ + /projects/<slug>/ case studies from content/projects/
+│   ├── build-skills-page.js← build:   renders /skills/ + /skills/<slug>/ from content/skills.json
 │   ├── build-og.js         ← build:   renders a 1200×630 social card (PNG) per post
 │   ├── build-glyphs.js     ← build:   regen /glyphs (a gallery of the doodle glyphs)
 │   ├── build-llms.js       ← build:   regen /llms.txt + /llms-full.txt
@@ -49,16 +60,19 @@ SOURCE (edit these — directly or via /admin/)
 │   └── config.yml          ← collection schemas (shared Sveltia/Decap format)
 ├── workers/
 │   ├── decap-oauth/        ← Cloudflare Worker: GitHub OAuth proxy for /admin/
-│   └── qa/                 ← Cloudflare Worker: the "ask" assistant (Workers AI)
+│   ├── qa/                 ← Cloudflare Worker: the "ask" assistant (Workers AI)
+│   └── comments/           ← Cloudflare Worker + D1: reactions + comments on Writing posts
 ├── cli/                    ← `npx antares-cv` — the terminal résumé
 ├── vendor/                 ← vendored: Sveltia CMS, vis-timeline, resvg-wasm + fonts/ (for the OG cards)
 ├── package.json            ← `npm run build` / `reset-content` / `serve` — no dependencies
 ├── media/                  ← avatars + other static images
+├── tools/buddy/            ← felt avatar sources + felt-frames.sh (and the Blender alternative)
 └── favicon.svg
 
 ARTIFACTS (generated — do not hand-edit)
 ├── index.html              ← built by scripts/build-html.js (Work home)
 ├── personal/index.html     ← built by scripts/build-spaces.js
+├── projects/, gallery/, skills/ ← built by build-projects.js / build-gallery.js / build-skills-page.js
 ├── blog/                   ← built by scripts/build-blog.js (index.html + <slug>/index.html)
 ├── glyphs.html             ← built by scripts/build-glyphs.js (the doodle-glyph gallery, /glyphs)
 ├── llms.txt                ← built by scripts/build-llms.js
@@ -163,6 +177,7 @@ Production: <https://antaresyuan.site> on Cloudflare Pages.
 Two Cloudflare Workers back it (each deploys itself — see the README in its folder):
 - `workers/decap-oauth/` — GitHub OAuth proxy for `/admin/` sign-in. (The folder name stuck from Decap; Sveltia speaks the same OAuth protocol.)
 - `workers/qa/` — the "ask" assistant on Cloudflare Workers AI. Optional: when `site.json → qa.workerUrl` is empty, the "ask" bar falls back to the hand-authored FAQ.
+- `workers/comments/` — reactions and comments on Writing posts (Worker + D1, Turnstile, Llama Guard screening, an `/admin` moderation page). Optional: while `site.json → comments.endpoint` is empty, posts keep giscus.
 
 ## Add-ons (configured via `content/site.json` or `/admin/`)
 

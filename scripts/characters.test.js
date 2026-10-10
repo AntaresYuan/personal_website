@@ -127,8 +127,9 @@ chars.forEach((c) => {
 });
 
 /* ── The art must be loaded before the module that consumes it ────────── */
-/* Not index.html: Work has no skins (styles/work.css, scripts/work.js). */
-['personal/index.html', 'usage/index.html', 'blog/index.html'].forEach((rel) => {
+/* Not index.html, /blog/, /gallery/ or /skills/: Work pages have no skins
+   (styles/work.css, scripts/work.js). */
+['personal/index.html', 'usage/index.html'].forEach((rel) => {
   const p = path.join(ROOT, rel);
   if (!fs.existsSync(p)) return;
   const html = fs.readFileSync(p, 'utf8');

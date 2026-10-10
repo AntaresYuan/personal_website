@@ -19,8 +19,7 @@
   },
   "projects": {
     "title": "Projects",
-    "placeholders": 5,
-    "items": []
+    "sub": "Case studies — what each project set out to do, what I did, and what came of it."
   },
   "nav": [
     {
@@ -32,19 +31,19 @@
     {
       "id": "projects",
       "label": "Projects",
-      "href": "",
+      "href": "/projects/",
       "icon": "folder"
     },
     {
       "id": "skills",
       "label": "AI Skills",
-      "href": "",
+      "href": "/skills/",
       "icon": "spark"
     },
     {
       "id": "gallery",
       "label": "Gallery",
-      "href": "",
+      "href": "/gallery/",
       "icon": "image"
     },
     {

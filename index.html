@@ -81,21 +81,22 @@
       media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
-<!-- Theme: a localStorage override ('light' | 'dark'), else the OS preference.
-     Same key as Personal, so the choice follows the visitor across spaces.
+<!-- Theme: the stored choice ('light' | 'dark' | 'auto'), else dark — Work
+     reads best dark. Same key as Personal, so a choice follows the visitor
+     across spaces (Personal's own default stays auto).
      Runs before the stylesheet so <html data-theme> is set before first paint.
      Work has no skins — light, dark and auto are the whole menu. -->
 <script>
   (function () {
-    var d = document.documentElement, m = 'auto';
-    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') m = t; } catch (e) {}
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);
     d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
   })();
 </script>
 
-<link rel="stylesheet" href="styles/work.css?v=9b2f8a45">
+<link rel="stylesheet" href="styles/work.css?v=96280c50">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -111,10 +112,10 @@
 <div class="scroll-edge" aria-hidden="true"></div>
 
 <!-- ── TOP CONTROLS (glass layer) ─────────────────────────────────── -->
-<header class="topbar">
+<header class="topbar" id="topbar">
   <nav class="space-switch glass" id="space-switch" aria-label="Space" data-lens>
     <span class="space-thumb" aria-hidden="true"></span>
-    <a class="space-opt is-active" href="/" aria-current="page" data-space="work">Work</a>
+    <a class="space-opt is-active" href="/" data-space="work">Work</a>
     <a class="space-opt" href="/personal/" data-space="personal">Personal</a>
   </nav>
 
@@ -141,11 +142,11 @@
   <span class="rail-blob" aria-hidden="true"></span>
   <ul class="rail-list" id="rail-list">
     <li><a class="rail-item is-active" href="/" aria-current="page" data-id="home" data-label="Home" aria-label="Home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="projects" data-label="Projects · soon" aria-label="Projects (coming soon)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></span></li>
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="skills" data-label="AI Skills · soon" aria-label="AI Skills (coming soon)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></span></li>
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="gallery" data-label="Gallery · soon" aria-label="Gallery (coming soon)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></span></li>
+    <li><a class="rail-item" href="/projects/" data-id="projects" data-label="Projects" aria-label="Projects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/skills/" data-id="skills" data-label="AI Skills" aria-label="AI Skills"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/gallery/" data-id="gallery" data-label="Gallery" aria-label="Gallery"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
     <li><a class="rail-item" href="/blog/" data-id="writing" data-label="Writing" aria-label="Writing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="about" data-label="About me · soon" aria-label="About me (coming soon)"><img class="rail-avatar" src="media/avatar-calm.png" alt="" width="32" height="32" decoding="async"></span></li>
+    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="about" data-label="About me · soon" aria-label="About me (coming soon)"><img class="rail-avatar" src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async"></span></li>
   </ul>
 </nav>
 
@@ -165,16 +166,12 @@
     <!-- Live AI usage. render: scripts/work.js. Hidden when the Worker cannot
          be reached — never a broken widget. See workers/usage/README.md. -->
     <section class="hero-col hero-usage" id="usage" aria-labelledby="usage-title" data-endpoint="https://usage.antaresyuan.site">
-      <h2 class="col-label" id="usage-title">Personal token consumption</h2>
+      <h2 class="col-label" id="usage-title"><a class="col-link" href="/usage/" title="All charts">Personal token consumption<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></a></h2>
       <dl class="kpis">
         <div class="kpi"><dt>Total tokens</dt><dd id="kpi-total">—</dd></div>
         <div class="kpi"><dt>Top agent</dt><dd id="kpi-agent">—</dd></div>
       </dl>
       <div class="chart" id="usage-chart" role="img" aria-label="Daily tokens over the last four weeks"></div>
-      <div class="chart-foot">
-        <span id="usage-range">Last 4 weeks</span>
-        <a class="chart-more" href="/usage/">All charts<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></a>
-      </div>
     </section>
 
     <section class="hero-col hero-message" aria-labelledby="message-title">
@@ -187,11 +184,18 @@
   <section class="projects" aria-labelledby="projects-title">
     <div class="section-head">
       <h2 class="section-title" id="projects-title">Projects</h2>
-      <span class="carousel-count" id="carousel-count" aria-hidden="true"></span>
+      <div class="carousel-nav">
+        <span class="carousel-count" id="carousel-count" aria-hidden="true"></span>
+        <button class="carousel-btn" id="carousel-prev" type="button" aria-label="Previous projects" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>
+        </button>
+        <button class="carousel-btn" id="carousel-next" type="button" aria-label="More projects">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="update" id="update">
-      <span class="update-dot" aria-hidden="true"></span>
       <span class="update-label">Update</span>
       <time class="update-date" id="update-date" datetime="2026-10-07">Oct 7</time>
       <p class="update-text" id="update-text">I&#39;m working on ApplyMint, SusFix and the Kaboo token-efficiency leaderboard.</p>
@@ -199,97 +203,376 @@
 
     <div class="carousel" id="carousel">
       <ul class="carousel-track" id="project-track" tabindex="0" aria-label="Projects">
-        <li class="project-card is-placeholder" style="--hue: 222">
-          <div class="project-cover" aria-hidden="true"><span class="project-num">01</span></div>
-          <div class="project-body">
-            <span class="project-chip">Placeholder</span>
-            <h3 class="project-title">Project title</h3>
-            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
-          </div>
+        <li class="project-card" style="--hue: 262">
+          <a class="project-link" href="/projects/agentic-hiring/">
+            <div class="project-cover is-svg" style="--hue: 262" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-agentic-hiring" viewBox="0 0 1200 480" role="img" aria-label="Agentic hiring: from the unmet needs to the agent-quality metrics">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">Problem</text><text class="pc-hs" x="128" y="70">Needs unmet</text>
+<text class="pc-h" x="352" y="46">Scenario</text><text class="pc-hs" x="352" y="70">Person × role</text>
+<text class="pc-h" x="576" y="46">Product</text><text class="pc-hs" x="576" y="70">TA workbench</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On the agent</text>
+<text class="pc-h" x="1060" y="46">Metrics</text><text class="pc-hs" x="1060" y="70">Agent quality</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Efficiency</text><text class="pc-s" x="128" y="179">Concurrency,</text><text class="pc-s" x="128" y="201">pipeline flow</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">Supply</text><text class="pc-s" x="352" y="179">Large, fresh</text><text class="pc-s" x="352" y="201">talent pool</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Infrastructure</text><text class="pc-s" x="576" y="179">Supply, funnel,</text><text class="pc-s" x="576" y="201">intake, booking</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">UX iteration</text><text class="pc-s" x="812" y="179">Preset prompts</text><text class="pc-s" x="812" y="201">from feedback</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Coverage</text><text class="pc-s" x="1060" y="179">Missed</text><text class="pc-s" x="1060" y="201">candidates</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Quality</text><text class="pc-s" x="128" y="331">Depends on</text><text class="pc-s" x="128" y="353">TA expertise</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Role needs</text><text class="pc-s" x="352" y="331">Who the role</text><text class="pc-s" x="352" y="353">really needs</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Agentic Hiring</text><text class="pc-s" x="576" y="331">Clarify, recall,</text><text class="pc-s" x="576" y="353">evaluate, rank</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">Optimization</text><text class="pc-s" x="812" y="331">Bad-case</text><text class="pc-s" x="812" y="353">attribution</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Accuracy</text><text class="pc-s" x="1060" y="331">Pass rate</text><text class="pc-s" x="1060" y="353">21% → <tspan class="pc-k">25%</tspan></text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Efficiency track</text>
+<g class="pc-tb"><rect class="pc-b" x="225.2" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="225.2" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="251.2" y="439">Quality track</text>
+</svg></div>
+            <div class="project-body">
+              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part">ByteDance&nbsp;·</span> <span class="chip-part">AI Agent&nbsp;·</span> <span class="chip-part">Intern Project&nbsp;·</span> <span class="chip-part">2K+ DAU&nbsp;·</span> <span class="chip-part">Staged rollout</span></span></span>
+              <h3 class="project-title">Agentic Hiring</h3>
+              <p class="project-summary">A recruiting workbench for ByteDance&#39;s talent-acquisition team, with an agent that turns a role brief into a ranked shortlist for the hiring manager.</p>
+            </div>
+          </a>
         </li>
-        <li class="project-card is-placeholder" style="--hue: 262">
-          <div class="project-cover" aria-hidden="true"><span class="project-num">02</span></div>
-          <div class="project-body">
-            <span class="project-chip">Placeholder</span>
-            <h3 class="project-title">Project title</h3>
-            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
-          </div>
+        <li class="project-card" style="--hue: 315">
+          <a class="project-link" href="/projects/kaboo/">
+            <div class="project-cover is-svg" style="--hue: 315" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-kaboo" viewBox="0 0 1200 480" role="img" aria-label="Kaboo: token analysis inside ByteDance, built by one owner from problem to production">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">Project</text><text class="pc-hs" x="128" y="70">Token analysis</text>
+<text class="pc-h" x="352" y="46">Way of work</text><text class="pc-hs" x="352" y="70">One owner, end to end</text>
+<text class="pc-h" x="576" y="46">Infrastructure</text><text class="pc-hs" x="576" y="70">mew, in Lark</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On token efficiency</text>
+<text class="pc-h" x="1060" y="46">Result</text><text class="pc-hs" x="1060" y="70">In production</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Kaboo</text><text class="pc-s" x="128" y="179">open source,</text><text class="pc-s" x="128" y="201">inside ByteDance</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">No relay</text><text class="pc-s" x="352" y="179">raise it, solve it,</text><text class="pc-s" x="352" y="201">test it, ship it</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">mew</text><text class="pc-s" x="576" y="179">agents built into</text><text class="pc-s" x="576" y="201">the dev process</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">The problem</text><text class="pc-s" x="812" y="179">tasks that succeed</text><text class="pc-s" x="812" y="201">but waste tokens</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Shipped</text><text class="pc-s" x="1060" y="179">tested and</text><text class="pc-s" x="1060" y="201">deployed by me</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Token use</text><text class="pc-s" x="128" y="331">where the tokens</text><text class="pc-s" x="128" y="353">go, and why</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Two safeguards</text><text class="pc-s" x="352" y="331">agent review first,</text><text class="pc-s" x="352" y="353">rollback after</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">In Lark</text><text class="pc-s" x="576" y="331">the path from idea</text><text class="pc-s" x="576" y="353">to release, paved</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">The fix</text><text class="pc-s" x="812" y="331">5 waste criteria,</text><text class="pc-s" x="812" y="353">Effective Tokens</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Reach</text><text class="pc-s" x="1060" y="331"><tspan class="pc-k">10K+</tspan> internal</text><text class="pc-s" x="1060" y="353">users</text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">How we work</text>
+<g class="pc-tb"><rect class="pc-b" x="184.2" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="184.2" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="210.2" y="439">What I built</text>
+</svg></div>
+            <div class="project-body">
+              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part">ByteDance&nbsp;·</span> <span class="chip-part">Internal Open Source&nbsp;·</span> <span class="chip-part">Token Efficiency</span></span></span>
+              <h3 class="project-title">Kaboo</h3>
+              <p class="project-summary">An open-source token-analysis project inside ByteDance, built without hand-offs: I raised the problem, designed the Token Efficiency Leaderboard, tested it and shipped it myself.</p>
+            </div>
+          </a>
         </li>
-        <li class="project-card is-placeholder" style="--hue: 28">
-          <div class="project-cover" aria-hidden="true"><span class="project-num">03</span></div>
-          <div class="project-body">
-            <span class="project-chip">Placeholder</span>
-            <h3 class="project-title">Project title</h3>
-            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
-          </div>
+        <li class="project-card" style="--hue: 205">
+          <a class="project-link" href="/projects/roundtable/">
+            <div class="project-cover is-svg" style="--hue: 205" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-roundtable" viewBox="0 0 1200 480" role="img" aria-label="Roundtable: from orchestration by hand to agents that decompose the task">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">Problem</text><text class="pc-hs" x="128" y="70">Users orchestrate</text>
+<text class="pc-h" x="352" y="46">Scenario</text><text class="pc-hs" x="352" y="70">Task decomposition</text>
+<text class="pc-h" x="576" y="46">Product</text><text class="pc-hs" x="576" y="70">Roundtable</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On decomposition</text>
+<text class="pc-h" x="1060" y="46">Metrics</text><text class="pc-hs" x="1060" y="70">Decomposition quality</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">High barrier</text><text class="pc-s" x="128" y="179">Users split, assign</text><text class="pc-s" x="128" y="201">and sequence</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">Newcomers</text><text class="pc-s" x="352" y="179">don’t know how</text><text class="pc-s" x="352" y="201">to split a task</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Agents split</text><text class="pc-s" x="576" y="179">workflow → plan</text><text class="pc-s" x="576" y="201">→ PM Agent tasks</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">Recommender</text><text class="pc-s" x="812" y="179">metadata, evals,</text><text class="pc-s" x="812" y="201">few-shot</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Entry accuracy</text><text class="pc-s" x="1060" y="179">Seed 2.0 Pro</text><text class="pc-s" x="1060" y="201">16 → <tspan class="pc-k">28</tspan> of 30</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Poor reuse</text><text class="pc-s" x="128" y="331">good flows are</text><text class="pc-s" x="128" y="353">rebuilt each time</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Experts</text><text class="pc-s" x="352" y="331">split well, then</text><text class="pc-s" x="352" y="353">redo it every time</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Templates</text><text class="pc-s" x="576" y="331">save, edit and</text><text class="pc-s" x="576" y="353">reuse workflows</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">Visual editor</text><text class="pc-s" x="812" y="331">and template</text><text class="pc-s" x="812" y="353">marketplace</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Reuse · next</text><text class="pc-s" x="1060" y="331">tasks started</text><text class="pc-s" x="1060" y="353">from a template</text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Decomposition track</text>
+<g class="pc-tb"><rect class="pc-b" x="249.79999999999998" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="249.79999999999998" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="275.79999999999995" y="439">Reuse track</text>
+</svg></div>
+            <div class="project-body">
+              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part">ByteDance AI Full-Stack Challenge&nbsp;·</span> <span class="chip-part">Agent Orchestration&nbsp;·</span> <span class="chip-part">Top 3</span></span></span>
+              <h3 class="project-title">Roundtable</h3>
+              <p class="project-summary">A group-chat platform where a team of AI agents takes a goal, agrees on a plan and splits the work itself, with the user in control at three gates.</p>
+            </div>
+          </a>
         </li>
-        <li class="project-card is-placeholder" style="--hue: 162">
-          <div class="project-cover" aria-hidden="true"><span class="project-num">04</span></div>
-          <div class="project-body">
-            <span class="project-chip">Placeholder</span>
-            <h3 class="project-title">Project title</h3>
-            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
-          </div>
+        <li class="project-card" style="--hue: 155">
+          <a class="project-link" href="/projects/lark-loom/">
+            <div class="project-cover is-svg" style="--hue: 155" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-lark-loom" viewBox="0 0 1200 480" role="img" aria-label="Lark Loom: from context scattered in chat to structured memory and targeted recall">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">Problem</text><text class="pc-hs" x="128" y="70">Context stuck in IM</text>
+<text class="pc-h" x="352" y="46">Scenario</text><text class="pc-hs" x="352" y="70">Chat is fragmented</text>
+<text class="pc-h" x="576" y="46">Product</text><text class="pc-hs" x="576" y="70">Lark Loom</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On memory and models</text>
+<text class="pc-h" x="1060" y="46">Metrics</text><text class="pc-hs" x="1060" y="70">Quality and speed</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Context in IM</text><text class="pc-s" x="128" y="179">needs, decisions,</text><text class="pc-s" x="128" y="201">owners: all in chat</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">Storage</text><text class="pc-s" x="352" y="179">days of messages,</text><text class="pc-s" x="352" y="201">small talk mixed in</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Memory</text><text class="pc-s" x="576" y="179">chat kept as</text><text class="pc-s" x="576" y="201">structured notes</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">Store & select</text><text class="pc-s" x="812" y="179">Lite extracts;</text><text class="pc-s" x="812" y="201">keyword + task recall</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Pass rate</text><text class="pc-s" x="1060" y="179">60-case eval</text><text class="pc-s" x="1060" y="201">65% → <tspan class="pc-k">80%</tspan></text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Unusable</text><text class="pc-s" x="128" y="331">models can’t</text><text class="pc-s" x="128" y="353">consume the chat</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Selection</text><text class="pc-s" x="352" y="331">relevant, complete,</text><text class="pc-s" x="352" y="353">clean context</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Skills</text><text class="pc-s" x="576" y="331">docs, tables, slides</text><text class="pc-s" x="576" y="353">from recalled context</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">Tiered models</text><text class="pc-s" x="812" y="331">Lite prepares,</text><text class="pc-s" x="812" y="353">Pro reasons</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Response time</text><text class="pc-s" x="1060" y="331">per task</text><text class="pc-s" x="1060" y="353">95s → <tspan class="pc-k">50s</tspan></text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Context track</text>
+<g class="pc-tb"><rect class="pc-b" x="200.6" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="200.6" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="226.6" y="439">Generation track</text>
+</svg></div>
+            <div class="project-body">
+              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/lark.webp" alt="" width="14" height="14"><span><span class="chip-part">Lark Campus AI Challenge&nbsp;·</span> <span class="chip-part">AI Agent&nbsp;·</span> <span class="chip-part">Memory &amp; Retrieval</span></span></span>
+              <h3 class="project-title">Lark Loom</h3>
+              <p class="project-summary">A project agent that lives in Lark group chats: it remembers what the team worked out and turns the discussion into specs, task tables and slides.</p>
+            </div>
+          </a>
         </li>
-        <li class="project-card is-placeholder" style="--hue: 336">
-          <div class="project-cover" aria-hidden="true"><span class="project-num">05</span></div>
-          <div class="project-body">
-            <span class="project-chip">Placeholder</span>
-            <h3 class="project-title">Project title</h3>
-            <p class="project-summary">A featured project goes here — a cover, a title and one line on what it does.</p>
-          </div>
+        <li class="project-card" style="--hue: 285">
+          <a class="project-link" href="/projects/susbench/">
+            <div class="project-cover is-svg" style="--hue: 285" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-susbench" viewBox="0 0 1200 480" role="img" aria-label="SusBench: do dark patterns built to fool people fool computer-use agents too?">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">Question</text><text class="pc-hs" x="128" y="70">Do agents fall for it?</text>
+<text class="pc-h" x="352" y="46">Challenge</text><text class="pc-hs" x="352" y="70">Control vs. realism</text>
+<text class="pc-h" x="576" y="46">Method</text><text class="pc-hs" x="576" y="70">SusBench</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On the benchmark</text>
+<text class="pc-h" x="1060" y="46">Findings</text><text class="pc-hs" x="1060" y="70">Agents vs. people</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Dark patterns</text><text class="pc-s" x="128" y="179">designs built to</text><text class="pc-s" x="128" y="201">mislead people</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">Controllable</text><text class="pc-s" x="352" y="179">where it appears,</text><text class="pc-s" x="352" y="201">which type it is</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Code injection</text><text class="pc-s" x="576" y="179">9 types, on 55</text><text class="pc-s" x="576" y="201">real websites</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">Eval framework</text><text class="pc-s" x="812" y="179">inject, run, judge;</text><text class="pc-s" x="812" y="201">5 agents, one setup</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Same weak spots</text><text class="pc-s" x="1060" y="179">Preselection, Trick</text><text class="pc-s" x="1060" y="201">Wording, Hidden Info</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Agents act</text><text class="pc-s" x="128" y="331">on real interfaces,</text><text class="pc-s" x="128" y="353">for their users</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Realistic</text><text class="pc-s" x="352" y="331">or the results</text><text class="pc-s" x="352" y="353">won’t transfer</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">User study</text><text class="pc-s" x="576" y="331">29 people; most</text><text class="pc-s" x="576" y="353">never noticed</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">Test cases</text><text class="pc-s" x="812" y="331">goal, step, misstep:</text><text class="pc-s" x="812" y="353"><tspan class="pc-k">313</tspan> tasks</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Overt ones</text><text class="pc-s" x="1060" y="331">people and agents</text><text class="pc-s" x="1060" y="353">both resist them</text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Control track</text>
+<g class="pc-tb"><rect class="pc-b" x="200.6" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="200.6" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="226.6" y="439">Realism track</text>
+</svg></div>
+            <div class="project-body">
+              <span class="project-chip"><span><span class="chip-part">ACM IUI 2026&nbsp;·</span> <span class="chip-part">Research&nbsp;·</span> <span class="chip-part">Computer-Use Agents&nbsp;·</span> <span class="chip-part">Benchmark</span></span></span>
+              <h3 class="project-title">SusBench</h3>
+              <p class="project-summary">An online benchmark that injects dark patterns into 55 real websites, to test whether computer-use agents fall for designs made to fool people.</p>
+            </div>
+          </a>
         </li>
       </ul>
-      <button class="carousel-btn carousel-prev glass" id="carousel-prev" type="button" aria-label="Previous projects" data-lens hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>
-      </button>
-      <button class="carousel-btn carousel-next glass" id="carousel-next" type="button" aria-label="More projects" data-lens>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>
-      </button>
     </div>
   </section>
 
-  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a></footer>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a></footer>
 </main>
 
 <!-- ── ASK ANTARES (glass layer) ───────────────────────────────────────
-     One shape that grows: a capsule at rest, a composer once focused, and a
-     sheet above the composer once a question is asked. Behaviour in
-     scripts/work.js; answers come from the qa Worker (content/site.json →
-     qa.workerUrl), with the hand-written FAQ (scripts/qa-faq.js) as fallback. -->
+     A composer docked at the bottom; answers open in a side panel on the
+     right, which pushes the page aside rather than covering it. Markup from
+     scripts/lib/work-shell.js, behaviour in scripts/work.js; answers come
+     from the qa Worker (content/site.json → qa.workerUrl), with the
+     hand-written FAQ (scripts/qa-faq.js) as fallback. -->
 <div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
   <div class="ask-shell glass" id="ask-shell" data-lens>
-    <div class="ask-sheet" id="ask-sheet" hidden>
-      <div class="ask-sheet-head">
-        <span class="ask-sheet-title">Ask Antares</span>
-        <button class="ask-icon" id="ask-new" type="button" aria-label="New conversation" title="New conversation">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
-        </button>
-        <button class="ask-icon" id="ask-close" type="button" aria-label="Close" title="Close">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
-        </button>
-      </div>
-      <div class="ask-log" id="ask-log" aria-live="polite"></div>
-    </div>
-    <div class="ask-suggest" id="ask-suggest" hidden></div>
     <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
       <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
-        <img src="media/avatar-calm.png" alt="" width="40" height="40" decoding="async">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
       </button>
       <input class="ask-input" id="ask-input" type="text" maxlength="500"
              placeholder="Ask anything" aria-label="Ask Antares anything">
-      <button class="ask-send" id="ask-send" type="submit" aria-label="Send">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg>
-      </button>
+      <button class="ask-send" id="ask-send" type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
     </form>
   </div>
 </div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="Ask Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>Ask Antares</strong><span>Answers from this site's content — they can be wrong.</span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="New conversation" title="New conversation">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="Close" title="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="Ask a follow-up…" aria-label="Ask a follow-up">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
 
 <!-- Refraction filters for the glass layer are generated here at runtime
      (Chromium only — other engines keep the blur-and-rim version). -->
 <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
 
 <script src="scripts/qa-faq.js?v=657b3299" defer></script>
-<script src="scripts/work.js?v=1383fdd0" defer></script>
+<script src="scripts/work.js?v=97622e8a" defer></script>
+<script src="scripts/buddy.js?v=9a4fd889" defer></script>
 </body>
 </html>

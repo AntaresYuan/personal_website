@@ -1,0 +1,572 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1460,
+      "y": 564,
+      "w": 660,
+      "h": 520,
+      "text": "05 · How we measure it"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1400,
+      "h": 520,
+      "text": "04 · My work"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · The product"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · Why it happens"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · Problem"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "The context lives in chat"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "Requirements, decisions and who does what are all worked out in IM."
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**Context lives in IM**\nNeeds, decisions and owners all get settled in the group chat, not in documents."
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "purple",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**Models can't use it**\nWhen it's time for a spec, a task table or a report, the model can't draw on that context."
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "IM is fragmented; a model needs clean context"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "So the scenario comes down to two problems."
+    },
+    {
+      "id": "fr",
+      "type": "sticky",
+      "color": "gray",
+      "x": 468,
+      "y": 136,
+      "w": 250,
+      "h": 140,
+      "text": "**Fragmented**\nOne requirement is spread over dozens of messages across days, mixed with small talk, said casually."
+    },
+    {
+      "id": "nd",
+      "type": "sticky",
+      "color": "gray",
+      "x": 468,
+      "y": 306,
+      "w": 250,
+      "h": 140,
+      "text": "**What a model needs**\nContext that is relevant to the task at hand, complete and clean."
+    },
+    {
+      "id": "two",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 750,
+      "y": 246,
+      "w": 120,
+      "h": 90,
+      "text": "**Two problems**"
+    },
+    {
+      "id": "st",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 902,
+      "y": 146,
+      "w": 270,
+      "h": 120,
+      "text": "**Storage**\nkeep the chat’s context in a better form"
+    },
+    {
+      "id": "se",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 902,
+      "y": 316,
+      "w": 270,
+      "h": 120,
+      "text": "**Selection**\npick exactly the right context when it’s needed"
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "Lark Loom: an agent that lives in the group chat"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "It listens all the time, picks up intent without an @, and turns discussion into docs, tables and slides."
+    },
+    {
+      "id": "q1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1288,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**Group chat**\nthe team talks it through"
+    },
+    {
+      "id": "q2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1570,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**Always listening**\n9 kinds of intent, no @ needed"
+    },
+    {
+      "id": "q3",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1852,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**Memory**\nstructured memories, not raw messages"
+    },
+    {
+      "id": "w1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1288,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**Skill**\none of 13 presets; only Q&A needs an @"
+    },
+    {
+      "id": "w2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1570,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**Recall**\nthe context this task needs, from Memory"
+    },
+    {
+      "id": "w3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1852,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**Output**\nin Lark Base, Docs and Slides"
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1344,
+      "h": 30,
+      "text": "Two things I owned"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1344,
+      "h": 40,
+      "text": "A: redesigned storage and selection.   B: tiered the models by how hard each subtask is."
+    },
+    {
+      "id": "ta",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 676,
+      "w": 500,
+      "h": 24,
+      "text": "**A · Storage and selection, redesigned**"
+    },
+    {
+      "id": "bf",
+      "type": "sticky",
+      "color": "gray",
+      "x": 28,
+      "y": 714,
+      "w": 220,
+      "h": 140,
+      "text": "**Before**\nSemantic similarity over the raw history; the top 20 went to the model."
+    },
+    {
+      "id": "dr",
+      "type": "sticky",
+      "color": "pink",
+      "x": 284,
+      "y": 714,
+      "w": 260,
+      "h": 140,
+      "text": "**Recall drifts**\nIM is so fragmented that close in meaning isn't what the task needs."
+    },
+    {
+      "id": "so",
+      "type": "sticky",
+      "color": "blue",
+      "x": 572,
+      "y": 714,
+      "w": 260,
+      "h": 140,
+      "text": "**Storage**\nSeed 1.5 Lite extracts messages into structured Memory."
+    },
+    {
+      "id": "sl",
+      "type": "sticky",
+      "color": "purple",
+      "x": 860,
+      "y": 714,
+      "w": 300,
+      "h": 140,
+      "text": "**Selection, two paths**\n- Keywords: exact match reins in the drift\n- Task type: bounds what gets recalled"
+    },
+    {
+      "id": "ra",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 729,
+      "w": 188,
+      "h": 110,
+      "text": "**65% → 80%**\npass rate on a 60-case eval set"
+    },
+    {
+      "id": "tb",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 880,
+      "w": 500,
+      "h": 24,
+      "text": "**B · Models tiered by subtask**"
+    },
+    {
+      "id": "lt",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**Deterministic work → Seed 1.5 Lite**\nContext extraction, structuring."
+    },
+    {
+      "id": "pr",
+      "type": "sticky",
+      "color": "purple",
+      "x": 356,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**Core reasoning and generation → Seed 2.0 Pro**\nOnly that."
+    },
+    {
+      "id": "tk",
+      "type": "sticky",
+      "color": "gray",
+      "x": 684,
+      "y": 916,
+      "w": 260,
+      "h": 130,
+      "text": "Fewer tokens for the large model to read and write."
+    },
+    {
+      "id": "rb",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 926,
+      "w": 188,
+      "h": 110,
+      "text": "**95s → 50s**\nper task, −47%; spot checks: same quality"
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1488,
+      "y": 592,
+      "w": 604,
+      "h": 30,
+      "text": "Quality and speed"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1488,
+      "y": 630,
+      "w": 604,
+      "h": 40,
+      "text": "Did the model get the task right, and did it answer in time?"
+    },
+    {
+      "id": "mq",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1488,
+      "y": 714,
+      "w": 220,
+      "h": 130,
+      "text": "**Quality**\npass rate on the eval set"
+    },
+    {
+      "id": "mq2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1738,
+      "y": 704,
+      "w": 354,
+      "h": 160,
+      "text": "**Built from the task, not the recall**\nThe set is distilled from what completing the task takes and from the model’s reasoning chains: given this context, does the model get the task right?"
+    },
+    {
+      "id": "ms",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1488,
+      "y": 916,
+      "w": 220,
+      "h": 130,
+      "text": "**Speed**\naverage time per task"
+    },
+    {
+      "id": "ms2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1738,
+      "y": 916,
+      "w": 354,
+      "h": 130,
+      "text": "**Why it matters**\nThe agent lives in a group chat. Answer too slowly, and the rhythm of the conversation breaks."
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p1",
+      "to": "fr"
+    },
+    {
+      "id": "e2",
+      "from": "p2",
+      "to": "nd"
+    },
+    {
+      "id": "e3",
+      "from": "fr",
+      "to": "two"
+    },
+    {
+      "id": "e4",
+      "from": "nd",
+      "to": "two"
+    },
+    {
+      "id": "e5",
+      "from": "two",
+      "to": "st"
+    },
+    {
+      "id": "e6",
+      "from": "two",
+      "to": "se"
+    },
+    {
+      "id": "e7",
+      "from": "st",
+      "to": "q1"
+    },
+    {
+      "id": "e8",
+      "from": "se",
+      "to": "w1"
+    },
+    {
+      "id": "e9",
+      "from": "q1",
+      "to": "q2"
+    },
+    {
+      "id": "e10",
+      "from": "q2",
+      "to": "q3"
+    },
+    {
+      "id": "e11",
+      "from": "w1",
+      "to": "w2"
+    },
+    {
+      "id": "e12",
+      "from": "w2",
+      "to": "w3"
+    },
+    {
+      "id": "e13",
+      "from": "q3",
+      "to": "w2",
+      "dashed": true,
+      "label": "recalled from",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e14",
+      "from": "bf",
+      "to": "dr"
+    },
+    {
+      "id": "e15",
+      "from": "dr",
+      "to": "so"
+    },
+    {
+      "id": "e16",
+      "from": "so",
+      "to": "sl"
+    },
+    {
+      "id": "e17",
+      "from": "sl",
+      "to": "ra"
+    },
+    {
+      "id": "e18",
+      "from": "lt",
+      "to": "pr"
+    },
+    {
+      "id": "e19",
+      "from": "pr",
+      "to": "tk"
+    },
+    {
+      "id": "e20",
+      "from": "tk",
+      "to": "rb"
+    },
+    {
+      "id": "e21",
+      "from": "mq",
+      "to": "mq2"
+    },
+    {
+      "id": "e22",
+      "from": "ms",
+      "to": "ms2"
+    },
+    {
+      "id": "e23",
+      "from": "ra",
+      "to": "mq",
+      "dashed": true,
+      "label": "measured by"
+    },
+    {
+      "id": "e24",
+      "from": "rb",
+      "to": "ms",
+      "dashed": true
+    }
+  ]
+}

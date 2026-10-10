@@ -1,0 +1,9 @@
+{
+  "name": "antares-comments",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "test": "node test/lib.test.js"
+  }
+}

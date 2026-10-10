@@ -1,0 +1,67 @@
+{
+  "title": "Kaboo",
+  "slug": "kaboo",
+  "order": 2,
+  "kind": "ByteDance · Internal Open Source · Token Efficiency",
+  "logo": "/media/logos/bytedance.svg",
+  "placeholder": false,
+  "summary": "An open-source token-analysis project inside ByteDance, built without hand-offs: I raised the problem, designed the Token Efficiency Leaderboard, tested it and shipped it myself.",
+  "cover": "/media/projects/kaboo/cover.svg",
+  "hue": 315,
+  "facts": [
+    {
+      "label": "Company",
+      "value": "ByteDance",
+      "icon": "/media/logos/bytedance.svg"
+    },
+    {
+      "label": "Project",
+      "value": "Kaboo, internal open source"
+    },
+    {
+      "label": "My part",
+      "value": "Token Efficiency Leaderboard"
+    },
+    {
+      "label": "Reach",
+      "value": "10,000+ internal users"
+    }
+  ],
+  "story": [
+    {
+      "title": "What it is",
+      "body": "Kaboo is an open-source project inside ByteDance that analyzes token consumption.\n\nThe most interesting thing about it, though, isn't what it does but how it was made: with a new way of working together."
+    },
+    {
+      "title": "How we work",
+      "body": "There's no relay of people here, no \"file a requirement, schedule it, build it, test it, ship it.\" Whoever raises a problem designs the fix, runs the tests and deploys it to production themselves. Each person owns their part, end to end.\n\nQuality rests on two safeguards:\n\n1. **Before release**, an agent checks the change for problems.\n2. **After release**, anything that goes wrong can be rolled back quickly."
+    },
+    {
+      "title": "Why it works",
+      "body": "It works because the infrastructure is in place. We build on **mew**, a project-management platform that builds agents into the software-development process, and it is connected to Lark.\n\nThe road from idea to implementation is already paved. As long as you can say clearly what you want, you can build it and ship it yourself."
+    },
+    {
+      "title": "What I did",
+      "body": "Working this way, I owned the **Token Efficiency Leaderboard** and the **efficiency-analysis module**.\n\n**I raised the problem.** Everyone looked at where agents failed; nobody looked at tasks that succeeded but were wasteful along the way.\n\n**I designed the fix:**\n\n- I defined criteria for five kinds of waste.\n- I designed a diagnosis that uses only metadata and never touches content.\n- I normalized cost across different models with **Effective Tokens**.\n\nThen I tested it and shipped it myself. It now covers more than 10,000 internal users."
+    },
+    {
+      "title": "What I learned",
+      "body": "This gave me a very concrete picture of how collaboration works in the AI era. Once the infrastructure flattens the cost of implementation, the bottleneck becomes whether you can think a problem through and say it clearly.\n\nA person's value lies more in judgment than in execution."
+    }
+  ],
+  "board": "kaboo",
+  "outcomes": [
+    {
+      "value": "10K+",
+      "label": "Internal users the leaderboard and the analysis now cover"
+    },
+    {
+      "value": "5",
+      "label": "Kinds of waste, each with a criterion for spotting it"
+    },
+    {
+      "value": "Metadata only",
+      "label": "The diagnosis never reads the content of a session"
+    }
+  ]
+}

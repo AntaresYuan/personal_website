@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board editor</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (dark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=96280c50">
+</head>
+<body class="work-home board-editor-page">
+<div class="be-app">
+  <header class="be-top glass">
+    <a class="be-back" href="/projects/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>Projects</a>
+    <span class="be-name">Board · <strong id="be-id"></strong></span>
+    <span class="be-status" id="be-status">Loading…</span>
+    <span class="be-spacer"></span>
+    <button type="button" class="btn" id="be-undo" title="Undo (⌘Z)">Undo</button>
+    <button type="button" class="btn" id="be-redo" title="Redo (⇧⌘Z)">Redo</button>
+    <button type="button" class="btn" id="be-copy">Copy JSON</button>
+    <button type="button" class="btn" id="be-download">Download</button>
+    <button type="button" class="btn btn-primary" id="be-save">Save</button>
+  </header>
+  <nav class="be-tools glass" aria-label="Tools">
+    <button type="button" data-tool="select" title="Select (V)" aria-label="Select"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5l12 7-5.2 1.3L10.5 18z"/></svg></button>
+    <button type="button" data-tool="sticky" title="Note (N)" aria-label="Note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v9.5l-5 5H5z"/><path d="M14 19v-5h5"/></svg></button>
+    <button type="button" data-tool="shape" title="Shape (R)" aria-label="Shape"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="6" width="15" height="12" rx="3.5"/></svg></button>
+    <button type="button" data-tool="text" title="Text (T)" aria-label="Text"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12M12 6v13"/></svg></button>
+    <button type="button" data-tool="frame" title="Frame (F)" aria-label="Frame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16M16 4v16M4 8h16M4 16h16"/></svg></button>
+    <button type="button" data-tool="image" title="Image (I)" aria-label="Image"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="13" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="m4.5 17 4.5-4.5 3.5 3.5 2.5-2.5 4.5 4"/></svg></button>
+  </nav>
+  <div class="be-draft glass" id="be-draft" hidden>An unsaved draft of this board was found.
+    <button type="button" class="btn" data-draft="restore">Restore</button>
+    <button type="button" class="btn" data-draft="discard">Discard</button>
+  </div>
+  <div class="be-canvas" id="be-board"></div>
+  <aside class="be-inspector glass" id="be-inspector" aria-label="Properties" hidden></aside>
+</div>
+<script src="/scripts/board.js?v=1d1d95ed" defer></script>
+<script src="/scripts/board-editor.js?v=396b8489" defer></script>
+</body>
+</html>

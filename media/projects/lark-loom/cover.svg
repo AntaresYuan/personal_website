@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="pc pc-lark-loom" viewBox="0 0 1200 480" role="img" aria-label="Lark Loom: from context scattered in chat to structured memory and targeted recall">
+<!-- lark-loom cover, drawn by tools/covers/covers.js — edit that, not this. -->
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<!-- column heads -->
+<text class="pc-h" x="128" y="46">Problem</text><text class="pc-hs" x="128" y="70">Context stuck in IM</text>
+<text class="pc-h" x="352" y="46">Scenario</text><text class="pc-hs" x="352" y="70">Chat is fragmented</text>
+<text class="pc-h" x="576" y="46">Product</text><text class="pc-hs" x="576" y="70">Lark Loom</text>
+<text class="pc-h pc-me" x="812" y="46">My work</text><text class="pc-hs" x="812" y="70">On memory and models</text>
+<text class="pc-h" x="1060" y="46">Metrics</text><text class="pc-hs" x="1060" y="70">Quality and speed</text>
+<!-- groups: my work, metrics -->
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<!-- nodes -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Context in IM</text><text class="pc-s" x="128" y="179">needs, decisions,</text><text class="pc-s" x="128" y="201">owners: all in chat</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">Storage</text><text class="pc-s" x="352" y="179">days of messages,</text><text class="pc-s" x="352" y="201">small talk mixed in</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Memory</text><text class="pc-s" x="576" y="179">chat kept as</text><text class="pc-s" x="576" y="201">structured notes</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">Store & select</text><text class="pc-s" x="812" y="179">Lite extracts;</text><text class="pc-s" x="812" y="201">keyword + task recall</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">Pass rate</text><text class="pc-s" x="1060" y="179">60-case eval</text><text class="pc-s" x="1060" y="201">65% → <tspan class="pc-k">80%</tspan></text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Unusable</text><text class="pc-s" x="128" y="331">models can’t</text><text class="pc-s" x="128" y="353">consume the chat</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">Selection</text><text class="pc-s" x="352" y="331">relevant, complete,</text><text class="pc-s" x="352" y="353">clean context</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Skills</text><text class="pc-s" x="576" y="331">docs, tables, slides</text><text class="pc-s" x="576" y="353">from recalled context</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">Tiered models</text><text class="pc-s" x="812" y="331">Lite prepares,</text><text class="pc-s" x="812" y="353">Pro reasons</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">Response time</text><text class="pc-s" x="1060" y="331">per task</text><text class="pc-s" x="1060" y="353">95s → <tspan class="pc-k">50s</tspan></text></g>
+<!-- arrows -->
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<!-- legend -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Context track</text>
+<g class="pc-tb"><rect class="pc-b" x="200.6" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="200.6" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="226.6" y="439">Generation track</text>
+</svg>
