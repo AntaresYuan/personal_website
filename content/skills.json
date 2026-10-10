@@ -56,6 +56,22 @@
       "order": 0
     },
     {
+      "slug": "agent-memory-hub",
+      "name": "Agent Memory Hub",
+      "category": "Agent infra",
+      "tagline": "Shared memory for ChatGPT, Claude, Codex, and Claude Code",
+      "summary": "A Markdown-and-Git memory layer with MCP tools for durable context, scoped recall, consolidation, and cross-agent handoffs.",
+      "site": "https://antaresyuan.github.io/agent-memory-hub-site/",
+      "hue": 255,
+      "links": [
+        {
+          "label": "Site",
+          "href": "https://antaresyuan.github.io/agent-memory-hub-site/"
+        }
+      ],
+      "order": 1
+    },
+    {
       "slug": "devloop",
       "name": "/devloop",
       "category": "Claude Code skill",
@@ -67,7 +83,7 @@
           "href": "https://github.com/AntaresYuan/claude-devloop"
         }
       ],
-      "order": 1,
+      "order": 2,
       "tagline": "An unattended dev loop that works your issue queue",
       "install": "mkdir -p ~/.claude/skills/devloop && curl -sL https://raw.githubusercontent.com/AntaresYuan/claude-devloop/main/SKILL.md -o ~/.claude/skills/devloop/SKILL.md",
       "installNote": "Then run /devloop in Claude Code. Per project instead of global: put it in <repo>/.claude/skills/devloop/.",
@@ -84,6 +100,23 @@
       }
     },
     {
+      "slug": "iterate",
+      "name": "/iterate",
+      "category": "Claude Code skill",
+      "tagline": "A human-reviewed improvement loop for other skills",
+      "summary": "Reads a skill's run logs, accumulates recurring friction, and proposes a SKILL.md pull request when the evidence is strong enough — never auto-merging.",
+      "install": "git clone https://github.com/AntaresYuan/claude-skill-iterate ~/.claude/skills/iterate",
+      "repo": "https://github.com/AntaresYuan/claude-skill-iterate",
+      "hue": 34,
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/claude-skill-iterate"
+        }
+      ],
+      "order": 3
+    },
+    {
       "slug": "ai-pm-resume",
       "name": "/ai-pm-resume",
       "category": "Claude Code skill",
@@ -95,7 +128,7 @@
           "href": "https://github.com/AntaresYuan/ai-pm-resume"
         }
       ],
-      "order": 2,
+      "order": 4,
       "tagline": "A résumé reviewer that reads like an AI PM hiring loop",
       "install": "git clone https://github.com/AntaresYuan/ai-pm-resume ~/.claude/skills/ai-pm-resume",
       "installNote": "Or fetch just SKILL.md into ~/.claude/skills/ai-pm-resume/. Then ask Claude Code to review your résumé for an AI PM role.",
@@ -123,7 +156,7 @@
           "href": "https://github.com/AntaresYuan/claude-skill-interview-sim"
         }
       ],
-      "order": 3,
+      "order": 5,
       "tagline": "Synthetic interviews that read like real transcripts",
       "install": "git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim",
       "installNote": "Restart Claude Code and /interview-sim shows up in the skills list.",
@@ -137,26 +170,6 @@
           "Coherence pass for persona consistency and cross-answer references",
           "8-point self-check before delivery"
         ]
-      }
-    },
-    {
-      "slug": "logger",
-      "name": "/log",
-      "category": "Claude Code Skill",
-      "summary": "When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.",
-      "details": "What this thing actually does\n\n  While you're working on a project in Claude Code, it keeps a journal in the background. When the project ends, that\n  journal turns into a blog draft with one command.\n\n  ---\n  The three files\n  \n  Stream (stream.md) — every time you hit enter, one line lands here (timestamp + first 300 chars of your prompt). When\n  the session ends (/clear or terminal close), a summary block is appended: how many prompts you sent, which tools got\n  used, what files git shows changed. You don't read this one — it's noisy, it's source material.\n\n  ▎ Why log in real-time instead of only at session end: if Claude Code runs for 4 hours and then crashes, at least your\n  ▎  prompts survive.\n\n  Digest (digest.md) — this is the file you actually read. Fourteen sections (Decisions / Failures / AI-trust-broke /\n  Assumptions / Reversals / Surprises / Quotes / Lucky breaks / ...). Two ways stuff gets in:\n  - You drop a thought: /log note \"that call was emotional, I didn't run the numbers\" — agent decides which section(s)\n  it belongs to and writes it in\n  - You want to clean up: /log digest — agent scans whatever's new in the stream and sorts it into the right sections\n  \n  Blog draft (blog-draft.md) — at project end, /log blog runs. Agent only reads the digest (never the stream), spits out\n   a ~1000-word draft, leaning hard on Reversals / AI-trust-broke / Surprises / Quotes for narrative tension.\n\n  ---\n  Starting a new project\n  \n  Inside the project directory, type /log start <name>. From then on, any Claude Code session launched from that\n  directory (or any subdirectory) auto-logs to that project's files.\n\n  Joining a project that's already in flight: add --backfill. The agent goes through your Claude Code transcript history\n   + git log + README + ~/research/<name>/, picks out high-signal events, and writes them into the digest with\n  [backfilled] tags. (Stream doesn't get backfilled — backfilled raw data is just noise.) Your yitang project was\n  already done this way.\n\n  ---\n  Multiple terminals don't cross-contaminate\n  \n  Terminal A in ~/Downloads/一堂, Terminal B in ~/projects/lark-loom — each logs to its own project. The agent looks at\n  the launch directory to figure out which journal to write to. Unbound directories log nothing — which is why this \n  current session (launched from your home dir) won't end up in any journal.\n\n  ---\n  Filter\n  \n  Prompts shorter than 5 visible characters get skipped (好 / 继续 / ok / yes / y / n) — pure filler that would just\n  dilute the signal. If you genuinely want a short instruction captured, use /log note \"...\" — that bypasses the filter\n  and goes straight into the digest. Threshold is tunable via export LOG_STREAM_MIN_CHARS=N.\n\n  ---\n  The rest of the commands\n  \n Command           │    What it does                             │\n /log list                  │ List all projects with state (active / paused / archived)            │\n/log open <name>           │ Open a project's digest in your editor                               │\n /log pause / /log resume   │ Stop or resume recording for the current directory                   │\n/log archive <name>        │ Mark a project finished (data stays, just status flips)              │\n/log ingest <path-or-text> │ Pull external material (advisor emails, Figma notes) into the digest │\n/log status                │ Show which project is bound to the current directory                 │\n  \n  ---\n  What it doesn't do\n  \n  - Doesn't read private files, doesn't upload anything — fully local\n  - The background hook never calls an LLM (it's fast, costs nothing, and no API key has to live in the hook\n  environment)\n  - All LLM-powered work (classification, blog drafting) happens inside your interactive Claude Code session — you see\n  it happen\n  - Doesn't make decisions for you, doesn't write code for you\n\n  ---\n  One diagram\n  \n  You working normally\n     │\n     │   each prompt ─────────────► Stream  (raw, you don't read)\n     │                                  │\n     │                                  │ /log digest\n     │                                  ▼\n     │   /log note \"...\" ─────────► Digest  (14 sections, you read)\n     │                                  │\n     │   project ends                   │ /log blog\n     │   ↓                              ▼\n     └───────────────────────────► Blog draft  (you edit)",
-      "links": [
-        {
-          "label": "/agent-brief.txt",
-          "href": "/agent-brief.txt"
-        }
-      ],
-      "order": 4,
-      "tagline": "A background project diary that turns into a blog draft",
-      "hue": 150,
-      "eval": {
-        "status": "none",
-        "note": "Not published yet."
       }
     },
     {
@@ -175,34 +188,15 @@
           "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
-      "order": 5,
+      "order": 6,
       "tagline": "Resumes your Claude Code work the moment credits renew",
       "hue": 200,
       "download": "https://claude-credit-watchdog.netlify.app",
+      "site": "https://claude-credit-watchdog.netlify.app",
       "repo": "https://github.com/AntaresYuan/Claude-Credit-Watchdog",
       "eval": {
         "status": "none",
         "note": "No benchmark — a utility."
-      }
-    },
-    {
-      "slug": "agent-brief",
-      "name": "agent-brief.txt",
-      "category": "agent infra",
-      "summary": "off-page notes my site's QA Worker reads — context I want an agent to know but not render on the page",
-      "details": "## What it is\n\nA single text file at `/agent-brief.txt` — built from `content/agent-brief.json`\nby `scripts/build-agent-brief.js`. Publicly fetchable, but not linked from\nany visible page on the site.\n\n## Why\n\nThe site's QA Worker grounds answers in `/llms-full.txt` (the public site\ncontent — projects, principles, contact). But there are nuances I want an\nagent to know — context on a project, judgement on a tradeoff, what I'm\nopen to right now — that don't belong on a public page. `agent-brief.txt`\nis where I put those. The Worker fetches both files and folds them into\nthe grounding context, so an answer can lean on the brief without making\nit public reading material.\n\n## Edit via\n\n`/admin/` → **Assistant knowledge** collection. Each entry is a note with a\ntitle and body. The build flattens them into the txt file.\n\n## Why this is a skill, not just a feature\n\nMost personal sites either over-share (everything goes on the page) or\nunder-share (nothing for an agent to ground on). `agent-brief.txt` is a\nthird thing: a private-ish channel for agent-targeted context. Once you\nhave it, every assistant answering questions about you gets richer without\ncluttering your public page.",
-      "links": [
-        {
-          "label": "/agent-brief.txt",
-          "href": "/agent-brief.txt"
-        }
-      ],
-      "order": 6,
-      "tagline": "Off-page context for the site's answering agent",
-      "hue": 285,
-      "eval": {
-        "status": "none",
-        "note": "A pattern, not a package."
       }
     }
   ]

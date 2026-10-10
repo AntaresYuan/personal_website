@@ -104,34 +104,21 @@ const lensListHtml = (lens) =>
         </div>`;
   }).join('');
 
-// Skills — one alias-style row per item. Sort by `order` (then by name) so
-// the SKILL-NN ids stay stable. Each row is a real <button> carrying the
-// data-card-id render.js's modal click handler listens for.
+// Skills — one alias-style row per item. Each row links straight to the
+// project's official site, falling back to its GitHub repository.
 const skillsSorted = (skills) => (skills.items ?? []).slice().sort((a, b) =>
   (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
-const skillDisplayId = (idx) => `SKILL-${pad2(idx + 1)}`;
-const skillRowHtml = (s, idx) => {
-  const id = skillDisplayId(idx);
-  // External links live OUTSIDE the modal-opening button so they're real <a>
-  // hit targets (an <a> inside a <button> is invalid HTML and would either
-  // fail or steal the click). The arrow is a sibling of the links — it's a
-  // pure visual cue that the row also opens a modal.
-  const linksHtml = (s.links ?? [])
-    .filter((l) => l && l.href && l.href !== '#')
-    .map((l) => `<a class="skill-extlink" href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label ?? l.href)} ↗</a>`)
-    .join('');
+const skillRowHtml = (s) => {
+  const destination = s.site || s.repo || '#';
+  const destinationLabel = s.site ? 'Visit site' : 'GitHub';
   return `
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="${escape(id)}" aria-label="Open details for ${escape(s.name ?? '')}">
-            <span class="skill-id">${escape(id)}</span>
+          <a class="skill-link" href="${escape(destination)}" target="_blank" rel="noopener" aria-label="${escape(destinationLabel)} for ${escape(s.name ?? '')}">
             <span class="skill-name">${escape(s.name ?? '')}</span>
             ${s.category ? `<span class="skill-cat">${escape(s.category)}</span>` : ''}
             <span class="skill-summary">${escape(s.summary ?? '')}</span>
-          </button>
-          <div class="skill-row-side">
-            ${linksHtml}
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">${destinationLabel} ↗</span>
+          </a>
         </li>`;
 };
 

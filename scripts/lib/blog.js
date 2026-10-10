@@ -245,6 +245,7 @@ function loadPosts({ includeDrafts = false } = {}) {
         title: String(data.title || slug).trim(),
         date: String(data.date || '').trim().slice(0, 10),
         summary: String(data.summary || '').replace(/\s+/g, ' ').trim(),
+        cover: String(data.cover || '').trim(),
         tags,
         draft: data.draft === true || data.draft === 'true',
         body: String(body).trim(),

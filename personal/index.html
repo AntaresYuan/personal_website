@@ -118,7 +118,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="/styles/main.css?v=6afbb783">
+<link rel="stylesheet" href="/styles/main.css?v=94624345">
   <!-- feature-beacon -->
   <script defer src="/scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
@@ -677,9 +677,8 @@
        The receipts for the "AI Agent Native" pill — Claude Code skills,
        configs, and agent-infra Antares built to multiply his own AI work.
        Header + list are filled by build-html.js from content/skills.json.
-       Each row is a real <button> with data-card-id="SKILL-NN"; clicking
-       opens the same side-panel modal the board cards use (render.js
-       hydrates skills into cardIndex on boot). -->
+       Each row is a direct link to the project's official site or, when it
+       has no site, its GitHub repository. -->
   <section class="section skills-section rise rise-3" id="skills">
     <header class="sec-head">
       <span class="sec-cmd"   id="skills-cmd">$ ls ~/skills</span>
@@ -688,88 +687,60 @@
     </header>
     <ul class="skills-list" id="skills-list">
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-01" aria-label="Open details for Eynap">
-            <span class="skill-id">SKILL-01</span>
+          <a class="skill-link" href="https://antaresyuan.github.io/eynap-site/" target="_blank" rel="noopener" aria-label="Visit site for Eynap">
             <span class="skill-name">Eynap</span>
             <span class="skill-cat">Claude Code skill kit</span>
             <span class="skill-summary">An AI PM skill kit: one orchestrator that routes by stage, six skills from research to PRD, and one shared foundation every skill reads.</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://antaresyuan.github.io/eynap-site/" target="_blank" rel="noopener">Site ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/eynap" target="_blank" rel="noopener">GitHub ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">Visit site ↗</span>
+          </a>
         </li>
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-02" aria-label="Open details for /devloop">
-            <span class="skill-id">SKILL-02</span>
+          <a class="skill-link" href="https://antaresyuan.github.io/agent-memory-hub-site/" target="_blank" rel="noopener" aria-label="Visit site for Agent Memory Hub">
+            <span class="skill-name">Agent Memory Hub</span>
+            <span class="skill-cat">Agent infra</span>
+            <span class="skill-summary">A Markdown-and-Git memory layer with MCP tools for durable context, scoped recall, consolidation, and cross-agent handoffs.</span>
+            <span class="skill-destination">Visit site ↗</span>
+          </a>
+        </li>
+        <li class="skill-row">
+          <a class="skill-link" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener" aria-label="GitHub for /devloop">
             <span class="skill-name">/devloop</span>
             <span class="skill-cat">Claude Code skill</span>
             <span class="skill-summary">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">GitHub ↗</span>
+          </a>
         </li>
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-03" aria-label="Open details for /ai-pm-resume">
-            <span class="skill-id">SKILL-03</span>
+          <a class="skill-link" href="https://github.com/AntaresYuan/claude-skill-iterate" target="_blank" rel="noopener" aria-label="GitHub for /iterate">
+            <span class="skill-name">/iterate</span>
+            <span class="skill-cat">Claude Code skill</span>
+            <span class="skill-summary">Reads a skill&#39;s run logs, accumulates recurring friction, and proposes a SKILL.md pull request when the evidence is strong enough — never auto-merging.</span>
+            <span class="skill-destination">GitHub ↗</span>
+          </a>
+        </li>
+        <li class="skill-row">
+          <a class="skill-link" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener" aria-label="GitHub for /ai-pm-resume">
             <span class="skill-name">/ai-pm-resume</span>
             <span class="skill-cat">Claude Code skill</span>
             <span class="skill-summary">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">GitHub ↗</span>
+          </a>
         </li>
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-04" aria-label="Open details for /interview-sim">
-            <span class="skill-id">SKILL-04</span>
+          <a class="skill-link" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener" aria-label="GitHub for /interview-sim">
             <span class="skill-name">/interview-sim</span>
             <span class="skill-cat">Claude Code skill</span>
             <span class="skill-summary">synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">GitHub ↗</span>
+          </a>
         </li>
         <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-05" aria-label="Open details for /log">
-            <span class="skill-id">SKILL-05</span>
-            <span class="skill-name">/log</span>
-            <span class="skill-cat">Claude Code Skill</span>
-            <span class="skill-summary">When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-06" aria-label="Open details for Claude Credit Watchdog">
-            <span class="skill-id">SKILL-06</span>
+          <a class="skill-link" href="https://claude-credit-watchdog.netlify.app" target="_blank" rel="noopener" aria-label="Visit site for Claude Credit Watchdog">
             <span class="skill-name">Claude Credit Watchdog</span>
             <span class="skill-cat">Claude Code Plugin</span>
             <span class="skill-summary">A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://claude-credit-watchdog.netlify.app" target="_blank" rel="noopener">Download ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">GitHub ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-07" aria-label="Open details for agent-brief.txt">
-            <span class="skill-id">SKILL-07</span>
-            <span class="skill-name">agent-brief.txt</span>
-            <span class="skill-cat">agent infra</span>
-            <span class="skill-summary">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
+            <span class="skill-destination">Visit site ↗</span>
+          </a>
         </li></ul>
   </section>
 
@@ -1063,9 +1034,9 @@
      execute in document order after parse — qa-faq.js (the shared FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="/scripts/qa-faq.js?v=657b3299"      defer></script>
-<script src="/scripts/render.js?v=d9f213fe"   defer></script>
+<script src="/scripts/render.js?v=b6308667"   defer></script>
 <script src="/scripts/terminal.js?v=ef73ed0e" defer></script>
-<script src="/scripts/palette.js?v=60c99a82"  defer></script>
+<script src="/scripts/palette.js?v=1ac21297"  defer></script>
 <script src="/scripts/giscus-lazy.js?v=0521a30c" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c"   defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2"        defer></script>

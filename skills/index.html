@@ -9,7 +9,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AI Skills · Antares Yuan</title>
-<meta name="description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — install in one line.">
+<meta name="description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — official sites and source repositories.">
 <meta name="author" content="Chenjie (Antares) Yuan">
 <link rel="canonical" href="https://antaresyuan.site/skills/">
 <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
@@ -20,11 +20,11 @@
 <meta property="og:url" content="https://antaresyuan.site/skills/">
 <meta property="og:site_name" content="Antares Yuan">
 <meta property="og:title" content="AI Skills">
-<meta property="og:description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — install in one line.">
+<meta property="og:description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — official sites and source repositories.">
 <meta property="og:image" content="https://antaresyuan.site/media/avatar-calm.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AI Skills">
-<meta name="twitter:description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — install in one line.">
+<meta name="twitter:description" content="Skills and plugins for Claude Code and other agents, by Antares Yuan — official sites and source repositories.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
@@ -38,7 +38,7 @@
     d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
   })();
 </script>
-<link rel="stylesheet" href="/styles/work.css?v=f93717c3">
+<link rel="stylesheet" href="/styles/work.css?v=2b57624d">
 </head>
 <body class="work-home skills-page">
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -75,7 +75,7 @@
     <li><a class="rail-item is-active" href="/skills/" aria-current="page" data-id="skills" data-label="AI Skills" aria-label="AI Skills"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
     <li><a class="rail-item" href="/gallery/" data-id="gallery" data-label="Gallery" aria-label="Gallery"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
     <li><a class="rail-item" href="/blog/" data-id="writing" data-label="Writing" aria-label="Writing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="about" data-label="About me · soon" aria-label="About me (coming soon)"><img class="rail-avatar" src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async"></span></li>
+    <li><a class="rail-item" href="/about/" data-id="about" data-label="About me" aria-label="About me"><img class="rail-avatar" src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async"></a></li>
   </ul>
 </nav>
 
@@ -84,7 +84,7 @@
     <header class="page-head">
       <div>
         <h1 class="page-title" id="skills-title">AI Skills</h1>
-        <p class="page-sub">Skills and plugins I built for Claude Code and other agents. Each one installs in a line — the details page shows what it does and how it checks itself.</p>
+        <p class="page-sub">Skills and plugins I built for Claude Code and other agents. Each row goes straight to its official site or GitHub repository.</p>
       </div>
       <label class="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
@@ -114,83 +114,83 @@
       </div>
     </section>
     <div class="filters" role="group" aria-label="Filter by type" data-filter-for="skill-list">
-      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter" type="button" data-filter="kits" aria-pressed="false">Skill kits</button><button class="filter" type="button" data-filter="skills" aria-pressed="false">Skills</button><button class="filter" type="button" data-filter="plugins" aria-pressed="false">Plugins</button><button class="filter" type="button" data-filter="infra" aria-pressed="false">Agent infra</button>
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">All</button><button class="filter" type="button" data-filter="kits" aria-pressed="false">Skill kits</button><button class="filter" type="button" data-filter="infra" aria-pressed="false">Agent infra</button><button class="filter" type="button" data-filter="skills" aria-pressed="false">Skills</button><button class="filter" type="button" data-filter="plugins" aria-pressed="false">Plugins</button>
     </div>
     <ul class="skill-list" id="skill-list">
         <li class="skill-row" data-tags="kits" data-search="eynap everything you need as an ai pm an ai pm skill kit: one orchestrator that routes by stage, six skills from research to prd, and one shared foundation every skill reads. claude code skill kit">
-          <a class="skill-row-link" href="/skills/eynap/">
+          <a class="skill-row-link" href="https://antaresyuan.github.io/eynap-site/" target="_blank" rel="noopener">
             <span class="skill-icon" style="--hue: 262" aria-hidden="true">E</span>
             <span class="skill-row-text">
               <span class="skill-row-name">Eynap</span>
               <span class="skill-row-sub">Everything You Need as an AI PM</span>
             </span>
-            <span class="skill-get">Get</span>
+            <span class="skill-get">Visit site<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </a>
+        </li>
+        <li class="skill-row" data-tags="infra" data-search="agent memory hub shared memory for chatgpt, claude, codex, and claude code a markdown-and-git memory layer with mcp tools for durable context, scoped recall, consolidation, and cross-agent handoffs. agent infra">
+          <a class="skill-row-link" href="https://antaresyuan.github.io/agent-memory-hub-site/" target="_blank" rel="noopener">
+            <span class="skill-icon" style="--hue: 255" aria-hidden="true">A</span>
+            <span class="skill-row-text">
+              <span class="skill-row-name">Agent Memory Hub</span>
+              <span class="skill-row-sub">Shared memory for ChatGPT, Claude, Codex, and Claude Code</span>
+            </span>
+            <span class="skill-get">Visit site<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
           </a>
         </li>
         <li class="skill-row" data-tags="skills" data-search="/devloop an unattended dev loop that works your issue queue autonomous unattended dev loop — branch → small step → test → pr → sub-agent review → merge → verify deploy → next claude code skill">
-          <a class="skill-row-link" href="/skills/devloop/">
+          <a class="skill-row-link" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">
             <span class="skill-icon" style="--hue: 175" aria-hidden="true">D</span>
             <span class="skill-row-text">
               <span class="skill-row-name">/devloop</span>
               <span class="skill-row-sub">An unattended dev loop that works your issue queue</span>
             </span>
-            <span class="skill-get">Get</span>
+            <span class="skill-get">GitHub<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </a>
+        </li>
+        <li class="skill-row" data-tags="skills" data-search="/iterate a human-reviewed improvement loop for other skills reads a skill's run logs, accumulates recurring friction, and proposes a skill.md pull request when the evidence is strong enough — never auto-merging. claude code skill">
+          <a class="skill-row-link" href="https://github.com/AntaresYuan/claude-skill-iterate" target="_blank" rel="noopener">
+            <span class="skill-icon" style="--hue: 34" aria-hidden="true">I</span>
+            <span class="skill-row-text">
+              <span class="skill-row-name">/iterate</span>
+              <span class="skill-row-sub">A human-reviewed improvement loop for other skills</span>
+            </span>
+            <span class="skill-get">GitHub<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
           </a>
         </li>
         <li class="skill-row" data-tags="skills" data-search="/ai-pm-resume a résumé reviewer that reads like an ai pm hiring loop ai pm résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation claude code skill">
-          <a class="skill-row-link" href="/skills/ai-pm-resume/">
+          <a class="skill-row-link" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">
             <span class="skill-icon" style="--hue: 225" aria-hidden="true">A</span>
             <span class="skill-row-text">
               <span class="skill-row-name">/ai-pm-resume</span>
               <span class="skill-row-sub">A résumé reviewer that reads like an AI PM hiring loop</span>
             </span>
-            <span class="skill-get">Get</span>
+            <span class="skill-get">GitHub<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
           </a>
         </li>
         <li class="skill-row" data-tags="skills" data-search="/interview-sim synthetic interviews that read like real transcripts synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not llm output claude code skill">
-          <a class="skill-row-link" href="/skills/interview-sim/">
+          <a class="skill-row-link" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">
             <span class="skill-icon" style="--hue: 300" aria-hidden="true">I</span>
             <span class="skill-row-text">
               <span class="skill-row-name">/interview-sim</span>
               <span class="skill-row-sub">Synthetic interviews that read like real transcripts</span>
             </span>
-            <span class="skill-get">Get</span>
-          </a>
-        </li>
-        <li class="skill-row" data-tags="skills" data-search="/log a background project diary that turns into a blog draft when you use claude code for projects, it helps you keep a diary in the background. when the project ends, this diary can be easily turned into a blog draft with one click. claude code skill">
-          <a class="skill-row-link" href="/skills/logger/">
-            <span class="skill-icon" style="--hue: 150" aria-hidden="true">L</span>
-            <span class="skill-row-text">
-              <span class="skill-row-name">/log</span>
-              <span class="skill-row-sub">A background project diary that turns into a blog draft</span>
-            </span>
-            <span class="skill-get">View</span>
+            <span class="skill-get">GitHub<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
           </a>
         </li>
         <li class="skill-row" data-tags="plugins" data-search="claude credit watchdog resumes your claude code work the moment credits renew a lightweight menu bar watchdog that monitors your claude code sessions, alerts you the moment credits renew, and automatically resumes your work. claude code plugin">
-          <a class="skill-row-link" href="/skills/claude-credit-watchdog/">
+          <a class="skill-row-link" href="https://claude-credit-watchdog.netlify.app" target="_blank" rel="noopener">
             <span class="skill-icon" style="--hue: 200" aria-hidden="true">C</span>
             <span class="skill-row-text">
               <span class="skill-row-name">Claude Credit Watchdog</span>
               <span class="skill-row-sub">Resumes your Claude Code work the moment credits renew</span>
             </span>
-            <span class="skill-get">Download</span>
-          </a>
-        </li>
-        <li class="skill-row" data-tags="infra" data-search="agent-brief.txt off-page context for the site's answering agent off-page notes my site's qa worker reads — context i want an agent to know but not render on the page agent infra">
-          <a class="skill-row-link" href="/skills/agent-brief/">
-            <span class="skill-icon" style="--hue: 285" aria-hidden="true">A</span>
-            <span class="skill-row-text">
-              <span class="skill-row-name">agent-brief.txt</span>
-              <span class="skill-row-sub">Off-page context for the site's answering agent</span>
-            </span>
-            <span class="skill-get">View</span>
+            <span class="skill-get">Visit site<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
           </a>
         </li>
     </ul>
     <p class="empty" id="skill-list-empty" hidden>No skill matches that.</p>
   </section>
-  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a></footer>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">Edit</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a></footer>
 </main>
 
 <div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">

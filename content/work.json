@@ -55,7 +55,7 @@
     {
       "id": "about",
       "label": "About me",
-      "href": "",
+      "href": "/about/",
       "icon": "avatar"
     }
   ]
