@@ -1,0 +1,63 @@
+{
+  "title": "Agentic Hiring",
+  "slug": "agentic-hiring",
+  "order": 1,
+  "kind": "ByteDance · AI Agent · Intern Project · 2K+ DAU · Staged rollout",
+  "logo": "/media/logos/bytedance.svg",
+  "placeholder": false,
+  "summary": "A recruiting workbench for ByteDance's talent-acquisition team, with an agent that turns a role brief into a ranked shortlist for the hiring manager.",
+  "cover": "/media/projects/agentic-hiring/cover.svg",
+  "hue": 262,
+  "facts": [
+    {
+      "label": "Company",
+      "value": "ByteDance",
+      "icon": "/media/logos/bytedance.svg"
+    },
+    {
+      "label": "Team",
+      "value": "Institute of Management Strategy (IMS)"
+    },
+    {
+      "label": "Role",
+      "value": "AI Product Manager Intern"
+    },
+    {
+      "label": "Users",
+      "value": "TAs, sourcers, hiring managers"
+    }
+  ],
+  "story": [
+    {
+      "title": "The problem",
+      "body": "ByteDance's hiring process wasn't meeting what the company needed from it, in two ways.\n\nIt wasn't **fast** enough: too little concurrency, and candidates moved through the pipeline too slowly. And it wasn't **good** enough: the quality of a hire leaned heavily on the skill of the individual TA (talent-acquisition partner) running the search."
+    },
+    {
+      "title": "Why it happens",
+      "body": "To see why, look at what hiring is: deciding whether a candidate fits a role. Doing that well takes two things. On the candidate side, there have to be enough candidates, with up-to-date information. That is a **supply** problem. On the role side, someone has to understand who the role really needs. That is a **demand-understanding** problem.\n\nToday the TA carries both. Supply means digging candidates out of the talent pool by hand while running many roles in parallel, and that is the efficiency bottleneck. Understanding the role rests on each TA's own grasp of the business, so quality varies from person to person.\n\nSo we set out to do two things:\n\n1. **Build a TA workbench** that turns supply, and the rest of a TA's daily toolkit, into platform infrastructure.\n2. **Improve recommendation quality**, so the agent understands a role precisely and recommends precisely."
+    },
+    {
+      "title": "The product",
+      "body": "The result is a recruiting workbench. Its primary users are TAs and sourcers; hiring managers are secondary users. It has two halves, one for each of those two things.\n\n**Infrastructure** brings what a TA uses every day into the workbench.\n\n- **Supply.** *Sourcing* adds people who aren't in the talent pool yet, from careers-site applications, referrals, internal transfers and external channels. *Activation* refreshes the people already in it: how open they are to a move, their new projects and roles.\n- **The rest of the day.** A hiring-funnel analysis for each TA's own roles, a place to pin down the hiring brief with the hiring manager, and interview scheduling once a candidate passes review.\n\n**Agentic Hiring.** A TA or sourcer hands the agent the requirements for a role. The agent first clarifies them, then runs three steps (recall, evaluation, ranking) and sends the shortlist to the hiring manager for review."
+    },
+    {
+      "title": "My work",
+      "body": "I owned two things.\n\n**Recommendation quality.** I pulled bad cases from live data, traced each to its cause, and fixed the causes one at a time. A bad case is a candidate the agent recommended and the hiring manager rejected. The attribution showed that misunderstandings of the role fall into three kinds:\n\n1. **The need was clear; the AI misread it.** An AI product-manager role would surface people with algorithm backgrounds: people who do a different job. I built a job taxonomy, with the job family at level one and what the role actually does at level two. It tags live roles and candidates for recall, and it is written into the ranking stage's system prompt. In an A/B test during the staged rollout, the pass rate rose from 21% to 25%, four percentage points.\n2. **The user didn't say it clearly.** When a requirement is vague, the agent checks itself and flags it back to the user. When it is incomplete, the agent asks follow-up questions against a complete checklist of criteria.\n3. **The user's own bar is unclear.** This one is solved over time, with long-term preference memory: the bar is distilled from the user's past behavior.\n\n**Product experience.** I iterated on the product from user feedback. Users didn't know how to describe a role to the agent clearly, for instance, so we added preset prompts: they start from a ready-made draft and edit it, instead of facing a blank box."
+    },
+    {
+      "title": "How we measure it",
+      "body": "Two metrics tell us whether the work is paying off.\n\n- **Accuracy:** the hiring manager's résumé-review pass rate, meaning candidates who pass review divided by all the candidates the agent recommended. The benchmark is human TAs, and the goal is to approach the best of them.\n- **Coverage:** for the same role, the candidates a TA recommended who passed review, but whom the agent never surfaced."
+    }
+  ],
+  "board": "agentic-hiring",
+  "outcomes": [
+    {
+      "value": "21% → 25%",
+      "label": "Hiring managers' pass rate on the agent's picks, after the job taxonomy (A/B test, staged rollout)"
+    },
+    {
+      "value": "3",
+      "label": "Kinds of bad case found by attribution, each with its own fix"
+    }
+  ]
+}

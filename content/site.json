@@ -49,6 +49,10 @@
     "theme": "preferred_color_scheme",
     "inputPosition": "bottom"
   },
+  "comments": {
+    "endpoint": "https://comments.antaresyuan.site",
+    "turnstileSiteKey": "0x4AAAAAAFSoyL7NWjynbTIt"
+  },
   "qa": {
     "workerUrl": "https://qa.antaresyuan.site"
   },

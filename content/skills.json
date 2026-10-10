@@ -6,6 +6,56 @@
   },
   "items": [
     {
+      "slug": "eynap",
+      "name": "Eynap",
+      "category": "Claude Code skill kit",
+      "tagline": "Everything You Need as an AI PM",
+      "cover": "/media/skills/eynap/cover.webp",
+      "summary": "An AI PM skill kit: one orchestrator that routes by stage, six skills from research to PRD, and one shared foundation every skill reads.",
+      "details": "## What it is\n\nResearch, framing, PRD, entity state machines, design handoff — each written down in a form an AI can read, so an agent can carry a PM's work. One orchestrator decides the stage, routes to a skill and checks the gate; the skills cover value, flow, entity, design, PRD and research; and a shared foundation holds memory, preferences, naming, protocols, host differences and wording rules.\n\nCall the one you need directly — no need to run the whole pipeline.\n\n## The chain\n\nBuilding a product from scratch, the skills run **value → flow → entity → design → prd**. The PRD comes last because its journey, entity and interaction chapters *are* those outputs. Research is called on demand, not run first.\n\n## Credits\n\nAn adaptation of [SmileLiuuuu/ai-pm](https://github.com/SmileLiuuuu/ai-pm), released under the same CC BY-NC 4.0 license. The methodology comes from v1; v3 splits it into independently callable skills.",
+      "install": "npx skills add AntaresYuan/eynap -y",
+      "installNote": "Works with Claude Code, Cursor, Codex and 70+ other hosts. You can also paste the line to your AI and let it install itself.",
+      "repo": "https://github.com/AntaresYuan/eynap",
+      "site": "https://antaresyuan.github.io/eynap-site/",
+      "version": "v3.0.0",
+      "license": "CC BY-NC 4.0",
+      "featured": true,
+      "hue": 262,
+      "stats": [
+        {
+          "value": "7",
+          "label": "skills, each callable on its own"
+        },
+        {
+          "value": "37/37",
+          "label": "static checks passed"
+        },
+        {
+          "value": "v3.0.0",
+          "label": "current version"
+        }
+      ],
+      "eval": {
+        "status": "designed",
+        "note": "The plan is written; results land here once it runs.",
+        "checks": [
+          "37 static checks on the kit itself, all passing",
+          "Gate checks on your own project's output — value anchor, pain coverage, three-layer (scripts/check_gate.sh)"
+        ]
+      },
+      "links": [
+        {
+          "label": "Site",
+          "href": "https://antaresyuan.github.io/eynap-site/"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/AntaresYuan/eynap"
+        }
+      ],
+      "order": 0
+    },
+    {
       "slug": "devloop",
       "name": "/devloop",
       "category": "Claude Code skill",
@@ -17,7 +67,21 @@
           "href": "https://github.com/AntaresYuan/claude-devloop"
         }
       ],
-      "order": 1
+      "order": 1,
+      "tagline": "An unattended dev loop that works your issue queue",
+      "install": "mkdir -p ~/.claude/skills/devloop && curl -sL https://raw.githubusercontent.com/AntaresYuan/claude-devloop/main/SKILL.md -o ~/.claude/skills/devloop/SKILL.md",
+      "installNote": "Then run /devloop in Claude Code. Per project instead of global: put it in <repo>/.claude/skills/devloop/.",
+      "repo": "https://github.com/AntaresYuan/claude-devloop",
+      "hue": 175,
+      "eval": {
+        "status": "none",
+        "note": "No benchmark yet — battle-tested running this site's own backlog.",
+        "checks": [
+          "The build must pass, and be idempotent, before a PR opens",
+          "An independent sub-agent reviews every PR before it merges",
+          "Verifies the live deploy before closing the issue"
+        ]
+      }
     },
     {
       "slug": "ai-pm-resume",
@@ -31,7 +95,21 @@
           "href": "https://github.com/AntaresYuan/ai-pm-resume"
         }
       ],
-      "order": 2
+      "order": 2,
+      "tagline": "A résumé reviewer that reads like an AI PM hiring loop",
+      "install": "git clone https://github.com/AntaresYuan/ai-pm-resume ~/.claude/skills/ai-pm-resume",
+      "installNote": "Or fetch just SKILL.md into ~/.claude/skills/ai-pm-resume/. Then ask Claude Code to review your résumé for an AI PM role.",
+      "repo": "https://github.com/AntaresYuan/ai-pm-resume",
+      "hue": 225,
+      "eval": {
+        "status": "none",
+        "note": "No published benchmark yet.",
+        "checks": [
+          "8-dimension AI-PM signal audit, each dimension scored 0–3 with bullet-level evidence",
+          "5-reader critique: ATS bot, hiring manager, AI engineer, peer AI PM, recruiter",
+          "Anti-fabrication checkpoints on numbers, attribution, status and verbs"
+        ]
+      }
     },
     {
       "slug": "interview-sim",
@@ -45,7 +123,21 @@
           "href": "https://github.com/AntaresYuan/claude-skill-interview-sim"
         }
       ],
-      "order": 3
+      "order": 3,
+      "tagline": "Synthetic interviews that read like real transcripts",
+      "install": "git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim",
+      "installNote": "Restart Claude Code and /interview-sim shows up in the skills list.",
+      "repo": "https://github.com/AntaresYuan/claude-skill-interview-sim",
+      "hue": 300,
+      "eval": {
+        "status": "none",
+        "note": "No published benchmark yet.",
+        "checks": [
+          "Kickoff intake that aligns protocol, persona and time budget before writing",
+          "Coherence pass for persona consistency and cross-answer references",
+          "8-point self-check before delivery"
+        ]
+      }
     },
     {
       "slug": "logger",
@@ -59,7 +151,13 @@
           "href": "/agent-brief.txt"
         }
       ],
-      "order": 4
+      "order": 4,
+      "tagline": "A background project diary that turns into a blog draft",
+      "hue": 150,
+      "eval": {
+        "status": "none",
+        "note": "Not published yet."
+      }
     },
     {
       "slug": "Claude Credit Watchdog",
@@ -77,7 +175,15 @@
           "href": "https://github.com/AntaresYuan/Claude-Credit-Watchdog"
         }
       ],
-      "order": 5
+      "order": 5,
+      "tagline": "Resumes your Claude Code work the moment credits renew",
+      "hue": 200,
+      "download": "https://claude-credit-watchdog.netlify.app",
+      "repo": "https://github.com/AntaresYuan/Claude-Credit-Watchdog",
+      "eval": {
+        "status": "none",
+        "note": "No benchmark — a utility."
+      }
     },
     {
       "slug": "agent-brief",
@@ -91,7 +197,13 @@
           "href": "/agent-brief.txt"
         }
       ],
-      "order": 6
+      "order": 6,
+      "tagline": "Off-page context for the site's answering agent",
+      "hue": 285,
+      "eval": {
+        "status": "none",
+        "note": "A pattern, not a package."
+      }
     }
   ]
 }

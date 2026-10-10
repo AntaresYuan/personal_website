@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────────────────────────────
+# Cloudflare Worker config for reactions + comments on Writing posts.
+# Full setup, local dev and privacy notes: README.md.
+#
+# One-time deploy:
+#   cd workers/comments
+#   npx wrangler login
+#   npx wrangler d1 create antares-comments        # paste database_id below
+#   npx wrangler d1 execute antares-comments --remote --file=schema.sql
+#   npx wrangler secret put TURNSTILE_SECRET       # from the Turnstile widget
+#   npx wrangler secret put HASH_SALT              # any long random string
+#   npx wrangler secret put ADMIN_TOKEN            # ≥ 24 random characters
+#   npx wrangler deploy
+# Then put the endpoint + Turnstile site key in content/site.json → comments
+# (or /admin/ → Site meta → Comments) and rebuild.
+# ─────────────────────────────────────────────────────────────────────
+
+name = "antares-comments"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Same zone as the site, so it is reachable wherever antaresyuan.site is
+# (mainland China included); the *.workers.dev fallback stays off.
+workers_dev = false
+routes = [
+  { pattern = "comments.antaresyuan.site", custom_domain = true },
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "antares-comments"
+database_id = "d9ca5528-5376-4847-a7f1-12491171d65e"
+
+# Llama Guard screens each comment before it is published.
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+[vars]
+ALLOWED_ORIGINS = "https://antaresyuan.site,https://www.antaresyuan.site"
+PAGE_PATTERN = "^/blog/[a-z0-9-]+/$"
+REACTIONS = "like,love,insight,fun"
+MODERATION = "ai"
+OWNER_NAME = "Antares"
+SITE_URL = "https://antaresyuan.site"
+SELF_URL = "https://comments.antaresyuan.site"
+# Optional email (Resend): new-comment alerts to OWNER_EMAIL, and a note to
+# a commenter when someone replies. Off until RESEND_API_KEY (a secret) and
+# MAIL_FROM are both set; the comment form hides its email field meanwhile.
+OWNER_EMAIL = ""
+MAIL_FROM = ""

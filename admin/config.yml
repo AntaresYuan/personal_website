@@ -32,126 +32,337 @@ public_folder: "/media"
 # Collections — each maps to a JSON file or folder under /content.
 # ─────────────────────────────────────────────────────────────────────
 collections:
-  # ── Site meta + footer ─────────────────────────────────────────────
-  # NOTE: Sveltia CMS rejects Decap-style dotted field names ("meta.title"),
-  # so the nested groups are real `object` widgets. Every sub-field of each
-  # group is listed (even rarely-edited ones) — both editors serialize an
-  # object from exactly the fields declared here, so an omitted sub-field
-  # would be dropped from content/site.json on the next save.
+
+  # ── WORK — the site root and its pages ───────────────────────────────
   - divider: true
     name: "div_work"
     label: "— WORK —"
     files: []
-  - name: "site"
-    label: "Site meta"
-    icon: settings          # Sveltia: Material Symbols name; Decap ignores it
+
+  # ── Work home ──────────────────────────────────────────────────────
+  # The Work space's own copy (content/work.json): the hero name, the
+  # message, the Update bar, the Projects heading and the left rail.
+  # Every sub-field is listed — an undeclared one would be dropped on save.
+  - name: "work"
+    label: "Work home"
+    icon: home
     files:
-      - file: "content/site.json"
-        label: "Site"
-        name: "site"
+      - file: "content/work.json"
+        label: "Work home"
+        name: "work"
         format: "json"
         fields:
-          - label: "Meta — <head> / SEO"
-            name: "meta"
+          - label: "Name (hero)"
+            name: "name"
+            widget: "object"
+            fields:
+              - { label: "First", name: "first", widget: "string" }
+              - { label: "Middle (shown in parentheses)", name: "middle", widget: "string", required: false }
+              - { label: "Last", name: "last", widget: "string" }
+              - { label: "Native name (the line below)", name: "native", widget: "string", required: false }
+          - label: "Message (hero, right column)"
+            name: "message"
+            widget: "object"
+            fields:
+              - { label: "Heading", name: "title", widget: "string" }
+              - { label: "Body", name: "body", widget: "text" }
+          - label: "Update bar (above the projects)"
+            name: "update"
+            widget: "object"
+            fields:
+              - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+              - { label: "Text", name: "text", widget: "string" }
+          - label: "Projects section"
+            name: "projects"
             widget: "object"
             collapsed: true
+            hint: "The heading and intro only — the projects themselves are in the Projects collection."
             fields:
-              - { label: "Title",            name: "title",          widget: "string" }
-              - { label: "Site name",        name: "siteName",       widget: "string" }
-              - { label: "Description",      name: "description",    widget: "text" }
-              - { label: "Canonical URL",    name: "url",            widget: "string", hint: "e.g. https://antaresyuan.site" }
-              - { label: "Author",           name: "author",         widget: "string" }
-              - { label: "Language",         name: "lang",           widget: "string", default: "en" }
-              - { label: "Locale",           name: "locale",         widget: "string", default: "en_US", hint: "e.g. en_US" }
-              - { label: "OG / social image (path)", name: "ogImage", widget: "string", hint: "A file under media/, e.g. media/avatar-calm.png" }
-              - { label: "OG image width",   name: "ogImageWidth",   widget: "string", default: "512" }
-              - { label: "OG image height",  name: "ogImageHeight",  widget: "string", default: "512" }
-          - label: "Footer"
-            name: "footer"
+              - { label: "Heading", name: "title", widget: "string" }
+              - { label: "Intro (on /projects/)", name: "sub", widget: "text", required: false }
+          - label: "Résumé link labels"
+            name: "resume"
             widget: "object"
             collapsed: true
+            hint: "The PDFs themselves are set in Profile."
             fields:
-              - { label: "Copyright", name: "copyright", widget: "string" }
-              - { label: "Tagline",   name: "tagline",   widget: "string" }
-              - { label: "Last updated (YYYY-MM-DD)", name: "lastUpdated", widget: "string", required: false, hint: "Leave empty to auto-fill with the date of the last content change. Set a value to pin a specific date." }
-          - label: "Cloudflare Web Analytics"
-            name: "analytics"
-            widget: "object"
+              - { label: "English", name: "en", widget: "string" }
+              - { label: "Chinese", name: "zh", widget: "string" }
+          - label: "Left rail"
+            name: "nav"
+            widget: "list"
             collapsed: true
+            summary: "{{fields.label}} — {{fields.href}}"
+            hint: "Top to bottom = the rail's order. An item without a link shows as \"soon\"."
             fields:
-              - { label: "Analytics token", name: "cfAnalyticsToken", widget: "string", required: false, hint: "dash.cloudflare.com → Web Analytics → your site → the data-cf-beacon token. Empty = analytics off." }
-          - label: "Giscus comments"
-            name: "giscus"
-            widget: "object"
-            collapsed: true
-            # Setup: enable Discussions on the GitHub repo, configure at
-            # giscus.app for AntaresYuan/personal_website, paste the IDs below.
-            fields:
-              - { label: "Repo (owner/name)", name: "repo",          widget: "string", required: false, default: "AntaresYuan/personal_website" }
-              - { label: "Repo ID",           name: "repoId",        widget: "string", required: false, hint: "From giscus.app — empty = comments disabled" }
-              - { label: "Category",          name: "category",      widget: "string", required: false, default: "General" }
-              - { label: "Category ID",       name: "categoryId",    widget: "string", required: false, hint: "From giscus.app" }
-              - { label: "Mapping",           name: "mapping",       widget: "select", options: ["pathname","url","title","og:title","specific","number"], required: false, default: "pathname" }
-              - { label: "Theme",             name: "theme",         widget: "select", options: ["light","dark","preferred_color_scheme"], required: false, default: "light" }
-              - { label: "Input position",    name: "inputPosition", widget: "select", options: ["top","bottom"], required: false, default: "top" }
-          - label: "Q&A assistant"
-            name: "qa"
-            widget: "object"
-            collapsed: true
-            fields:
-              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
+              - { label: "ID (marks the current page; don't change)", name: "id", widget: "string" }
+              - { label: "Label", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string", required: false }
+              - { label: "Icon", name: "icon", widget: "select", options: ["home", "folder", "spark", "image", "doc", "avatar"] }
 
-  # ── Hero / profile ─────────────────────────────────────────────────
-  - name: "profile"
-    label: "Hero / profile"
-    icon: person
+  # ── Projects ───────────────────────────────────────────────────────
+  # One file per project, content/projects/<slug>.json: a card on the home
+  # carousel and /projects/, and a case study at /projects/<slug>/
+  # (scripts/build-projects.js). A case-study field left empty shows as a
+  # labelled placeholder. Whiteboards are drawn in the board editor, not
+  # here — see the Whiteboard field.
+  - name: "projects"
+    label: "Projects"
+    label_singular: "Project"
+    icon: folder
+    folder: "content/projects"
+    extension: "json"
+    format: "json"
+    create: true
+    slug: "{{fields.slug}}"
+    summary: "{{fields.order}} · {{fields.title}}"
+    sortable_fields: ["order", "title"]
+    media_folder: "/media/projects"
+    public_folder: "/media/projects"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "URL slug", name: "slug", widget: "string", pattern: ["^[a-z0-9-]+$", "Lowercase letters, digits and dashes only"], hint: "Published at /projects/<slug>/ and used as the file name. Changing it breaks shared links." }
+      - { label: "Order (lower = first)", name: "order", widget: "number", value_type: "int", default: 10 }
+      - { label: "Draft (keep it off the site)", name: "draft", widget: "boolean", required: false, default: false }
+      - { label: "Placeholder", name: "placeholder", widget: "boolean", required: false, default: false, hint: "On: the card is marked as one and every empty part of the case study shows a labelled placeholder. Off: empty parts are left out." }
+      - { label: "Kind (the chip on the card)", name: "kind", widget: "string", required: false, hint: "e.g. AI agent, 0→1 product" }
+      - { label: "Logo (leads the chip)", name: "logo", widget: "image", required: false, hint: "A small company or product mark, shown at 14px before the kind on the card and the case page. A square SVG or PNG reads best." }
+      - { label: "One-line summary", name: "summary", widget: "text", required: false }
+      - label: "Cover"
+        name: "cover"
+        widget: "image"
+        required: false
+        hint: "A photo or screenshot fills the frame (16:9 on cards, 21:9 on the case page). An .svg is drawn inline and follows light/dark: draw it on a transparent ground."
+      - { label: "Cover fit", name: "coverFit", widget: "select", options: ["cover", "contain"], required: false, hint: "contain = show a raster diagram whole instead of cropping it." }
+      - { label: "Cover margin colour (with contain)", name: "coverBg", widget: "string", required: false, hint: "The image's own background colour, e.g. #151515." }
+      - { label: "Backdrop hue (0-360)", name: "hue", widget: "number", value_type: "int", required: false, hint: "The project's one colour: an OKLCH hue angle (e.g. 262 blue, 285 indigo, 305 violet, 200 cyan, 170 teal). It tints the cover's glow and its diagram. Empty = the next one in the palette." }
+      - { label: "Link elsewhere instead of a case study", name: "href", widget: "string", required: false }
+      - label: "Facts (the row under the title)"
+        name: "facts"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}: {{fields.value}}"
+        hint: "e.g. Company, Role, Timeline, Team, Users."
+        fields:
+          - { label: "Label", name: "label", widget: "string" }
+          - { label: "Value", name: "value", widget: "string" }
+          - { label: "Icon (optional, e.g. a company logo)", name: "icon", widget: "image", required: false, hint: "Shown at 18px before the value; a square SVG or PNG reads best." }
+      - label: "Story"
+        name: "story"
+        widget: "list"
+        required: false
+        collapsed: true
+        summary: "{{fields.title}}"
+        hint: "The case in its own shape, one section each (e.g. The problem, Why it happens, The product, My work, How we measure it). When filled, it replaces Overview, What I did and Process."
+        fields:
+          - { label: "Heading", name: "title", widget: "string" }
+          - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Overview (when Story is empty)", name: "overview", widget: "text", required: false }
+      - label: "What I did (when Story is empty)"
+        name: "contribution"
+        widget: "list"
+        required: false
+        field: { label: "Point", name: "point", widget: "string" }
+      - label: "Process (when Story is empty)"
+        name: "process"
+        widget: "list"
+        required: false
+        collapsed: true
+        summary: "{{fields.title}}"
+        fields:
+          - { label: "Step", name: "title", widget: "string" }
+          - { label: "What happened", name: "body", widget: "text" }
+      - label: "Live demo (the real app, embedded)"
+        name: "live"
+        widget: "object"
+        required: false
+        collapsed: true
+        hint: "Shown full width after the story, as a poster until someone clicks Try it live. The site must allow being framed."
+        fields:
+          - { label: "App URL", name: "url", widget: "string", required: false }
+          - { label: "Poster (a screenshot of the app as it opens)", name: "poster", widget: "image", required: false }
+          - { label: "Desktop width (px)", name: "width", widget: "number", value_type: "int", required: false, default: 1440 }
+          - { label: "Desktop height (px)", name: "height", widget: "number", value_type: "int", required: false, default: 810, hint: "The layout it is scaled from; match the poster's aspect." }
+      - { label: "Whiteboard (board id)", name: "board", widget: "string", required: false, hint: "Embeds content/boards/<id>.json, full width below the story. Draw it locally: npm run board, then /board-editor/?id=<id> and Save. Empty = no whiteboard." }
+      - label: "Outcome"
+        name: "outcomes"
+        widget: "list"
+        required: false
+        summary: "{{fields.value}} — {{fields.label}}"
+        fields:
+          - { label: "Value", name: "value", widget: "string" }
+          - { label: "Label", name: "label", widget: "string" }
+      - label: "Pictures"
+        name: "images"
+        widget: "list"
+        required: false
+        summary: "{{fields.caption}}"
+        fields:
+          - { label: "Image", name: "src", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
+      - label: "Links"
+        name: "links"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}} — {{fields.href}}"
+        fields:
+          - { label: "Label", name: "label", widget: "string" }
+          - { label: "URL", name: "href", widget: "string" }
+
+  # ── AI Skills ──────────────────────────────────────────────────────
+  # Claude Code skills, configs and agent infra. Feeds both spaces: the Work
+  # /skills/ catalogue (build-skills-page.js — it also reads the install /
+  # eval / stats fields) and the Personal /skills list, ⌘K palette and
+  # /llms-full.txt.
+  - name: "skills"
+    label: "AI Skills"
+    icon: terminal
     files:
-      - file: "content/profile.json"
-        label: "Profile"
-        name: "profile"
+      - file: "content/skills.json"
+        label: "Skills"
+        name: "skills"
         format: "json"
         fields:
-          - { label: "Name",         name: "name",        widget: "string" }
-          - { label: "Name accent",  name: "nameAccent",  widget: "string", required: false }
-          - { label: "Role",         name: "role",        widget: "string" }
-          - { label: "Location",     name: "location",    widget: "string" }
-          - { label: "Status (now)", name: "status",      widget: "string" }
-          - { label: "Slogan",       name: "slogan",      widget: "text" }
-          - { label: "Manifesto",    name: "manifesto",   widget: "text", required: false, hint: "One-liner — the through-line of the whole site." }
-          - { label: "Résumé / CV — English (PDF)", name: "resumeEn", widget: "file", required: false, hint: "English résumé (PDF recommended). When set, a 'résumé ↓' link shows up in the hero. Empty = no link." }
-          - { label: "Résumé / CV — 中文 (PDF)",     name: "resumeZh", widget: "file", required: false, hint: "中文简历（建议 PDF）。设置后 hero 会显示「简历 ↓」链接。留空则不显示。" }
-          - label: "Avatar (illustrated portrait)"
-            name: "avatar"
+          - label: "Section header"
+            name: "head"
             widget: "object"
-            collapsed: true
             fields:
-              - { label: "Calm (default)",   name: "calm",    widget: "image" }
-              - { label: "Talking (on hover/tap)", name: "talking", widget: "image" }
-              - { label: "Alt text",         name: "alt",     widget: "string" }
-          - label: "Tags (Personal hero)"
-            name: "tags"
+              - { label: "Command", name: "cmd",   widget: "string" }
+              - { label: "Title",   name: "title", widget: "string" }
+              - { label: "Meta",    name: "meta",  widget: "string", required: false }
+          - label: "Items"
+            name: "items"
             widget: "list"
-            field: { label: "Tag", name: "tag", widget: "string" }
-          - label: "Tags (Work hero)"
-            name: "tagsWork"
-            widget: "list"
-            required: false
-            field: { label: "Tag", name: "tag", widget: "string" }
-            hint: "Shown on the Work space only. Leave empty to reuse the Personal tags."
-          - label: "Audience CTAs (3 entries)"
-            name: "ctas"
-            widget: "list"
-            min: 1
-            max: 4
             collapsed: true
-            summary: "{{fields.audience}} → {{fields.label}}"
+            summary: "{{fields.name}} — {{fields.summary}}"
             fields:
-              - { label: "Audience",  name: "audience", widget: "string" }
-              - { label: "Label",     name: "label",    widget: "string" }
-              - { label: "Anchor (#shipped, #now, #contact, …)", name: "anchor", widget: "string" }
-              - { label: "Helper note", name: "note",   widget: "string", required: false }
+              - { label: "Slug (URL-safe id)", name: "slug",     widget: "string" }
+              - { label: "Display name (e.g. /devloop, agent-brief.txt)", name: "name", widget: "string" }
+              - { label: "Category (e.g. “Claude Code skill”, “agent infra”, “hook”)", name: "category", widget: "string" }
+              - { label: "Summary (one line — shows on the row)",       name: "summary",  widget: "text" }
+              - { label: "Details (markdown — shows in the side panel)", name: "details", widget: "text", required: false }
+              - label: "Links"
+                name: "links"
+                widget: "list"
+                required: false
+                collapsed: true
+                summary: "{{fields.label}} — {{fields.href}}"
+                fields:
+                  - { label: "Label", name: "label", widget: "string" }
+                  - { label: "URL",   name: "href",  widget: "string" }
+              - { label: "Order (lower = higher up)", name: "order", widget: "number", default: 1 }
+              # The rest feed the Work space's /skills/ catalogue (build-skills-page.js).
+              - { label: "Tagline (one short line on the catalogue)", name: "tagline", widget: "string", required: false }
+              - { label: "Install command (shown with a copy button)", name: "install", widget: "string", required: false }
+              - { label: "Install note", name: "installNote", widget: "text", required: false }
+              - { label: "Download URL (apps, instead of a command)", name: "download", widget: "string", required: false }
+              - { label: "GitHub repo URL", name: "repo", widget: "string", required: false }
+              - { label: "Site URL", name: "site", widget: "string", required: false }
+              - { label: "Version", name: "version", widget: "string", required: false }
+              - { label: "License", name: "license", widget: "string", required: false }
+              - { label: "Featured (top of the catalogue)", name: "featured", widget: "boolean", required: false, default: false }
+              - { label: "Icon hue (0–360)", name: "hue", widget: "number", required: false }
+              - label: "Stats"
+                name: "stats"
+                widget: "list"
+                required: false
+                summary: "{{fields.value}} — {{fields.label}}"
+                fields:
+                  - { label: "Value", name: "value", widget: "string" }
+                  - { label: "Label", name: "label", widget: "string" }
+              - label: "Evaluation"
+                name: "eval"
+                widget: "object"
+                required: false
+                fields:
+                  - { label: "Status", name: "status", widget: "select", options: ["published", "running", "designed", "none"], default: "none" }
+                  - { label: "Note", name: "note", widget: "string", required: false }
+                  - label: "Metrics"
+                    name: "metrics"
+                    widget: "list"
+                    required: false
+                    summary: "{{fields.value}} — {{fields.label}}"
+                    fields:
+                      - { label: "Value", name: "value", widget: "string" }
+                      - { label: "Label", name: "label", widget: "string" }
+                  - { label: "How it checks itself", name: "checks", widget: "list", required: false }
 
-  # ── Board: project cards ───────────────────────────────────────────
+  # ── Gallery (Work space) ───────────────────────────────────────────
+  # /gallery/ — a wall of work; each piece opens a lightbox. Built by
+  # scripts/build-gallery.js.
+  - name: "gallery"
+    label: "Gallery"
+    icon: image
+    files:
+      - file: "content/gallery.json"
+        label: "Gallery"
+        name: "gallery"
+        format: "json"
+        fields:
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Intro", name: "sub", widget: "text", required: false }
+          - { label: "Categories (key → label)", name: "categories", widget: "object", fields: [
+              { label: "product", name: "product", widget: "string", required: false },
+              { label: "visual", name: "visual", widget: "string", required: false },
+              { label: "art3d", name: "art3d", widget: "string", required: false },
+              { label: "physical", name: "physical", widget: "string", required: false },
+              { label: "photo", name: "photo", widget: "string", required: false },
+              { label: "illustration", name: "illustration", widget: "string", required: false },
+              { label: "nft", name: "nft", widget: "string", required: false } ] }
+          - label: "Pieces"
+            name: "items"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.title}} — {{fields.year}}"
+            fields:
+              - { label: "Slug", name: "slug", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Year", name: "year", widget: "string", required: false }
+              - { label: "Medium", name: "medium", widget: "string", required: false }
+              - { label: "Category", name: "category", widget: "select", options: ["product", "visual", "art3d", "physical", "photo", "illustration", "nft"] }
+              - { label: "Cover (picture number, from 0)", name: "cover", widget: "number", default: 0, required: false }
+              - { label: "Story", name: "summary", widget: "text", required: false }
+              - { label: "Link (write-up)", name: "link", widget: "string", required: false }
+              - label: "Pictures"
+                name: "images"
+                widget: "list"
+                summary: "{{fields.caption}}"
+                fields:
+                  - { label: "Image (large, ~1600px)", name: "src", widget: "image" }
+                  - { label: "Thumbnail (~768px; falls back to the image)", name: "thumb", widget: "image", required: false }
+                  - { label: "Caption", name: "caption", widget: "string", required: false }
+
+  # ── Writing (the blog) ─────────────────────────────────────────────
+  # Each post is one Markdown file in content/blog/ with YAML frontmatter
+  # (title, date, summary, draft); the `body` field is the Markdown below.
+  # scripts/build-blog.js renders them into /blog/ (index) and /blog/<slug>/
+  # (one page each); drafts are skipped. Filename = slugified title. Keep this
+  # block minimal — folder collections are fussier than file ones; `format`
+  # auto-detects the `.md` + `---`-frontmatter shape.
+  - name: "blog"
+    label: "Writing"
+    label_singular: "Post"
+    icon: edit_note           # Sveltia: Material Symbols name; Decap ignores it
+    folder: "content/blog"
+    create: true
+    extension: "md"
+    sortable_fields: ["title", "date"]
+    summary: "{{title}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Summary", name: "summary", widget: "text", hint: "One-line teaser shown on /blog/ — also the page’s meta description." }
+      - { label: "Tags", name: "tags", widget: "list", required: false, default: [], hint: "Optional. Add a few topic tags — they show as chips on /blog/ and the post page, and become <category> entries in the RSS feed." }
+      - { label: "Draft", name: "draft", widget: "boolean", default: false, hint: "Drafts don’t appear on the site." }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  # ── PERSONAL — /personal/ ────────────────────────────────────────────
+  - divider: true
+    name: "div_personal"
+    label: "— PERSONAL —"
+    files: []
+
+  # ── Board: project cards (the Personal space's kanban) ─────────────
   - name: "board"
     label: "Board (Shipped/Now/Next/Later)"
     icon: dashboard
@@ -199,55 +410,7 @@ collections:
               - { label: "Ongoing — until present", name: "present", widget: "boolean", default: false, required: false, hint: "Check if the project is still active. Overrides Until: the card displays as 'ongoing', sorts to the top, and on the Timeline draws as an open range from Started → today." }
               - { label: "Order within column", name: "order", widget: "number", default: 1 }
 
-  # ── Skills: dotfiles for AI ────────────────────────────────────────
-  # The receipts for the hero "AI Agent Native" pill — Claude Code skills,
-  # configs, and agent-infra Antares built to multiply his own AI work.
-  # Renders as a terminal alias list on the home page (between Roadmap and
-  # Lens); each row opens the same side-panel modal the board cards use.
-  # Also flows into /llms-full.txt and the ⌘K palette.
-  - name: "skills"
-    label: "Skills (dotfiles for AI)"
-    icon: terminal
-    files:
-      - file: "content/skills.json"
-        label: "Skills"
-        name: "skills"
-        format: "json"
-        fields:
-          - label: "Section header"
-            name: "head"
-            widget: "object"
-            fields:
-              - { label: "Command", name: "cmd",   widget: "string" }
-              - { label: "Title",   name: "title", widget: "string" }
-              - { label: "Meta",    name: "meta",  widget: "string", required: false }
-          - label: "Items"
-            name: "items"
-            widget: "list"
-            collapsed: true
-            summary: "{{fields.name}} — {{fields.summary}}"
-            fields:
-              - { label: "Slug (URL-safe id)", name: "slug",     widget: "string" }
-              - { label: "Display name (e.g. /devloop, agent-brief.txt)", name: "name", widget: "string" }
-              - { label: "Category (e.g. “Claude Code skill”, “agent infra”, “hook”)", name: "category", widget: "string" }
-              - { label: "Summary (one line — shows on the row)",       name: "summary",  widget: "text" }
-              - { label: "Details (markdown — shows in the side panel)", name: "details", widget: "text", required: false }
-              - label: "Links"
-                name: "links"
-                widget: "list"
-                required: false
-                collapsed: true
-                summary: "{{fields.label}} — {{fields.href}}"
-                fields:
-                  - { label: "Label", name: "label", widget: "string" }
-                  - { label: "URL",   name: "href",  widget: "string" }
-              - { label: "Order (lower = higher up)", name: "order", widget: "number", default: 1 }
-
   # ── Lens: principles ───────────────────────────────────────────────
-  - divider: true
-    name: "div_personal"
-    label: "— PERSONAL —"
-    files: []
   - name: "lens"
     label: "Lens (how I think)"
     icon: lightbulb
@@ -302,54 +465,6 @@ collections:
               - { label: "Display label", name: "label", widget: "string" }
               - { label: "URL",           name: "href",  widget: "string" }
 
-  # ── Assistant knowledge ────────────────────────────────────────────
-  # Private-ish notes that feed the "ask" assistant (workers/qa/) but are
-  # NOT rendered on the public page. The build flattens them into
-  # /agent-brief.txt, which the Worker appends to the site content it uses
-  # as grounding. (agent-brief.txt is a deployed static file — fetchable by
-  # URL, just not linked anywhere. It's "off the site", not "secret".)
-  - name: "agent_brief"
-    label: "Assistant knowledge"
-    icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
-    files:
-      - file: "content/agent-brief.json"
-        label: "Assistant knowledge"
-        name: "agent_brief"
-        format: "json"
-        fields:
-          - label: "Notes — these feed the “ask” assistant; they are NOT shown on the public site"
-            name: "notes"
-            widget: "list"
-            collapsed: true
-            summary: "{{fields.title}}"
-            fields:
-              - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
-              - { label: "What the assistant should know (markdown OK)", name: "body", widget: "text" }
-
-  # ── Blog ───────────────────────────────────────────────────────────
-  # Each post is one Markdown file in content/blog/ with YAML frontmatter
-  # (title, date, summary, draft); the `body` field is the Markdown below.
-  # scripts/build-blog.js renders them into /blog/ (index) and /blog/<slug>/
-  # (one page each); drafts are skipped. Filename = slugified title. Keep this
-  # block minimal — folder collections are fussier than file ones; `format`
-  # auto-detects the `.md` + `---`-frontmatter shape.
-  - name: "blog"
-    label: "Blog"
-    label_singular: "Post"
-    icon: edit_note           # Sveltia: Material Symbols name; Decap ignores it
-    folder: "content/blog"
-    create: true
-    extension: "md"
-    sortable_fields: ["title", "date"]
-    summary: "{{title}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
-      - { label: "Summary", name: "summary", widget: "text", hint: "One-line teaser shown on /blog/ — also the page’s meta description." }
-      - { label: "Tags", name: "tags", widget: "list", required: false, default: [], hint: "Optional. Add a few topic tags — they show as chips on /blog/ and the post page, and become <category> entries in the RSS feed." }
-      - { label: "Draft", name: "draft", widget: "boolean", default: false, hint: "Drafts don’t appear on the site." }
-      - { label: "Body", name: "body", widget: "markdown" }
-
   # ── Doodles ────────────────────────────────────────────────────────
   # The brand "moon" mark in the topnav (and the favicon) shows tonight's
   # actual lunar phase by default; on a day matched here it becomes the chosen
@@ -381,3 +496,158 @@ collections:
                 options: ["candle", "mortarboard", "rocket", "sprout", "firework", "heart", "pumpkin", "leaf", "tree", "egg", "redenvelope", "lantern", "zongzi", "mooncake", "star", "flag", "wrench", "kite"]
               - { label: "Custom SVG (optional)", name: "customIcon", widget: "file", required: false, hint: "Use *instead of* the glyph above. Give it a square viewBox (e.g. 0 0 24 24) and fill='currentColor' so it picks up the brand yellow + glow. Leave empty to use the glyph above." }
               - { label: "Caption", name: "caption", widget: "string", hint: "Tooltip when you hover the mark." }
+
+  # ── SHARED — read by both spaces ─────────────────────────────────────
+  - divider: true
+    name: "div_shared"
+    label: "— SHARED —"
+    files: []
+
+  # ── Profile (both spaces) ──────────────────────────────────────────
+  # The Work hero reads the résumé files and "Tags (Work hero)" from here;
+  # its own name, message and Update bar are in Work home.
+  - name: "profile"
+    label: "Profile"
+    icon: person
+    files:
+      - file: "content/profile.json"
+        label: "Profile"
+        name: "profile"
+        format: "json"
+        fields:
+          - { label: "Name",         name: "name",        widget: "string" }
+          - { label: "Name accent",  name: "nameAccent",  widget: "string", required: false }
+          - { label: "Role",         name: "role",        widget: "string" }
+          - { label: "Location",     name: "location",    widget: "string" }
+          - { label: "Status (now)", name: "status",      widget: "string" }
+          - { label: "Slogan",       name: "slogan",      widget: "text" }
+          - { label: "Manifesto",    name: "manifesto",   widget: "text", required: false, hint: "One-liner — the through-line of the whole site." }
+          - { label: "Résumé / CV — English (PDF)", name: "resumeEn", widget: "file", required: false, hint: "English résumé (PDF recommended). When set, a 'résumé ↓' link shows up in the hero. Empty = no link." }
+          - { label: "Résumé / CV — Chinese (PDF)", name: "resumeZh", widget: "file", required: false, hint: "Optional Chinese résumé PDF. When set, the hero shows a second résumé download link." }
+          - label: "Avatar (illustrated portrait)"
+            name: "avatar"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Calm (default)",   name: "calm",    widget: "image" }
+              - { label: "Talking (on hover/tap)", name: "talking", widget: "image" }
+              - { label: "Alt text",         name: "alt",     widget: "string" }
+          - label: "Tags (Personal hero)"
+            name: "tags"
+            widget: "list"
+            field: { label: "Tag", name: "tag", widget: "string" }
+          - label: "Tags (Work hero)"
+            name: "tagsWork"
+            widget: "list"
+            required: false
+            field: { label: "Tag", name: "tag", widget: "string" }
+            hint: "Shown on the Work space only. Leave empty to reuse the Personal tags."
+          - label: "Audience CTAs (3 entries)"
+            name: "ctas"
+            widget: "list"
+            min: 1
+            max: 4
+            collapsed: true
+            summary: "{{fields.audience}} → {{fields.label}}"
+            fields:
+              - { label: "Audience",  name: "audience", widget: "string" }
+              - { label: "Label",     name: "label",    widget: "string" }
+              - { label: "Anchor (#shipped, #now, #contact, …)", name: "anchor", widget: "string" }
+              - { label: "Helper note", name: "note",   widget: "string", required: false }
+
+  # ── Site meta + footer (both spaces) ──────────────────────────────
+  # NOTE: Sveltia CMS rejects Decap-style dotted field names ("meta.title"),
+  # so the nested groups are real `object` widgets. Every sub-field of each
+  # group is listed (even rarely-edited ones) — both editors serialize an
+  # object from exactly the fields declared here, so an omitted sub-field
+  # would be dropped from content/site.json on the next save.
+  - name: "site"
+    label: "Site meta"
+    icon: settings          # Sveltia: Material Symbols name; Decap ignores it
+    files:
+      - file: "content/site.json"
+        label: "Site"
+        name: "site"
+        format: "json"
+        fields:
+          - label: "Meta — <head> / SEO"
+            name: "meta"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Title",            name: "title",          widget: "string" }
+              - { label: "Site name",        name: "siteName",       widget: "string" }
+              - { label: "Description",      name: "description",    widget: "text" }
+              - { label: "Canonical URL",    name: "url",            widget: "string", hint: "e.g. https://antaresyuan.site" }
+              - { label: "Author",           name: "author",         widget: "string" }
+              - { label: "Language",         name: "lang",           widget: "string", default: "en" }
+              - { label: "Locale",           name: "locale",         widget: "string", default: "en_US", hint: "e.g. en_US" }
+              - { label: "OG / social image (path)", name: "ogImage", widget: "string", hint: "A file under media/, e.g. media/avatar-calm.png" }
+              - { label: "OG image width",   name: "ogImageWidth",   widget: "string", default: "512" }
+              - { label: "OG image height",  name: "ogImageHeight",  widget: "string", default: "512" }
+          - label: "Footer"
+            name: "footer"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Copyright", name: "copyright", widget: "string" }
+              - { label: "Tagline",   name: "tagline",   widget: "string" }
+              - { label: "Last updated (YYYY-MM-DD)", name: "lastUpdated", widget: "string", required: false, hint: "Leave empty to auto-fill with the date of the last content change. Set a value to pin a specific date." }
+          - label: "Cloudflare Web Analytics"
+            name: "analytics"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Analytics token", name: "cfAnalyticsToken", widget: "string", required: false, hint: "dash.cloudflare.com → Web Analytics → your site → the data-cf-beacon token. Empty = analytics off." }
+          - label: "Giscus comments"
+            name: "giscus"
+            widget: "object"
+            collapsed: true
+            # Setup: enable Discussions on the GitHub repo, configure at
+            # giscus.app for AntaresYuan/personal_website, paste the IDs below.
+            fields:
+              - { label: "Repo (owner/name)", name: "repo",          widget: "string", required: false, default: "AntaresYuan/personal_website" }
+              - { label: "Repo ID",           name: "repoId",        widget: "string", required: false, hint: "From giscus.app — empty = comments disabled" }
+              - { label: "Category",          name: "category",      widget: "string", required: false, default: "General" }
+              - { label: "Category ID",       name: "categoryId",    widget: "string", required: false, hint: "From giscus.app" }
+              - { label: "Mapping",           name: "mapping",       widget: "select", options: ["pathname","url","title","og:title","specific","number"], required: false, default: "pathname" }
+              - { label: "Theme",             name: "theme",         widget: "select", options: ["light","dark","preferred_color_scheme"], required: false, default: "light" }
+              - { label: "Input position",    name: "inputPosition", widget: "select", options: ["top","bottom"], required: false, default: "top" }
+          - label: "Comments + reactions (Writing)"
+            name: "comments"
+            widget: "object"
+            collapsed: true
+            # workers/comments/README.md has the setup. Empty endpoint = giscus above.
+            fields:
+              - { label: "Endpoint", name: "endpoint", widget: "string", required: false, hint: "The antares-comments Worker, e.g. https://comments.antaresyuan.site. Set it once the Worker is deployed; while empty, posts keep giscus." }
+              - { label: "Turnstile site key", name: "turnstileSiteKey", widget: "string", required: false, hint: "Cloudflare dashboard → Turnstile → the widget for antaresyuan.site. Public; the secret goes in the Worker." }
+          - label: "Q&A assistant"
+            name: "qa"
+            widget: "object"
+            collapsed: true
+            fields:
+              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
+
+  # ── Assistant knowledge ────────────────────────────────────────────
+  # Private-ish notes that feed the "ask" assistant (workers/qa/) but are
+  # NOT rendered on the public page. The build flattens them into
+  # /agent-brief.txt, which the Worker appends to the site content it uses
+  # as grounding. (agent-brief.txt is a deployed static file — fetchable by
+  # URL, just not linked anywhere. It's "off the site", not "secret".)
+  - name: "agent_brief"
+    label: "Assistant knowledge"
+    icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
+    files:
+      - file: "content/agent-brief.json"
+        label: "Assistant knowledge"
+        name: "agent_brief"
+        format: "json"
+        fields:
+          - label: "Notes — these feed the “ask” assistant; they are NOT shown on the public site"
+            name: "notes"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
+              - { label: "What the assistant should know (markdown OK)", name: "body", widget: "text" }

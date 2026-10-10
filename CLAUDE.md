@@ -9,8 +9,8 @@
 
 ### `[hidden] { display: none !important; }` is load-bearing
 
-The reset at the top of `styles/main.css` makes the `hidden` HTML attribute
-work. Without it, an author rule like `.foo { display: flex }` beats the UA
+The reset at the top of `styles/main.css` (and of `styles/work.css`) makes
+the `hidden` HTML attribute work. Without it, an author rule like `.foo { display: flex }` beats the UA
 `[hidden] { display: none }` (cascade origin: author > UA), and elements
 marked `hidden` in markup still get laid out. On mobile, full-viewport panels
 (`.ask-panel`, `.palette`, `.modal-backdrop`, `.card-modal`) then become
@@ -62,6 +62,9 @@ must be a custom subdomain on the same zone as the main site.** Currently:
 
 - `qa.antaresyuan.site` — the "ask" assistant
 - `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
+- `comments.antaresyuan.site` — reactions + comments on Writing posts
+  (`workers/comments/`, D1; client `scripts/comments.js`). Off until
+  `content/site.json → comments.endpoint` is set — posts keep giscus till then.
 
 Bind via Cloudflare dashboard → Worker → Settings → Domains & Routes → Add
 Custom Domain. Same-zone = same Anycast endpoints that serve `antaresyuan.site`,
@@ -80,12 +83,44 @@ leaving the live site one full rebuild behind every CMS edit. The paths
 filter alone is enough to prevent re-trigger loops (the bot commit only
 touches artifacts, which aren't watched).
 
+### Work and Personal share content, not markup or styles
+
+- **Work** (`/`, `/projects/`, `/blog/`, `/gallery/`, `/skills/`): `styles/work.css` +
+  `scripts/work.js` (+ `buddy.js`; `gallery.js` on /gallery/). Every page
+  shares one chrome — rail, top controls, ask composer + side panel, footer —
+  from `scripts/lib/work-shell.js`; the home page is a template filled in
+  place (`build-html.js`), the rest are generated whole (`build-projects.js`,
+  `build-blog.js`, `build-gallery.js`, `build-skills-page.js`). Paths are
+  root-relative. Project cards (home carousel + /projects/) come from
+  `scripts/lib/projects.js`, which reads `content/projects/<slug>.json` (one
+  file per project — a folder collection in the CMS; an `.svg` cover is
+  inlined so it follows the theme); a case study's empty fields render as `.ph`
+  placeholders. A project's `board` embeds `content/boards/<id>.json`
+  (scripts/board.js, fetched at runtime — no rebuild after editing).
+  Boards are edited at /board-editor/?id=<id>; `npm run board`
+  (ops/board-dev.js, 127.0.0.1 only) is what lets Save write the file.
+  Does **not** load `main.css` or `render.js` — no skins, no board, no
+  terminal. A new Work page: generate it with `shell.pageHtml({ active })`
+  and give its nav item an `href` in `content/work.json`.
+- **Personal** (`/personal/`): `templates/personal.html` + `styles/main.css` +
+  `scripts/render.js`. `build-spaces.js` re-renders its lists (board, chips,
+  counts, skills, lens, contact) from JSON via `scripts/lib/personal-blocks.js`.
+
+A style or behaviour change for one space goes in that space's files only.
+`content/skills.json` feeds both: Personal's /skills list and Work's
+/skills/ catalogue (which also reads the optional install / eval / stats
+fields). The ask panel pushes the page by growing `--side-r`; layout that
+must react to it uses `@container page`, not viewport media queries.
+Glass (`.glass`) is for the navigation/control layer — never content cards,
+never glass on glass. Refraction (`data-lens`) is Chromium-only by design;
+other engines get the blur-and-rim fallback.
+
 ### `index.html` is BOTH source template AND artifact
 
-`scripts/build-html.js` mutates `index.html` in-place every build:
+`scripts/build-html.js` mutates `index.html` (the Work home) in-place every build:
 
 - Edit: the structural markup, anchors, placeholder containers (e.g.
-  `<div id="skills-list"></div>`). New section blocks go in the template
+  `<ul id="project-track"></ul>`). New section blocks go in the template
   area between sibling sections.
 - Don't edit by hand: anything inside `replaceInner` / `replaceInnerOpenMatch`
   targets — build-html will overwrite on next run.
@@ -108,11 +143,11 @@ enforces it client-side; the GET response strips anything but the daily total.
 Full hard-line list lives in `workers/usage/README.md` § "Privacy contract — read
 first, do not bend".
 
-The `/usage` section sits **inside the `.hero` grid** (between `.hero-ctas`
-and `.hero-ask`) with `grid-column: 1 / -1` spanning both columns. Heatmap
-constants (`HEATMAP_COLS=52`, `HEATMAP_CELL=16`, etc.) are duplicated in
-`scripts/build-html.js` and `scripts/render.js` — keep them in lockstep
-or the SSR shell and client render mismatch on first paint.
+On Personal the `/usage` section sits **inside the `.hero` grid** with
+`grid-column: 1 / -1`; its heatmap SSR shell is frozen in
+`templates/personal.html` and redrawn by `scripts/render.js`. On Work it is
+the hero's middle column (`#usage`), drawn entirely by `scripts/work.js` —
+no SSR shell to keep in lockstep. Both hide on a failed fetch.
 
 **Worker GET is edge-cached.** `workers/usage/src/index.js` stashes the
 assembled JSON in `caches.default` for `GET_CACHE_TTL_S` (60s). POST handler
@@ -199,4 +234,5 @@ an `until <check>; do sleep 5; done` loop. Don't chain foreground sleeps.
 | `npm run reset-content` | Wipe personal content for a fork |
 | `bash scripts/install-hooks.sh` | One-time pre-commit hook (auto-build on content changes) |
 | `npx serve .` | Local preview at localhost:3000 |
+| `npm run board` | Board editor with save-to-repo at 127.0.0.1:4322/board-editor/ |
 | `gh pr merge <N> --squash --admin` | Squash-merge bypassing branch protection |

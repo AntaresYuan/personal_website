@@ -42,7 +42,7 @@
     } catch (e) {}
   })();
 </script>
-<link rel="stylesheet" href="/styles/main.css?v=b2c63f3b">
+<link rel="stylesheet" href="/styles/main.css?v=6afbb783">
 <script defer src="/scripts/beacon.js?v=2dc05071"></script>
 </head>
 <body class="usage-page-body">
@@ -230,7 +230,7 @@
   btn.addEventListener('click', function () {
     var cur = d.getAttribute('data-theme-mode') || 'auto';
     var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
-    try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
+    try { localStorage.setItem('theme', next); } catch (e) {}  // 'auto' too: Work's default is dark
     apply(next);
   });
   mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });

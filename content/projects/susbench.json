@@ -1,0 +1,75 @@
+{
+  "title": "SusBench",
+  "slug": "susbench",
+  "order": 5,
+  "kind": "ACM IUI 2026 · Research · Computer-Use Agents · Benchmark",
+  "placeholder": false,
+  "summary": "An online benchmark that injects dark patterns into 55 real websites, to test whether computer-use agents fall for designs made to fool people.",
+  "cover": "/media/projects/susbench/cover.svg",
+  "hue": 285,
+  "facts": [
+    {
+      "label": "Venue",
+      "value": "ACM IUI 2026, full paper"
+    },
+    {
+      "label": "Authorship",
+      "value": "Second author of ten"
+    },
+    {
+      "label": "Institution",
+      "value": "University of Washington"
+    },
+    {
+      "label": "Benchmark",
+      "value": "313 tasks, 55 websites"
+    }
+  ],
+  "story": [
+    {
+      "title": "The question",
+      "body": "Computer-use agents have started operating real interfaces on their own, on their users' behalf. The web is full of **dark patterns**: interface designs built to steer people into actions they didn't mean to take.\n\nWe wanted to answer one question: do designs made to fool people fool agents too?"
+    },
+    {
+      "title": "Why it's hard",
+      "body": "The hard part is the test environment. To measure accurately, the dark patterns have to be **controllable**: where each one appears and which type it is must be up to us. But the environment also has to be **realistic**, or the results won't say anything about how agents behave on real websites.\n\nA mock website you build yourself is controllable but not realistic. Live websites are realistic but not controllable."
+    },
+    {
+      "title": "Method",
+      "body": "We built the dark patterns into real consumer websites by injecting code. From existing taxonomies we picked **9 common types** of dark pattern, and designed **313 evaluation tasks** across **55 websites**.\n\nTo check that the injections were convincing, we ran a user study with **29 participants**. The great majority never noticed that the dark patterns had been added by the research team.\n\nWe then evaluated **5 state-of-the-art computer-use agents** on the benchmark."
+    },
+    {
+      "title": "Findings",
+      "body": "People and agents share the same weak spots. Both are especially susceptible to three types: **Preselection**, **Trick Wording** and **Hidden Information**. Against the more overt dark patterns, both hold up well."
+    },
+    {
+      "title": "Why it matters",
+      "body": "The work points three ways:\n\n1. **Trust:** how to build computer-use agents people can trust.\n2. **Evaluation:** agents might stand in for people in auditing deceptive designs.\n3. **Regulation:** how online environments should be governed as more of the web is browsed by agents."
+    },
+    {
+      "title": "My contribution",
+      "body": "I was responsible for two parts.\n\n**The evaluation framework.** I built the pipeline that injects a dark pattern into a real website, has an agent carry out a task, and judges whether it was misled, so that all five agents could be evaluated in the same environment.\n\n**The test cases.** I turned the 9 types of dark pattern into concrete tasks on specific websites. Each case pins down three things:\n\n1. What the task asks the agent to do.\n2. At which step the dark pattern is injected.\n3. Which action by the agent counts as being misled.\n\nThe final benchmark covers 55 websites and 313 tasks."
+    }
+  ],
+  "board": "susbench",
+  "outcomes": [
+    {
+      "value": "313",
+      "label": "Evaluation tasks across 55 real websites and 9 types of dark pattern"
+    },
+    {
+      "value": "29",
+      "label": "People in the realism study; most never noticed the injected patterns"
+    },
+    {
+      "value": "ACM IUI 2026",
+      "label": "Full paper at the ACM Conference on Intelligent User Interfaces"
+    }
+  ],
+  "links": [
+    {
+      "label": "Paper on arXiv",
+      "href": "https://arxiv.org/abs/2510.11035"
+    }
+  ]
+}

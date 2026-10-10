@@ -5,17 +5,17 @@
      /blog/                  → index (every published post, newest first)
      /blog/<slug>/index.html → one post
 
-   Pages share the homepage's chrome (fonts, theme bootstrap, topnav,
-   footer, giscus) but pull in only styles/main.css — no dashboard JS. The
-   theme toggle is wired by a tiny inline script. Wired into scripts/build.js.
+   "Writing" in the Work space: pages are built on the Work shell
+   (scripts/lib/work-shell.js — rail, top controls, ask, footer) and styled
+   by styles/work.css. Wired into scripts/build.js.
 
    Run:  node scripts/build-blog.js
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { loadPosts, mdToHtml, escapeHtml } = require('./lib/blog');
+const shell = require('./lib/work-shell');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -26,21 +26,9 @@ const e = escapeHtml;   // text & attribute escaping
 const SITE_NAME = site.meta?.siteName ?? site.meta?.title ?? 'Personal site';
 const LANG = site.meta?.lang ?? 'en';
 const SITE_URL = (site.meta?.url ?? 'https://example.com').replace(/\/$/, '');
-const abs = (p) => p ? `/${String(p).replace(/^\/+/, '')}` : '';   // root-absolute URL (blog pages aren't at the root)
 const AUTHOR = [profile.name, profile.nameAccent].filter(Boolean).join(' ') || SITE_NAME;
-const AVATAR = abs(profile.avatar?.calm || 'media/avatar-calm.png');
-const OG_IMAGE = site.meta?.ogImage ? `${SITE_URL}${abs(site.meta.ogImage)}` : '';
 const FEED_TITLE = `Writing — ${SITE_NAME}`;
 const FEED_DESC = `Writeups and notes from building — by ${AUTHOR}.`;
-const hashOf = (rel) => crypto.createHash('sha1').update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
-const cssV = hashOf('styles/main.css');
-const doodleV = hashOf('scripts/doodle.js');   // the moon-phase / doodle mark — same on blog pages as on the home page
-const skinsV = hashOf('scripts/skins.js');     // skin registry + companion art
-const skinRtV = hashOf('scripts/skin-runtime.js');
-const skinDivaV = hashOf('scripts/skin-diva.js');
-const skinCharsV = hashOf('scripts/skin-characters.js');
-
-// rough reading time, ~200 wpm — strip Markdown punctuation first.
 const readMinutes = (md) => {
   const words = String(md).replace(/```[\s\S]*?```/g, ' ').replace(/[#>*_`~\-\[\]()!|]/g, ' ').split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 200));
@@ -50,76 +38,6 @@ const rfc822 = (ymd) => { const d = new Date(`${ymd}T12:00:00Z`); return isNaN(d
 // root-relative URLs → absolute, for the feed's HTML payload
 const absUrls = (html) => String(html).replace(/(href|src)="\/(?!\/)/g, `$1="${SITE_URL}/`);
 const cdata = (s) => `<![CDATA[${String(s).replace(/]]>/g, ']]]]><![CDATA[>')}]]>`;
-
-const FONTS = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap';
-
-// FOUC-free theme bootstrap — same logic as index.html's <head> script.
-const THEME_INIT = `<script>
-  (function () {
-    var d = document.documentElement, m = 'auto';
-    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') m = t; } catch (e) {}
-    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    d.setAttribute('data-theme-mode', m);
-    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
-    try {
-      var s = localStorage.getItem('skin');
-      if (s && ['meadow', 'solar', 'press', 'dossier', 'blueprint', 'terminal', 'hud', 'neon', 'dusk', 'observatory', 'abyss', 'dumpling', 'vocal', 'workshop', 'hereva'].indexOf(s) >= 0) d.setAttribute('data-skin', s);
-    } catch (e) {}
-  })();
-</script>`;
-
-// The blog pages' only JS — kept tiny + inline so they don't pull in the
-// dashboard's render.js: the theme toggle (auto → light → dark → auto) and the
-// reading-progress bar (post pages only).
-const BLOG_JS = `<script>
-(function () {
-  // ── theme toggle: auto → light → dark → auto ─────────────────────────
-  // giscusReady: the iframe exists before giscus.app loads into it, and until
-  // then contentWindow is same-origin about:blank — posting with targetOrigin
-  // 'https://giscus.app' then only produces a console warning. Wait for
-  // giscus's own message instead of widening targetOrigin to '*'.
-  var d = document.documentElement, btn = document.getElementById('theme-toggle');
-  var giscusReady = false;
-  var pushGiscus = function (theme) {
-    if (!giscusReady) return;
-    var gi = document.querySelector('iframe.giscus-frame');
-    if (!gi || !gi.contentWindow) return;
-    try { gi.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app'); } catch (e) {}
-  };
-  window.addEventListener('message', function (ev) {
-    if (ev.origin !== 'https://giscus.app') return;
-    if (!ev.data || typeof ev.data !== 'object' || !('giscus' in ev.data)) return;
-    giscusReady = true;
-    pushGiscus(d.getAttribute('data-theme'));
-  });
-  if (btn) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    var apply = function (mode) {
-      d.setAttribute('data-theme-mode', mode);
-      d.setAttribute('data-theme', mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode);
-      pushGiscus(d.getAttribute('data-theme'));
-    };
-    btn.addEventListener('click', function () {
-      var cur = d.getAttribute('data-theme-mode') || 'auto';
-      var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
-      try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
-      apply(next);
-    });
-    mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });
-  }
-  // ── reading progress bar (post pages only) ───────────────────────────
-  var bar = document.querySelector('.blog-progress-bar');
-  if (bar && document.body.classList.contains('blog-post-page')) {
-    var update = function () {
-      var h = document.documentElement, max = (h.scrollHeight - h.clientHeight) || 1;
-      bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (h.scrollTop || window.pageYOffset) / max)) + ')';
-    };
-    addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', update);
-    update();
-  }
-})();
-</script>`;
 
 const giscus = site.giscus ?? {};
 const giscusReady = giscus.repo && giscus.repoId && giscus.category && giscus.categoryId;
@@ -144,117 +62,82 @@ const giscusBlock = giscusReady
      <script src="/scripts/giscus-lazy.js" defer></script>`
   : '<p class="blog-comments-off">Comments aren’t configured for this site yet.</p>';
 
-/* ── page shell — shared head/topnav/footer ───────────────────────────── */
-function pageShell({ title, description, canonical, ogType, bodyClass, main, ogImage }) {
-  const desc = (description || site.meta?.description || '').replace(/\s+/g, ' ').trim();
-  const img = ogImage || OG_IMAGE;                 // a 1200×630 card if given, else the square avatar
-  const card = !!ogImage;                          // (build-blog passes the per-page card URL when its PNG exists)
-  const imgTags = img
-    ? `\n<meta property="og:image" content="${e(img)}">${card ? `\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:alt" content="${e(title)}">` : ''}`
-    : '';
-  const twitterImg = img ? `\n<meta name="twitter:image" content="${e(img)}">` : '';
-  return `<!DOCTYPE html>
-<!--
-  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
-  GENERATED — do not edit by hand. Source: content/blog/*.md → scripts/build-blog.js
--->
-<html lang="${e(LANG)}">
-<head>
-<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${e(title)} · ${e(SITE_NAME)}</title>
-<meta name="description" content="${e(desc)}">
-<meta name="author" content="${e(site.meta?.author ?? SITE_NAME)}">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="${e(canonical)}">
-<link rel="alternate" type="application/rss+xml" title="${e(FEED_TITLE)}" href="/blog/feed.xml">
-<meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="${e(ogType || 'website')}">
-<meta property="og:url" content="${e(canonical)}">
-<meta property="og:site_name" content="${e(SITE_NAME)}">
-<meta property="og:title" content="${e(title)}">
-<meta property="og:description" content="${e(desc)}">${imgTags}
-<meta name="twitter:card" content="${card ? 'summary_large_image' : 'summary'}">
-<meta name="twitter:title" content="${e(title)}">
-<meta name="twitter:description" content="${e(desc)}">${twitterImg}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="${FONTS}" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="${FONTS}"></noscript>
-${THEME_INIT}
-<link rel="stylesheet" href="/styles/main.css?v=${cssV}">
-</head>
-<body class="${e(bodyClass)}">
-<div class="blog-progress" aria-hidden="true"><span class="blog-progress-bar"></span></div>
-<a class="skip-link" href="#main-content">Skip to content</a>
-<main class="page" id="main-content">
-  <nav class="topnav">
-    <div class="brand"><a class="brand-link" href="/"><span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span>${e(SITE_NAME)}</span></a></div>
-    <div class="topnav-end">
-      <a class="topnav-link" href="/blog/">blog</a>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme">
-        <span class="tt-icon tt-auto"  aria-hidden="true">◐</span>
-        <span class="tt-icon tt-light" aria-hidden="true">☀</span>
-        <span class="tt-icon tt-dark"  aria-hidden="true">☾</span>
-      </button>
-      <details class="skin-picker" id="skin-picker">
-        <summary aria-label="Skin" title="Skin"><span class="skin-trigger-sw" data-sw="default" aria-hidden="true"></span><span class="skin-trigger-name">Skin</span><span class="skin-trigger-chev" aria-hidden="true">⌄</span></summary>
-        <div class="skin-menu" role="menu" aria-label="Skin"></div>
-      </details>
-    </div>
-  </nav>
-${main}
-  <footer class="site-footer">
-    <span>${e(site.footer?.copyright ?? '')}${site.footer?.tagline ? ` · <em>${e(site.footer.tagline)}</em>` : ''}</span>
-    <span><a href="/">home</a> · <a href="/blog/">blog</a> · <a href="/blog/feed.xml">rss</a> · <a href="/admin/">edit</a> · <a href="https://github.com/AntaresYuan/personal_website" title="Open-source template — fork it freely; a link back is appreciated">source</a></span>
-  </footer>
-</main>
-${BLOG_JS}
-<script src="/scripts/doodle.js?v=${doodleV}" defer></script>
-<script src="/scripts/skins.js?v=${skinsV}" defer></script>
-<script src="/scripts/skin-characters.js?v=${skinCharsV}" defer></script>
-<script src="/scripts/skin-diva.js?v=${skinDivaV}" defer></script>
-<script src="/scripts/skin-runtime.js?v=${skinRtV}" defer></script>
-</body>
-</html>
-`;
-}
+/* Our own reactions + comments (workers/comments/, scripts/comments.js) take
+   over from giscus once site.json → comments.endpoint is set; until then the
+   giscus block above stays. COMMENTS_ENDPOINT / COMMENTS_SITEKEY override
+   both for a preview against a local Worker (`wrangler dev`). */
+const comments = site.comments ?? {};
+const discussEndpoint = process.env.COMMENTS_ENDPOINT || comments.endpoint || '';
+const discussKey = process.env.COMMENTS_SITEKEY || comments.turnstileSiteKey || '';
+const discussBlock = (slug) => `<section class="discuss" data-discuss
+        data-endpoint="${e(discussEndpoint)}"
+        data-page="/blog/${e(slug)}/"
+        data-turnstile="${e(discussKey)}"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">Comments</h2>
+      <noscript><p class="discuss-note">Comments need JavaScript.</p></noscript>
+    </section>`;
 
 /* ── render ───────────────────────────────────────────────────────────── */
 const posts = loadPosts().map((p) => ({ ...p, readMin: readMinutes(p.body) }));
 
-const byline = (p, big) => `<div class="blog-byline${big ? ' blog-byline-lg' : ''}">
-        <img class="blog-byline-avatar" src="${e(AVATAR)}" alt="${e(AUTHOR)}" width="${big ? 40 : 24}" height="${big ? 40 : 24}" loading="lazy">
-        <span class="blog-byline-text"><span class="blog-byline-name">${e(AUTHOR)}</span><span class="blog-byline-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</span></span>
-      </div>`;
+const niceDate = (ymd) => /^\d{4}-\d{2}-\d{2}$/.test(ymd || '')
+  ? new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+  : '';
+const metaLine = (p) => [p.date ? `<time datetime="${e(p.date)}">${e(niceDate(p.date))}</time>` : '', `${p.readMin} min read`]
+  .filter(Boolean).join('<span aria-hidden="true"> · </span>');
+// The first image in a post is its cover; posts without one get a tinted
+// panel instead of an empty frame.
+const coverOf = (md) => { const m = /!\[[^\]]*\]\(\s*([^)\s]+)/.exec(md || ''); return m ? m[1] : ''; };
+const HUES = [262, 305, 200, 285, 150, 235];   // OKLCH hue angles, as the projects
+const tagSlug = (t) => String(t).toLowerCase();
+const tagList = (tags) => (tags && tags.length)
+  ? `<ul class="post-tags">${tags.map((t) => `<li>${e(t)}</li>`).join('')}</ul>` : '';
 
-// A row of tag chips for a post — empty string if the post carries no tags so
-// the surrounding template can drop the row cleanly.
-const tagRow = (tags) => (tags && tags.length)
-  ? `<ul class="blog-tags" aria-label="Tags">${tags.map((t) => `<li class="blog-tag">${e(t)}</li>`).join('')}</ul>`
+const postCard = (p, i) => {
+  const cover = coverOf(p.body);
+  const art = cover
+    ? `<img src="${e(cover)}" alt="" loading="${i < 3 ? 'eager' : 'lazy'}" decoding="async">`
+    : `<span class="post-cover-mark">${e((p.title || '?').trim().charAt(0))}</span>`;
+  return `
+      <li class="post-card${i === 0 ? ' is-feature' : ''}" data-tags="${e((p.tags || []).map(tagSlug).join('|'))}">
+        <a class="post-link" href="/blog/${e(p.slug)}/">
+          <div class="post-cover" style="--hue: ${HUES[i % HUES.length]}">${art}</div>
+          <div class="post-body">
+            <p class="post-meta">${metaLine(p)}</p>
+            <h2 class="post-title">${e(p.title)}</h2>
+            ${p.summary ? `<p class="post-summary">${e(p.summary)}</p>` : ''}
+            ${tagList(p.tags)}
+          </div>
+        </a>
+      </li>`;
+};
+
+// Topic chips: the most used tags, only when there is more than one to pick.
+const tagCounts = new Map();
+posts.forEach((p) => (p.tags || []).forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1)));
+const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([t]) => t);
+const filterRow = topTags.length > 1
+  ? `<div class="filters" role="group" aria-label="Filter by topic" data-filter-for="post-grid">
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">All</button>${topTags.map((t) =>
+        `<button class="filter" type="button" data-filter="${e(tagSlug(t))}" aria-pressed="false">${e(t)}</button>`).join('')}
+    </div>`
   : '';
 
-// /blog/  — index ("publication" masthead + a roomy card per post)
-const indexMain = `  <section class="section blog-index">
-    <header class="blog-index-head">
-      <h1 class="blog-index-title">Writing</h1>
-      <p class="blog-index-sub">Writeups, teardowns, and notes from building — by ${e(AUTHOR)}.</p>
+// /blog/ — the Writing index
+const indexMain = `  <section class="writing" aria-labelledby="writing-title">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title" id="writing-title">Writing</h1>
+        <p class="page-sub">Writeups, teardowns and notes from building.</p>
+      </div>
+      <a class="pill-link" href="/blog/feed.xml">RSS</a>
     </header>
+    ${filterRow}
     ${posts.length
-    ? `<ul class="blog-list">
-${posts.map((p) => `      <li class="blog-list-item">
-        <a class="blog-list-link" href="/blog/${e(p.slug)}/">
-          <h2 class="blog-list-title">${e(p.title)}</h2>
-          ${p.summary ? `<p class="blog-list-summary">${e(p.summary)}</p>` : ''}
-          <p class="blog-list-meta">${p.date ? `<time datetime="${e(p.date)}">${e(p.date)}</time> · ` : ''}${p.readMin} min read</p>
-          ${tagRow(p.tags)}
-        </a>
-      </li>`).join('\n')}
+    ? `<ul class="post-grid" id="post-grid">${posts.map(postCard).join('')}
     </ul>`
-    : '<p class="blog-empty">Nothing here yet.</p>'}
+    : '<p class="empty">Nothing here yet.</p>'}
   </section>`;
 
 fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
@@ -263,46 +146,51 @@ fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
 fs.writeFileSync(path.join(root, 'blog', 'posts.json'),
   JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date, tags: p.tags })), null, 2) + '\n');
 const ogCard = (rel) => fs.existsSync(path.join(root, rel)) ? `${SITE_URL}/${rel}` : undefined;
-fs.writeFileSync(path.join(root, 'blog', 'index.html'), pageShell({
+fs.writeFileSync(path.join(root, 'blog', 'index.html'), shell.pageHtml({
   title: 'Writing',
   description: `Writeups and notes from building — by ${AUTHOR}.`,
   canonical: `${SITE_URL}/blog/`,
   ogType: 'website',
-  bodyClass: 'blog-page blog-index-page',
   ogImage: ogCard('blog/og.png'),
+  active: 'writing',
+  bodyClass: 'writing-page',
   main: indexMain,
 }));
 
-// /blog/<slug>/  — one page per post (Medium-ish: big title, byline w/ avatar
-// + read time, progress bar, serif reading column, then comments)
+// /blog/<slug>/ — one page per post: a centred reading column, then comments
 let postPages = 0;
 for (const p of posts) {
-  const main = `  <article class="section blog-post">
-    <p class="blog-post-back"><a href="/blog/">← all writing</a></p>
-    <header class="blog-post-head">
-      <h1 class="blog-post-title">${e(p.title)}</h1>
-      ${p.summary ? `<p class="blog-post-lead">${e(p.summary)}</p>` : ''}
-      ${byline(p, true)}
-      ${tagRow(p.tags)}
+  const main = `  <article class="post">
+    <a class="back-link" href="/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>Writing</a>
+    <header class="post-head">
+      <p class="post-meta">${metaLine(p)}</p>
+      <h1 class="post-page-title">${e(p.title)}</h1>
+      ${p.summary ? `<p class="post-lead">${e(p.summary)}</p>` : ''}
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>${e(AUTHOR)}</span>
+      </div>
+      ${tagList(p.tags)}
     </header>
-    <div class="blog-post-body prose">
+    <div class="prose">
 ${mdToHtml(p.body)}
     </div>
-    <hr class="blog-post-rule">
-    <section class="blog-comments" aria-label="Comments">
+    ${discussEndpoint ? discussBlock(p.slug) : `<section class="post-comments" aria-label="Comments">
       ${giscusBlock}
-    </section>
+    </section>`}
   </article>`;
   const dir = path.join(root, 'blog', p.slug);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'index.html'), pageShell({
+  fs.writeFileSync(path.join(dir, 'index.html'), shell.pageHtml({
     title: p.title,
     description: p.summary,
     canonical: `${SITE_URL}/blog/${p.slug}/`,
     ogType: 'article',
-    bodyClass: 'blog-page blog-post-page',
     ogImage: ogCard(`blog/${p.slug}/og.png`),
+    active: 'writing',
+    bodyClass: 'writing-page post-page',
     main,
+    scripts: discussEndpoint ? ['scripts/comments.js'] : [],
   }));
   postPages++;
 }

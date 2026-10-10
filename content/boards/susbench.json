@@ -1,0 +1,574 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1460,
+      "y": 564,
+      "w": 660,
+      "h": 520,
+      "text": "05 · Findings"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1400,
+      "h": 520,
+      "text": "04 · My contribution"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · Method"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · Why it's hard"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · The question"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "Do dark patterns fool agents?"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "Designs made to fool people now meet agents that browse for them."
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "pink",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**Dark patterns**\nInterface designs built to steer people into actions they didn't mean to take. The web is full of them."
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**Agents act for us now**\nComputer-use agents operate real interfaces on their own, on their users’ behalf."
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "The test bed must be controllable and real"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "Measuring it well needs both; the obvious options give you only one."
+    },
+    {
+      "id": "rc",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 468,
+      "y": 146,
+      "w": 200,
+      "h": 120,
+      "text": "**Controllable**\nwhere a pattern appears and which type, by design"
+    },
+    {
+      "id": "rr",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 468,
+      "y": 316,
+      "w": 200,
+      "h": 120,
+      "text": "**Realistic**\nor results say nothing about real websites"
+    },
+    {
+      "id": "om",
+      "type": "sticky",
+      "color": "gray",
+      "x": 700,
+      "y": 136,
+      "w": 230,
+      "h": 140,
+      "text": "**Build a mock site**\nControllable, not realistic."
+    },
+    {
+      "id": "ol",
+      "type": "sticky",
+      "color": "gray",
+      "x": 700,
+      "y": 306,
+      "w": 230,
+      "h": 140,
+      "text": "**Use live websites**\nRealistic, not controllable."
+    },
+    {
+      "id": "ans",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 962,
+      "y": 231,
+      "w": 210,
+      "h": 120,
+      "text": "**Our answer**\ninject dark patterns into real websites"
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "SusBench: dark patterns, injected into real sites"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "An online benchmark. A full paper at ACM IUI 2026, the Conference on Intelligent User Interfaces."
+    },
+    {
+      "id": "m1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1288,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**9 types**\nof dark pattern, from existing taxonomies"
+    },
+    {
+      "id": "m2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1570,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**Code injection**\ninto real consumer websites"
+    },
+    {
+      "id": "m3",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1852,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**313 tasks**\nacross 55 websites"
+    },
+    {
+      "id": "m4",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 1570,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**User study, 29 people**\nmost never noticed the patterns were added"
+    },
+    {
+      "id": "m5",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1852,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**5 agents**\nstate-of-the-art computer-use agents, evaluated"
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1344,
+      "h": 30,
+      "text": "Two parts of the benchmark were mine"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1344,
+      "h": 40,
+      "text": "A: the evaluation framework.   B: the test cases."
+    },
+    {
+      "id": "ta",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 676,
+      "w": 500,
+      "h": 24,
+      "text": "**A · The evaluation framework**"
+    },
+    {
+      "id": "a1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 28,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**Inject**\nthe dark pattern into the live website"
+    },
+    {
+      "id": "a2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 312,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**Run**\nthe agent carries out the task"
+    },
+    {
+      "id": "a3",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 596,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**Judge**\nwas the agent misled?"
+    },
+    {
+      "id": "a4",
+      "type": "sticky",
+      "color": "gray",
+      "x": 880,
+      "y": 714,
+      "w": 280,
+      "h": 140,
+      "text": "One pipeline, so every agent meets the same pages, the same patterns and the same judge."
+    },
+    {
+      "id": "ra",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 729,
+      "w": 188,
+      "h": 110,
+      "text": "**5 agents**\nevaluated in one environment"
+    },
+    {
+      "id": "tb",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 880,
+      "w": 500,
+      "h": 24,
+      "text": "**B · The test cases**"
+    },
+    {
+      "id": "b0",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 28,
+      "y": 916,
+      "w": 180,
+      "h": 130,
+      "text": "**9 types**\nturned into tasks on specific sites"
+    },
+    {
+      "id": "b1",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 236,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**1 · The goal**\nWhat the task asks the agent to do."
+    },
+    {
+      "id": "b2",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 560,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**2 · The injection point**\nThe step where the dark pattern appears."
+    },
+    {
+      "id": "b3",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 884,
+      "y": 916,
+      "w": 276,
+      "h": 130,
+      "text": "**3 · What counts as misled**\nThe action that means the agent fell for it."
+    },
+    {
+      "id": "rb",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 926,
+      "w": 188,
+      "h": 110,
+      "text": "**313 tasks**\nacross 55 websites"
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1488,
+      "y": 592,
+      "w": 604,
+      "h": 30,
+      "text": "Agents fall where people fall"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1488,
+      "y": 630,
+      "w": 604,
+      "h": 40,
+      "text": "And three questions follow from it."
+    },
+    {
+      "id": "fs",
+      "type": "sticky",
+      "color": "pink",
+      "x": 1488,
+      "y": 704,
+      "w": 290,
+      "h": 160,
+      "text": "**Most susceptible, both**\n- Preselection\n- Trick Wording\n- Hidden Information"
+    },
+    {
+      "id": "fr",
+      "type": "sticky",
+      "color": "green",
+      "x": 1802,
+      "y": 704,
+      "w": 290,
+      "h": 160,
+      "text": "**Resilient, both**\nTo the more overt dark patterns, people and agents alike held up."
+    },
+    {
+      "id": "tw",
+      "type": "text",
+      "size": "body",
+      "x": 1488,
+      "y": 880,
+      "w": 400,
+      "h": 24,
+      "text": "**Why it matters**"
+    },
+    {
+      "id": "w1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1488,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**Trust**\nhow to build agents people can trust"
+    },
+    {
+      "id": "w2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1695,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**Evaluation**\nagents may stand in for people when auditing deceptive design"
+    },
+    {
+      "id": "w3",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1902,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**Regulation**\nwhen more of the web is browsed by agents"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p1",
+      "to": "rc"
+    },
+    {
+      "id": "e2",
+      "from": "p2",
+      "to": "rr"
+    },
+    {
+      "id": "e3",
+      "from": "rc",
+      "to": "om"
+    },
+    {
+      "id": "e4",
+      "from": "rr",
+      "to": "ol"
+    },
+    {
+      "id": "e5",
+      "from": "om",
+      "to": "ans"
+    },
+    {
+      "id": "e6",
+      "from": "ol",
+      "to": "ans"
+    },
+    {
+      "id": "e7",
+      "from": "ans",
+      "to": "m1"
+    },
+    {
+      "id": "e8",
+      "from": "m1",
+      "to": "m2"
+    },
+    {
+      "id": "e9",
+      "from": "m2",
+      "to": "m3"
+    },
+    {
+      "id": "e10",
+      "from": "m2",
+      "to": "m4",
+      "dashed": true,
+      "label": "convincing?",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e11",
+      "from": "m3",
+      "to": "m5",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e12",
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "id": "e13",
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "id": "e14",
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "id": "e15",
+      "from": "a4",
+      "to": "ra"
+    },
+    {
+      "id": "e16",
+      "from": "b0",
+      "to": "b1"
+    },
+    {
+      "id": "e17",
+      "from": "b1",
+      "to": "b2"
+    },
+    {
+      "id": "e18",
+      "from": "b2",
+      "to": "b3"
+    },
+    {
+      "id": "e19",
+      "from": "b3",
+      "to": "rb"
+    },
+    {
+      "id": "e20",
+      "from": "ra",
+      "to": "fs",
+      "dashed": true,
+      "label": "found"
+    }
+  ]
+}

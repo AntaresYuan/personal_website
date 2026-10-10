@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 1040,
+      "h": 600,
+      "text": "Placeholder board"
+    },
+    {
+      "id": "t1",
+      "type": "text",
+      "size": "h2",
+      "x": 40,
+      "y": 48,
+      "w": 560,
+      "h": 44,
+      "text": "How the project came together"
+    },
+    {
+      "id": "t2",
+      "type": "text",
+      "size": "small",
+      "x": 40,
+      "y": 92,
+      "w": 560,
+      "h": 24,
+      "text": "Replace this with your own board \u2014 open /board-editor/?id=<name>"
+    },
+    {
+      "id": "s1",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 40,
+      "y": 152,
+      "w": 200,
+      "h": 150,
+      "text": "**Problem**\nWhat hurt, and for whom."
+    },
+    {
+      "id": "s2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 296,
+      "y": 152,
+      "w": 200,
+      "h": 150,
+      "text": "**Users**\n- who they are\n- what they tried"
+    },
+    {
+      "id": "r1",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 560,
+      "y": 172,
+      "w": 200,
+      "h": 110,
+      "text": "**Insight**\nWhat research showed."
+    },
+    {
+      "id": "d1",
+      "type": "shape",
+      "shape": "diamond",
+      "color": "purple",
+      "x": 816,
+      "y": 152,
+      "w": 184,
+      "h": 150,
+      "text": "Build or buy?"
+    },
+    {
+      "id": "e1",
+      "type": "shape",
+      "shape": "ellipse",
+      "color": "pink",
+      "x": 816,
+      "y": 392,
+      "w": 184,
+      "h": 110,
+      "text": "**MVP**"
+    },
+    {
+      "id": "s3",
+      "type": "sticky",
+      "color": "gray",
+      "x": 560,
+      "y": 372,
+      "w": 200,
+      "h": 150,
+      "text": "**Metric**\nHow success was judged."
+    },
+    {
+      "id": "s4",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 296,
+      "y": 372,
+      "w": 200,
+      "h": 150,
+      "text": "**Next**\nWhat the results changed."
+    }
+  ],
+  "edges": [
+    {
+      "id": "a1",
+      "from": "s1",
+      "to": "s2"
+    },
+    {
+      "id": "a2",
+      "from": "s2",
+      "to": "r1"
+    },
+    {
+      "id": "a3",
+      "from": "r1",
+      "to": "d1",
+      "label": "decide"
+    },
+    {
+      "id": "a4",
+      "from": "d1",
+      "to": "e1",
+      "label": "build"
+    },
+    {
+      "id": "a5",
+      "from": "e1",
+      "to": "s3"
+    },
+    {
+      "id": "a6",
+      "from": "s3",
+      "to": "s4",
+      "dashed": true
+    }
+  ]
+}

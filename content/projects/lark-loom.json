@@ -1,0 +1,69 @@
+{
+  "title": "Lark Loom",
+  "slug": "lark-loom",
+  "order": 4,
+  "kind": "Lark Campus AI Challenge · AI Agent · Memory & Retrieval",
+  "logo": "/media/logos/lark.webp",
+  "placeholder": false,
+  "summary": "A project agent that lives in Lark group chats: it remembers what the team worked out and turns the discussion into specs, task tables and slides.",
+  "cover": "/media/projects/lark-loom/cover.svg",
+  "hue": 155,
+  "facts": [
+    {
+      "label": "Event",
+      "value": "Lark Campus AI Challenge",
+      "icon": "/media/logos/lark.webp"
+    },
+    {
+      "label": "Role",
+      "value": "AI PM + delivery-layer dev"
+    },
+    {
+      "label": "Team",
+      "value": "3 people"
+    },
+    {
+      "label": "Models",
+      "value": "Seed 1.5 Lite, Seed 2.0 Pro"
+    }
+  ],
+  "story": [
+    {
+      "title": "The problem",
+      "body": "A team's project context really lives in IM. Requirements, decisions and who does what all get worked out in chat.\n\nBut that content doesn't turn into anything a model can consume well. So when it's time to help produce documents, task tables or reports, the model can't use that context."
+    },
+    {
+      "title": "Why it happens",
+      "body": "To see why, look at what collaborating over IM is like. The information is fragmented: one requirement may be spread over dozens of messages across several days, mixed in with small talk and other topics, and phrased casually. To help produce something, though, a model needs context that is relevant to the task at hand, complete and clean.\n\nSo at heart the scenario is two problems:\n\n- **Storage:** how to keep the context from the chat in a better form.\n- **Selection:** when it's needed, how to pick out exactly the right context to help the user generate content."
+    },
+    {
+      "title": "The product",
+      "body": "Lark Loom is a project-collaboration agent that lives in Lark group chats. It listens to the group continuously, picks up intent without being @-mentioned, and turns the group's discussion into structured output: requirement docs, task tables, slide decks. The output lands where the team already works: task tables in Lark Base, requirement and meeting notes in Lark Docs, report decks as native Lark Slides. Its design answers the two problems above.\n\n**Storage is Memory.** The group's discussion is organized into structured memories and stored that way, rather than kept only as raw messages.\n\n**Selection is recall.** Each kind of output is one of 13 preset Skills, and only the Q&A Skill needs an @-mention. When a Skill runs, it selects the context the current task needs from Memory, and hands it to the model to generate the content."
+    },
+    {
+      "title": "My work",
+      "body": "I did two main things.\n\n**I redesigned storage and selection.** The original approach ran semantic-similarity search straight over the message history and gave the top 20 results to the model. The trouble is that IM messages are so fragmented that what is close in meaning isn't necessarily what the current task needs, so recall drifts. I split it into two steps:\n\n- **Storage:** Seed 1.5 Lite extracts the messages into structured Memory.\n- **Selection:** targeted extraction along two paths, keywords and task type. Exact keyword matching reins in the semantic drift; the task type bounds the scope of recall.\n\nOn a 60-case evaluation set, the pass rate rose from 65% to 80%.\n\n**I tiered model calls by how complex each subtask is.** Deterministic processing, like extracting and structuring context, goes to Seed 1.5 Lite; Seed 2.0 Pro does only the core reasoning and generation, which cuts the tokens the large model has to read and write. Average response time per task fell from 95 seconds to 50, down 47%, with no noticeable difference in quality in manual spot checks."
+    },
+    {
+      "title": "How we measure it",
+      "body": "How do we tell whether storing and selecting work well? Two metrics.\n\n- **Quality:** the pass rate on the evaluation set. The set is distilled from what it takes to complete each task and from the model's reasoning chains, so it judges not what was recalled, but whether the model, given that context, gets the task right.\n- **Speed:** the average response time per task. The agent lives in a group chat; if it answers too slowly, the rhythm of the conversation breaks."
+    }
+  ],
+  "board": "lark-loom",
+  "outcomes": [
+    {
+      "value": "65% → 80%",
+      "label": "Pass rate on a 60-case eval set, after structured memory and two-path recall"
+    },
+    {
+      "value": "95s → 50s",
+      "label": "Average response time per task, down 47%, with models tiered by subtask"
+    }
+  ],
+  "links": [
+    {
+      "label": "Code on GitHub",
+      "href": "https://github.com/EdwinjJ1/lark-loom"
+    }
+  ]
+}

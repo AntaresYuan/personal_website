@@ -1,0 +1,539 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1272,
+      "y": 564,
+      "w": 848,
+      "h": 470,
+      "text": "05 · What I learned"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1212,
+      "h": 470,
+      "text": "04 · What I did"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · Why it works"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · How we work"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · What it is"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "Kaboo: token analysis"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "An open-source project inside ByteDance. How it was made matters more than what it does."
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**What it does**\nAnalyzes token consumption: where agents spend their tokens."
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "green",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**How it was made**\nWith a new way of working together, where one person carries a change from problem to production."
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "No relay: one owner, end to end"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "Whoever raises a problem takes it all the way to production."
+    },
+    {
+      "id": "rl",
+      "type": "sticky",
+      "color": "gray",
+      "x": 468,
+      "y": 136,
+      "w": 230,
+      "h": 140,
+      "text": "**Not the usual relay**\nRequirement → schedule → build → test → release, handed between people."
+    },
+    {
+      "id": "o1",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 738,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**Raise**"
+    },
+    {
+      "id": "o2",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 852,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**Solve**"
+    },
+    {
+      "id": "o3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 966,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**Test**"
+    },
+    {
+      "id": "o4",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1080,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**Ship**"
+    },
+    {
+      "id": "one",
+      "type": "text",
+      "size": "small",
+      "x": 738,
+      "y": 254,
+      "w": 434,
+      "h": 24,
+      "text": "All four by the same person, who owns that part."
+    },
+    {
+      "id": "s1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 468,
+      "y": 326,
+      "w": 340,
+      "h": 110,
+      "text": "**Safeguard 1 · before release**\nan agent checks the change for problems"
+    },
+    {
+      "id": "s2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 832,
+      "y": 326,
+      "w": 340,
+      "h": 110,
+      "text": "**Safeguard 2 · after release**\na fast rollback if something goes wrong"
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "The road is paved: mew, inside Lark"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "A project-management platform that builds agents into the software-development process."
+    },
+    {
+      "id": "w1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1288,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**An idea**\nstated clearly"
+    },
+    {
+      "id": "w2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1570,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**mew**\nagents built into the development process"
+    },
+    {
+      "id": "w3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1852,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**Built and shipped**\nby the person who had the idea"
+    },
+    {
+      "id": "w4",
+      "type": "sticky",
+      "color": "gray",
+      "x": 1570,
+      "y": 316,
+      "w": 240,
+      "h": 120,
+      "text": "**Connected to Lark**\nwhere the team already talks and works."
+    },
+    {
+      "id": "w5",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 1288,
+      "y": 316,
+      "w": 240,
+      "h": 120,
+      "text": "**The one requirement**\nBeing able to say clearly what you want."
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1156,
+      "h": 30,
+      "text": "The Token Efficiency Leaderboard, end to end"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1156,
+      "h": 40,
+      "text": "I raised the problem, designed the fix, tested it and shipped it."
+    },
+    {
+      "id": "bs",
+      "type": "sticky",
+      "color": "pink",
+      "x": 28,
+      "y": 700,
+      "w": 300,
+      "h": 300,
+      "text": "**The blind spot**\nEveryone looked at where agents failed.\n\nNobody looked at tasks that succeeded, but wasted a lot of tokens getting there."
+    },
+    {
+      "id": "f1x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 700,
+      "w": 320,
+      "h": 90,
+      "text": "**5 kinds of waste**\neach with a criterion for spotting it"
+    },
+    {
+      "id": "f2x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 805,
+      "w": 320,
+      "h": 90,
+      "text": "**Metadata only**\nthe diagnosis never reads session content"
+    },
+    {
+      "id": "f3x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 910,
+      "w": 320,
+      "h": 90,
+      "text": "**Effective Tokens**\none cost scale across different models"
+    },
+    {
+      "id": "sh",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 720,
+      "y": 790,
+      "w": 236,
+      "h": 120,
+      "text": "**Tested and shipped, by me**\nthe leaderboard and the efficiency-analysis module"
+    },
+    {
+      "id": "res",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 984,
+      "y": 795,
+      "w": 200,
+      "h": 110,
+      "text": "**10K+**\ninternal users covered"
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1300,
+      "y": 592,
+      "w": 792,
+      "h": 30,
+      "text": "Judgment becomes the bottleneck"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1300,
+      "y": 630,
+      "w": 792,
+      "h": 40,
+      "text": "What this changed about how I see collaboration in the AI era."
+    },
+    {
+      "id": "l1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1300,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**Implementation gets cheap**\nthe infrastructure flattens its cost"
+    },
+    {
+      "id": "l2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1570,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**The bottleneck moves**\nto thinking a problem through and saying it clearly"
+    },
+    {
+      "id": "l3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1840,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**So does the value**\nfrom execution to judgment"
+    },
+    {
+      "id": "lq",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 1300,
+      "y": 870,
+      "w": 778,
+      "h": 80,
+      "text": "**A person's value lies more in judgment than in execution.**"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p2",
+      "to": "rl",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e2",
+      "from": "rl",
+      "to": "o1",
+      "dashed": true
+    },
+    {
+      "id": "e3",
+      "from": "o1",
+      "to": "o2"
+    },
+    {
+      "id": "e4",
+      "from": "o2",
+      "to": "o3"
+    },
+    {
+      "id": "e5",
+      "from": "o3",
+      "to": "o4"
+    },
+    {
+      "id": "e6",
+      "from": "o4",
+      "to": "w1"
+    },
+    {
+      "id": "e7",
+      "from": "w1",
+      "to": "w2"
+    },
+    {
+      "id": "e8",
+      "from": "w2",
+      "to": "w3"
+    },
+    {
+      "id": "e9",
+      "from": "w4",
+      "to": "w2",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e10",
+      "from": "w5",
+      "to": "w1",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e11",
+      "from": "bs",
+      "to": "f1x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e12",
+      "from": "bs",
+      "to": "f2x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e13",
+      "from": "bs",
+      "to": "f3x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e14",
+      "from": "f1x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e15",
+      "from": "f2x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e16",
+      "from": "f3x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e17",
+      "from": "sh",
+      "to": "res"
+    },
+    {
+      "id": "e18",
+      "from": "l1",
+      "to": "l2"
+    },
+    {
+      "id": "e19",
+      "from": "l2",
+      "to": "l3"
+    },
+    {
+      "id": "e20",
+      "from": "res",
+      "to": "l1",
+      "dashed": true,
+      "label": "taught me"
+    }
+  ]
+}

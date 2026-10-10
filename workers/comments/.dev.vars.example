@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `wrangler dev` (never commit .dev.vars).
+# The Turnstile secret below is Cloudflare's published always-pass test
+# secret; pair it with the test site key 1x00000000000000000000AA.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+HASH_SALT=local-dev-salt-change-me
+ADMIN_TOKEN=local-dev-admin-token-change-me-0000
+ALLOWED_ORIGINS=http://localhost:4321,http://127.0.0.1:4321,http://localhost:3000
+MODERATION=hold

@@ -35,8 +35,10 @@ try {
 } catch (err) {
   // The generated file is committed, so a missing devDependency must not
   // break a plain `npm run build` for someone who only cloned the repo.
+  // `return`, not process.exit(0): build.js require()s this module in-process,
+  // and exiting here ended the whole build silently after the OG step.
   console.log('[characters] @dicebear not installed — keeping existing generated art');
-  process.exit(0);
+  return;
 }
 
 const OUT = path.join(__dirname, 'skin-characters.js');
@@ -80,7 +82,7 @@ const CHARACTERS = [
     id: 'crabhand',
     skin: 'workshop',
     style: 'notionists',
-    // Notionists reads as a sketched工作室 portrait, which suits a machine
+    // Notionists reads as a sketched studio portrait, which suits a machine
     // shop far better than a polished vector face.
     options: {
       hair: ['variant31'],

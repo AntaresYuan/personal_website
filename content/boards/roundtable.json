@@ -1,0 +1,635 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1460,
+      "y": 564,
+      "w": 660,
+      "h": 650,
+      "text": "05 · How we measure it"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1400,
+      "h": 650,
+      "text": "04 · My work"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · The product"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · Why it happens"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · Problem"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "Powerful, but hard to drive"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "Multi-agent collaboration can now take on complex development work. Two things get in the way."
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**High barrier**\nSplitting the task, picking the agents, setting the order: it's all on the user. AI-coding newcomers can't get started."
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**Poor reuse**\nExperienced users build flows that work, then rebuild them every time. Good flows don't stick."
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "Multi-agent work is task decomposition"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "One agent can't do it all, so the task is split. How well it's split decides the output."
+    },
+    {
+      "id": "m",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 468,
+      "y": 246,
+      "w": 160,
+      "h": 90,
+      "text": "**Decomposition**\nfalls on the user"
+    },
+    {
+      "id": "nw",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 660,
+      "y": 146,
+      "w": 210,
+      "h": 120,
+      "text": "**Newcomers**\ndon't know how to split"
+    },
+    {
+      "id": "ex",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 660,
+      "y": 316,
+      "w": 210,
+      "h": 120,
+      "text": "**Experts**\nsplit well, then redo it every time"
+    },
+    {
+      "id": "wf",
+      "type": "sticky",
+      "color": "purple",
+      "x": 900,
+      "y": 136,
+      "w": 272,
+      "h": 310,
+      "text": "**A workflow fixes one way to split**\nWho does what, in what order, how work is handed off.\n\nToday's options are two extremes:\n- A fixed process: controllable, not flexible\n- Open orchestration: flexible, but back on the user\n\n**Our bet:** agents decompose; the user stays in control."
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "Roundtable: a group chat of agents"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "Pick a few agents, set a goal; the team does the rest. The flow on top, the three gates under it."
+    },
+    {
+      "id": "s1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1288,
+      "y": 146,
+      "w": 140,
+      "h": 110,
+      "text": "**Team + goal**\npicked by the user"
+    },
+    {
+      "id": "s2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1454,
+      "y": 146,
+      "w": 140,
+      "h": 110,
+      "text": "**Workflow**\nrecommended by the system"
+    },
+    {
+      "id": "s3",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1620,
+      "y": 146,
+      "w": 140,
+      "h": 110,
+      "text": "**Plan**\ndiscussed by the agents"
+    },
+    {
+      "id": "s4",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1786,
+      "y": 146,
+      "w": 140,
+      "h": 110,
+      "text": "**Tasks**\nsplit and sent by the PM Agent"
+    },
+    {
+      "id": "s5",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1952,
+      "y": 146,
+      "w": 140,
+      "h": 110,
+      "text": "**Delivery**\nbuilt by the agents"
+    },
+    {
+      "id": "ru",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 1288,
+      "y": 316,
+      "w": 306,
+      "h": 110,
+      "text": "**Reuse**\nworkflows that work go into the visual editor and the template marketplace"
+    },
+    {
+      "id": "g1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1620,
+      "y": 316,
+      "w": 140,
+      "h": 110,
+      "text": "**Gate 1 · before**\nthe user reviews the plan"
+    },
+    {
+      "id": "g2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1786,
+      "y": 316,
+      "w": 140,
+      "h": 110,
+      "text": "**Gate 2 · during**\nthe PM Agent watches and escalates"
+    },
+    {
+      "id": "g3",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1952,
+      "y": 316,
+      "w": 140,
+      "h": 110,
+      "text": "**Gate 3 · delivery**\nthe Test Agent tests it first"
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1344,
+      "h": 30,
+      "text": "Two things I owned, both on decomposition"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1344,
+      "h": 40,
+      "text": "A: workflow recommendation at the planning entry.   B: keeping good decompositions for reuse."
+    },
+    {
+      "id": "qa",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 676,
+      "w": 500,
+      "h": 24,
+      "text": "**A · Workflow recommendation at the entry**"
+    },
+    {
+      "id": "why",
+      "type": "sticky",
+      "color": "gray",
+      "x": 28,
+      "y": 714,
+      "w": 220,
+      "h": 130,
+      "text": "**Why the entry**\nPick the wrong workflow and every node after it is wasted."
+    },
+    {
+      "id": "k1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 284,
+      "y": 714,
+      "w": 260,
+      "h": 130,
+      "text": "**1 · Workflow metadata**\nTask type, scenarios, agent roles, inputs and outputs, nodes, constraints."
+    },
+    {
+      "id": "k2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 572,
+      "y": 714,
+      "w": 260,
+      "h": 130,
+      "text": "**2 · A 30-case eval set**\nSeeded with look-alike cases on purpose."
+    },
+    {
+      "id": "k3",
+      "type": "sticky",
+      "color": "pink",
+      "x": 860,
+      "y": 714,
+      "w": 300,
+      "h": 130,
+      "text": "**3 · Bad-case attribution**\nRoot cause: the model didn't know these workflows."
+    },
+    {
+      "id": "fx",
+      "type": "sticky",
+      "color": "blue",
+      "x": 860,
+      "y": 880,
+      "w": 300,
+      "h": 150,
+      "text": "**Fix**\n- 5 few-shot examples: positive and negative, with the reasoning\n- An ICE-structured prompt, schema output against hallucination"
+    },
+    {
+      "id": "res",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 900,
+      "w": 188,
+      "h": 110,
+      "text": "**16 → 28 of 30**\nright workflow · Seed 2.0 Pro · +40 points"
+    },
+    {
+      "id": "qb",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 1028,
+      "w": 500,
+      "h": 24,
+      "text": "**B · Keep good decompositions**"
+    },
+    {
+      "id": "ed",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 28,
+      "y": 1064,
+      "w": 260,
+      "h": 110,
+      "text": "**Visual editor**\nSave a workflow that works, and edit it."
+    },
+    {
+      "id": "mk",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 316,
+      "y": 1064,
+      "w": 260,
+      "h": 110,
+      "text": "**Template marketplace**\nReuse someone else's workflow as it is."
+    },
+    {
+      "id": "ef",
+      "type": "sticky",
+      "color": "gray",
+      "x": 604,
+      "y": 1064,
+      "w": 280,
+      "h": 110,
+      "text": "Experts stop rebuilding; newcomers start from a template."
+    },
+    {
+      "id": "top",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 940,
+      "y": 1064,
+      "w": 432,
+      "h": 110,
+      "text": "**Top 3** in ByteDance's AI Full-Stack Development Challenge\nI led the team and gave the finals demo."
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1488,
+      "y": 592,
+      "w": 604,
+      "h": 30,
+      "text": "Measured at the entry, for now"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1488,
+      "y": 630,
+      "w": 604,
+      "h": 40,
+      "text": "A competition-cycle project: end-to-end results aren't measured systematically yet."
+    },
+    {
+      "id": "now",
+      "type": "text",
+      "size": "body",
+      "x": 1488,
+      "y": 676,
+      "w": 300,
+      "h": 24,
+      "text": "**Now**"
+    },
+    {
+      "id": "acc",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1488,
+      "y": 714,
+      "w": 220,
+      "h": 130,
+      "text": "**Entry accuracy**\nthe right workflow, look-alike cases included"
+    },
+    {
+      "id": "acc2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1738,
+      "y": 714,
+      "w": 354,
+      "h": 150,
+      "text": "**28 of 30 today**\nWhy this metric: a wrong entry wastes all the work downstream, so it is the precondition for output quality."
+    },
+    {
+      "id": "next",
+      "type": "text",
+      "size": "body",
+      "x": 1488,
+      "y": 1028,
+      "w": 300,
+      "h": 24,
+      "text": "**Next, if the work continues**"
+    },
+    {
+      "id": "n1",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 1488,
+      "y": 1064,
+      "w": 290,
+      "h": 110,
+      "text": "**Output quality**\nthe Test Agent’s first-pass rate"
+    },
+    {
+      "id": "n2",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 1802,
+      "y": 1064,
+      "w": 290,
+      "h": 110,
+      "text": "**Reuse**\nthe share of tasks started from a template"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p1",
+      "to": "m"
+    },
+    {
+      "id": "e2",
+      "from": "p2",
+      "to": "m"
+    },
+    {
+      "id": "e3",
+      "from": "m",
+      "to": "nw"
+    },
+    {
+      "id": "e4",
+      "from": "m",
+      "to": "ex"
+    },
+    {
+      "id": "e5",
+      "from": "nw",
+      "to": "wf"
+    },
+    {
+      "id": "e6",
+      "from": "ex",
+      "to": "wf"
+    },
+    {
+      "id": "e7",
+      "from": "wf",
+      "to": "s1"
+    },
+    {
+      "id": "e8",
+      "from": "s1",
+      "to": "s2"
+    },
+    {
+      "id": "e9",
+      "from": "s2",
+      "to": "s3"
+    },
+    {
+      "id": "e10",
+      "from": "s3",
+      "to": "s4"
+    },
+    {
+      "id": "e11",
+      "from": "s4",
+      "to": "s5"
+    },
+    {
+      "id": "e12",
+      "from": "ru",
+      "to": "s2",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e13",
+      "from": "g1",
+      "to": "s3",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e14",
+      "from": "g2",
+      "to": "s4",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e15",
+      "from": "g3",
+      "to": "s5",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e16",
+      "from": "why",
+      "to": "k1"
+    },
+    {
+      "id": "e17",
+      "from": "k1",
+      "to": "k2"
+    },
+    {
+      "id": "e18",
+      "from": "k2",
+      "to": "k3"
+    },
+    {
+      "id": "e19",
+      "from": "k3",
+      "to": "fx",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e20",
+      "from": "fx",
+      "to": "res"
+    },
+    {
+      "id": "e21",
+      "from": "ed",
+      "to": "mk"
+    },
+    {
+      "id": "e22",
+      "from": "mk",
+      "to": "ef"
+    },
+    {
+      "id": "e23",
+      "from": "acc",
+      "to": "acc2"
+    },
+    {
+      "id": "e24",
+      "from": "res",
+      "to": "acc",
+      "label": "measured by",
+      "dashed": true
+    }
+  ]
+}

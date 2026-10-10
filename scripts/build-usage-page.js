@@ -86,7 +86,7 @@ const PAGE_JS = `<script>
   btn.addEventListener('click', function () {
     var cur = d.getAttribute('data-theme-mode') || 'auto';
     var next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
-    try { if (next === 'auto') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (e) {}
+    try { localStorage.setItem('theme', next); } catch (e) {}  // 'auto' too: Work's default is dark
     apply(next);
   });
   mq.addEventListener('change', function () { if ((d.getAttribute('data-theme-mode') || 'auto') === 'auto') apply('auto'); });

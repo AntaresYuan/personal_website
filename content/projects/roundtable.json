@@ -1,0 +1,69 @@
+{
+  "title": "Roundtable",
+  "slug": "roundtable",
+  "order": 3,
+  "kind": "ByteDance AI Full-Stack Challenge · Agent Orchestration · Top 3",
+  "logo": "/media/logos/bytedance.svg",
+  "placeholder": false,
+  "summary": "A group-chat platform where a team of AI agents takes a goal, agrees on a plan and splits the work itself, with the user in control at three gates.",
+  "cover": "/media/projects/roundtable/cover.svg",
+  "hue": 205,
+  "facts": [
+    {
+      "label": "Event",
+      "value": "ByteDance AI Full-Stack Development Challenge",
+      "icon": "/media/logos/bytedance.svg"
+    },
+    {
+      "label": "Result",
+      "value": "Top 3, finals demo"
+    },
+    {
+      "label": "Role",
+      "value": "Team lead"
+    },
+    {
+      "label": "Model",
+      "value": "Seed 2.0 Pro"
+    }
+  ],
+  "story": [
+    {
+      "title": "The problem",
+      "body": "Multi-agent collaboration can now take on complex development work, but using it runs into two problems.\n\nThe **barrier is high**. How to split the task, which agents to give it to, in what order they work together: all of it is orchestrated by the user, so people new to AI coding can't get started. And **reuse is poor**. Experienced users can build flows that work well, but they build them from scratch every time, and good flows never get kept."
+    },
+    {
+      "title": "Why it happens",
+      "body": "To see why, look at what multi-agent collaboration is. You use several agents because some complex tasks are too much for one agent: they have to be split up and divided among agents. So at heart it is a **task-decomposition** problem, and how well the task is split decides how good the output is.\n\nToday that decomposition rests entirely on the user. Newcomers don't know how to split a task, so the barrier is high. Experts split well, but have to do it all over again each time, so reuse is poor.\n\nA **workflow** fixes one way of splitting: who does what, in what order and how work is handed off are all settled, and multi-agent collaboration becomes controllable. But the existing approaches sit at two extremes. Either you get one fixed process, which is controllable but not flexible, or fully open orchestration, which is flexible but puts the splitting back on the user.\n\nSo we designed the product around two things: **let the agents do the decomposition**, and **keep the whole process under the user’s control**."
+    },
+    {
+      "title": "The product",
+      "body": "Roundtable is a multi-agent collaboration platform shaped like a group chat. The user picks a few agents to form a team and sets a goal; the agent team does the rest.\n\n**The agents do the decomposition.** The system first recommends a workflow, a ready-made way of splitting the task. The agents discuss an execution plan on top of it, and a PM Agent breaks the plan into concrete tasks and hands them out to the agents. A workflow that works can be kept in a visual editor and a template marketplace, and reused directly.\n\n**Control comes from three gates:**\n\n1. **Before execution**, the user reviews the plan.\n2. **During execution**, the PM Agent watches progress and escalates problems to the user.\n3. **Before delivery**, the output has to pass the Test Agent's tests."
+    },
+    {
+      "title": "My work",
+      "body": "I owned two things, both on the decomposition side.\n\n**Workflow recommendation at the planning entry.** The first step of decomposition is choosing the right way to collaborate. Choose wrong here, and the cost of executing every node after it is wasted. So I set the bar for success as *recognizing exactly where each workflow applies, and telling easily confused scenarios apart*. I got there in three steps:\n\n1. **Metadata.** I defined metadata for each workflow: task type, the scenarios it fits, agent roles, inputs and outputs, process nodes and constraints.\n2. **An eval set.** I built a 30-case evaluation set, deliberately seeded with look-alike cases.\n3. **Bad-case attribution.** The root cause was that the model didn't know these workflows. So I added five few-shot examples, each with positive and negative cases and the reasoning behind them, and used an ICE-structured prompt with schema-structured output to keep the model from hallucinating.\n\nSeed 2.0 Pro's rate of picking the right workflow rose from 16/30 to 28/30, up 40 percentage points.\n\n**Keeping good decompositions.** I built the visual editor and the template marketplace. A workflow that works can be saved, edited and reused by anyone else as it is. Experts no longer rebuild their flows each time, and newcomers have ready-made ones to start from.\n\nIn the end, I led the team to the top three of ByteDance's AI Full-Stack Development Challenge, and presented the demo in the finals."
+    },
+    {
+      "title": "How we measure it",
+      "body": "How do we tell whether the decomposition is any good? What we measure now is the entry: the planning entry's accuracy, meaning whether the system recommends the right workflow on an evaluation set that includes look-alike cases. It currently stands at 28/30. I chose it because once the entry picks wrong, all the work downstream is wasted; it is the precondition for the quality of the output.\n\nThis was a project of one competition cycle, so the end-to-end results haven't been measured systematically yet. If I kept going, I'd add two metrics:\n\n- **Output quality:** the Test Agent's first-pass rate.\n- **Reuse:** how many tasks start from a template."
+    }
+  ],
+  "live": {
+    "url": "https://roundtable-gray.vercel.app",
+    "poster": "/media/projects/roundtable/live-poster.webp",
+    "width": 1440,
+    "height": 779
+  },
+  "board": "roundtable",
+  "outcomes": [
+    {
+      "value": "16 → 28 of 30",
+      "label": "Workflows recognized correctly at the planning entry (Seed 2.0 Pro), up 40 points"
+    },
+    {
+      "value": "Top 3",
+      "label": "ByteDance's AI Full-Stack Development Challenge, with a finals demo"
+    }
+  ]
+}
