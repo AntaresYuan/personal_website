@@ -68,7 +68,7 @@ const coverBox = (p, cls, { lazy = true, hidden = true } = {}) => {
 // a part wider than the whole line breaks inside.
 const chipText = (kind) => {
   const parts = String(kind).split(' · ');
-  return parts.map((part, i) => `<span class="chip-part">${escape(part)}${i < parts.length - 1 ? '&nbsp;·' : ''}</span>`).join(' ');
+  return parts.map((part, i) => `<span class="chip-part"><span class="chip-copy">${escape(part)}</span>${i < parts.length - 1 ? '&nbsp;·' : ''}</span>`).join(' ');
 };
 const chipHtml = (p) => p.kind
   ? `<span class="project-chip">${p.logo ? `<img class="project-chip-logo" src="${escape(p.logo)}" alt="" width="14" height="14">` : ''}<span>${chipText(p.kind)}</span></span>`

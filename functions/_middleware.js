@@ -1,8 +1,10 @@
-const LANGUAGE_COOKIE = 'site_lang';
+const LANGUAGE_PREFERENCE_COOKIE = 'site_lang_pref';
+const LANGUAGE_GEO_COOKIE = 'site_geo_lang';
 const CHINESE_REGIONS = new Set(['CN', 'HK', 'MO', 'TW']);
 
-function cookieLanguage(header) {
-  const match = String(header || '').match(/(?:^|;\s*)site_lang=(en|zh)(?:;|$)/);
+function cookieLanguage(header, name) {
+  const pattern = new RegExp(`(?:^|;\\s*)${name}=(en|zh)(?:;|$)`);
+  const match = String(header || '').match(pattern);
   return match ? match[1] : '';
 }
 
@@ -13,14 +15,14 @@ function countryLanguage(request) {
   return CHINESE_REGIONS.has(country) ? 'zh' : 'en';
 }
 
-function responseWithLanguage(response, language, setCookie) {
+function responseWithLanguage(response, language, setGeoCookie) {
   const headers = new Headers(response.headers);
   headers.set('Content-Language', language === 'zh' ? 'zh-Hans' : 'en');
   headers.set('Vary', [headers.get('Vary'), 'Cookie'].filter(Boolean).join(', '));
-  if (setCookie) {
+  if (setGeoCookie) {
     headers.append(
       'Set-Cookie',
-      `${LANGUAGE_COOKIE}=${language}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`
+      `${LANGUAGE_GEO_COOKIE}=${language}; Path=/; SameSite=Lax; Secure`
     );
   }
   return new Response(response.body, {
@@ -31,8 +33,11 @@ function responseWithLanguage(response, language, setCookie) {
 }
 
 export async function onRequest(context) {
-  const saved = cookieLanguage(context.request.headers.get('Cookie'));
-  const language = saved || countryLanguage(context.request);
+  const preference = cookieLanguage(
+    context.request.headers.get('Cookie'),
+    LANGUAGE_PREFERENCE_COOKIE
+  );
+  const language = preference || countryLanguage(context.request);
   const response = await context.next();
-  return responseWithLanguage(response, language, !saved);
+  return responseWithLanguage(response, language, !preference);
 }

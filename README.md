@@ -157,9 +157,10 @@ npx serve .
 
 Append `?lang=zh` or `?lang=en` to preview either language locally. On
 Cloudflare Pages, `functions/_middleware.js` chooses Chinese for visitors in
-CN, HK, MO and TW on their first request and English elsewhere. The language
-switch stores a one-year `site_lang` cookie, so an explicit visitor choice
-always overrides the country default. Long-form Writing bodies stay in their
+CN, HK, MO and TW and English elsewhere. The current country choice is stored
+in a session cookie and refreshed on every page response. The language switch
+stores a one-year `site_lang_pref` cookie, so an explicit visitor choice always
+overrides the country default. Long-form Writing bodies stay in their
 original language and show a short notice in Chinese mode.
 
 ## Edit content
