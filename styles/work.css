@@ -433,8 +433,7 @@ body::after {
   background: var(--surface);
   box-shadow: 0 0 0 1px var(--hairline);
 }
-/* Selection lozenge: sits under the active item and glides to whichever item
-   the pointer is over, then springs back. */
+/* Selection lozenge: stays under the current page while other items hover. */
 .rail-blob {
   position: absolute;
   z-index: 0;
@@ -446,7 +445,7 @@ body::after {
   box-shadow: var(--knob-shadow);
   transform: translate(var(--blob-x, 0), var(--blob-y, 0));
   opacity: 0;
-  transition: transform 0.5s var(--spring-bounce), opacity 0.25s;
+  transition: opacity 0.25s;
 }
 .rail.is-ready .rail-blob { opacity: 1; }
 
