@@ -633,88 +633,15 @@
        The receipts for the "AI Agent Native" pill — Claude Code skills,
        configs, and agent-infra Antares built to multiply his own AI work.
        Header + list are filled by build-html.js from content/skills.json.
-       Each row is a real <button> with data-card-id="SKILL-NN"; clicking
-       opens the same side-panel modal the board cards use (render.js
-       hydrates skills into cardIndex on boot). -->
+       Each row is a direct link to the project's official site or, when it
+       has no site, its GitHub repository. -->
   <section class="section skills-section rise rise-3" id="skills">
     <header class="sec-head">
       <span class="sec-cmd"   id="skills-cmd">$ ls ~/skills</span>
       <span class="sec-title" id="skills-title">/skills</span>
       <span class="sec-meta"  id="skills-meta">dotfiles for AI — what I built to multiply my own AI work</span>
     </header>
-    <ul class="skills-list" id="skills-list">
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-01" aria-label="Open details for /devloop">
-            <span class="skill-id">SKILL-01</span>
-            <span class="skill-name">/devloop</span>
-            <span class="skill-cat">Claude Code skill</span>
-            <span class="skill-summary">autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-devloop" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-02" aria-label="Open details for /ai-pm-resume">
-            <span class="skill-id">SKILL-02</span>
-            <span class="skill-name">/ai-pm-resume</span>
-            <span class="skill-cat">Claude Code skill</span>
-            <span class="skill-summary">AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/ai-pm-resume" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-03" aria-label="Open details for /interview-sim">
-            <span class="skill-id">SKILL-03</span>
-            <span class="skill-name">/interview-sim</span>
-            <span class="skill-cat">Claude Code skill</span>
-            <span class="skill-summary">synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://github.com/AntaresYuan/claude-skill-interview-sim" target="_blank" rel="noopener">github ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-04" aria-label="Open details for /log">
-            <span class="skill-id">SKILL-04</span>
-            <span class="skill-name">/log</span>
-            <span class="skill-cat">Claude Code Skill</span>
-            <span class="skill-summary">When you use Claude Code for projects, it helps you keep a diary in the background. When the project ends, this diary can be easily turned into a blog draft with one click.</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-05" aria-label="Open details for Claude Credit Watchdog">
-            <span class="skill-id">SKILL-05</span>
-            <span class="skill-name">Claude Credit Watchdog</span>
-            <span class="skill-cat">Claude Code Plugin</span>
-            <span class="skill-summary">A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="https://claude-credit-watchdog.netlify.app" target="_blank" rel="noopener">Download ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">GitHub ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li>
-        <li class="skill-row">
-          <button type="button" class="skill-link" data-card-id="SKILL-06" aria-label="Open details for agent-brief.txt">
-            <span class="skill-id">SKILL-06</span>
-            <span class="skill-name">agent-brief.txt</span>
-            <span class="skill-cat">agent infra</span>
-            <span class="skill-summary">off-page notes my site&#39;s QA Worker reads — context I want an agent to know but not render on the page</span>
-          </button>
-          <div class="skill-row-side">
-            <a class="skill-extlink" href="/agent-brief.txt" target="_blank" rel="noopener">/agent-brief.txt ↗</a><a class="skill-extlink" href="https://github.com/AntaresYuan/Claude-Credit-Watchdog" target="_blank" rel="noopener">GitHub ↗</a>
-            <span class="skill-arrow" aria-hidden="true">→</span>
-          </div>
-        </li></ul>
+    <ul class="skills-list" id="skills-list"></ul>
   </section>
 
   <!-- ── LENS: how I think ───────────────────────────────────────── -->

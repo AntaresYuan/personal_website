@@ -159,11 +159,10 @@ ok('failures are swallowed', (client.match(/catch/g) || []).length >= 4);
   const bu = read('scripts/build-usage-page.js');
   ok('beacon is cache-busted', bh.includes("'scripts/beacon.js'"));
   ok('homepage injects the tag', bh.includes('feature-beacon'));
-  /* /usage/ has its own generator and did not inherit the homepage's
-     injection — it would have been the one page whose visits went
-     uncounted, and it is the page whose traffic decides whether to keep
-     adding charts. */
-  ok('usage page injects the tag', bu.includes('BEACON_TAG'));
+  /* /usage/ uses the Work shell and adds the beacon through its page-level
+     script list. It still needs an explicit assertion because its traffic
+     decides whether the dashboard is worth extending. */
+  ok('usage page injects the tag', bu.includes("'scripts/beacon.js'"));
   ok('both are gated on one config flag',
     bh.includes('site.analytics?.featureBeacon === true')
     && bu.includes('featureBeacon === true'));

@@ -86,8 +86,8 @@ const niceDate = (ymd) => /^\d{4}-\d{2}-\d{2}$/.test(ymd || '')
   : '';
 const metaLine = (p) => [p.date ? `<time datetime="${e(p.date)}">${e(niceDate(p.date))}</time>` : '', `${p.readMin} min read`]
   .filter(Boolean).join('<span aria-hidden="true"> · </span>');
-// The first image in a post is its cover; posts without one get a tinted
-// panel instead of an empty frame.
+// A frontmatter cover stays out of the article body. Older posts can still
+// use their first Markdown image as a backwards-compatible fallback.
 const coverOf = (md) => { const m = /!\[[^\]]*\]\(\s*([^)\s]+)/.exec(md || ''); return m ? m[1] : ''; };
 const HUES = [262, 305, 200, 285, 150, 235];   // OKLCH hue angles, as the projects
 const tagSlug = (t) => String(t).toLowerCase();
@@ -95,7 +95,7 @@ const tagList = (tags) => (tags && tags.length)
   ? `<ul class="post-tags">${tags.map((t) => `<li>${e(t)}</li>`).join('')}</ul>` : '';
 
 const postCard = (p, i) => {
-  const cover = coverOf(p.body);
+  const cover = p.cover || coverOf(p.body);
   const art = cover
     ? `<img src="${e(cover)}" alt="" loading="${i < 3 ? 'eager' : 'lazy'}" decoding="async">`
     : `<span class="post-cover-mark">${e((p.title || '?').trim().charAt(0))}</span>`;

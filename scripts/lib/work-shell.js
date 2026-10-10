@@ -118,6 +118,7 @@ const footerInner = () => {
   const site = read('content/site.json');
   const parts = [];
   if (site.footer?.copyright) parts.push(escape(site.footer.copyright));
+  parts.push('<a href="/admin/">Edit</a>');
   parts.push('<a href="/blog/feed.xml">RSS</a>');
   parts.push('<a href="/llms.txt">llms.txt</a>');
   parts.push('<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a>');
@@ -140,13 +141,14 @@ const SCRIPTS = ['scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'];
 /* ── Whole page, for the generated Work pages ─────────────────────────────
    The home page is a template filled in place by build-html.js instead, but
    it takes its rail, top controls, ask and footer from this same module. */
-const pageHtml = ({ title, description, canonical, ogType, ogImage, active, bodyClass, main, scripts }) => {
+const pageHtml = ({ title, description, canonical, ogType, ogImage, active, bodyClass, main, scripts, styles }) => {
   const site = read('content/site.json');
   const siteName = site.meta?.siteName ?? site.meta?.title ?? '';
   const desc = String(description || site.meta?.description || '').replace(/\s+/g, ' ').trim();
   const img = ogImage || (site.meta?.url && site.meta?.ogImage
     ? `${site.meta.url.replace(/\/+$/, '')}/${site.meta.ogImage.replace(/^\/+/, '')}` : '');
   const extra = (scripts ?? []).map((rel) => `<script src="/${rel}?v=${hashOf(rel)}" defer></script>`).join('\n');
+  const extraStyles = (styles ?? []).map((rel) => `<link rel="stylesheet" href="/${rel}?v=${hashOf(rel)}">`).join('\n');
   return `<!DOCTYPE html>
 <!--
   Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
@@ -178,7 +180,7 @@ const pageHtml = ({ title, description, canonical, ogType, ogImage, active, body
 <link rel="stylesheet" href="${FONTS}" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="${FONTS}"></noscript>
 ${THEME_INIT}
-<link rel="stylesheet" href="/styles/work.css?v=${hashOf('styles/work.css')}">
+<link rel="stylesheet" href="/styles/work.css?v=${hashOf('styles/work.css')}">${extraStyles ? '\n' + extraStyles : ''}
 </head>
 <body class="work-home ${escape(bodyClass || '')}">
 <a class="skip-link" href="#main-content">Skip to content</a>

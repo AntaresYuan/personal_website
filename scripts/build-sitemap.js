@@ -65,7 +65,7 @@ const urls = [
   ...blogLinks,
   ...cardLinks,
   // Work-space pages (build-gallery.js, build-skills-page.js): listed when built.
-  ...['projects', 'gallery', 'skills'].filter((d) => fs.existsSync(path.join(root, d, 'index.html')))
+  ...['projects', 'gallery', 'skills', 'about'].filter((d) => fs.existsSync(path.join(root, d, 'index.html')))
     .map((d) => ({ loc: `${SITE_URL}/${d}/`, lastmod, priority: '0.7' })),
   ...['projects', 'skills'].flatMap((d) => fs.existsSync(path.join(root, d))
     ? fs.readdirSync(path.join(root, d), { withFileTypes: true })

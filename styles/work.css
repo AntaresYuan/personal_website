@@ -1238,6 +1238,96 @@ body.ask-panel-open .ask { opacity: 0; translate: 0 24px; pointer-events: none; 
   .post-card.is-feature .post-title { font-size: 22px; }
 }
 
+/* ── About ───────────────────────────────────────────────────────────── */
+.about { max-width: 1040px; margin: 0 auto; }
+.about-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: center;
+  gap: 64px;
+  min-height: 390px;
+  padding: 30px 38px;
+  border-radius: 32px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+}
+.about-kicker,
+.about-card-label {
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.about-title {
+  max-width: 760px;
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5.4vw, 66px);
+  font-weight: 700;
+  letter-spacing: -0.048em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.about-lead {
+  max-width: 650px;
+  margin-top: 22px;
+  color: var(--text-2);
+  font-size: 18px;
+  line-height: 1.6;
+}
+.about-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.about-tags li { padding: 7px 12px; border-radius: 999px; background: var(--chip-bg); color: var(--text-2); font-size: 13px; font-weight: 600; }
+.about-portrait {
+  width: 200px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--chip-bg);
+  box-shadow: 0 0 0 1px var(--hairline), 0 24px 50px -28px rgba(0, 0, 0, 0.7);
+}
+.about-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.about-card {
+  min-height: 240px;
+  padding: 28px 30px;
+  border-radius: 26px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.about-card-wide { grid-column: 1 / -1; min-height: 0; }
+.about-statement { max-width: 900px; margin-top: 18px; color: var(--text); font-size: clamp(22px, 2.9vw, 34px); line-height: 1.3; letter-spacing: -0.025em; text-wrap: balance; }
+.about-points { display: grid; gap: 14px; margin-top: 18px; }
+.about-points li { position: relative; padding-left: 20px; }
+.about-points li::before { content: ''; position: absolute; left: 0; top: 0.68em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.about-resume { display: inline-flex; align-items: center; gap: 7px; margin-top: 22px; color: var(--text); font-weight: 700; }
+.about-resume svg,
+.about-links svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.about-links { margin-top: 56px; }
+.about-links h2 { font-family: var(--font-display); font-size: 26px; letter-spacing: -0.025em; }
+.about-links ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.about-links a { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--hairline); transition: transform 0.35s var(--spring), background 0.2s; }
+.about-links a:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--surface) 90%, var(--accent)); }
+.about-links a span { color: var(--text-3); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.about-links a strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 600; white-space: nowrap; }
+@container page (max-width: 720px) {
+  .about-hero { grid-template-columns: minmax(0, 1fr); gap: 30px; padding: 28px 24px; }
+  .about-portrait { grid-row: 1; width: 124px; }
+  .about-grid, .about-links ul { grid-template-columns: minmax(0, 1fr); }
+  .about-card-wide { grid-column: auto; }
+}
+@container page (max-width: 480px) {
+  .about-title { font-size: 38px; }
+  .about-lead { font-size: 16px; }
+  .about-card { padding: 23px 21px; }
+  .about-links a { grid-template-columns: 70px minmax(0, 1fr) auto; }
+}
+
 /* A post: one centred reading column. */
 .post { max-width: 720px; margin: 0 auto; }
 .back-link {
@@ -1579,6 +1669,7 @@ body.ask-panel-open .ask { opacity: 0; translate: 0 24px; pointer-events: none; 
   font-size: 13.5px;
   font-weight: 700;
 }
+.skill-get svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .skill-row-link:hover .skill-get { background: var(--accent); color: #fff; }
 
 /* A skill's own page. */

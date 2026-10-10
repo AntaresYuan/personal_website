@@ -150,21 +150,23 @@
       });
     });
 
-    // Skills (/skills section). Same modal open path as cards — dispatch
-    // agent:open-card with the SKILL-NN id and render.js opens the panel.
+    // Skills (/skills section). Open the official site when present;
+    // otherwise go straight to the GitHub repository.
     const skillItems = (skills && skills.items) || [];
     skillItems.slice().sort((a, b) =>
       (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? ''))
     ).forEach((s, idx) => {
       const id = `SKILL-${pad2(idx + 1)}`;
+      const destination = s.site || s.repo;
+      if (!destination) return;
       out.push({
         kind: 'skill',
         icon: '⌘',
         label: `${id}  ${s.name ?? ''}`,
         desc: s.category ? `skill · ${s.category}` : 'skill',
-        meta: '',
+        meta: s.site ? 'website' : 'github',
         search: `${id} ${s.name ?? ''} ${s.category ?? ''} ${s.summary ?? ''} skill dotfile ai workflow`.toLowerCase(),
-        action: () => { document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id } })); },
+        action: () => { window.open(destination, '_blank', 'noopener,noreferrer'); },
       });
     });
 
