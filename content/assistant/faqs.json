@@ -80,16 +80,6 @@
     },
     {
       "enabled": false,
-      "question": "what does “a star to ship by” mean?",
-      "aliases": [
-        "what does a star to ship by mean?",
-        "a star to ship by 是什么意思？"
-      ],
-      "answer": "It means choosing a north star worth committing to, then continually shipping toward it.",
-      "href": "/"
-    },
-    {
-      "enabled": true,
       "question": "what's a Pi-shaped AI PM?",
       "aliases": [
         "what is a pi shaped product manager?",
@@ -105,7 +95,8 @@
         "tell me about WorthFly.",
         "WorthFly 是什么？"
       ],
-      "answer": "WorthFly focuses on flight search, decision support, alert drafts, and handoff to the real booking channel. Final fare, inventory and ticketing remain with that booking channel."
+      "answer": "WorthFly focuses on flight search, decision support, alert drafts, and handoff to the real booking channel. Final fare, inventory and ticketing remain with that booking channel.",
+      "href": ""
     },
     {
       "enabled": false,
@@ -114,7 +105,8 @@
         "tell me about Gmail Plus Plus.",
         "Gmail++ 是什么？"
       ],
-      "answer": "Gmail++ is an AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences."
+      "answer": "Gmail++ is an AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences.",
+      "href": ""
     },
     {
       "enabled": true,
@@ -127,7 +119,7 @@
       "href": "https://github.com/AntaresYuan/personal_website"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "question": "how do I edit the content?",
       "aliases": [
         "where is the CMS?",
@@ -135,6 +127,27 @@
       ],
       "answer": "I edit the content through Sveltia CMS at /admin/. It uses GitHub OAuth, and a GitHub Action rebuilds the static artifacts after a save.",
       "href": "/admin/"
+    },
+    {
+      "enabled": true,
+      "question": "when will you graduate from university?",
+      "starter": false,
+      "aliases": [
+        "where is the CMS?",
+        "怎么编辑网站内容？"
+      ],
+      "answer": "I will earn my Bachelor of Science Degree from University of Washington, from College of Engineering, in June, 2027.",
+      "href": ""
+    },
+    {
+      "enabled": true,
+      "question": "What did you do this summer?",
+      "starter": false,
+      "aliases": [
+        "What did you do during the summer of 2026?"
+      ],
+      "answer": "I interned at Institude of Management Strategy (IMS) as an AI PM intern for 3 months (from early June to late September). My main role is explained in my first project: agentic hiring. I also pariticipate in Kaboo, the internal open source project during this internship.",
+      "href": ""
     }
   ]
 }
