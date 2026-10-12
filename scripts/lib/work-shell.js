@@ -91,7 +91,7 @@ const askInner = () => `
         <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
       </button>
       <input class="ask-input" id="ask-input" type="text" maxlength="500"
-             placeholder="Ask anything" aria-label="Ask Antares anything">
+             placeholder="Ask Antares anything" aria-label="Ask Antares anything">
       <button class="ask-send" id="ask-send" type="submit" aria-label="Send">${SEND_ICON}</button>
     </form>
   </div>
