@@ -2,7 +2,7 @@
 window.QA_FAQ_DATA = [
   {
     "question": "are you looking for a job / open to roles?",
-    "answer": "Yes — I'm open to AI PM roles at top labs and big-tech companies, founder conversations, and independent collaborations.",
+    "answer": "Yes!!! I'm in the job market now. Recently I started actively applying for full-time AI PM roles at tech/AI companies starting at next summer/autumn. If you want to hire an intern NOW, I am also open with that!",
     "starter": true,
     "aliases": [
       "are you open to opportunities?",
@@ -25,7 +25,7 @@ window.QA_FAQ_DATA = [
   },
   {
     "question": "what are you building right now?",
-    "answer": "I'm currently building Lark Loom, a collaborative AI agent in the Lark ecosystem; Gmail++, an AI email-ranking product; and ApplyMint, a one-click job-application autofill tool.",
+    "answer": "I'm currently doing three part of things: 1) Research RA at UW helped with agent harness and model post-training; 2) Helped with building a agentic workflow in finding social media maker for commercial advertising (Haier the client); 3) Iterating on the content and AI QA Agent on my personal website.",
     "starter": true,
     "aliases": [
       "what are you working on?",
