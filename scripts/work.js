@@ -511,10 +511,37 @@
     var pSend = $('ask-panel-send');
     var avatarHome = $('ask-avatar') && $('ask-avatar').parentNode;
     var avatarSlot = $('ask-panel-avatar');
+    var sourceEl = $('ask-model-source');
     var qaUrl = (ask.getAttribute('data-qa') || '').trim();
     var convo = [];
     var busy = false;
     var boardCards = null;
+
+    /* The route is decided per answer: the Mac is tried first, then Workers
+       AI takes over if it is unavailable. Keep that decision in the panel
+       chrome instead of repeating a footnote under every answer. */
+    var sourceIcons = {
+      idle: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>',
+      pending: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.25"/><path d="M8 4.75V8l2.25 1.5"/></svg>',
+      local: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.25" y="2.5" width="11.5" height="8" rx="1.5"/><path d="M1.5 13h13"/></svg>',
+      cloud: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.1 12.25h6.2a2.45 2.45 0 0 0 .35-4.88A4 4 0 0 0 4 6.25v.1a3 3 0 0 0 1.1 5.9Z"/></svg>',
+      offline: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3z"/><path d="M10 2.5v3h3M5.5 9h5M5.5 11.5h3.5"/></svg>'
+    };
+    var setSource = function (source, model) {
+      if (!sourceEl) return;
+      var zh = root.dataset.language === 'zh' || /^zh/i.test(root.lang || '');
+      var labels = {
+        idle: zh ? '\u672c\u5730\u4f18\u5148 \u00b7 \u4e91\u7aef\u515c\u5e95' : 'Local first \u00b7 cloud fallback',
+        pending: zh ? '\u6b63\u5728\u9009\u62e9\u53ef\u7528\u6a21\u578b\u2026' : 'Choosing an available model\u2026',
+        local: (zh ? '\u672c\u5730 \u00b7 ' : 'Local \u00b7 ') + (model || 'Ollama'),
+        cloud: zh ? '\u4e91\u7aef \u00b7 Workers AI' : 'Cloud \u00b7 Workers AI',
+        offline: zh ? '\u5185\u7f6e FAQ \u00b7 \u65e0\u6a21\u578b' : 'Built-in FAQ \u00b7 no model'
+      };
+      sourceEl.setAttribute('data-source', source);
+      sourceEl.innerHTML = (sourceIcons[source] || sourceIcons.idle) + '<span>' + escape(labels[source] || labels.idle) + '</span>';
+      sourceEl.title = model ? (zh ? '\u6a21\u578b\uff1a' : 'Model: ') + model : '';
+    };
+    setSource('idle');
 
     var isOpen = function () { return ask.classList.contains('is-open'); };
     var panelOpen = function () { return panel.classList.contains('is-open'); };
@@ -545,9 +572,7 @@
         return;
       }
       var html = convo.map(function (m) {
-        // An answer from the model on Antares's own Mac says so, quietly.
-        var via = m.via === 'local' ? '<span class="msg-via">Answered by a model running on my MacBook</span>' : '';
-        return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + via + '</div>';
+        return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + '</div>';
       }).join('');
       if (pending) {
         html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="Thinking"><span></span><span></span><span></span></div></div>';
@@ -626,6 +651,7 @@
       busy = true;
       updateSend();
       openPanel();
+      setSource('pending');
       renderLog(true);
       setMood('thinking');
 
@@ -638,7 +664,7 @@
             signal: timeout(45000),
           }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (d) {
-              if (r.ok && d && d.answer) return { answer: String(d.answer), via: d.via };
+              if (r.ok && d && d.answer) return { answer: String(d.answer), via: d.via, model: d.model };
               return offlineAnswer(q);
             });
           }).catch(function () { return offlineAnswer(q); })
@@ -646,7 +672,12 @@
 
       reply.then(function (res) {
         var answer = typeof res === 'string' ? res : res.answer;
-        convo.push({ role: 'assistant', content: answer, via: res && res.via });
+        var via = res && res.via;
+        var model = res && res.model ? String(res.model) : '';
+        if (via === 'local') setSource('local', model);
+        else if (via === 'cloud') setSource('cloud', model);
+        else setSource('offline');
+        convo.push({ role: 'assistant', content: answer, via: via, model: model });
         busy = false;
         renderLog(false);
         // Talk for roughly as long as the answer takes to skim, then beam.
@@ -688,6 +719,7 @@
     $('ask-new').addEventListener('click', function () {
       if (busy) return;
       convo = [];
+      setSource('idle');
       renderLog(false);
       pInput.focus();
     });

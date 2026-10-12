@@ -100,7 +100,10 @@ const askInner = () => `
 const askPanelInner = () => `
   <header class="ask-panel-head">
     <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
-    <span class="ask-panel-title"><strong>Ask Antares</strong><span>Answers from this site's content — they can be wrong.</span></span>
+    <span class="ask-panel-title"><strong>Ask Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>Local first · cloud fallback</span>
+    </span></span>
     <button class="ask-icon" id="ask-new" type="button" aria-label="New conversation" title="New conversation">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
     </button>
