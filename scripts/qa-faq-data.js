@@ -72,15 +72,6 @@ window.QA_FAQ_DATA = [
     "href": "https://github.com/AntaresYuan/personal_website"
   },
   {
-    "question": "what's a Pi-shaped AI PM?",
-    "answer": "It means product and HCI-research depth, plus enough builder fluency to ship a product from 0 to 1 — not merely spec it.",
-    "aliases": [
-      "what is a pi shaped product manager?",
-      "什么是 Pi 型 AI 产品经理？"
-    ],
-    "href": "/"
-  },
-  {
     "question": "is the source code available?",
     "answer": "Yes. The site's source code is available at github.com/AntaresYuan/personal_website, and the content can be edited through the owner-only CMS at /admin/.",
     "aliases": [
@@ -90,12 +81,18 @@ window.QA_FAQ_DATA = [
     "href": "https://github.com/AntaresYuan/personal_website"
   },
   {
-    "question": "how do I edit the content?",
-    "answer": "I edit the content through Sveltia CMS at /admin/. It uses GitHub OAuth, and a GitHub Action rebuilds the static artifacts after a save.",
+    "question": "when will you graduate from university?",
+    "answer": "I will earn my Bachelor of Science Degree from University of Washington, from College of Engineering, in June, 2027.",
     "aliases": [
       "where is the CMS?",
       "怎么编辑网站内容？"
-    ],
-    "href": "/admin/"
+    ]
+  },
+  {
+    "question": "What did you do this summer?",
+    "answer": "I interned at Institude of Management Strategy (IMS) as an AI PM intern for 3 months (from early June to late September). My main role is explained in my first project: agentic hiring. I also pariticipate in Kaboo, the internal open source project during this internship.",
+    "aliases": [
+      "What did you do during the summer of 2026?"
+    ]
   }
 ];

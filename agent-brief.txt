@@ -31,14 +31,14 @@ Yes. The Work space exposes the concise /llms.txt summary and the fuller /llms-f
 ## what's the site built with / tech stack?
 The site uses vanilla HTML, CSS and JavaScript, Sveltia CMS, a pre-rendering static-site build, and Cloudflare Pages. The source is public on GitHub.
 
-## what's a Pi-shaped AI PM?
-It means product and HCI-research depth, plus enough builder fluency to ship a product from 0 to 1 — not merely spec it.
-
 ## is the source code available?
 Yes. The site's source code is available at github.com/AntaresYuan/personal_website, and the content can be edited through the owner-only CMS at /admin/.
 
-## how do I edit the content?
-I edit the content through Sveltia CMS at /admin/. It uses GitHub OAuth, and a GitHub Action rebuilds the static artifacts after a save.
+## when will you graduate from university?
+I will earn my Bachelor of Science Degree from University of Washington, from College of Engineering, in June, 2027.
+
+## What did you do this summer?
+I interned at Institude of Management Strategy (IMS) as an AI PM intern for 3 months (from early June to late September). My main role is explained in my first project: agentic hiring. I also pariticipate in Kaboo, the internal open source project during this internship.
 
 # Background knowledge
 ## Who am I
