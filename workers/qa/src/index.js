@@ -30,7 +30,10 @@ import {
 } from './lib.js';
 
 const SITE = 'https://antaresyuan.site';
-const INDEX_URL = `${SITE}/ask-index.json`;
+// Version the cache key when the corpus shape changes. The short TTL keeps a
+// CMS save from taking ten minutes to reach answers, while embeddings remain
+// cached by the index's content-derived version.
+const INDEX_URL = `${SITE}/ask-index.json?corpus=faq-v1`;
 const LLMS_FULL_URL = `${SITE}/llms-full.txt`;          // fallback when the index is missing
 const CLOUD_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
 const EMBED_MODEL = '@cf/baai/bge-m3';
@@ -60,9 +63,9 @@ function reply(obj, status, headers) {
   });
 }
 
-const grab = async (url, type = 'text') => {
+const grab = async (url, type = 'text', cacheTtl = 600) => {
   try {
-    const r = await fetch(url, { cf: { cacheTtl: 600, cacheEverything: true } });
+    const r = await fetch(url, { cf: { cacheTtl, cacheEverything: true } });
     if (!r.ok) return null;
     return type === 'json' ? await r.json() : (await r.text()).trim();
   } catch { return null; }
@@ -171,7 +174,7 @@ export default {
     const query = searchText(turns);
 
     // Grounding: the passage index; the old whole-site text if it's missing.
-    const index = await grab(env.INDEX_URL || INDEX_URL, 'json');
+    const index = await grab(env.INDEX_URL || INDEX_URL, 'json', 60);
     let localCtx, cloudCtx;
     if (index && Array.isArray(index.chunks) && index.chunks.length) {
       const faqCtx = faqContextOf(matchFaqs(index.faqs, query));

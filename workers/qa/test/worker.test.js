@@ -22,7 +22,7 @@ let local = 'ok';            // 'ok' | 'down' | 'busy'
 let localCalls = 0, lastLocalPrompt = '';
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
-  if (url.endsWith('/ask-index.json')) return new Response(JSON.stringify(INDEX));
+  if (url.includes('/ask-index.json')) return new Response(JSON.stringify(INDEX));
   if (url.startsWith('https://llm.example/')) {
     localCalls++;
     lastLocalPrompt = JSON.parse(init.body).messages[0].content;

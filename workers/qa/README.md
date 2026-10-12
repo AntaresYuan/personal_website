@@ -21,8 +21,9 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
      finds English passages;
    - a small TF-IDF nudge toward exact names.
 
-   They are then taken in order until a character budget is spent. The passage
-   vectors are computed once per index version and cached at the edge.
+   They are then taken in order until a character budget is spent. The FAQ and
+   passage index refreshes within about a minute after a CMS deploy; passage
+   vectors are computed once per content-derived index version and cached.
 2. **Answer from the Mac**, if `LOCAL_LLM_URL` is set. This is a Cloudflare
    Tunnel, behind an Access service token, to a small proxy in front of Ollama
    on Antares's Mac (`ops/local-llm/`). It is skipped when the Mac is busy, and
