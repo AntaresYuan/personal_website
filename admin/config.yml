@@ -635,24 +635,26 @@ collections:
             fields:
               - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
 
-  # ── Assistant FAQ ──────────────────────────────────────────────────
-  # Authoritative answer briefs for recurring questions. The Q&A Worker
-  # checks these first, then supplements the matched brief with evidence
-  # retrieved from the rest of the site.
-  - name: "assistant_faq"
-    label: "Assistant FAQ"
-    icon: quiz
+  # ── Assistant ──────────────────────────────────────────────────────
+  # One CMS home for everything that grounds Ask Antares. FAQ answers are
+  # authoritative for recurring questions; background notes add context for
+  # everything else. They stay as separate source files because the Worker
+  # retrieves them differently, but no longer appear as duplicate sections.
+  - name: "assistant"
+    label: "Assistant"
+    icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
     files:
       - file: "content/faq.json"
-        label: "FAQ answer briefs"
-        name: "assistant_faq"
+        label: "FAQ answers"
+        name: "faq_answers"
         format: "json"
         fields:
-          - label: "FAQ entries — drag to reorder; starter questions use this order"
+          - label: "FAQ answers — drag to reorder; starter questions use this order"
             name: "items"
             widget: "list"
-            collapsed: true
+            collapsed: false
             summary: "{{fields.question}}"
+            hint: "Each item contains both the question and its editable answer. Ask Antares uses the answer as authoritative guidance, then adds supporting facts from the site."
             fields:
               - { label: "Question", name: "question", widget: "string", hint: "The canonical English wording. It is also shown verbatim when Starter question is enabled." }
               - { label: "Starter question", name: "starter", widget: "boolean", required: false, default: false, hint: "Show this above Ask Antares. The first three enabled entries are used." }
@@ -662,29 +664,19 @@ collections:
                 required: false
                 hint: "Add likely English and Chinese phrasings. These make deterministic FAQ matching more reliable before model generation."
                 field: { label: "Alias", name: "alias", widget: "string" }
-              - { label: "Answer brief (authoritative)", name: "answer", widget: "text", hint: "Write the position, facts and narrative you want preserved. The model may rephrase it and add facts retrieved from the site, but this brief takes priority." }
+              - { label: "Answer content", name: "answer", widget: "markdown", hint: "Edit the full answer here. The model may rephrase it and add facts retrieved from the site, but this content takes priority." }
               - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Used by the offline answer and command palette." }
-
-  # ── Assistant knowledge ────────────────────────────────────────────
-  # Private-ish notes that feed the "ask" assistant (workers/qa/) but are
-  # NOT rendered on the public page. The build flattens them into
-  # /agent-brief.txt, which the Worker appends to the site content it uses
-  # as grounding. (agent-brief.txt is a deployed static file — fetchable by
-  # URL, just not linked anywhere. It's "off the site", not "secret".)
-  - name: "agent_brief"
-    label: "Assistant knowledge"
-    icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
-    files:
       - file: "content/agent-brief.json"
-        label: "Assistant knowledge"
-        name: "agent_brief"
+        label: "Background knowledge"
+        name: "background_knowledge"
         format: "json"
         fields:
-          - label: "Notes — these feed the “ask” assistant; they are NOT shown on the public site"
+          - label: "Background notes — used when no FAQ fully answers the question"
             name: "notes"
             widget: "list"
-            collapsed: true
+            collapsed: false
             summary: "{{fields.title}}"
+            hint: "Use these for facts, preferences and stories that do not belong to one specific FAQ. They are not rendered as a page, but /agent-brief.txt is publicly fetchable."
             fields:
               - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
-              - { label: "What the assistant should know (markdown OK)", name: "body", widget: "text" }
+              - { label: "What the assistant should know", name: "body", widget: "markdown" }
