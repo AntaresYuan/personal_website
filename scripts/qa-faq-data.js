@@ -2,7 +2,7 @@
 window.QA_FAQ_DATA = [
   {
     "question": "are you looking for a job / open to roles?",
-    "answer": "Yes!!! I'm in the job market now. Recently I started actively applying for full-time AI PM roles at tech/AI companies starting at next summer/autumn. If you want to hire an intern NOW, I am also open with that!",
+    "answer": "Yes!!! I'm in the job market now. Recently I started actively applying for full-time AI PM roles at tech/AI companies starting at next summer/autumn. If you want to hire an intern NOW, I am also open with that!\n\nPS: This is my email address [chenjy4@uw.edu](chenjy4@uw.edu) and this is my LinkedIn [https://www.linkedin.com/in/chenjie-yuan-682b93298/](https://www.linkedin.com/in/chenjie-yuan-682b93298/)",
     "starter": true,
     "aliases": [
       "are you open to opportunities?",

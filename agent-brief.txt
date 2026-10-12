@@ -11,6 +11,8 @@ If the available context does not contain the answer, say that I have not writte
 ## are you looking for a job / open to roles?
 Yes!!! I'm in the job market now. Recently I started actively applying for full-time AI PM roles at tech/AI companies starting at next summer/autumn. If you want to hire an intern NOW, I am also open with that!
 
+PS: This is my email address [chenjy4@uw.edu](chenjy4@uw.edu) and this is my LinkedIn [https://www.linkedin.com/in/chenjie-yuan-682b93298/](https://www.linkedin.com/in/chenjie-yuan-682b93298/)
+
 ## walk me through your most mature project.
 Use Agentic Hiring as the main example. It is a recruiting workbench I worked on at ByteDance. Its agent turns a role brief into a ranked candidate shortlist. I owned recommendation quality and product experience; a job taxonomy I designed raised the hiring-manager pass rate from 21% to 25% in a staged-rollout A/B test. Explain the problem, the product loop, what I owned, and the measured result in that order.
 
