@@ -545,7 +545,9 @@
         return;
       }
       var html = convo.map(function (m) {
-        return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + '</div>';
+        // An answer from the model on Antares's own Mac says so, quietly.
+        var via = m.via === 'local' ? '<span class="msg-via">Answered by a model running on my MacBook</span>' : '';
+        return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + via + '</div>';
       }).join('');
       if (pending) {
         html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="Thinking"><span></span><span></span><span></span></div></div>';
@@ -631,18 +633,20 @@
         ? fetch(qaUrl, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ q: q, messages: convo }),
-            signal: timeout(30000),
+            body: JSON.stringify({ q: q, messages: convo, lang: document.documentElement.lang || 'en' }),
+            // Room for the Mac's model (up to ~25 s) and then the cloud fallback.
+            signal: timeout(45000),
           }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (d) {
-              if (r.ok && d && d.answer) return String(d.answer);
+              if (r.ok && d && d.answer) return { answer: String(d.answer), via: d.via };
               return offlineAnswer(q);
             });
           }).catch(function () { return offlineAnswer(q); })
         : offlineAnswer(q);
 
-      reply.then(function (answer) {
-        convo.push({ role: 'assistant', content: answer });
+      reply.then(function (res) {
+        var answer = typeof res === 'string' ? res : res.answer;
+        convo.push({ role: 'assistant', content: answer, via: res && res.via });
         busy = false;
         renderLog(false);
         // Talk for roughly as long as the answer takes to skim, then beam.

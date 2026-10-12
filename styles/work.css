@@ -1051,6 +1051,7 @@ body::after {
   line-height: 1.45;
 }
 .msg-bot { color: var(--text); }
+.msg-via { display: block; margin-top: 6px; font-size: 11.5px; color: var(--text-3); }
 .msg-dots { display: inline-flex; gap: 5px; padding: 8px 0; }
 .msg-dots span {
   width: 7px; height: 7px;

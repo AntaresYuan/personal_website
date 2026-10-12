@@ -28,6 +28,7 @@ const skills = (() => {
   catch { return { items: [] }; }
 })();
 const { loadPosts } = require('./lib/blog');     // published blog posts (content/blog/*.md)
+const { projectList } = require('./lib/projects'); // Work case studies (content/projects/*.json)
 const lastUpdated = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
@@ -130,7 +131,21 @@ Name: ${profile.name} ${profile.nameAccent ?? ''}
 Role: ${profile.role}
 Location: ${profile.location}
 Tags: ${(profile.tags ?? []).join(', ')}
-${sectionFor('Shipped', 'shipped')}${sectionFor('Now', 'now')}${sectionFor('Next', 'next')}${sectionFor('Later', 'later')}
+${(() => {
+  // The Work space's case studies: the fullest account of each project.
+  const list = projectList();
+  if (!list.length) return '';
+  const fmt = (p) => [
+    `## ${p.title}${p.kind ? ` · ${p.kind}` : ''}`,
+    `URL: /projects/${p.slug}/`,
+    p.summary ? `Summary: ${p.summary}` : '',
+    (p.facts ?? []).map((f) => `${f.label}: ${f.value}`).join('\n'),
+    ...(p.story ?? []).map((st) => `### ${st.title}\n\n${stripMd(st.body)}`),
+    (p.outcomes ?? []).length ? `Outcomes:\n${p.outcomes.map((o) => `  - ${o.value}: ${o.label}`).join('\n')}` : '',
+    (p.links ?? []).length ? `Links:\n${p.links.map((l) => `  - ${l.label}: ${l.href}`).join('\n')}` : '',
+  ].filter(Boolean).join('\n\n');
+  return `\n# Work — case studies\n\n${list.map(fmt).join('\n\n---\n\n')}\n`;
+})()}${sectionFor('Shipped', 'shipped')}${sectionFor('Now', 'now')}${sectionFor('Next', 'next')}${sectionFor('Later', 'later')}
 ${(() => {
   const items = (skills.items ?? []).slice().sort((a, b) =>
     (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));

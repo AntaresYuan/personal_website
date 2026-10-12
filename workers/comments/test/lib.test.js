@@ -57,8 +57,8 @@ t('emails are optional but must look like one', () => {
   assert.equal(ok({ email: '<x@y.z>' }).error, 'bad-email');
 });
 t('control, zero-width and bidi characters are stripped', () => {
-  assert.equal(clean('a‮b​c\u0007d'), 'abcd');
-  assert.equal(ok({ name: 'M​ei' }).value.name, 'Mei');
+  assert.equal(clean('a\u202Eb\u200Bc\u0007d'), 'abcd');
+  assert.equal(ok({ name: 'M\u200Bei' }).value.name, 'Mei');
 });
 t('parent ids are checked', () => {
   assert.equal(ok({ parent: 'c_abcdefghijkl' }).value.parent, 'c_abcdefghijkl');

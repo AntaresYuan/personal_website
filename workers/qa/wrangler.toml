@@ -1,9 +1,10 @@
 # ─────────────────────────────────────────────────────────────────────
 # Cloudflare Worker config for the "ask this portfolio" Q&A endpoint.
 #
-# It answers a visitor's question using ONLY the site's own content
-# (it fetches https://antaresyuan.site/llms-full.txt as grounding) via
-# Workers AI. Free tier covers it for a personal site. This powers the
+# It answers a visitor's question using ONLY the site's own content: it
+# retrieves the relevant passages from https://antaresyuan.site/ask-index.json
+# (scripts/build-ask-index.js) and answers from the model on Antares's Mac
+# when it is reachable, else Workers AI. Free tier covers it for a personal site. This powers the
 # embedded terminal's `ask <question>` command; the ⌘K palette is a plain
 # search/launcher and needs no Worker.
 #
@@ -39,3 +40,13 @@ enabled = true
 # type = "ratelimit"
 # namespace_id = "1001"
 # simple = { limit = 20, period = 60 }   # 20 requests / 60 s per key (IP)
+
+# ── Answering from Antares's Mac (optional) ──────────────────────────
+# LOCAL_LLM_URL: the Cloudflare Tunnel hostname in front of the local-llm
+# proxy (ops/local-llm/README.md). Empty = cloud only. The Access service
+# token that guards it goes in as secrets, never here:
+#   npx wrangler secret put ACCESS_CLIENT_ID
+#   npx wrangler secret put ACCESS_CLIENT_SECRET
+[vars]
+LOCAL_LLM_URL = ""
+

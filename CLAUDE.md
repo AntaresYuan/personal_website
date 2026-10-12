@@ -60,7 +60,11 @@ Cloudflare `*.workers.dev` is intermittently DNS-poisoned / SNI-reset on
 mainland-China networks. **Every Worker URL stored in `content/site.json`
 must be a custom subdomain on the same zone as the main site.** Currently:
 
-- `qa.antaresyuan.site` — the "ask" assistant
+- `qa.antaresyuan.site` — the "ask" assistant (`workers/qa/`). It retrieves
+  passages from `/ask-index.json` (`scripts/build-ask-index.js`) and answers
+  from the model on Antares's Mac when `LOCAL_LLM_URL` is set
+  (`ops/local-llm/`, a Cloudflare Tunnel behind an Access service token),
+  else Workers AI. The Mac's hostname is only ever called by the Worker.
 - `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
 - `comments.antaresyuan.site` — reactions + comments on Writing posts
   (`workers/comments/`, D1; client `scripts/comments.js`). Off until
@@ -206,11 +210,12 @@ embedded `"`, `$`, or backticks.
 
 ### Don't commit pure artifacts in feature PRs
 
-`blog/`, `llms-full.txt`, `sitemap.xml`, `agent-brief.txt`, `glyphs.html`
-are pure outputs. The bot rebuilds them after merge. Reset before commit:
+`blog/`, `llms-full.txt`, `sitemap.xml`, `agent-brief.txt`, `glyphs.html`,
+`ask-index.json` are pure outputs. The bot rebuilds them after merge. Reset
+before commit:
 
 ```sh
-git checkout -- blog/ llms-full.txt sitemap.xml agent-brief.txt glyphs.html
+git checkout -- blog/ llms-full.txt sitemap.xml agent-brief.txt glyphs.html ask-index.json
 ```
 
 `index.html` is the exception — it's mutated in-place and must be committed

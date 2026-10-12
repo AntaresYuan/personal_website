@@ -16,7 +16,7 @@ const EMAIL = /^[^\s@<>"']{1,64}@[^\s@<>"']+\.[^\s@<>"']{2,}$/;
 // held for review; a name with one is refused.
 const LINK = /(https?:\/\/|www\.|\b[a-z0-9-]{2,}\.(com|net|org|io|co|cn|xyz|top|ru|info|biz|me|app|dev|site|online|shop|club|vip|cc|tk|link|live|ly|gg)\b)/i;
 // Control characters, zero-width and bidi overrides: nothing a comment needs.
-const STRIP = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F​-‏‪-‮⁦-⁩﻿]/g;
+const STRIP = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
 
 export const clean = (s) => String(s ?? '').replace(/\r\n?/g, '\n').replace(STRIP, '');
 export const charCount = (s) => [...s].length;

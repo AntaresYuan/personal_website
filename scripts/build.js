@@ -35,6 +35,7 @@
   // (and its "all charts →" link) is already in place.
   require('./build-usage-page');
   require('./build-llms');
+  require('./build-ask-index');
   require('./build-sitemap');
   require('./build-agent-brief');
   require('./build-glyphs');

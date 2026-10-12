@@ -187,7 +187,7 @@ Production: <https://antaresyuan.site> on Cloudflare Pages.
 
 Two Cloudflare Workers back it (each deploys itself — see the README in its folder):
 - `workers/decap-oauth/` — GitHub OAuth proxy for `/admin/` sign-in. (The folder name stuck from Decap; Sveltia speaks the same OAuth protocol.)
-- `workers/qa/` — the "ask" assistant on Cloudflare Workers AI. Optional: when `site.json → qa.workerUrl` is empty, the "ask" bar falls back to the hand-authored FAQ.
+- `workers/qa/` — the "ask" assistant: retrieves passages from `/ask-index.json` and answers in the visitor's language, from the model on my Mac when it's reachable (`ops/local-llm/`), else Workers AI. Optional: when `site.json → qa.workerUrl` is empty, the "ask" bar falls back to the hand-authored FAQ.
 - `workers/comments/` — reactions and comments on Writing posts (Worker + D1, Turnstile, Llama Guard screening, an `/admin` moderation page). Optional: while `site.json → comments.endpoint` is empty, posts keep giscus.
 
 ## Add-ons (configured via `content/site.json` or `/admin/`)

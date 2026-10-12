@@ -1,0 +1,9 @@
+{
+  "name": "antares-qa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "node test/lib.test.js && node test/worker.test.js"
+  }
+}

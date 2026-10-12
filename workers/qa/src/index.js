@@ -1,61 +1,43 @@
 /* ════════════════════════════════════════════════════════════════════════
    antares-qa — "ask this portfolio" Q&A endpoint (Cloudflare Worker).
 
-   POST /  with JSON body { "q": "<a question>" }
-   →  { "answer": "<first-person prose>", "model": "<id>", "verified": <bool> }   on success
-   →  { "error": "<reason>", "detail"? }                                          on failure (4xx/5xx)
+   POST /  { "messages": [{role, content}, …] } or { "q": "…" }, + "lang"?
+   →  { answer, model, via: 'local' | 'cloud', verified }      on success
+   →  { error, detail? }                                        on failure
 
-   What it does:
-     1. fetch the grounding context — https://<SITE>/llms-full.txt (the public
-        site content) + https://<SITE>/agent-brief.txt (supplemental notes
-        Antares wrote for the assistant via the CMS, not rendered on the
-        site; may be empty). Together: the ONLY source of truth.
-     2. GENERATE — Workers AI answers in the FIRST PERSON as Antares, told to
-        ground every fact in that context and never invent.
-     3. VERIFY (anti-hallucination pass) — a second, low-temperature call
-        rewrites the draft so every claim is supported by the context,
-        keeping the first-person voice. If it fails, the (prompt-grounded)
-        draft is returned and `verified` is false.
+   1. RETRIEVE — fetch /ask-index.json (the site cut into titled passages,
+      scripts/build-ask-index.js). Embed the question with bge-m3
+      (multilingual: a Chinese question finds English passages) and keep
+      the best passages, plus the pinned ones (the owner's notes and an
+      overview), within a character budget. The passage vectors are
+      computed once per index version and cached. Without embeddings, a
+      TF-IDF score does the ranking.
+   2. ANSWER, LOCAL FIRST — if LOCAL_LLM_URL is set, ask the model running
+      on Antares's Mac (ops/local-llm/: a Cloudflare Tunnel behind an Access
+      service token, then a small proxy in front of Ollama). Unreachable,
+      busy or slow → fall through; a failure parks the Mac for a minute so
+      visitors don't each wait out the timeout.
+   3. ANSWER, CLOUD — Workers AI generates, then a second low-temperature
+      call fact-checks the draft against the same passages.
 
-   First person ("I built…"), grounded, fact-checked. No keys in the
-   frontend; CORS is locked to the site origin (+ localhost for dev). Powers
-   the hero "ask" bar and the terminal's `ask` command. (The ⌘K palette is a
-   plain search/launcher and needs no Worker.)
-
-   Deploy: see wrangler.toml. Free tier covers a personal site's volume.
+   Replies come in the visitor's language (lib.js → replyLang). First
+   person as Antares, grounded only in the passages. No keys in the
+   frontend; CORS is locked to the site origin (+ localhost for dev).
    ════════════════════════════════════════════════════════════════════════ */
+import {
+  normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
+  genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+} from './lib.js';
 
 const SITE = 'https://antaresyuan.site';
-const LLMS_FULL_URL = `${SITE}/llms-full.txt`;        // the public site content
-const AGENT_BRIEF_URL = `${SITE}/agent-brief.txt`;   // supplemental notes Antares wrote for the assistant (not rendered on the site)
-const MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';   // alt: @cf/meta/llama-3.1-8b-instruct, @cf/meta/llama-3.3-70b-instruct-fp8-fast
-const MAX_MSG_CHARS = 600;     // per turn (user or assistant) in a multi-turn request
-const MAX_TURNS = 8;           // keep at most this many recent turns of history
-const MAX_CONTEXT_CHARS = 24000;
-
-// Pass 1 — generate, in Antares's first-person voice, strictly from the content.
-const GEN_PROMPT = (context) => `You are an AI assistant that answers in the FIRST PERSON as Antares Yuan (an AI Product Manager) — say "I", "my", "I built…". You speak only from the CONTEXT below — the content of Antares's site (projects shipped / in progress / planned, principles, contact, bio) plus any background notes Antares wrote for you.
-
-Hard rules — these matter more than sounding good:
-1. GROUND EVERYTHING. Every factual claim — project names, what a project does, dates, numbers ("cited by 2 papers", "saved 10 hrs"), where I studied, what I'm open to, the tech stack, anything specific — must be supported by the CONTEXT. You may rephrase, connect stated facts, and tell it as flowing first-person prose; you may NOT introduce any fact that isn't in the CONTEXT.
-2. NEVER INVENT. No invented metrics, durations, team sizes, company names, dates, quotes, or "obvious-sounding" details. Example: the CONTEXT says "Worth Fly — flight search, decision support, alert drafts." Do NOT write "Worth Fly, which I spent six months building with a small team" — there is no six months and no team in the CONTEXT.
-3. GAPS. If the CONTEXT doesn't cover what's asked, say so in first person — "I haven't written that up here yet" / "that's not something this page covers" — don't guess or fill in plausible details. Match the depth of the CONTEXT: a one-line summary → a brief answer; don't pad a one-liner into a story.
-4. GREETINGS / SMALL TALK (hi, hello, how are you, thanks): reply briefly and warmly in first person, then invite a question about my work — don't say "not covered".
-5. STYLE: first person, plain conversational prose — no markdown headings or bullet lists, no code, no fabricated links. A line for a quick fact; a short paragraph (3–6 sentences) for a project's story.
-
-CONTEXT:
-${context}`;
-
-// Pass 2 — strict fact-check + minimal rewrite (the anti-hallucination pass).
-const VERIFY_PROMPT = (context) => `You are a strict fact-checker. Below is CONTEXT (Antares Yuan's site content plus background notes he wrote) and a DRAFT answer written in the first person as Antares. Return a corrected version of the DRAFT in which EVERY factual claim is supported by the CONTEXT:
-- Remove or soften any claim, number, date, name, duration, or detail not present in the CONTEXT.
-- Keep the first-person voice, the conversational tone, and the flow.
-- Add nothing. Don't tack on caveats like "based on the site" — just make the prose accurate.
-- If the DRAFT is already fully grounded, return it unchanged.
-Output ONLY the corrected answer text — no preamble, no commentary.
-
-CONTEXT:
-${context}`;
+const INDEX_URL = `${SITE}/ask-index.json`;
+const LLMS_FULL_URL = `${SITE}/llms-full.txt`;          // fallback when the index is missing
+const CLOUD_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
+const EMBED_MODEL = '@cf/baai/bge-m3';
+const BUDGET = { cloud: 9000, local: 12000 };           // context characters
+const LOCAL_TIMEOUT_MS = 25000;               // a cold model load takes ~20 s
+const DOWN_KEY = 'https://qa-cache.internal/local-down';
+const vecKey = (version) => `https://qa-cache.internal/vectors/${version}`;
 
 function cors(origin) {
   const ok = origin === SITE
@@ -68,7 +50,7 @@ function cors(origin) {
         'Access-Control-Max-Age': '86400',
         Vary: 'Origin',
       }
-    : { Vary: 'Origin' };   // no ACAO ⇒ a browser on another origin is blocked
+    : { Vary: 'Origin' };
 }
 
 function reply(obj, status, headers) {
@@ -78,47 +60,103 @@ function reply(obj, status, headers) {
   });
 }
 
-async function ai(env, messages, temperature, maxTokens) {
-  const out = await env.AI.run(MODEL, { messages, max_tokens: maxTokens, temperature });
+const grab = async (url, type = 'text') => {
+  try {
+    const r = await fetch(url, { cf: { cacheTtl: 600, cacheEverything: true } });
+    if (!r.ok) return null;
+    return type === 'json' ? await r.json() : (await r.text()).trim();
+  } catch { return null; }
+};
+
+/* ── Retrieval ──────────────────────────────────────────────────────────── */
+async function embed(env, texts) {
+  const out = await env.AI.run(EMBED_MODEL, { text: texts });
+  const vecs = out?.data ?? out?.response;
+  if (!Array.isArray(vecs) || vecs.length !== texts.length) throw new Error('embedding shape');
+  return vecs;
+}
+
+// Passage vectors for this index version: from the cache, or computed now.
+async function passageVectors(env, ctx, index) {
+  const cache = caches.default;
+  const key = vecKey(index.version);
+  const hit = await cache.match(key);
+  if (hit) return unpackVectors(await hit.json());
+  const texts = index.chunks.map((c) => `${c.title}\n${c.text}`);
+  const batches = [];
+  for (let i = 0; i < texts.length; i += 48) batches.push(texts.slice(i, i + 48));
+  const vecs = (await Promise.all(batches.map((b) => embed(env, b)))).flat();
+  ctx.waitUntil(cache.put(key, new Response(JSON.stringify(packVectors(vecs)), {
+    headers: { 'content-type': 'application/json', 'cache-control': 'max-age=604800' },
+  })));
+  return vecs;
+}
+
+async function retrieve(env, ctx, index, query, budget) {
+  const lexical = lexicalScores(query, index.chunks);
+  let semantic = null;
+  try {
+    const [vecs, [qv]] = await Promise.all([passageVectors(env, ctx, index), embed(env, [query])]);
+    semantic = vecs.map((v) => cosine(qv, v));
+  } catch { /* embeddings unavailable — the lexical score ranks alone */ }
+  return selectPassages(index.chunks, { semantic, lexical, budget });
+}
+
+/* ── Answering ──────────────────────────────────────────────────────────── */
+// The model on Antares's Mac, through the tunnel. null = not this time.
+async function askLocal(env, messages) {
+  if (!env.LOCAL_LLM_URL) return null;
+  const cache = caches.default;
+  if (await cache.match(DOWN_KEY)) return null;
+  const park = () => cache.put(DOWN_KEY, new Response('1', { headers: { 'cache-control': 'max-age=60' } }));
+  try {
+    const r = await fetch(`${env.LOCAL_LLM_URL.replace(/\/$/, '')}/chat`, {
+      method: 'POST',
+      redirect: 'manual',             // an Access login redirect is a failure, not a page to follow
+      headers: {
+        'content-type': 'application/json',
+        ...(env.ACCESS_CLIENT_ID ? { 'CF-Access-Client-Id': env.ACCESS_CLIENT_ID, 'CF-Access-Client-Secret': env.ACCESS_CLIENT_SECRET } : {}),
+      },
+      body: JSON.stringify({ messages, max_tokens: 700, temperature: 0.3 }),
+      signal: AbortSignal.timeout(Number(env.LOCAL_TIMEOUT_MS) || LOCAL_TIMEOUT_MS),
+    });
+    if (r.status === 503) return null;   // busy with another visitor: fall back, but don't park
+    if (!r.ok) { await park(); return null; }
+    const d = await r.json();
+    const answer = stripThinking(d.answer);
+    if (!answer) return null;
+    return { answer, model: String(d.model || 'local'), via: 'local', verified: false };
+  } catch {
+    await park();
+    return null;
+  }
+}
+
+async function cloud(env, messages, temperature, maxTokens) {
+  const out = await env.AI.run(env.CLOUD_MODEL || CLOUD_MODEL, { messages, max_tokens: maxTokens, temperature });
   return String((out && (out.response ?? out.result ?? '')) || '').trim();
 }
 
-// Normalize the request into a clean alternating user/assistant turn list.
-// Accepts { messages: [{role,content}, …] } (multi-turn) or { q: "…" } (single).
-// Returns [] if there's no usable user question to answer.
-function normTurns(body) {
-  let turns = [];
-  if (body && Array.isArray(body.messages)) {
-    turns = body.messages
-      .map((m) => ({
-        role: (m && m.role === 'assistant') ? 'assistant' : 'user',
-        content: String((m && m.content) || '').trim().slice(0, MAX_MSG_CHARS),
-      }))
-      .filter((m) => m.content);
-  } else {
-    const q = String((body && body.q) || '').trim().slice(0, MAX_MSG_CHARS);
-    if (q) turns = [{ role: 'user', content: q }];
-  }
-  // Collapse any accidental consecutive same-role turns, keep last MAX_TURNS,
-  // and require the conversation to end with a user turn.
-  const collapsed = [];
-  for (const t of turns) {
-    if (collapsed.length && collapsed[collapsed.length - 1].role === t.role) collapsed[collapsed.length - 1].content += '\n' + t.content;
-    else collapsed.push({ ...t });
-  }
-  const recent = collapsed.slice(-MAX_TURNS);
-  return (recent.length && recent[recent.length - 1].role === 'user') ? recent : [];
+async function askCloud(env, context, lang, turns) {
+  const draft = await cloud(env, [{ role: 'system', content: genPrompt(context, lang) }, ...turns], 0.2, 480);
+  if (!draft) throw new Error('the model returned an empty answer');
+  let answer = draft, verified = false;
+  try {
+    const checked = await cloud(env, [{ role: 'system', content: verifyPrompt(context, lang) }, { role: 'user', content: `DRAFT:\n${draft}` }], 0.1, 480);
+    if (checked) { answer = checked; verified = true; }
+  } catch { /* verify unavailable — keep the grounded draft */ }
+  return { answer, model: env.CLOUD_MODEL || CLOUD_MODEL, via: 'cloud', verified };
 }
 
+/* ── Entry ──────────────────────────────────────────────────────────────── */
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin') || '';
     const ch = cors(origin);
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: ch });
     if (request.method !== 'POST') return reply({ error: 'POST JSON: { "q": "…" } or { "messages": [{role,content},…] }' }, 405, ch);
 
-    // Optional per-IP rate limit (only if the RATE_LIMITER binding is configured — see wrangler.toml).
     if (env.RATE_LIMITER && typeof env.RATE_LIMITER.limit === 'function') {
       const ip = request.headers.get('CF-Connecting-IP') || 'anon';
       const { success } = await env.RATE_LIMITER.limit({ key: ip });
@@ -127,34 +165,33 @@ export default {
 
     let body;
     try { body = await request.json(); } catch { return reply({ error: 'invalid JSON body' }, 400, ch); }
-    const turns = normTurns(body);   // [{role:'user'|'assistant', content}, …], ending with a user turn
+    const turns = normTurns(body);
     if (!turns.length) return reply({ error: 'no question — send { "q": "…" } or a "messages" array ending with a user turn' }, 400, ch);
+    const lang = replyLang(turns[turns.length - 1].content, body.lang);
+    const query = searchText(turns);
 
-    // Grounding context: the public site content + (if any) Antares's
-    // supplemental notes. Both edge-cached. The site content is required;
-    // the brief is best-effort (may be empty / 404).
-    const grab = async (url) => {
-      try { const r = await fetch(url, { cf: { cacheTtl: 600, cacheEverything: true } }); return r.ok ? (await r.text()).trim() : ''; }
-      catch { return ''; }
-    };
-    const [siteContent, brief] = await Promise.all([grab(LLMS_FULL_URL), grab(AGENT_BRIEF_URL)]);
-    if (!siteContent) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);
-    let context = brief ? `${siteContent}\n\n${brief}` : siteContent;
-    if (context.length > MAX_CONTEXT_CHARS) context = context.slice(0, MAX_CONTEXT_CHARS);
+    // Grounding: the passage index; the old whole-site text if it's missing.
+    const index = await grab(env.INDEX_URL || INDEX_URL, 'json');
+    let localCtx, cloudCtx;
+    if (index && Array.isArray(index.chunks) && index.chunks.length) {
+      const wide = await retrieve(env, ctx, index, query, BUDGET.local);
+      localCtx = contextOf(wide);
+      // The cloud budget is a prefix of the same ranking: pinned first, then by score.
+      let used = 0;
+      cloudCtx = contextOf(wide.filter((c) => (used += c.text.length) <= BUDGET.cloud || c.pin));
+    } else {
+      const site = await grab(LLMS_FULL_URL);
+      if (!site) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);
+      localCtx = site.slice(0, BUDGET.local);
+      cloudCtx = site.slice(0, BUDGET.cloud);
+    }
 
-    // Pass 1 — generate, given the system prompt + the conversation so far.
-    let draft;
-    try { draft = await ai(env, [{ role: 'system', content: GEN_PROMPT(context) }, ...turns], 0.2, 420); }
-    catch (e) { return reply({ error: 'generation failed', detail: String((e && e.message) || e) }, 502, ch); }
-    if (!draft) return reply({ error: 'the model returned an empty answer' }, 502, ch);
-
-    // Pass 2 — fact-check + minimal rewrite of the latest answer. If it fails, keep the draft.
-    let answer = draft, verified = false;
+    const local = await askLocal(env, [{ role: 'system', content: genPrompt(localCtx, lang) }, ...turns]);
+    if (local) return reply(local, 200, ch);
     try {
-      const checked = await ai(env, [{ role: 'system', content: VERIFY_PROMPT(context) }, { role: 'user', content: `DRAFT:\n${draft}` }], 0.1, 420);
-      if (checked) { answer = checked; verified = true; }
-    } catch { /* verify unavailable — return the (prompt-grounded) draft */ }
-
-    return reply({ answer, model: MODEL, verified }, 200, ch);
+      return reply(await askCloud(env, cloudCtx, lang, turns), 200, ch);
+    } catch (e) {
+      return reply({ error: 'generation failed', detail: String((e && e.message) || e) }, 502, ch);
+    }
   },
 };
