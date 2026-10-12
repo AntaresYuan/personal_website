@@ -539,7 +539,7 @@
      right, which pushes the page aside rather than covering it. Markup from
      scripts/lib/work-shell.js, behaviour in scripts/work.js; answers come
      from the qa Worker (content/site.json → qa.workerUrl), with the
-     CMS-authored FAQ (content/faq.json) as fallback. -->
+     CMS-authored FAQ (content/assistant.json) as fallback. -->
 <div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
   <div class="ask-suggest" id="ask-suggest" hidden></div>
   <div class="ask-shell glass" id="ask-shell" data-lens>
@@ -580,9 +580,9 @@
 <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
 
 <script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
-<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
-<script src="/scripts/qa-faq.js?v=16189666" defer></script>
-<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/qa-faq-data.js?v=680c525f" defer></script>
+<script src="/scripts/qa-faq.js?v=861fccbe" defer></script>
+<script src="/scripts/work.js?v=739502fc" defer></script>
 <script src="/scripts/buddy.js?v=9a4fd889" defer></script>
 </body>
 </html>

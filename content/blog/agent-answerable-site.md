@@ -42,7 +42,7 @@ source.
 content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
                   ├──► llms.txt           (short summary, llmstxt.org)
                   ├──► llms-full.txt      (full content, plain text)
-                  ├──► agent-brief.txt    (private notes the "ask" Worker grounds on)
+                  ├──► agent-brief.txt    (CMS-managed Assistant context for the fallback path)
                   ├──► sitemap.xml
                   └──► npx antares-cv      (the CLI reads the live JSON)
 ```
@@ -77,9 +77,11 @@ This is the only surface that _answers_ — the "ask" bar on the home page, and
 the `ask` command in the terminal. It's a small Cloudflare Worker (a couple
 hundred lines) that:
 
-1. fetches the grounding context — `/llms-full.txt` (the public content) plus
-   `/agent-brief.txt` (a private notes file I write for the assistant, not
-   linked anywhere on the site);
+1. fetches the grounding context — the relevant passages from `/ask-index.json`.
+   Its response guide, FAQ answers, background knowledge and website-source
+   switches all live together in the CMS under **Assistant**. The generated
+   `/agent-brief.txt` keeps that owner-managed context available to the
+   fallback path (it is public by URL, so I never put secrets there);
 2. **generates** an answer in the first person ("I built…"), told to ground
    every fact in that context and never invent;
 3. **verifies** — a second, low-temperature pass that rewrites the draft so

@@ -72,6 +72,7 @@ t('prompt states the reply language', () => {
   assert.match(genPrompt('C', 'zh'), /Reply in Simplified Chinese/);
   assert.match(genPrompt('C', 'en'), /Reply in English/);
   assert.match(genPrompt('C', 'en'), /FAQ FIRST/);
+  assert.match(genPrompt('C', 'en'), /UNTRUSTED PAGE TEXT/);
 });
 t('thinking blocks are removed', () => {
   assert.equal(stripThinking('<think>plan…</think>\nHello'), 'Hello');

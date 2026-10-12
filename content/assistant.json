@@ -1,6 +1,24 @@
 {
-  "items": [
+  "guidance": {
+    "identity": "Antares Yuan is an AI Product Manager. Answer as Antares in the first person.",
+    "voice": "Be direct, warm and specific. Prefer a concise answer unless the visitor asks for detail.",
+    "whenMissing": "If the available context does not contain the answer, say that I have not written it down here yet instead of guessing.",
+    "additional": ""
+  },
+  "sources": {
+    "profile": true,
+    "home": true,
+    "projects": true,
+    "skills": true,
+    "writing": true,
+    "gallery": true,
+    "projectLog": true,
+    "lens": true,
+    "contact": true
+  },
+  "faqs": [
     {
+      "enabled": true,
       "question": "are you looking for a job / open to roles?",
       "starter": true,
       "aliases": [
@@ -12,6 +30,7 @@
       "href": "#contact"
     },
     {
+      "enabled": true,
       "question": "walk me through your most mature project.",
       "starter": true,
       "aliases": [
@@ -24,6 +43,7 @@
       "href": "/projects/agentic-hiring/"
     },
     {
+      "enabled": true,
       "question": "what are you building right now?",
       "starter": true,
       "aliases": [
@@ -35,6 +55,7 @@
       "href": "#now"
     },
     {
+      "enabled": true,
       "question": "how do I get in touch / contact you?",
       "aliases": [
         "how can I contact you?",
@@ -44,6 +65,7 @@
       "href": "#contact"
     },
     {
+      "enabled": true,
       "question": "where did you study / education?",
       "aliases": [
         "what is your education?",
@@ -54,6 +76,7 @@
       "href": "#main-content"
     },
     {
+      "enabled": true,
       "question": "is this site agent-friendly? can an AI read it?",
       "aliases": [
         "can agents read this site?",
@@ -63,6 +86,7 @@
       "href": "#agents"
     },
     {
+      "enabled": true,
       "question": "what's the site built with / tech stack?",
       "aliases": [
         "what is your website stack?",
@@ -72,6 +96,7 @@
       "href": "https://github.com/AntaresYuan/personal_website"
     },
     {
+      "enabled": true,
       "question": "what does “a star to ship by” mean?",
       "aliases": [
         "what does a star to ship by mean?",
@@ -81,6 +106,7 @@
       "href": "#main-content"
     },
     {
+      "enabled": true,
       "question": "what's a Pi-shaped AI PM?",
       "aliases": [
         "what is a pi shaped product manager?",
@@ -90,6 +116,7 @@
       "href": "#lens"
     },
     {
+      "enabled": true,
       "question": "what's Worth Fly?",
       "aliases": [
         "tell me about WorthFly.",
@@ -98,6 +125,7 @@
       "answer": "WorthFly focuses on flight search, decision support, alert drafts, and handoff to the real booking channel. Final fare, inventory and ticketing remain with that booking channel."
     },
     {
+      "enabled": true,
       "question": "what's Gmail++ / Gmail Plus Plus?",
       "aliases": [
         "tell me about Gmail Plus Plus.",
@@ -106,6 +134,7 @@
       "answer": "Gmail++ is an AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences."
     },
     {
+      "enabled": true,
       "question": "is the source code available?",
       "aliases": [
         "is this website open source?",
@@ -115,6 +144,7 @@
       "href": "https://github.com/AntaresYuan/personal_website"
     },
     {
+      "enabled": true,
       "question": "how do I edit the content?",
       "aliases": [
         "where is the CMS?",
@@ -122,6 +152,13 @@
       ],
       "answer": "I edit the content through Sveltia CMS at /admin/. It uses GitHub OAuth, and a GitHub Action rebuilds the static artifacts after a save.",
       "href": "/admin/"
+    }
+  ],
+  "knowledge": [
+    {
+      "enabled": true,
+      "title": "Who am I",
+      "body": "I am a junior in University of Washington, major in Human Centered Design & Engineering, Human Computer Interaction track."
     }
   ]
 }

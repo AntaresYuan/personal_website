@@ -24,7 +24,7 @@
 <pre><code class="lang-plain">content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
                   ├──► llms.txt           (short summary, llmstxt.org)
                   ├──► llms-full.txt      (full content, plain text)
-                  ├──► agent-brief.txt    (private notes the &quot;ask&quot; Worker grounds on)
+                  ├──► agent-brief.txt    (CMS-managed Assistant context for the fallback path)
                   ├──► sitemap.xml
                   └──► npx antares-cv      (the CLI reads the live JSON)
 </code></pre>
@@ -36,7 +36,7 @@
 <p>Stable IDs sound fussy until you watch an agent try to keep track of five of your projects in a chat and quietly merge two of them.</p>
 <h2 id="4-a-grounded-qa-endpoint">4. A grounded Q&amp;A endpoint</h2>
 <p>This is the only surface that <em>answers</em> — the &quot;ask&quot; bar on the home page, and the <code>ask</code> command in the terminal. It's a small Cloudflare Worker (a couple hundred lines) that:</p>
-<ol><li>fetches the grounding context — <code>/llms-full.txt</code> (the public content) plus <code>/agent-brief.txt</code> (a private notes file I write for the assistant, not linked anywhere on the site);</li><li><strong>generates</strong> an answer in the first person (&quot;I built…&quot;), told to ground every fact in that context and never invent;</li><li><strong>verifies</strong> — a second, low-temperature pass that rewrites the draft so every claim is supported by the context, stripping anything that isn't.</li></ol>
+<ol><li>fetches the grounding context — the relevant passages from <code>/ask-index.json</code>. Its response guide, FAQ answers, background knowledge and website-source switches all live together in the CMS under <strong>Assistant</strong>. The generated <code>/agent-brief.txt</code> keeps that owner-managed context available to the fallback path (it is public by URL, so I never put secrets there);</li><li><strong>generates</strong> an answer in the first person (&quot;I built…&quot;), told to ground every fact in that context and never invent;</li><li><strong>verifies</strong> — a second, low-temperature pass that rewrites the draft so every claim is supported by the context, stripping anything that isn't.</li></ol>
 <p>Two model calls per question. The second one is the whole point. An ungrounded &quot;AI version of me&quot; is <em>worse</em> than no AI version of me — it's a confident hallucination with my name on it. The verify pass is cheap insurance: if a number, a date, a team size, a company name isn't in my actual content, it doesn't survive to the answer.</p>
 <p>It runs on Cloudflare's Workers AI free tier. For a personal site's traffic, that's free, forever, in practice.</p>
 <h2 id="5-a-cli">5. A CLI</h2>

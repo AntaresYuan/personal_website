@@ -7,14 +7,14 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const source = path.join(root, 'content/faq.json');
+const source = path.join(root, 'content/assistant.json');
 const output = path.join(root, 'scripts/qa-faq-data.js');
 const data = JSON.parse(fs.readFileSync(source, 'utf8'));
 
-if (!data || !Array.isArray(data.items)) throw new Error('content/faq.json must contain an items array');
+if (!data || !Array.isArray(data.faqs)) throw new Error('content/assistant.json must contain a faqs array');
 
 const seen = new Set();
-const items = data.items.map((item, index) => {
+const items = data.faqs.filter((item) => item && item.enabled !== false).map((item, index) => {
   const question = String(item && item.question || '').trim();
   const answer = String(item && item.answer || '').trim();
   if (!question || !answer) throw new Error(`FAQ item ${index + 1} needs both question and answer`);
@@ -31,7 +31,7 @@ const items = data.items.map((item, index) => {
   };
 });
 
-const out = `/* GENERATED from content/faq.json — edit it in /admin/, not here. */\nwindow.QA_FAQ_DATA = ${JSON.stringify(items, null, 2)};\n`;
+const out = `/* GENERATED from content/assistant.json — edit it in /admin/, not here. */\nwindow.QA_FAQ_DATA = ${JSON.stringify(items, null, 2)};\n`;
 fs.writeFileSync(output, out);
 console.log(`✓ wrote scripts/qa-faq-data.js (${items.length} FAQs, ${items.filter((x) => x.starter).length} starters)`);
 

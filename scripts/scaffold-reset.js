@@ -131,7 +131,20 @@ write('content/contact.json', {
   ],
 });
 
-write('content/agent-brief.json', { notes: [] });
+write('content/assistant.json', {
+  guidance: {
+    identity: 'Answer as the site owner in the first person.',
+    voice: 'Be direct, warm and specific.',
+    whenMissing: 'Say the information is not written down here instead of guessing.',
+    additional: '',
+  },
+  sources: {
+    profile: true, home: true, projects: true, skills: true, writing: true,
+    gallery: true, projectLog: true, lens: true, contact: true,
+  },
+  faqs: [],
+  knowledge: [],
+});
 
 write('content/doodles.json', {
   // The brand "moon" mark becomes one of these on the matching day; otherwise
@@ -162,8 +175,9 @@ console.log(`
   1. media/avatar-calm.png + media/avatar-talking.png — replace with your own
      images (or delete them and update content/profile.json → avatar). Same for
      any résumé PDFs in media/ (set profile.json → resumeEn / resumeZh, or "").
-  2. content/faq.json — the FAQ answer briefs behind ⌘K and the "ask" bar.
-     Edit them directly or in /admin/ → Assistant FAQ.
+  2. content/assistant.json — response guidance, website-source switches,
+     FAQ answers, and background knowledge for the "ask" assistant.
+     Edit it directly or in /admin/ → Assistant.
   3. content/site.json → meta.url, footer, and (optionally) the analytics /
      giscus / qa tokens. README has the setup steps for each.
   4. Deploy: point Cloudflare Pages at your fork. For /admin/ to work, deploy

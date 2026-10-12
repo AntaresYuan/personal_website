@@ -5,8 +5,8 @@
    The site cut into short, titled passages, so the qa Worker (workers/qa/)
    can pick the few that answer a question instead of truncating the whole
    site to its first few thousand words. Two kinds of passage are `pin`ned —
-   sent with every question — : the notes Antares wrote for the assistant
-   (content/agent-brief.json) and an overview of who he is and what is here.
+   sent with every question — : the guide and notes Antares manages in
+   content/assistant.json, plus an overview of the enabled website sources.
 
    Public content only: the same material as llms-full.txt and
    agent-brief.txt, both of which are already served.
@@ -25,12 +25,12 @@ const tryRead = (p, fallback) => { try { return read(p); } catch { return fallba
 const profile = read('content/profile.json');
 const work = read('content/work.json');
 const contact = tryRead('content/contact.json', { items: [] });
-const brief = tryRead('content/agent-brief.json', { notes: [] });
-const faq = tryRead('content/faq.json', { items: [] });
+const assistant = tryRead('content/assistant.json', { guidance: {}, sources: {}, faqs: [], knowledge: [] });
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
 const board = tryRead('content/board.json', { cards: [] });
 const lens = tryRead('content/lens.json', { items: [] });
+const sourceOn = (name) => !assistant.sources || assistant.sources[name] !== false;
 
 const MAX = 1200;   // characters per passage, roughly 250–300 tokens
 
@@ -49,7 +49,7 @@ const plain = (s) => String(s ?? '')
 // FAQ answer briefs stay separate from ordinary passages. The Worker first
 // performs a deterministic question/alias match, then places the matching
 // brief ahead of the normal site retrieval context.
-const faqs = (faq.items ?? []).map((item, index) => ({
+const faqs = (assistant.faqs ?? []).filter((item) => item && item.enabled !== false).map((item, index) => ({
   id: `faq-${index + 1}`,
   question: String(item.question || '').trim(),
   answer: plain(String(item.answer || '')),
@@ -81,24 +81,35 @@ const add = (id, title, url, text, pin = false) => {
   }));
 };
 
-/* ── Pinned: the owner's notes, and an overview ───────────────────────── */
-(brief.notes ?? []).forEach((n, i) => add(`brief-${i + 1}`, `Note: ${n.title || 'background'}`, '', n.body, true));
+/* ── Pinned: the owner's guide, notes, and an overview ────────────────── */
+const guide = assistant.guidance ?? {};
+const guideText = [
+  guide.identity ? `Identity: ${guide.identity}` : '',
+  guide.voice ? `Voice and style: ${guide.voice}` : '',
+  guide.whenMissing ? `When information is missing: ${guide.whenMissing}` : '',
+  guide.additional ? `Additional guidance: ${guide.additional}` : '',
+].filter(Boolean).join('\n\n');
+if (guideText) add('assistant-guide', 'Assistant response guide', '', guideText, true);
+
+(assistant.knowledge ?? []).filter((n) => n && n.enabled !== false)
+  .forEach((n, i) => add(`knowledge-${i + 1}`, `Background knowledge: ${n.title || 'untitled'}`, '', n.body, true));
 
 const projects = projectList();
 const name = [work.name?.first || profile.name, work.name?.middle && `(${work.name.middle})`, work.name?.last || profile.nameAccent].filter(Boolean).join(' ');
-add('overview', 'Who I am and what is on this site', '/', [
-  `I'm ${name}${work.name?.native ? ` (${work.name.native})` : ''}. ${profile.role || ''}. Based in ${profile.location || ''}.`,
-  profile.status ? `Right now: ${profile.status}` : '',
-  (profile.tagsWork ?? []).length ? `In short: ${profile.tagsWork.join(', ')}.` : '',
-  work.message?.body ? `My message on the home page: ${work.message.body}` : '',
-  work.update?.text ? `Latest update (${work.update.date || ''}): ${work.update.text}` : '',
-  `Projects on this site: ${projects.map((p) => `${p.title} (${p.kind || ''}) — ${p.summary || ''}`).join(' | ')}`,
-  `AI skills I built: ${(skills.items ?? []).map((s) => `${s.name} — ${s.tagline || s.summary || ''}`).join(' | ')}`,
-  `Contact: ${plain(contact.intro || '')} ${(contact.items ?? []).map((c) => `${c.key}: ${c.label} (${c.href})`).join('; ')}`,
-].filter(Boolean).join('\n\n'), true);
+const overview = [
+  sourceOn('profile') ? `I'm ${name}${work.name?.native ? ` (${work.name.native})` : ''}. ${profile.role || ''}. Based in ${profile.location || ''}.` : '',
+  sourceOn('profile') && profile.status ? `Right now: ${profile.status}` : '',
+  sourceOn('profile') && (profile.tagsWork ?? []).length ? `In short: ${profile.tagsWork.join(', ')}.` : '',
+  sourceOn('home') && work.message?.body ? `My message on the home page: ${work.message.body}` : '',
+  sourceOn('home') && work.update?.text ? `Latest update (${work.update.date || ''}): ${work.update.text}` : '',
+  sourceOn('projects') ? `Projects on this site: ${projects.map((p) => `${p.title} (${p.kind || ''}) — ${p.summary || ''}`).join(' | ')}` : '',
+  sourceOn('skills') ? `AI skills I built: ${(skills.items ?? []).map((s) => `${s.name} — ${s.tagline || s.summary || ''}`).join(' | ')}` : '',
+  sourceOn('contact') ? `Contact: ${plain(contact.intro || '')} ${(contact.items ?? []).map((c) => `${c.key}: ${c.label} (${c.href})`).join('; ')}` : '',
+].filter(Boolean).join('\n\n');
+if (overview) add('overview', 'Who I am and what is on this site', '/', overview, true);
 
 /* ── Work case studies ────────────────────────────────────────────────── */
-for (const p of projects) {
+for (const p of sourceOn('projects') ? projects : []) {
   const url = `/projects/${p.slug}/`;
   add(`project-${p.slug}`, `Project: ${p.title}`, url, [
     `${p.title} — ${p.kind || ''}`,
@@ -112,7 +123,7 @@ for (const p of projects) {
 }
 
 /* ── AI Skills, Gallery, Writing, the Personal board, Lens ────────────── */
-for (const s of skills.items ?? []) {
+for (const s of sourceOn('skills') ? (skills.items ?? []) : []) {
   add(`skill-${s.slug}`, `AI skill: ${s.name}`, `/skills/${s.slug}/`, [
     `${s.name} — ${s.category || ''}. ${s.tagline || ''}`,
     s.summary || '',
@@ -121,13 +132,13 @@ for (const s of skills.items ?? []) {
     s.details || '',
   ].filter(Boolean).join('\n\n'));
 }
-for (const g of gallery.items ?? []) {
+for (const g of sourceOn('gallery') ? (gallery.items ?? []) : []) {
   add(`gallery-${g.slug}`, `Gallery: ${g.title}`, '/gallery/', [
     `${g.title}${g.year ? ` (${g.year})` : ''}${g.medium ? ` — ${g.medium}` : ''}. Category: ${gallery.categories?.[g.category] || g.category || ''}.`,
     g.summary || '',
   ].filter(Boolean).join('\n\n'));
 }
-for (const post of loadPosts()) {
+for (const post of sourceOn('writing') ? loadPosts() : []) {
   const url = `/blog/${post.slug}/`;
   add(`post-${post.slug}`, `Writing: ${post.title}`, url, [`${post.title} (${post.date || ''})`, post.summary || ''].join('\n\n'));
   // One passage per section, so a long post doesn't crowd out everything else.
@@ -136,7 +147,7 @@ for (const post of loadPosts()) {
     add(`post-${post.slug}-${i + 1}`, `Writing: ${post.title}${head ? ` — ${head}` : ''}`, url, sec);
   });
 }
-for (const c of board.cards ?? []) {
+for (const c of sourceOn('projectLog') ? (board.cards ?? []) : []) {
   add(`board-${c.slug || c.id}`, `Project log: ${c.title} (${c.status})`, '/personal/', [
     `${c.title} — ${c.status}${c.updated ? `, ${c.updated}` : ''}. ${c.summary || ''}`,
     (c.tags ?? []).length ? `Tags: ${c.tags.join(', ')}` : '',
@@ -144,7 +155,7 @@ for (const c of board.cards ?? []) {
     c.details || '',
   ].filter(Boolean).join('\n\n'));
 }
-if ((lens.items ?? []).length) {
+if (sourceOn('lens') && (lens.items ?? []).length) {
   add('lens', 'How I think', '/personal/', lens.items.map((it) => `${it.main} — ${it.aside}`).join('\n\n'));
 }
 
