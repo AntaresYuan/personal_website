@@ -34,8 +34,7 @@
   };
 
   /* ── State ──────────────────────────────────────────────────────── */
-  const state = { profile: null, board: null, lens: null, contact: null, qaUrl: '' };
-  let askBusy = false;     // an `ask` request is in flight — the input is disabled meanwhile
+  const state = { profile: null, board: null, lens: null, contact: null };
   const history = [];
   let historyIdx = -1;
 
@@ -188,7 +187,6 @@
       ['cat <ID>',                   'full details for a card (e.g. cat SHIP-01)'],
       ['open <ID>',                  'open a card in the side panel'],
       ['search <keyword>',           'fuzzy match across all cards'],
-      ['ask <question>',             'ask this portfolio (AI answer, grounded in the site)'],
       ['recent [--days=N]',          'recently updated cards (default: top 5)'],
       ['now',                        'shortcut for projects --status=now'],
       ['lens',                       'principles / how I think'],
@@ -302,50 +300,6 @@
     }
     print(`<span class="term-dim">${matches.length} match${matches.length === 1 ? '' : 'es'} for '${escape(q)}':</span>`);
     printCardTable(matches);
-  };
-
-  // ask <question> — a grounded AI answer from the antares-qa Worker
-  // (workers/qa/, fed the site's /llms-full.txt). Needs content/site.json →
-  // qa.workerUrl to be set; otherwise it explains what's missing. The "asking…"
-  // line is replaced in place when the answer (or an error) arrives. The prompt
-  // is locked while we wait so nothing else prints in between.
-  cmds.ask = (args) => {
-    if (askBusy) return print('<span class="term-dim">one moment — still working on the last question.</span>', 'term-dim');
-    const q = (args || []).join(' ').trim();
-    if (!q) return print('usage: ask &lt;your question&gt; — e.g. <span class="term-key">ask are you open to roles?</span>', 'term-err');
-    const url = state.qaUrl;
-    if (!url) {
-      return print('<span class="term-dim">the </span><span class="term-key">ask</span><span class="term-dim"> command needs the antares-qa Worker deployed (see </span><span class="term-key">workers/qa/README.md</span><span class="term-dim">). For now try </span><span class="term-key">whoami</span><span class="term-dim"> · </span><span class="term-key">projects</span><span class="term-dim"> · </span><span class="term-key">cat &lt;ID&gt;</span><span class="term-dim"> · </span><span class="term-key">search</span><span class="term-dim">.</span>');
-    }
-    print("<span class=\"term-dim\">asking this portfolio… (takes a few seconds — two passes)</span>", 'term-dim');
-    // `print()` above is BUFFERED inside exec()'s printBatch — it isn't in the
-    // DOM yet. Grab the "asking…" line only after that batch flushes (next
-    // microtask), so we replace the right node and not the line above it.
-    let lineNode = null;
-    queueMicrotask(() => { lineNode = promptLine.previousElementSibling; });
-    const setLine = (html, cls) => {
-      if (lineNode) { lineNode.className = `terminal-line ${cls || 'term-out'}`; lineNode.innerHTML = html; }
-      else { print(html, cls); }
-      scrollToBottom();
-    };
-    // Lock the prompt while we wait — so a second `ask` can't be fired and its
-    // answer can't land out of order. Re-enabled in .finally().
-    askBusy = true;
-    input.disabled = true;
-    fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q }), signal: AbortSignal.timeout(30000) })
-      .then(async (r) => {
-        let data = {};
-        try { data = await r.json(); } catch (_) { /* non-JSON response */ }
-        if (r.ok && data && data.answer) {
-          const ans = escape(String(data.answer)).replace(/\n+/g, '<br>');
-          setLine(`<span class="term-dim">✨</span> ${ans}`, 'term-out');
-        } else {
-          const why = (data && data.error) ? ` — ${escape(String(data.error))}` : '';
-          setLine(`<span class="term-err">couldn’t get an answer right now${why}.</span> <span class="term-dim">try rephrasing, or </span><span class="term-key">search ${escape((q.split(/\s+/)[0] || '').toLowerCase())}</span>`, 'term-out');
-        }
-      })
-      .catch((e) => setLine(`<span class="term-err">${(e && e.name === 'TimeoutError') ? 'no answer in time — try again.' : "couldn’t reach the answer service."}</span> <span class="term-dim">try again in a moment.</span>`, 'term-out'))
-      .finally(() => { askBusy = false; input.disabled = false; input.focus(); });
   };
 
   cmds.recent = (args, opts) => {
@@ -589,8 +543,8 @@
 
       const [name, ...rest] = trimmed.split(/\s+/);
       const fn = cmds[name.toLowerCase()];
-      /* Command NAME only — never args. `search <term>` and `ask <question>`
-         carry whatever the visitor typed, which is exactly the kind of
+      /* Command NAME only — never args. `search <term>` carries whatever the
+         visitor typed, which is exactly the kind of
          content this site promised not to collect. An unrecognised name
          reports as 'unknown' rather than being echoed, so a typo cannot
          become a counter key either. */
@@ -712,14 +666,13 @@
   loadHistory();
   (async () => {
     try {
-      const [profile, board, lens, contact, site] = await Promise.all([
+      const [profile, board, lens, contact] = await Promise.all([
         json('content/profile.json'),
         json('content/board.json'),
         json('content/lens.json'),
         json('content/contact.json'),
-        json('content/site.json').catch(() => ({})),   // optional — just for qa.workerUrl
       ]);
-      Object.assign(state, { profile, board, lens, contact, qaUrl: String((site && site.qa && site.qa.workerUrl) || '').trim() });
+      Object.assign(state, { profile, board, lens, contact });
 
       print(
         [

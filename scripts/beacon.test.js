@@ -89,7 +89,7 @@ ok('only calendar-day precision', worker.includes("new Date().toISOString().slic
   ok('no invented terminal commands', extra.length === 0, `extra: ${extra.join(', ')}`);
   ok("'unknown' bucket exists", listed.includes('unknown'));
   // The hook must send the command NAME and never its arguments: `search`
-  // and `ask` carry whatever the visitor typed.
+  // carries whatever the visitor typed.
   const term = read('scripts/terminal.js');
   ok('terminal hook sends name only', term.includes("window.SITE_BEACON('terminal_cmd', fn ? name.toLowerCase() : 'unknown')"));
   ok('terminal hook never sends args', !/SITE_BEACON\('terminal_cmd'[^)]*\b(args|rest|trimmed|q)\b/.test(term));

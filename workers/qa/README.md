@@ -1,20 +1,21 @@
 # `antares-qa` — "ask this portfolio" Q&A Worker
 
-Powers the **Ask** composer on every Work page (and the terminal's
-**`ask <question>`** on Personal). It answers a visitor's question **in the
+Powers the **Ask** composer on every Work page. Personal deliberately has no
+AI chat and none of its roadmap, Lens or Contact content enters this corpus.
+It answers a visitor's question **in the
 first person, as Antares** ("I built…"), grounded only in the site's own
 content, and **in the visitor's language** (Chinese question, Chinese answer).
 
 1. **Retrieve.** The Worker fetches `/ask-index.json`. This is the site cut into
    titled passages by `scripts/build-ask-index.js`:
    - the concise `/llms.txt` site summary is pinned and included with every
-     answer when enabled in CMS → Assistant → Website context;
+     answer when enabled in CMS → Assistant → Work context;
    - CMS-authored FAQ answer briefs are checked first by canonical question
      and aliases; a match becomes authoritative guidance for the answer
    - the Work case studies
    - AI Skills and Gallery
    - every Writing post, section by section
-   - the Personal project log and Lens
+   - no Personal content; that boundary is enforced by the build and tests
 
    The response guide and background notes from CMS → **Assistant** →
    the four files in `content/assistant/` go with every question, along with an overview

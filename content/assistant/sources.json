@@ -5,8 +5,5 @@
   "projects": true,
   "skills": true,
   "writing": true,
-  "gallery": true,
-  "projectLog": true,
-  "lens": true,
-  "contact": true
+  "gallery": true
 }

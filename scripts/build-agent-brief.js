@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════
-   build-agent-brief.js — compile content/assistant/ → agent-brief.txt
+   build-agent-brief.js — compile Work Assistant context → agent-brief.txt
 
    This is the "private knowledge" feed for the `ask` assistant (workers/qa/):
    This compatibility artifact contains all owner-managed Assistant context:
@@ -30,7 +30,7 @@ const knowledge = Array.isArray(assistant.knowledge) ? assistant.knowledge.filte
 
 const guide = [guidance.identity, guidance.voice, guidance.whenMissing, guidance.additional]
   .map((x) => String(x || '').trim()).filter(Boolean);
-const sections = ['# Assistant context — managed in /admin/ → Assistant. This file is public by URL, not secret.'];
+const sections = ['# Work Assistant context — managed in /admin/ → Assistant. This file is public by URL, not secret.'];
 if (guide.length) sections.push(`## Response guide\n${guide.join('\n\n')}`);
 if (faqs.length) sections.push('# FAQ answers\n' + faqs.map((f) => `## ${String(f.question).trim()}\n${String(f.answer).trim()}`).join('\n\n'));
 if (knowledge.length) sections.push('# Background knowledge\n' + knowledge.map((n) => `## ${String(n.title || 'Untitled').trim()}\n${String(n.body || '').trim()}`).join('\n\n'));

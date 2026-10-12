@@ -147,8 +147,8 @@ Pulling Medium → site would be backwards: it canonicalizes those posts to Medi
 
 The site exposes three machine-readable surfaces backed by the same JSON:
 
-- **`/llms.txt`** — short summary per [llmstxt.org](https://llmstxt.org)
-- **`/llms-full.txt`** — full content dump in plain text
+- **`/llms.txt`** — short Work-only summary per [llmstxt.org](https://llmstxt.org)
+- **`/llms-full.txt`** — full Work-only content dump in plain text
 - **`/content/*.json`** — typed structured data
 
 Plus: project cards (`SHIP-01`, `NOW-01`, …) and `/skills` entries (`SKILL-01`, …) have stable IDs so agents can cite them across conversations, and the home HTML is **pre-rendered** — agents that don't execute JavaScript still see all content.
@@ -198,7 +198,7 @@ Production: <https://antaresyuan.site> on Cloudflare Pages.
 
 Two Cloudflare Workers back it (each deploys itself — see the README in its folder):
 - `workers/decap-oauth/` — GitHub OAuth proxy for `/admin/` sign-in. (The folder name stuck from Decap; Sveltia speaks the same OAuth protocol.)
-- `workers/qa/` — the "ask" assistant: checks CMS-authored FAQ briefs first, retrieves supporting passages from `/ask-index.json`, and answers in the visitor's language from the model on my Mac when it's reachable (`ops/local-llm/`), else Workers AI. When the Worker is unavailable, the "ask" bar falls back to the same FAQ data in the browser.
+- `workers/qa/` — the Work-only "ask" assistant: checks CMS-authored FAQ briefs first, retrieves supporting Work passages from `/ask-index.json`, and answers in the visitor's language from the model on my Mac when it's reachable (`ops/local-llm/`), else Workers AI. Personal has no chat and its roadmap/Lens/Contact data are excluded from the model corpus.
 - `workers/comments/` — reactions and comments on Writing posts (Worker + D1, Turnstile, Llama Guard screening, an `/admin` moderation page). Optional: while `site.json → comments.endpoint` is empty, posts keep giscus.
 
 ## Add-ons (configured via `content/site.json` or `/admin/`)

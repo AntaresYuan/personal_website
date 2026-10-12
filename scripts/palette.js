@@ -11,13 +11,10 @@
      section → smooth-scroll to anchor
      card    → CustomEvent('agent:open-card')  (render.js opens the panel)
      command → focus terminal input + prefill
-     faq     → show the answer inline; jump to the relevant card / section
      link    → open in new tab
 
-   The palette doubles as a pure-retrieval "ask this portfolio" (#76 Phase 1):
-   a small CMS-authored FAQ list plus token-overlap scoring, so a
-   typed question like "are you looking for a job" surfaces the right FAQ
-   entry / card. No embeddings, no model calls — just retrieval. */
+   Personal deliberately has no AI chat or FAQ-answer surface; the palette is
+   navigation and local search only. */
 (() => {
   const root = document.getElementById('palette');
   const backdrop = document.getElementById('palette-backdrop');
@@ -73,18 +70,9 @@
 
   const STATIC_EXTERNAL = [
     { label: 'Source on GitHub', desc: 'AntaresYuan/personal_website', href: 'https://github.com/AntaresYuan/personal_website', external: true },
-    { label: '/llms.txt',        desc: 'agent-readable summary',        href: '/llms.txt',      external: true },
-    { label: '/llms-full.txt',   desc: 'agent full content',            href: '/llms-full.txt', external: true },
     { label: '/admin/',          desc: 'CMS (auth required)',           href: '/admin/',        external: true },
     { label: 'npx antares-cv',   desc: 'resume in your terminal',       href: 'https://www.npmjs.com/package/antares-cv', external: true },
   ];
-
-  // Hand-authored FAQ — the "ask this portfolio" corpus (#76 Phase 1). The
-  // data + a tiny retrieval matcher now live in scripts/qa-faq.js (window.QA),
-  // shared with the hero "ask" bar (scripts/render.js). Loaded as a <script>
-  // before this one; if it didn't load, FAQ entries just won't show in ⌘K —
-  // everything else still works.
-  const FAQ = (window.QA && window.QA.FAQ) || [];
 
   const STATUS_GLYPH = { shipped: '✓', now: '→', next: '◇', later: '○' };
   const idPrefix = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
@@ -210,24 +198,6 @@
       });
     });
 
-    // FAQ — "ask this portfolio". The question is the label; the answer is
-    // shown inline; selecting it jumps to the relevant card / section / link.
-    FAQ.forEach((f) => {
-      out.push({
-        kind: 'faq',
-        icon: '?',
-        label: f.q,
-        answer: f.a,
-        meta: '',
-        search: `${f.q} ${f.a}`.toLowerCase(),
-        action: () => {
-          if (f.cardId) document.dispatchEvent(new CustomEvent('agent:open-card', { detail: { id: f.cardId } }));
-          else if (f.anchor) scrollToAnchor(f.anchor);
-          else if (f.href) window.open(f.href, '_blank', 'noopener');
-        },
-      });
-    });
-
     return out;
   };
 
@@ -296,9 +266,8 @@
       const writing = items.filter((it) => it.kind === 'post' && it.label === 'Writing').slice(0, 1);
       const topShipped = items.filter((it) => it.kind === 'card' && it.desc === 'shipped').slice(0, 2);
       const cv = items.filter((it) => it.kind === 'cmd' && it.label === 'cv');
-      const faq = items.filter((it) => it.kind === 'faq').slice(0, 1);   // first FAQ ("are you looking for a job")
       const ext = items.filter((it) => it.kind === 'ext' && it.label.startsWith('Source')).slice(0, 1);
-      return [...sections, ...writing, ...topShipped, ...faq, ...cv, ...ext];
+      return [...sections, ...writing, ...topShipped, ...cv, ...ext];
     }
     return items
       .map((it) => ({ it, s: score(q, it) }))
@@ -308,39 +277,12 @@
       .map((x) => x.it);
   };
 
-  /* The search box doubles as an ask box. Rather than making the visitor
-     decide up front which one they are using, the typed query is offered BOTH
-     ways: matching content below, and a row at the top that hands the same
-     text to the assistant.
-
-     Only when something is typed — with an empty box there is no question to
-     ask, and a permanent row would just be a second button competing with the
-     floating pill.
-
-     It is a normal item, so arrow keys, hover and Enter reach it through the
-     existing machinery instead of a parallel code path. */
-  const askItem = (q) => ({
-    kind: 'ask',
-    icon: '\u2726',
-    label: `ask Antares — \u201c${q}\u201d`,
-    desc: 'open a conversation in the side panel',
-    meta: 'ask',
-    action: () => {
-      const panel = window.ASK_PANEL;
-      if (panel && typeof panel.open === 'function') panel.open(q);
-    }
-  });
-
   /* ── Rendering ─────────────────────────────────────────────────── */
   let selected = 0;
 
   const render = () => {
     const q = input.value;
-    const typed = q.trim();
-    /* Prepend, not append: a question that matches nothing would otherwise sit
-       below a "no matches" line, which reads as a dead end at exactly the
-       moment the assistant is the useful answer. */
-    const matches = typed ? [askItem(typed), ...filter(q)] : filter(q);
+    const matches = filter(q);
 
     if (matches.length === 0) {
       list.innerHTML = `<li class="palette-empty">no matches for "${escape(q)}"</li>`;
@@ -351,11 +293,8 @@
     if (selected >= matches.length) selected = 0;
 
     list.innerHTML = matches.map((it, i) => {
-      const secondLine = (it.kind === 'faq' && it.answer)
-        ? `<div class="palette-result-answer">${escape(it.answer)}</div>`
-        : (it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : '');
-      const askCls = it.kind === 'ask' ? ' is-ask' : '';
-      return `<li class="palette-result${askCls} ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
+      const secondLine = it.desc ? `<div class="palette-result-desc">${escape(it.desc)}</div>` : '';
+      return `<li class="palette-result ${i === selected ? 'is-selected' : ''}" data-idx="${i}" role="option" aria-selected="${i === selected}">
         <span class="palette-result-icon" aria-hidden="true">${escape(it.icon)}</span>
         <div class="palette-result-body">
           <div class="palette-result-label">${escape(it.label)}</div>

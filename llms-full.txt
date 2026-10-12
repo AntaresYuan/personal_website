@@ -1,15 +1,14 @@
-# Antares Yuan
+# Antares (Chenjie) Yuan — Work
 
-A star to ship by.
-
-I build AI products by treating myself like one — versioned, measured, always shipping.
-
-Name: Antares Yuan
+## A message from Antares
+AI moves fast, remaking itself by the day. I keep one eye on the frontier in Silicon Valley — but as an AI product manager, I've learned to keep the other on the business problem in front of me. It is the compass that keeps the work grounded, honest, and on course. A note to myself, and to everyone building in this moment.
+Name: Antares (Chenjie) Yuan (袁晨杰)
 Role: AI Product Manager
 Location: Seattle | Beijing · currently working at ByteDance as an AI PM intern
-Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
+Work focus: AI Product Manager, HCDE @ UW, Ex ByteDance
+Latest update (2026-10-10): The new Work version of my personal website is live — yay!
 
-# Work — case studies
+# Projects
 
 ## Agentic Hiring · ByteDance · AI Agent · Intern Project · 2K+ DAU · Staged rollout
 
@@ -198,6 +197,8 @@ Outcomes:
   - 16 → 28 of 30: Workflows recognized correctly at the planning entry (Seed 2.0 Pro), up 40 points
   - Top 3: ByteDance's AI Full-Stack Development Challenge, with a finals demo
 
+Live demo: https://roundtable-gray.vercel.app
+
 ---
 
 ## Lark Loom · Lark Campus AI Challenge · AI Agent · Memory & Retrieval
@@ -325,292 +326,299 @@ Outcomes:
 Links:
   - Paper on arXiv: https://arxiv.org/abs/2510.11035
 
-# Shipped
+# AI Skills
 
-## SHIP-01 · SHIPPED · Lark Loom
-The collaborative AI Agent rooted  in the Lark ecosystem.
-Tags: HACKATHON PROJECT, AI Agent PM, Delivery Layer Developer, Collaboration, Lark, Lark AI Challenge for College Students
-Updated: 2026-05-15
-Links:
-  - GitHub(in Chinese): https://github.com/EdwinjJ1/lark-loom
-  - Lark AI Challenge(in Chinese): https://bytedance.aiforce.cloud/app/app_4jv6kvy942afr
+## Eynap · Claude Code skill kit
 
-## SHIP-02 · SHIPPED · Citation Trap
-Agentic RAG Reference Benchmark for Trustworthiness Evaluation
-Tags: HACKATHON PROJECT, AI Agent PM, Benchmark
-Updated: 2026-05-15
-Links:
-  - GitHub: https://github.com/AntaresYuan/citation-trap
-  - Run the benchmark: https://mesocosm.swecc.org/domains/36387b04-fa41-4254-9130-bc30f7bd61fe
+Website: https://antaresyuan.github.io/eynap-site/
 
-## SHIP-03 · SHIPPED · Gmail Plus Plus
-Gmail++ is a AI-powered email ranking platform that gives you a read-only reply queue on top of Gmail, with visible reasoning and reversible account-scoped preferences.
-Tags: SIDE PROJECT, AI Builder, XGBoost, Productivity, Website
-Updated: 2026-04-25
-Links:
-  - Try it: https://gmailplusplus.site
-  - GitHub: https://github.com/AntaresYuan/Gmailplusplus
+GitHub: https://github.com/AntaresYuan/eynap
 
-11111
+Everything You Need as an AI PM
 
-## SHIP-04 · SHIPPED · Worth Fly
-WorthFly currently focuses on search, decision support, alert drafts, and external purchase handoff. Final fare, inventory, and ticketing still belong to the real booking channel.
-Tags: SIDE PROJECT, AI PM, 0→1, Explainable AI, Website
-Updated: 2026-04-10
-Links:
-  - Demo: https://worthfly.vercel.app
-  - GitHub: https://github.com/AntaresYuan/Worthfly
-
-## Context
-
-Replace this with the longer story. Two or three short paragraphs is plenty.
-
-## What I owned
-
-- Decision X
-- Decision Y
-- Trade-off Z
--  I am very good.
-
-## Outcome
-
-What happened. What you'd do differently.
-
-## SHIP-05 · SHIPPED · SusBench
-Online benchmark for evaluating the susceptibility of CUAs to UI dark patterns.
-Impact: cited by 2 papers
-Tags: RESEARCH PROJECT, HCI, IUI 2025
-Updated: 2026-02-23
-Links:
-  - Paper: https://arxiv.org/pdf/2510.11035
-  - DOI: https://arxiv.org/abs/2510.11035
-  - GitHub: https://github.com/SusBench-creator/SusBench
-
-## SHIP-06 · SHIPPED · Coze Multi-Agent Orchestration
-Lower the barrier for AI-coding novices to complete complex tasks and improve orchestration reuse for experienced users, through workflows tailored to each development task.
-Impact: Shipped workflow recommendations, a visual editor and a template marketplace. Top 3 at the challenge.
-Tags: HACKATHON PROJECT, AI Agent PM, Multi-Agent, Coze
-Updated: 2026-07-01
-
-Choosing the wrong multi-agent workflow wastes the execution cost of every downstream node, so success was defined as accurately identifying applicable boundaries and distinguishing easily-confused scenarios. Defined metadata for task type, applicable scenarios, agent roles, I/O, process nodes and constraints, and built a 30-case evaluation set including confusable items. Bad-case attribution pointed at insufficient model knowledge, so the engineering layer gained 5-shot examples with positive/negative cases and reasoning explanations, using an ICE-structured prompt with schema-structured output to avoid hallucination.
-# Now
-
-## NOW-01 · NOW · Landed
-1
-Tags: SIDE PROJECT
-
-## NOW-02 · NOW · YiTang Profile Matching Infra
-1
-Tags: INTERN PROJECT
-
-## NOW-03 · NOW · ApplyMint
-ApplyMint is a AI-powered chrome extension that compiles the resume into JSON, import it once for visual editing, and automatically fill it in one click on the job application form
-Tags: SIDE PROJECT, Job Application, Chrome Extension
-
-## NOW-04 · NOW · SleepStreak
-Designing Healthier Pre-Sleep Phone Use Experience for Teens & Early Adults
-Tags: RESEARCH PROJECT
-
-• Sleep is crucial for human well-being, but insufficient sleep has become a global epidemic, especially for teens and early adults
-• Studies found this crisis has been caused in part by smartphones and digital devices
-• This work seeks to examine the specific interface affordances that disrupt sleep and design alternative interfaces that reduce this
-
-## NOW-05 · NOW · SusFix
-Ongoing project about building a system about using LLM to auto fix the dark patterns on the websites.
-Tags: RESEARCH PROJECT
-
-## NOW-06 · NOW · Kaboo — Token Efficiency
-Token-consumption analytics platform. Led the Token Efficiency Leaderboard and the efficiency analysis module, now covering thousands of internal users.
-Impact: Covering thousands of internal users.
-Tags: INTERN PROJECT, AI PM, Open Source, Observability
-
-Defined judgment criteria for five waste categories — ineffective retries, redundant tool definitions, redundant context, cache misses and over-provisioned model selection. Designed a diagnostic scheme that collects only structured metadata, never task content, and normalised cross-model cost with an Effective Tokens metric.
-# Next
-
-## NEXT-01 · NEXT · From PM to Builder
-Stop briefing engineers — become one. Use solo builder loops to solve real business problems end-to-end, not just spec them.
-Tags: Career Pivot, AI Builder, 0→1
-Updated: 2026-05-09
-
-## NEXT-02 · NEXT · Make AI worth looking at
-Most AI products inherit the model's flat default aesthetic. Explore distillation + skill composition to ship AI that's well-crafted, not just functional.
-Tags: AI Aesthetic, Distillation, Skills, Craft
-Updated: 2026-05-09
-
-## NEXT-03 · NEXT · Close the product loop
-Build operations + data analytics fluency so I own the full product lifecycle — not just the design-and-ship slice.
-Tags: Product Ops, Data Analysis, Full-stack PM
-Updated: 2026-05-09
-# Later
-
-## LATER-01 · LATER · AI for people, not just AI people
-The 1-3 year version of me: shipped AI products that ordinary people — not the early-adopter or AI-insider crowd — use daily to make their lives meaningfully better.
-Tags: Mission, Mass-impact AI, Real-world AI
-Updated: 2026-05-09
-
-## LATER-02 · LATER · Human-centered, agent-aware
-Human-centered design stays the foundation. But in the agent era, AI is also a user — and most products still ignore that. The 1-3 year version of me: deep enough AI fluency to design for both humans and the agents acting on their behalf, so the AI actually helps.
-Tags: Human-centered Design, Agent-friendly, HCI × AI, Pi-shaped
-Updated: 2026-05-09
-
-# Skills — dotfiles for AI
-
-What I built to multiply my own AI work.
-
-## SKILL-01 · Eynap · Claude Code skill kit
 An AI PM skill kit: one orchestrator that routes by stage, six skills from research to PRD, and one shared foundation every skill reads.
-Links:
-  - Site: https://antaresyuan.github.io/eynap-site/
-  - GitHub: https://github.com/AntaresYuan/eynap
 
-## What it is
+Install: npx skills add AntaresYuan/eynap -y
+
+7 skills, each callable on its own; 37/37 static checks passed; v3.0.0 current version
+
+What it is
 
 Research, framing, PRD, entity state machines, design handoff — each written down in a form an AI can read, so an agent can carry a PM's work. One orchestrator decides the stage, routes to a skill and checks the gate; the skills cover value, flow, entity, design, PRD and research; and a shared foundation holds memory, preferences, naming, protocols, host differences and wording rules.
 
 Call the one you need directly — no need to run the whole pipeline.
+The chain
 
-## The chain
+Building a product from scratch, the skills run value → flow → entity → design → prd. The PRD comes last because its journey, entity and interaction chapters are those outputs. Research is called on demand, not run first.
+Credits
 
-Building a product from scratch, the skills run **value → flow → entity → design → prd**. The PRD comes last because its journey, entity and interaction chapters *are* those outputs. Research is called on demand, not run first.
+An adaptation of SmileLiuuuu/ai-pm, released under the same CC BY-NC 4.0 license. The methodology comes from v1; v3 splits it into independently callable skills.
 
-## Credits
+---
 
-An adaptation of [SmileLiuuuu/ai-pm](https://github.com/SmileLiuuuu/ai-pm), released under the same CC BY-NC 4.0 license. The methodology comes from v1; v3 splits it into independently callable skills.
+## Agent Memory Hub · Agent infra
 
-## SKILL-02 · Agent Memory Hub · Agent infra
+Website: https://antaresyuan.github.io/agent-memory-hub-site/
+
+Shared memory for ChatGPT, Claude, Codex, and Claude Code
+
 A Markdown-and-Git memory layer with MCP tools for durable context, scoped recall, consolidation, and cross-agent handoffs.
-Links:
-  - Site: https://antaresyuan.github.io/agent-memory-hub-site/
 
-## SKILL-03 · /devloop · Claude Code skill
+---
+
+## /devloop · Claude Code skill
+
+GitHub: https://github.com/AntaresYuan/claude-devloop
+
+An unattended dev loop that works your issue queue
+
 autonomous unattended dev loop — branch → small step → test → PR → sub-agent review → merge → verify deploy → next
-Links:
-  - github: https://github.com/AntaresYuan/claude-devloop
 
-## What it does
+Install: mkdir -p ~/.claude/skills/devloop && curl -sL https://raw.githubusercontent.com/AntaresYuan/claude-devloop/main/SKILL.md -o ~/.claude/skills/devloop/SKILL.md
+
+What it does
 
 A self-paced loop that works through a queue of issues, one at a time:
 branch → small implementation steps → test hard → PR → an independent sub-agent
 code-reviews → merge → verify the deploy → update the issue → next.
-
-## Why I built it
+Why I built it
 
 Hand-running every PR is hours of attention I'd rather spend on product
 strategy. The loop turns my backlog into something I can hand off and check
 the next morning.
-
-## How it works
-
-- Self-paced via `ScheduleWakeup` between steps — no fixed cadence, picks the next interval based on what's being waited on
+How it works
+- Self-paced via ScheduleWakeup between steps — no fixed cadence, picks the next interval based on what's being waited on
 - Each PR gets reviewed by a fresh sub-agent (no rubber-stamping)
 - Pages deploy is verified before marking the issue done
 - Stops cleanly when the queue is empty
-
-## Best result so far
+Best result so far
 
 Cleared 8 issues on this very site overnight, one PAT, fully unattended.
+Stack
 
-## Stack
+Claude Code skill at ~/.claude/skills/devloop/. Reusable across any git repo.
 
-Claude Code skill at `~/.claude/skills/devloop/`. Reusable across any git repo.
+---
 
-## SKILL-04 · /iterate · Claude Code skill
+## /iterate · Claude Code skill
+
+GitHub: https://github.com/AntaresYuan/claude-skill-iterate
+
+A human-reviewed improvement loop for other skills
+
 Reads a skill's run logs, accumulates recurring friction, and proposes a SKILL.md pull request when the evidence is strong enough — never auto-merging.
-Links:
-  - GitHub: https://github.com/AntaresYuan/claude-skill-iterate
 
-## SKILL-05 · /ai-pm-resume · Claude Code skill
+Install: git clone https://github.com/AntaresYuan/claude-skill-iterate ~/.claude/skills/iterate
+
+---
+
+## /ai-pm-resume · Claude Code skill
+
+GitHub: https://github.com/AntaresYuan/ai-pm-resume
+
+A résumé reviewer that reads like an AI PM hiring loop
+
 AI PM résumé reviewer — 8-dim signal audit + 5-reader critique + anti-fab guardrails + tier adaptation
-Links:
-  - github: https://github.com/AntaresYuan/ai-pm-resume
 
-## What it does
+Install: git clone https://github.com/AntaresYuan/ai-pm-resume ~/.claude/skills/ai-pm-resume
+
+What it does
 
 Reviews and rewrites a résumé specifically for AI PM roles. Runs:
-
-- An **8-dimension AI-PM signal audit** (model fluency, eval craft, agent reasoning, infra literacy, taste, shipping cadence, …)
-- A **5-reader critique** — the same résumé read by an ATS bot, a hiring manager, an AI engineer, a peer AI PM, and a recruiter; each with their own rubric
-- A bullet **rewriter with anti-fabrication guardrails**
-- **Tier adaptation** — big tech / AI startup / 中国大厂（字节飞书）/ 应届
-
-## Why I built it
+- An 8-dimension AI-PM signal audit (model fluency, eval craft, agent reasoning, infra literacy, taste, shipping cadence, …)
+- A 5-reader critique — the same résumé read by an ATS bot, a hiring manager, an AI engineer, a peer AI PM, and a recruiter; each with their own rubric
+- A bullet rewriter with anti-fabrication guardrails
+- Tier adaptation — big tech / AI startup / 中国大厂（字节飞书）/ 应届
+Why I built it
 
 Generic résumé "optimizers" don't know what an AI engineer looks for in a PM
 bullet (vs what a recruiter scans for). I wanted one tool that splits the
 signal by reader role and refuses to invent metrics.
-
-## Anti-fab rule
+Anti-fab rule
 
 The skill will not insert numbers, durations, team sizes, or names that
-aren't in the source. If you give it `built X`, you get `built X` — not
-`built X in 6 months with a 4-person team`.
+aren't in the source. If you give it built X, you get built X — not
+built X in 6 months with a 4-person team.
+Stack
 
-## Stack
+Claude Code skill at ~/.claude/skills/ai-pm-resume/.
 
-Claude Code skill at `~/.claude/skills/ai-pm-resume/`.
+---
 
-## SKILL-06 · /interview-sim · Claude Code skill
+## /interview-sim · Claude Code skill
+
+GitHub: https://github.com/AntaresYuan/claude-skill-interview-sim
+
+Synthetic interviews that read like real transcripts
+
 synthetic interview generator — protocol + persona → time-budgeted transcript that reads like recording transcription, not LLM output
-Links:
-  - github: https://github.com/AntaresYuan/claude-skill-interview-sim
 
-## What it does
+Install: git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim
 
-Takes an **interview protocol** + a **受访者画像** (real person or fictional persona) and produces a **transcript that reads like a real recording transcription**, not an LLM Q&A. The bar isn't "answer well" — it's **"sound like that person"**: hits their knowledge edges, gets stuck, self-corrects, asks the interviewer back, occasionally goes off-topic.
+What it does
 
-## Use cases
-
-- **UX research synthetic interviews** — HCDE / product research, protocol + user persona → a transcript you can code
-- **Expert / journalist-style interviews** of public figures (research-backed, not invented)
-- **Mock interviews — interviewee side** — you write the questions, the agent plays the candidate
+Takes an interview protocol + a 受访者画像 (real person or fictional persona) and produces a transcript that reads like a real recording transcription, not an LLM Q&A. The bar isn't "answer well" — it's "sound like that person": hits their knowledge edges, gets stuck, self-corrects, asks the interviewer back, occasionally goes off-topic.
+Use cases
+- UX research synthetic interviews — HCDE / product research, protocol + user persona → a transcript you can code
+- Expert / journalist-style interviews of public figures (research-backed, not invented)
+- Mock interviews — interviewee side — you write the questions, the agent plays the candidate
 - Any context that wants a plausible interview transcript as research / writing material
-
-## How it works
-
-- **Kickoff intake-clarify** — an `AskUserQuestion` round to align on protocol / persona / duration / language / setting / disfluency level / interviewer style / how strictly to stay in character — *before* it goes off researching
-- **Real persona** → parallel `WebSearch` + `WebFetch` across LinkedIn / podcasts / talks / articles / posts; builds a dossier that strictly separates **verified** vs **inferred** facts
-- **Fictional persona** → cohort-representative research: searches for how this kind of person actually talks, anchors the synthesis in real-world data, refuses to invent from thin air
-- **Duration calibration** — English ≈150 wpm, Chinese ≈220 字/min, Japanese ≈300 字/min; word-count budget allocated across questions by weight
-- **High-realism disfluency toolbox** — bilingual filler / self-correction / questioning-back / pause templates, **clustered at thought transitions** (not sprinkled evenly — that's caricature, not realism)
-- **Real-respondent cognitive patterns** — struggling to find words, talking around the question, hedging, stated-vs-actual mismatches, admitting they don't know — at least 1–2 visible cognitive struggles per session
-- **Anti-fabrication red lines** — no inventing biographical facts for real people, no quietly upgrading a fictional persona mid-interview, no fabricated numbers / quotes ever
-- **Interviewer half-structured probing** — protocol's main questions + natural follow-ups ("can you say more about that", "can you give a specific example"), **never leading questions**
-- **Output dual channel** — saves `interview_<persona-slug>_<YYYY-MM-DD>.md` AND prints the full transcript inline
-- **Self-check before delivery** — 8-item checklist (identity drift, cognitive struggle, filler distribution, leading Qs, biographical sourcing, fabricated numbers, word-count drift, language consistency)
-
-## Why I built it
+How it works
+- Kickoff intake-clarify — an AskUserQuestion round to align on protocol / persona / duration / language / setting / disfluency level / interviewer style / how strictly to stay in character — before it goes off researching
+- Real persona → parallel WebSearch + WebFetch across LinkedIn / podcasts / talks / articles / posts; builds a dossier that strictly separates verified vs inferred facts
+- Fictional persona → cohort-representative research: searches for how this kind of person actually talks, anchors the synthesis in real-world data, refuses to invent from thin air
+- Duration calibration — English ≈150 wpm, Chinese ≈220 字/min, Japanese ≈300 字/min; word-count budget allocated across questions by weight
+- High-realism disfluency toolbox — bilingual filler / self-correction / questioning-back / pause templates, clustered at thought transitions (not sprinkled evenly — that's caricature, not realism)
+- Real-respondent cognitive patterns — struggling to find words, talking around the question, hedging, stated-vs-actual mismatches, admitting they don't know — at least 1–2 visible cognitive struggles per session
+- Anti-fabrication red lines — no inventing biographical facts for real people, no quietly upgrading a fictional persona mid-interview, no fabricated numbers / quotes ever
+- Interviewer half-structured probing — protocol's main questions + natural follow-ups ("can you say more about that", "can you give a specific example"), never leading questions
+- Output dual channel — saves interview<persona-slug><YYYY-MM-DD>.md AND prints the full transcript inline
+- Self-check before delivery — 8-item checklist (identity drift, cognitive struggle, filler distribution, leading Qs, biographical sourcing, fabricated numbers, word-count drift, language consistency)
+Why I built it
 
 UX-research synthetic interviews are everywhere now, but most of them read like LLM Q&A — the fictional user is suspiciously articulate, never stuck, never wrong, and the dialogue feels written. That's useless as research material. This skill bakes in disfluency, knowledge edges, and anti-fabrication so the transcript is plausible enough to actually code.
+Stack
 
-## Stack
+Claude Code skill. Install: git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim
 
-Claude Code skill. Install: `git clone https://github.com/AntaresYuan/claude-skill-interview-sim ~/.claude/skills/interview-sim`
+---
 
-## SKILL-07 · Claude Credit Watchdog · Claude Code Plugin
+## Claude Credit Watchdog · Claude Code Plugin
+
+Website: https://claude-credit-watchdog.netlify.app
+
+GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
+
+Resumes your Claude Code work the moment credits renew
+
 A lightweight menu bar watchdog that monitors your Claude Code sessions, alerts you the moment credits renew, and automatically resumes your work.
-Links:
-  - Download: https://claude-credit-watchdog.netlify.app
-  - GitHub: https://github.com/AntaresYuan/Claude-Credit-Watchdog
 
-# Lens — how I think
+# Gallery
 
-- / 01 Evals before features.
-  If you can't measure it, you're shipping vibes.
-- / 02 The model is one input.
-  Latency, UX, and trust often matter more than benchmark deltas.
-- / 03 Demos lie. Production tells the truth.
-  Watch the long tail.
-- / 04 A great PM removes ambiguity. Models add it back.
-  The job is balance.
+## AI museum tour guide
+URL: /gallery/
+Medium: Product design
+Category: Product design
+An app concept that answers questions about the painting in front of you.
 
-# Contact
+## Carved form studies
+URL: /gallery/
+Medium: Physical product
+Category: Physical product
+Hand-carved form studies laid over their sketches.
 
-Currently open to: founder conversations in AI infra & agents, AI PM roles at top product orgs, and contractor work on 0→1 features. Tell me what you're building.
+## Cat on the roof
+URL: /gallery/
+Medium: NFT art
+Category: NFT art
+A series: a white cat stretched out on the roof of a train, a ship, a bus and a plane.
 
-- email: chenjy4@uw.edu (mailto:chenjy4@uw.edu)
-- linkedin: Chenjie (Antares) Yuan (https://www.linkedin.com/in/chenjie-yuan-682b93298/)
-- github: @AntaresYuan (https://github.com/AntaresYuan)
-- Dribbblle: Antares Yuan (https://dribbble.com/AntaresYuan)
+## Climate collage
+URL: /gallery/
+Medium: Visual communication
+Category: Visual communication
+A collage built from newspaper headlines about the climate.
+
+## Desert airship
+URL: /gallery/
+Medium: Illustration
+Category: Illustration
+A digital painting.
+
+## Glass wind chimes
+URL: /gallery/
+Medium: 3D art
+Category: 3D art
+A 3D render of glass wind chimes against blossom.
+
+## In-car app concept
+URL: /gallery/
+Medium: Product design
+Category: Product design
+A mobile concept, shown in use from the driver’s seat.
+
+## Logo studies
+URL: /gallery/
+Medium: Visual communication
+Category: Visual communication
+Sheets of logo and mark explorations.
+
+## Meteor night
+URL: /gallery/
+Medium: Photography
+Category: Photography
+Meteors over a campus at night.
+
+## Milky Way
+URL: /gallery/
+Medium: Photography
+Category: Photography
+Astrophotography.
+
+## Mixed-media model
+URL: /gallery/
+Medium: Physical product
+Category: Physical product
+A large mixed-media model in the studio.
+
+## Monochrome figures
+URL: /gallery/
+Medium: NFT art
+Category: NFT art
+A series of black-and-white line portraits.
+
+## Mount Rainier
+URL: /gallery/
+Medium: Photography
+Category: Photography
+
+## Night street
+URL: /gallery/
+Medium: Illustration
+Category: Illustration
+A digital painting.
+
+## Orion Nebula
+URL: /gallery/
+Medium: Photography
+Category: Photography
+Astrophotography.
+
+## Outdoor app concept
+URL: /gallery/
+Medium: Product design
+Category: Product design
+A mobile concept, shown in use from a tent in the mountains.
+
+## Pocket device render
+URL: /gallery/
+Medium: 3D art
+Category: 3D art
+A 3D render of a small device with a display, in two colourways.
+
+## Snow globe cabin
+URL: /gallery/
+Medium: 3D art
+Category: 3D art
+A 3D render of a cabin inside a snow globe.
+
+## Spanish Culture Day identity
+URL: /gallery/
+Medium: Visual communication
+Category: Visual communication
+An identity applied to stationery, badges and a tote bag.
+
+## Sunset cliff
+URL: /gallery/
+Medium: Illustration
+Category: Illustration
+A digital painting.
+
+## Wall light panel
+URL: /gallery/
+Medium: Physical product
+Category: Physical product
+A wall-mounted light panel, lit.
 
 # Writing
 
@@ -1606,8 +1614,4 @@ Press enter or click to view image in full size
 [](https://www.pinterest.com/pin/1152077148439350973/)
 
 ---
-Generated 2026-10-12 from content/*.json. Last site update: 2026-10-12
-
-
----
-Generated from content/*.json. To update: edit the JSON (or via /admin/) and run `node scripts/build.js`.
+Generated 2026-10-12 from Work content only. Last site update: 2026-10-12. Edit the Work collections or /admin/ → Assistant, then run `node scripts/build.js`.

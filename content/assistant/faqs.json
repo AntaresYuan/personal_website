@@ -10,7 +10,7 @@
         "你现在开放工作机会吗？"
       ],
       "answer": "Yes!!! I'm in the job market now. Recently I started actively applying for full-time AI PM roles at tech/AI companies starting at next summer/autumn. If you want to hire an intern NOW, I am also open with that!\n\nPS: This is my email address [chenjy4@uw.edu](chenjy4@uw.edu) and this is my LinkedIn [https://www.linkedin.com/in/chenjie-yuan-682b93298/](https://www.linkedin.com/in/chenjie-yuan-682b93298/)",
-      "href": "#contact"
+      "href": "mailto:chenjy4@uw.edu"
     },
     {
       "enabled": true,
@@ -35,7 +35,7 @@
         "你现在在做什么项目？"
       ],
       "answer": "I'm currently doing three part of things: 1) Research RA at UW helped with agent harness and model post-training; 2) Helped with building a agentic workflow in finding social media maker for commercial advertising (Haier the client); 3) Iterating on the content and AI QA Agent on my personal website.",
-      "href": "#now"
+      "href": "/"
     },
     {
       "enabled": true,
@@ -44,8 +44,8 @@
         "how can I contact you?",
         "怎么联系你？"
       ],
-      "answer": "Email and socials are in the Contact section — that is the fastest way to reach me.",
-      "href": "#contact"
+      "answer": "Email me at chenjy4@uw.edu or reach me on LinkedIn at https://www.linkedin.com/in/chenjie-yuan-682b93298/.",
+      "href": "mailto:chenjy4@uw.edu"
     },
     {
       "enabled": true,
@@ -65,8 +65,8 @@
         "can agents read this site?",
         "这个网站对 AI agent 友好吗？"
       ],
-      "answer": "Yes. The site exposes /llms.txt and /llms-full.txt, an embedded CLI, and npx antares-cv. Point people to the agent surfaces section for the full explanation.",
-      "href": "#agents"
+      "answer": "Yes. The Work space exposes the concise /llms.txt summary and the fuller /llms-full.txt corpus. Ask Antares is grounded in those Work pages plus the owner-managed Assistant guide, FAQ answers, and background knowledge.",
+      "href": "/llms.txt"
     },
     {
       "enabled": true,
@@ -79,14 +79,14 @@
       "href": "https://github.com/AntaresYuan/personal_website"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "question": "what does “a star to ship by” mean?",
       "aliases": [
         "what does a star to ship by mean?",
         "a star to ship by 是什么意思？"
       ],
       "answer": "It means choosing a north star worth committing to, then continually shipping toward it.",
-      "href": "#main-content"
+      "href": "/"
     },
     {
       "enabled": true,
@@ -96,10 +96,10 @@
         "什么是 Pi 型 AI 产品经理？"
       ],
       "answer": "It means product and HCI-research depth, plus enough builder fluency to ship a product from 0 to 1 — not merely spec it.",
-      "href": "#lens"
+      "href": "/"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "question": "what's Worth Fly?",
       "aliases": [
         "tell me about WorthFly.",
@@ -108,7 +108,7 @@
       "answer": "WorthFly focuses on flight search, decision support, alert drafts, and handoff to the real booking channel. Final fare, inventory and ticketing remain with that booking channel."
     },
     {
-      "enabled": true,
+      "enabled": false,
       "question": "what's Gmail++ / Gmail Plus Plus?",
       "aliases": [
         "tell me about Gmail Plus Plus.",

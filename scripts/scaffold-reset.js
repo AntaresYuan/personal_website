@@ -139,7 +139,7 @@ write('content/assistant/guide.json', {
 });
 write('content/assistant/sources.json', {
   llmsSummary: true, profile: true, home: true, projects: true, skills: true, writing: true,
-  gallery: true, projectLog: true, lens: true, contact: true,
+  gallery: true,
 });
 write('content/assistant/faqs.json', { items: [] });
 write('content/assistant/knowledge.json', { notes: [] });

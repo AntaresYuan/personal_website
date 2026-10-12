@@ -8,8 +8,9 @@
    sent with every question — : the guide and notes Antares manages in
    content/assistant/, plus an overview of the enabled website sources.
 
-   Public content only: the same material as llms-full.txt and
-   agent-brief.txt, both of which are already served.
+   Public content is Work-only: home, case studies, AI Skills, Gallery and
+   Writing. Personal roadmap, Lens and Contact content are never indexed.
+   Owner-authored Assistant guidance, FAQs and knowledge are added separately.
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
@@ -29,12 +30,9 @@ const tryReadText = (p, fallback = '') => {
 
 const profile = read('content/profile.json');
 const work = read('content/work.json');
-const contact = tryRead('content/contact.json', { items: [] });
 const assistant = loadAssistant(root);
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
-const board = tryRead('content/board.json', { cards: [] });
-const lens = tryRead('content/lens.json', { items: [] });
 const sourceOn = (name) => !assistant.sources || assistant.sources[name] !== false;
 
 const MAX = 1200;   // characters per passage, roughly 250–300 tokens
@@ -102,7 +100,7 @@ if (guideText) add('assistant-guide', 'Assistant response guide', '', guideText,
 // richer passage index cannot be loaded.
 if (sourceOn('llmsSummary')) {
   const llmsSummary = tryReadText('llms.txt');
-  if (llmsSummary) add('llms-summary', 'Site summary from llms.txt', '/llms.txt', llmsSummary, true);
+  if (llmsSummary) add('llms-summary', 'Work summary from llms.txt', '/llms.txt', llmsSummary, true);
 }
 
 (assistant.knowledge ?? []).filter((n) => n && n.enabled !== false)
@@ -118,9 +116,8 @@ const overview = [
   sourceOn('home') && work.update?.text ? `Latest update (${work.update.date || ''}): ${work.update.text}` : '',
   sourceOn('projects') ? `Projects on this site: ${projects.map((p) => `${p.title} (${p.kind || ''}) — ${p.summary || ''}`).join(' | ')}` : '',
   sourceOn('skills') ? `AI skills I built: ${(skills.items ?? []).map((s) => `${s.name} — ${s.tagline || s.summary || ''}`).join(' | ')}` : '',
-  sourceOn('contact') ? `Contact: ${plain(contact.intro || '')} ${(contact.items ?? []).map((c) => `${c.key}: ${c.label} (${c.href})`).join('; ')}` : '',
 ].filter(Boolean).join('\n\n');
-if (overview) add('overview', 'Who I am and what is on this site', '/', overview, true);
+if (overview) add('overview', 'Who I am and what is in the Work portfolio', '/', overview, true);
 
 /* ── Work case studies ────────────────────────────────────────────────── */
 for (const p of sourceOn('projects') ? projects : []) {
@@ -136,7 +133,7 @@ for (const p of sourceOn('projects') ? projects : []) {
   (p.story ?? []).forEach((st, i) => add(`project-${p.slug}-${i + 1}`, `${p.title}: ${st.title}`, url, st.body));
 }
 
-/* ── AI Skills, Gallery, Writing, the Personal board, Lens ────────────── */
+/* ── Work AI Skills, Gallery and Writing ──────────────────────────── */
 for (const s of sourceOn('skills') ? (skills.items ?? []) : []) {
   add(`skill-${s.slug}`, `AI skill: ${s.name}`, `/skills/${s.slug}/`, [
     `${s.name} — ${s.category || ''}. ${s.tagline || ''}`,
@@ -161,18 +158,6 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
     add(`post-${post.slug}-${i + 1}`, `Writing: ${post.title}${head ? ` — ${head}` : ''}`, url, sec);
   });
 }
-for (const c of sourceOn('projectLog') ? (board.cards ?? []) : []) {
-  add(`board-${c.slug || c.id}`, `Project log: ${c.title} (${c.status})`, '/personal/', [
-    `${c.title} — ${c.status}${c.updated ? `, ${c.updated}` : ''}. ${c.summary || ''}`,
-    (c.tags ?? []).length ? `Tags: ${c.tags.join(', ')}` : '',
-    c.impact ? `Impact: ${c.impact}` : '',
-    c.details || '',
-  ].filter(Boolean).join('\n\n'));
-}
-if (sourceOn('lens') && (lens.items ?? []).length) {
-  add('lens', 'How I think', '/personal/', lens.items.map((it) => `${it.main} — ${it.aside}`).join('\n\n'));
-}
-
 /* ── Write ────────────────────────────────────────────────────────────── */
 const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks })).digest('hex').slice(0, 12);
 const out = { version, faqs, chunks };

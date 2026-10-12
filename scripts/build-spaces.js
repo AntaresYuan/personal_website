@@ -40,6 +40,14 @@ if (!fs.existsSync(tplPath)) {
 
 let html = fs.readFileSync(tplPath, 'utf8');
 
+/* Personal no longer hosts Ask Antares. Strip the historical chat block at
+   build time so the generated page contains no composer or chat panel. The
+   assistant remains available only across the Work space. */
+html = html.replace(
+  /\s*<!-- ── ASK ANTARES[\s\S]*?(?=\s*<!-- ── CARD DETAIL PANEL)/,
+  '\n\n'
+);
+
 /* Re-render every server-rendered list from the current JSON rather than
    shipping the copies frozen into the template.
 
@@ -60,11 +68,10 @@ const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
 
 [
-  'scripts/beacon.js', 'scripts/i18n.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/render.js',
+  'scripts/beacon.js', 'scripts/i18n.js', 'scripts/render.js',
   'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js',
   'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js',
   'scripts/skin-characters.js', 'scripts/giscus-lazy.js', 'scripts/spaces.js',
-  'scripts/ask-selection.js',
 ].forEach((rel) => {
   if (!fs.existsSync(path.join(root, rel))) return;
   const v = hashOf(rel);

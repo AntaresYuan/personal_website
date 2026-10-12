@@ -25,9 +25,6 @@
 <meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="media/avatar-calm.png">
-<!-- llmstxt.org — agent-readable summary + full content dump -->
-<link rel="alternate" type="text/plain" href="/llms.txt"      title="LLM-readable summary">
-<link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM-readable full content">
 <link rel="alternate" type="application/rss+xml" href="/blog/feed.xml" title="Blog — RSS feed">
 
 <!-- ── Open Graph / Twitter ──────────────────────────────────────── -->
@@ -687,34 +684,18 @@
        site. Aimed at engineering peers / curious humans — agents
        themselves go straight to the endpoints.
   ──────────────────────────────────────────────────────────────────── -->
-  <section class="section agents-section rise" id="agents" aria-label="For AI agents">
+  <section class="section agents-section rise" id="agents" aria-label="Personal data surface">
     <header class="sec-head">
       <span class="sec-cmd">$ /agents</span>
-      <span class="sec-title">how this site works for AI</span>
-      <span class="sec-meta">three entry points</span>
+      <span class="sec-title">personal data, kept separate</span>
+      <span class="sec-meta">not used by Ask Antares</span>
     </header>
 
     <p class="agents-intro">
-      This site is designed to be read by both humans and AI agents. The dashboard, terminal, and detail panels are for you. For an agent, prefer:
+      Personal is a separate roadmap. Ask Antares and the root <code>/llms*.txt</code> files use Work content only; this page is not part of that corpus.
     </p>
 
     <div class="agents-endpoints">
-      <a href="/llms.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms.txt</span>
-        </div>
-        <p>Short summary in plain text per the <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> spec. Best entry point — gist in &lt;1KB.</p>
-      </a>
-
-      <a href="/llms-full.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms-full.txt</span>
-        </div>
-        <p>Full content dump — every project card, lens entry, contact info — all plain text. Use when you need depth.</p>
-      </a>
-
       <a href="/content/board.json" class="agents-card">
         <div class="agents-card-head">
           <span class="agents-method">GET</span>
@@ -727,6 +708,7 @@
     <ul class="agents-extras">
       <li><strong>Stable IDs.</strong> Cards have permanent display IDs (<code>SHIP-01</code>, <code>NOW-01</code>, …) — citable across conversations and durable across content edits.</li>
       <li><strong>Pre-rendered HTML.</strong> The home page ships with content baked into the initial HTML — readable without executing JavaScript.</li>
+      <li><strong>Separate from Work AI.</strong> These Personal records are not indexed by <code>ask-index.json</code> or copied into <code>/llms-full.txt</code>.</li>
       <li><strong>Open content.</strong> All data lives at <a href="https://github.com/AntaresYuan/personal_website/tree/main/content" target="_blank" rel="noopener">/content</a> on GitHub. Free to scrape, fork, or quote.</li>
       <li><strong>Build your own.</strong> This whole setup is an open <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">template</a> — “Use this template” on GitHub, <code>npm run reset-content</code>, deploy. There’s a <a href="/blog/">writeup</a> on the why.</li>
     </ul>
@@ -776,7 +758,7 @@
         type="text"
         class="palette-input"
         id="palette-input"
-        placeholder="Search · or just ask…"
+        placeholder="Search sections, cards and commands…"
         autocomplete="off"
         autocapitalize="off"
         spellcheck="false"
@@ -921,22 +903,16 @@
     <span>
       <a href="/admin/">edit</a> ·
       <a href="https://github.com/AntaresYuan/personal_website"
-         title="Open-source template — fork it freely; a link back is appreciated">source</a> ·
-      <a href="/llms.txt" title="agent-readable summary">/llms.txt</a>
+         title="Open-source template — fork it freely; a link back is appreciated">source</a>
     </span>
   </footer>
 
 </main>
 
 <!-- defer keeps these out of the critical path on slow mobile networks.
-     Pre-rendered HTML means no script is needed for first paint; these
-     just add interactivity (modal, terminal, ⌘K palette, hero "ask"). They
-     execute in document order after parse — qa-faq-data.js + qa-faq.js
-     (the CMS-authored FAQ +
-     retrieval) must come before render.js / palette.js. -->
+     Pre-rendered HTML means no script is needed for first paint; these add
+     Personal-only interactivity such as the modal, terminal and ⌘K palette. -->
 <script src="scripts/i18n.js" defer></script>
-<script src="scripts/qa-faq-data.js" defer></script>
-<script src="scripts/qa-faq.js?v=657b3299"      defer></script>
 <script src="scripts/render.js?v=636cba39"   defer></script>
 <script src="scripts/terminal.js?v=3ad94f49" defer></script>
 <script src="scripts/palette.js?v=addcbda0"  defer></script>

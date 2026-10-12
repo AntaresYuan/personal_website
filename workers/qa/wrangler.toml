@@ -1,12 +1,11 @@
 # ─────────────────────────────────────────────────────────────────────
 # Cloudflare Worker config for the "ask this portfolio" Q&A endpoint.
 #
-# It answers a visitor's question using ONLY the site's own content: it
-# retrieves the relevant passages from https://antaresyuan.site/ask-index.json
+# It answers a visitor's question using the Work corpus plus the owner's
+# Assistant guide, FAQ answers and background knowledge. It retrieves the
+# relevant passages from https://antaresyuan.site/ask-index.json
 # (scripts/build-ask-index.js) and answers from the model on Antares's Mac
-# when it is reachable, else Workers AI. Free tier covers it for a personal site. This powers the
-# embedded terminal's `ask <question>` command; the ⌘K palette is a plain
-# search/launcher and needs no Worker.
+# when it is reachable, else Workers AI. Personal does not load this Worker.
 #
 # Deploy:
 #   cd workers/qa
@@ -17,7 +16,7 @@
 #   https://antares-qa.<your-subdomain>.workers.dev
 #
 # Put that URL into content/site.json → qa.workerUrl (or via /admin/ →
-# Site meta → Q&A assistant). Empty there ⇒ the terminal's `ask` says so.
+# Site meta → Q&A assistant). Empty there disables the Work assistant service.
 # ─────────────────────────────────────────────────────────────────────
 
 name = "antares-qa"

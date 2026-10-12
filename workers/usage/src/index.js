@@ -402,7 +402,7 @@ const BEACON_EVENTS = {
      terminal" no matter how much it was used. beacon.test.js now
      asserts this against terminal.js. */
   terminal_cmd: [
-    'help', 'whoami', 'projects', 'now', 'cat', 'open', 'search', 'ask',
+    'help', 'whoami', 'projects', 'now', 'cat', 'open', 'search',
     'recent', 'stats', 'fortune', 'lens', 'contact', 'cv', 'clear', 'unknown',
   ],
   qa_ask: ['answered', 'unanswered'],

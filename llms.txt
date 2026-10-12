@@ -1,27 +1,26 @@
-# Antares Yuan
+# Antares (Chenjie) Yuan — Work
 
-> AI Product Manager. A living roadmap of what I've shipped, what I'm building, and where I'm going.
-
-A star to ship by.
+> AI moves fast, remaking itself by the day. I keep one eye on the frontier in Silicon Valley — but as an AI product manager, I've learned to keep the other on the business problem in front of me. It is the compass that keeps the work grounded, honest, and on course. A note to myself, and to everyone building in this moment.
 
 ## Identity
-- Name: Antares Yuan
+- Name: Antares (Chenjie) Yuan (袁晨杰)
 - Role: AI Product Manager
 - Location: Seattle | Beijing · currently working at ByteDance as an AI PM intern
-- Status: Building in public
-- Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
+- Work focus: AI Product Manager, HCDE @ UW, Ex ByteDance
 
-## Sections
-- [Roadmap board](/#shipped): four-column kanban — shipped, now, next, later
-- [Agent terminal](/#terminal): interactive CLI — same data as the board
-- [Lens](/#lens): how I think
-- [Writing](/blog/): longer-form posts (writeups, teardowns, notes)
-- [Contact](/#contact): how to reach me
-- [Full content](/llms-full.txt): every card + lens entry + contact + post list, plain text
+## Latest update
+2026-10-10: The new Work version of my personal website is live — yay!
 
-## Edit
-This site is content-managed via Sveltia CMS at /admin/. Source: github.com/AntaresYuan/personal_website
+## Work sections
+- [Work home](/): current message, update and selected work
+- [Projects](/projects/): 5 case studies with ownership and outcomes
+- [AI Skills](/skills/): tools and agent workflows I built
+- [Gallery](/gallery/): selected visual work
+- [Writing](/blog/): product notes, writeups and reflections
+- [Full Work context](/llms-full.txt): the complete text corpus used as the assistant fallback
 
+## Scope
+This file and /llms-full.txt describe the Work space only.
 
 ---
-Generated from content/*.json. To update: edit the JSON (or via /admin/) and run `node scripts/build.js`.
+Generated 2026-10-12 from Work content only. Last site update: 2026-10-12. Edit the Work collections or /admin/ → Assistant, then run `node scripts/build.js`.

@@ -1,198 +1,161 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════
-   build-llms.js — generate /llms.txt and /llms-full.txt from content/*.json
-   Per the llmstxt.org spec: a short summary file + a full content dump,
-   both at the site root, both plain text, both meant to be read by LLM
-   agents that want a deterministic view of the site.
+   build-llms.js — generate the Work-only /llms.txt and /llms-full.txt.
+
+   These files describe the public Work portfolio and are also a grounding
+   surface for Ask Antares. Personal content is deliberately excluded: no
+   roadmap board, Lens, Personal contact section, or Personal-only metadata.
 
    Run:    node scripts/build-llms.js
-   Output: ./llms.txt + ./llms-full.txt (gitignored — committed only after
-           you've reviewed the output once)
-   ════════════════════════════════════════════════════════════════════════ */
+   Output: ./llms.txt + ./llms-full.txt
+   ═══════════════════════════════════════════════════════════════════════ */
+'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const { loadPosts } = require('./lib/blog');
+const { projectList } = require('./lib/projects');
+const lastUpdated = require('./last-updated');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
+const tryRead = (p, fallback) => { try { return read(p); } catch { return fallback; } };
 
-const site    = read('content/site.json');
+const site = read('content/site.json');
 const profile = read('content/profile.json');
-const board   = read('content/board.json');
-const lens    = read('content/lens.json');
-const contact = read('content/contact.json');
-// /skills — "dotfiles for AI" entries. Optional: an empty file just yields
-// no Skills section in llms-full.txt.
-const skills = (() => {
-  try { return read('content/skills.json'); }
-  catch { return { items: [] }; }
-})();
-const { loadPosts } = require('./lib/blog');     // published blog posts (content/blog/*.md)
-const { projectList } = require('./lib/projects'); // Work case studies (content/projects/*.json)
-const lastUpdated = require('./last-updated');   // pinned (site.json) or auto (last-commit date)
+const work = read('content/work.json');
+const skills = tryRead('content/skills.json', { items: [] });
+const gallery = tryRead('content/gallery.json', { items: [], categories: {} });
+const projects = projectList();
+const posts = loadPosts();
 
-/* ── Helpers ──────────────────────────────────────────────────────────── */
-const STATUS_PREFIX = { shipped: 'SHIP', now: 'NOW', next: 'NEXT', later: 'LATER' };
-const pad2 = (n) => String(n).padStart(2, '0');
-
-const allCards = () => {
-  const cards = (board.cards ?? []).slice().sort((a, b) => {
-    const ao = a.order ?? 99, bo = b.order ?? 99;
-    if (ao !== bo) return ao - bo;
-    return (b.updated ?? '').localeCompare(a.updated ?? '');
-  });
-  const cols = ['shipped', 'now', 'next', 'later'];
-  const out = [];
-  cols.forEach((col) => {
-    cards.filter(c => c.status === col).forEach((c, i) => {
-      out.push({ ...c, displayId: `${STATUS_PREFIX[col]}-${pad2(i + 1)}` });
-    });
-  });
-  return out;
-};
-
-const stripTags = (s) => String(s ?? '').replace(/<\/?(em|strong|br)\s*\/?>/gi, '');
-
-// Markdown → plain text — for putting blog post bodies in llms-full.txt so the
-// "ask" assistant (which grounds on this file) can talk about what's been written.
+const stripTags = (s) => String(s ?? '').replace(/<[^>]+>/g, '');
 const stripMd = (s) => String(s ?? '')
-  .replace(/```[\s\S]*?```/g, '')                  // drop fenced code blocks
-  .replace(/`([^`]+)`/g, '$1')                     // inline code → text
-  .replace(/!\[[^\]]*\]\([^)]*\)/g, '')            // images → gone
-  .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')         // links → text
-  .replace(/^\s{0,3}#{1,6}\s+/gm, '')              // heading markers
-  .replace(/^\s*>\s?/gm, '')                       // blockquote markers
-  .replace(/^\s*[-*+]\s+/gm, '- ')                 // list bullets
-  .replace(/(\*\*|__|\*|_)/g, '')                  // bold / italic markers
-  .replace(/^\s*-{3,}\s*$/gm, '')                  // horizontal rules
-  .replace(/\\([\\`*_{}\[\]()#+.!|>~^=-])/g, '$1') // backslash escapes
+  .replace(/```[\s\S]*?```/g, '')
+  .replace(/`([^`]+)`/g, '$1')
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+  .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+  .replace(/^\s*>\s?/gm, '')
+  .replace(/^\s*[-*+]\s+/gm, '- ')
+  .replace(/(\*\*|__|\*|_)/g, '')
+  .replace(/^\s*-{3,}\s*$/gm, '')
+  .replace(/\\([\\`*_{}\[\]()#+.!|>~^=-])/g, '$1')
   .replace(/\n{3,}/g, '\n\n')
   .trim();
 
-/* ── llms.txt — short summary (per llmstxt.org spec) ──────────────────── */
-const short = `# ${site.meta?.title ?? 'Personal site'}
+const name = [
+  work.name?.first || profile.name,
+  work.name?.middle ? `(${work.name.middle})` : '',
+  work.name?.last || profile.nameAccent,
+].filter(Boolean).join(' ');
+const nativeName = work.name?.native ? ` (${work.name.native})` : '';
+const workTags = profile.tagsWork ?? [];
 
-> ${stripTags(site.meta?.description ?? '')}
+const projectText = (p) => [
+  `## ${p.title}${p.kind ? ` · ${p.kind}` : ''}`,
+  `URL: /projects/${p.slug}/`,
+  p.summary ? `Summary: ${p.summary}` : '',
+  (p.facts ?? []).map((f) => `${f.label}: ${f.value}`).join('\n'),
+  ...(p.story ?? []).map((section) => `### ${section.title}\n\n${stripMd(section.body)}`),
+  (p.outcomes ?? []).length
+    ? `Outcomes:\n${p.outcomes.map((o) => `  - ${o.value}: ${o.label}`).join('\n')}`
+    : '',
+  (p.links ?? []).length
+    ? `Links:\n${p.links.map((l) => `  - ${l.label}: ${l.href}`).join('\n')}`
+    : '',
+  p.live?.url ? `Live demo: ${p.live.url}` : '',
+].filter(Boolean).join('\n\n');
 
-${profile.slogan ?? ''}
+const skillText = (s) => [
+  `## ${s.name}${s.category ? ` · ${s.category}` : ''}`,
+  s.site ? `Website: ${s.site}` : '',
+  s.repo ? `GitHub: ${s.repo}` : '',
+  s.tagline || '',
+  s.summary || '',
+  s.install ? `Install: ${s.install}` : '',
+  (s.stats ?? []).map((item) => `${item.value} ${item.label}`).join('; '),
+  stripMd(s.details || ''),
+].filter(Boolean).join('\n\n');
+
+const galleryText = (item) => [
+  `## ${item.title}${item.year ? ` (${item.year})` : ''}`,
+  'URL: /gallery/',
+  item.medium ? `Medium: ${item.medium}` : '',
+  item.category ? `Category: ${gallery.categories?.[item.category] || item.category}` : '',
+  item.summary || '',
+].filter(Boolean).join('\n');
+
+const postText = (post) => {
+  const head = [
+    `## ${post.title}`,
+    `URL: /blog/${post.slug}/`,
+    post.date ? `Published: ${post.date}` : '',
+    post.summary ? `Summary: ${post.summary}` : '',
+  ].filter(Boolean).join('\n');
+  const body = stripMd(post.body);
+  return body ? `${head}\n\n${body}` : head;
+};
+
+/* ── llms.txt: concise Work map ───────────────────────────────────── */
+const short = `# ${name} — Work
+
+> ${stripTags(work.message?.body || site.meta?.description || '')}
 
 ## Identity
-- Name: ${profile.name} ${profile.nameAccent ?? ''}
-- Role: ${profile.role}
-- Location: ${profile.location}
-- Status: ${profile.status}
-- Tags: ${(profile.tags ?? []).join(', ')}
+- Name: ${name}${nativeName}
+- Role: ${profile.role || ''}
+- Location: ${profile.location || ''}
+- Work focus: ${workTags.join(', ')}
 
-## Sections
-- [Roadmap board](/#shipped): four-column kanban — shipped, now, next, later
-- [Agent terminal](/#terminal): interactive CLI — same data as the board
-- [Lens](/#lens): how I think
-- [Writing](/blog/): longer-form posts (writeups, teardowns, notes)
-- [Contact](/#contact): how to reach me
-- [Full content](/llms-full.txt): every card + lens entry + contact + post list, plain text
+## Latest update
+${work.update?.date ? `${work.update.date}: ` : ''}${work.update?.text || 'No update published.'}
 
-## Edit
-This site is content-managed via Sveltia CMS at /admin/. Source: github.com/AntaresYuan/personal_website
+## Work sections
+- [Work home](/): current message, update and selected work
+- [Projects](/projects/): ${projects.length} case studies with ownership and outcomes
+- [AI Skills](/skills/): tools and agent workflows I built
+- [Gallery](/gallery/): selected visual work
+- [Writing](/blog/): product notes, writeups and reflections
+- [Full Work context](/llms-full.txt): the complete text corpus used as the assistant fallback
+
+## Scope
+This file and /llms-full.txt describe the Work space only.
 `;
 
-/* ── llms-full.txt — every card + lens + contact ──────────────────────── */
-const fmtCard = (c) => {
-  const lines = [
-    `## ${c.displayId} · ${c.status.toUpperCase()} · ${c.title}`,
-    c.summary ? `${c.summary}` : '',
-    c.impact  ? `Impact: ${c.impact}` : '',
-    (c.tags ?? []).length ? `Tags: ${c.tags.join(', ')}` : '',
-    c.updated ? `Updated: ${c.updated}` : '',
-  ].filter(Boolean);
-  if ((c.links ?? []).length) {
-    lines.push('Links:');
-    c.links.filter(l => l.href && l.href !== '#').forEach((l) => lines.push(`  - ${l.label}: ${l.href}`));
-  }
-  if (c.details) {
-    lines.push('');
-    lines.push(c.details.trim());
-  }
-  return lines.join('\n');
-};
+/* ── llms-full.txt: complete Work corpus ─────────────────────────────── */
+const sections = [
+  `# ${name} — Work`,
+  [
+    `## ${work.message?.title || 'Work message'}`,
+    stripTags(work.message?.body || ''),
+    '',
+    `Name: ${name}${nativeName}`,
+    `Role: ${profile.role || ''}`,
+    `Location: ${profile.location || ''}`,
+    `Work focus: ${workTags.join(', ')}`,
+    work.update?.text ? `Latest update${work.update.date ? ` (${work.update.date})` : ''}: ${work.update.text}` : '',
+  ].filter(Boolean).join('\n'),
+];
 
-const cards = allCards();
-const byStatus = (s) => cards.filter(c => c.status === s);
-const sectionFor = (label, status) => {
-  const list = byStatus(status);
-  if (list.length === 0) return '';
-  return `\n# ${label}\n\n${list.map(fmtCard).join('\n\n')}`;
-};
+if (projects.length) sections.push(`# Projects\n\n${projects.map(projectText).join('\n\n---\n\n')}`);
 
-const full = `# ${site.meta?.title ?? 'Personal site'}
+const skillItems = (skills.items ?? []).slice().sort((a, b) =>
+  (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
+if (skillItems.length) sections.push(`# AI Skills\n\n${skillItems.map(skillText).join('\n\n---\n\n')}`);
 
-${profile.slogan ?? ''}
-${profile.manifesto ? `\n${profile.manifesto}\n` : ''}
-Name: ${profile.name} ${profile.nameAccent ?? ''}
-Role: ${profile.role}
-Location: ${profile.location}
-Tags: ${(profile.tags ?? []).join(', ')}
-${(() => {
-  // The Work space's case studies: the fullest account of each project.
-  const list = projectList();
-  if (!list.length) return '';
-  const fmt = (p) => [
-    `## ${p.title}${p.kind ? ` · ${p.kind}` : ''}`,
-    `URL: /projects/${p.slug}/`,
-    p.summary ? `Summary: ${p.summary}` : '',
-    (p.facts ?? []).map((f) => `${f.label}: ${f.value}`).join('\n'),
-    ...(p.story ?? []).map((st) => `### ${st.title}\n\n${stripMd(st.body)}`),
-    (p.outcomes ?? []).length ? `Outcomes:\n${p.outcomes.map((o) => `  - ${o.value}: ${o.label}`).join('\n')}` : '',
-    (p.links ?? []).length ? `Links:\n${p.links.map((l) => `  - ${l.label}: ${l.href}`).join('\n')}` : '',
-  ].filter(Boolean).join('\n\n');
-  return `\n# Work — case studies\n\n${list.map(fmt).join('\n\n---\n\n')}\n`;
-})()}${sectionFor('Shipped', 'shipped')}${sectionFor('Now', 'now')}${sectionFor('Next', 'next')}${sectionFor('Later', 'later')}
-${(() => {
-  const items = (skills.items ?? []).slice().sort((a, b) =>
-    (a.order ?? 99) - (b.order ?? 99) || String(a.name ?? '').localeCompare(String(b.name ?? '')));
-  if (!items.length) return '';
-  const fmt = (s, idx) => {
-    const id = `SKILL-${pad2(idx + 1)}`;
-    const lines = [`## ${id} · ${s.name ?? ''}${s.category ? ` · ${s.category}` : ''}`];
-    if (s.summary) lines.push(s.summary);
-    if ((s.links ?? []).length) {
-      lines.push('Links:');
-      s.links.filter(l => l.href && l.href !== '#').forEach((l) => lines.push(`  - ${l.label}: ${l.href}`));
-    }
-    if (s.details) { lines.push(''); lines.push(String(s.details).trim()); }
-    return lines.join('\n');
-  };
-  return `\n# Skills — dotfiles for AI\n\nWhat I built to multiply my own AI work.\n\n${items.map(fmt).join('\n\n')}\n`;
-})()}
-# Lens — how I think
+const galleryItems = (gallery.items ?? []).slice().sort((a, b) =>
+  (a.order ?? 99) - (b.order ?? 99) || String(a.title ?? '').localeCompare(String(b.title ?? '')));
+if (galleryItems.length) sections.push(`# Gallery\n\n${galleryItems.map(galleryText).join('\n\n')}`);
 
-${(lens.items ?? []).map(it => `- ${it.num ?? ''} ${it.main ?? ''}\n  ${it.aside ?? ''}`).join('\n')}
+if (posts.length) sections.push(`# Writing\n\n${posts.map(postText).join('\n\n---\n\n')}`);
 
-# Contact
+const full = sections.join('\n\n') + '\n';
+const footer = `\n---\nGenerated ${new Date().toISOString().slice(0, 10)} from Work content only. Last site update: ${lastUpdated}. Edit the Work collections or /admin/ → Assistant, then run \`node scripts/build.js\`.\n`;
 
-${stripTags(contact.intro ?? '')}
+fs.writeFileSync(path.join(root, 'llms.txt'), short + footer);
+fs.writeFileSync(path.join(root, 'llms-full.txt'), full + footer);
 
-${(contact.items ?? []).map(it => `- ${it.key}: ${it.label} (${it.href})`).join('\n')}
-${(() => {
-  const posts = loadPosts();
-  if (!posts.length) return '';
-  return `\n# Writing\n\n` + posts.map(p => {
-    const head = [`## ${p.title}`, `URL: /blog/${p.slug}/`, p.date ? `Published: ${p.date}` : '', p.summary ? `Summary: ${p.summary}` : ''].filter(Boolean).join('\n');
-    const body = stripMd(p.body);
-    return body ? `${head}\n\n${body}` : head;
-  }).join('\n\n---\n\n') + '\n';
-})()}
----
-Generated ${new Date().toISOString().slice(0, 10)} from content/*.json. Last site update: ${lastUpdated}
-`;
-
-/* ── Write ────────────────────────────────────────────────────────────── */
-// Footer noting the file is generated, placed after content so it doesn't
-// interfere with the llmstxt.org top-of-file conventions.
-const footer = `\n\n---\nGenerated from content/*.json. To update: edit the JSON (or via /admin/) and run \`node scripts/build.js\`.\n`;
-
-fs.writeFileSync(path.join(root, 'llms.txt'),      short + footer);
-fs.writeFileSync(path.join(root, 'llms-full.txt'), full  + footer);
-
-const sz = (p) => fs.statSync(path.join(root, p)).size;
-console.log(`✓ wrote llms.txt       (${sz('llms.txt')} bytes)`);
-console.log(`✓ wrote llms-full.txt  (${sz('llms-full.txt')} bytes)`);
+const size = (p) => fs.statSync(path.join(root, p)).size;
+console.log(`✓ wrote llms.txt       (${size('llms.txt')} bytes, Work only)`);
+console.log(`✓ wrote llms-full.txt  (${size('llms-full.txt')} bytes, Work only)`);

@@ -9,7 +9,7 @@ window.QA_FAQ_DATA = [
       "你在找工作吗？",
       "你现在开放工作机会吗？"
     ],
-    "href": "#contact"
+    "href": "mailto:chenjy4@uw.edu"
   },
   {
     "question": "walk me through your most mature project.",
@@ -32,16 +32,16 @@ window.QA_FAQ_DATA = [
       "你最近在做什么？",
       "你现在在做什么项目？"
     ],
-    "href": "#now"
+    "href": "/"
   },
   {
     "question": "how do I get in touch / contact you?",
-    "answer": "Email and socials are in the Contact section — that is the fastest way to reach me.",
+    "answer": "Email me at chenjy4@uw.edu or reach me on LinkedIn at https://www.linkedin.com/in/chenjie-yuan-682b93298/.",
     "aliases": [
       "how can I contact you?",
       "怎么联系你？"
     ],
-    "href": "#contact"
+    "href": "mailto:chenjy4@uw.edu"
   },
   {
     "question": "where did you study / education?",
@@ -55,12 +55,12 @@ window.QA_FAQ_DATA = [
   },
   {
     "question": "is this site agent-friendly? can an AI read it?",
-    "answer": "Yes. The site exposes /llms.txt and /llms-full.txt, an embedded CLI, and npx antares-cv. Point people to the agent surfaces section for the full explanation.",
+    "answer": "Yes. The Work space exposes the concise /llms.txt summary and the fuller /llms-full.txt corpus. Ask Antares is grounded in those Work pages plus the owner-managed Assistant guide, FAQ answers, and background knowledge.",
     "aliases": [
       "can agents read this site?",
       "这个网站对 AI agent 友好吗？"
     ],
-    "href": "#agents"
+    "href": "/llms.txt"
   },
   {
     "question": "what's the site built with / tech stack?",
@@ -72,38 +72,13 @@ window.QA_FAQ_DATA = [
     "href": "https://github.com/AntaresYuan/personal_website"
   },
   {
-    "question": "what does “a star to ship by” mean?",
-    "answer": "It means choosing a north star worth committing to, then continually shipping toward it.",
-    "aliases": [
-      "what does a star to ship by mean?",
-      "a star to ship by 是什么意思？"
-    ],
-    "href": "#main-content"
-  },
-  {
     "question": "what's a Pi-shaped AI PM?",
     "answer": "It means product and HCI-research depth, plus enough builder fluency to ship a product from 0 to 1 — not merely spec it.",
     "aliases": [
       "what is a pi shaped product manager?",
       "什么是 Pi 型 AI 产品经理？"
     ],
-    "href": "#lens"
-  },
-  {
-    "question": "what's Worth Fly?",
-    "answer": "WorthFly focuses on flight search, decision support, alert drafts, and handoff to the real booking channel. Final fare, inventory and ticketing remain with that booking channel.",
-    "aliases": [
-      "tell me about WorthFly.",
-      "WorthFly 是什么？"
-    ]
-  },
-  {
-    "question": "what's Gmail++ / Gmail Plus Plus?",
-    "answer": "Gmail++ is an AI email-ranking layer over Gmail: a read-only reply queue with visible reasoning and reversible, account-scoped preferences.",
-    "aliases": [
-      "tell me about Gmail Plus Plus.",
-      "Gmail++ 是什么？"
-    ]
+    "href": "/"
   },
   {
     "question": "is the source code available?",

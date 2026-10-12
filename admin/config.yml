@@ -817,7 +817,7 @@ collections:
             widget: "object"
             collapsed: true
             fields:
-              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
+              - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers Ask Antares across the Work space. Personal never loads the assistant." }
 
   # ── Assistant ──────────────────────────────────────────────────────
   # The single source of truth for every owner-managed input to Ask Antares:
@@ -836,20 +836,17 @@ collections:
           - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
           - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions that should apply to every answer. Safety and fact-grounding rules remain enforced by the Worker." }
       - file: "content/assistant/sources.json"
-        label: "Website context"
+        label: "Work context"
         name: "assistant_sources"
         format: "json"
         fields:
-          - { label: "llms.txt site summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Include the concise /llms.txt summary with every answer. It is generated from Site meta and Profile. /llms-full.txt remains the automatic fallback if the primary retrieval index is unavailable." }
-          - { label: "Profile and current status", name: "profile", widget: "boolean", default: true }
-          - { label: "Homepage message and update", name: "home", widget: "boolean", default: true }
-          - { label: "Project case studies", name: "projects", widget: "boolean", default: true }
+          - { label: "llms.txt Work summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Include the concise, Work-only /llms.txt summary with every answer. /llms-full.txt is also Work-only and remains the automatic fallback if the primary retrieval index is unavailable." }
+          - { label: "Work profile and current status", name: "profile", widget: "boolean", default: true }
+          - { label: "Work homepage message and update", name: "home", widget: "boolean", default: true }
+          - { label: "Work project case studies", name: "projects", widget: "boolean", default: true }
           - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
           - { label: "Writing", name: "writing", widget: "boolean", default: true }
           - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
-          - { label: "Personal project log", name: "projectLog", widget: "boolean", default: true }
-          - { label: "Product lens", name: "lens", widget: "boolean", default: true }
-          - { label: "Contact information", name: "contact", widget: "boolean", default: true }
       - file: "content/assistant/faqs.json"
         label: "FAQ answers"
         name: "assistant_faqs"

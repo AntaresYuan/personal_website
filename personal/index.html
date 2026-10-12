@@ -25,9 +25,6 @@
 <meta name="theme-color" content="#14130D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/media/avatar-calm.png">
-<!-- llmstxt.org — agent-readable summary + full content dump -->
-<link rel="alternate" type="text/plain" href="/llms.txt"      title="LLM-readable summary">
-<link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM-readable full content">
 <link rel="alternate" type="application/rss+xml" href="/blog/feed.xml" title="Blog — RSS feed">
 
 <!-- ── Open Graph / Twitter ──────────────────────────────────────── -->
@@ -787,34 +784,18 @@
        site. Aimed at engineering peers / curious humans — agents
        themselves go straight to the endpoints.
   ──────────────────────────────────────────────────────────────────── -->
-  <section class="section agents-section rise" id="agents" aria-label="For AI agents">
+  <section class="section agents-section rise" id="agents" aria-label="Personal data surface">
     <header class="sec-head">
       <span class="sec-cmd">$ /agents</span>
-      <span class="sec-title">how this site works for AI</span>
-      <span class="sec-meta">three entry points</span>
+      <span class="sec-title">personal data, kept separate</span>
+      <span class="sec-meta">not used by Ask Antares</span>
     </header>
 
     <p class="agents-intro">
-      This site is designed to be read by both humans and AI agents. The dashboard, terminal, and detail panels are for you. For an agent, prefer:
+      Personal is a separate roadmap. Ask Antares and the root <code>/llms*.txt</code> files use Work content only; this page is not part of that corpus.
     </p>
 
     <div class="agents-endpoints">
-      <a href="/llms.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms.txt</span>
-        </div>
-        <p>Short summary in plain text per the <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a> spec. Best entry point — gist in &lt;1KB.</p>
-      </a>
-
-      <a href="/llms-full.txt" class="agents-card">
-        <div class="agents-card-head">
-          <span class="agents-method">GET</span>
-          <span class="agents-path">/llms-full.txt</span>
-        </div>
-        <p>Full content dump — every project card, lens entry, contact info — all plain text. Use when you need depth.</p>
-      </a>
-
       <a href="/content/board.json" class="agents-card">
         <div class="agents-card-head">
           <span class="agents-method">GET</span>
@@ -827,6 +808,7 @@
     <ul class="agents-extras">
       <li><strong>Stable IDs.</strong> Cards have permanent display IDs (<code>SHIP-01</code>, <code>NOW-01</code>, …) — citable across conversations and durable across content edits.</li>
       <li><strong>Pre-rendered HTML.</strong> The home page ships with content baked into the initial HTML — readable without executing JavaScript.</li>
+      <li><strong>Separate from Work AI.</strong> These Personal records are not indexed by <code>ask-index.json</code> or copied into <code>/llms-full.txt</code>.</li>
       <li><strong>Open content.</strong> All data lives at <a href="https://github.com/AntaresYuan/personal_website/tree/main/content" target="_blank" rel="noopener">/content</a> on GitHub. Free to scrape, fork, or quote.</li>
       <li><strong>Build your own.</strong> This whole setup is an open <a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">template</a> — “Use this template” on GitHub, <code>npm run reset-content</code>, deploy. There’s a <a href="/blog/">writeup</a> on the why.</li>
     </ul>
@@ -876,7 +858,7 @@
         type="text"
         class="palette-input"
         id="palette-input"
-        placeholder="Search · or just ask…"
+        placeholder="Search sections, cards and commands…"
         autocomplete="off"
         autocapitalize="off"
         spellcheck="false"
@@ -894,89 +876,7 @@
     </div>
   </div>
 
-  <!-- ── ASK ANTARES — multi-turn chat panel ─────────────────────────
-       Opened by the hero "ask" bar (typing there → this panel opens with
-       the question). Answers come from the antares-qa Worker (multi-turn);
-       behaviour in scripts/render.js (wireAskPanel). It's a transcript, not
-       a chatbot UI — and labelled as an AI answering in Antares's voice. -->
-  <!-- The floating ask pill. Always docked and always position:fixed, so it
-       lives beside the panel it opens rather than inside the hero. It used to
-       sit in the hero as a full-width bar and collapse on scroll; that bar was
-       a duplicate entry point to this same panel. -->
-<div class="hero-ask" id="hero-ask">
-      <form class="hero-ask-form" id="hero-ask-form" role="search" autocomplete="off">
-        <!-- The mark, not a shell prompt. A four-point star belongs to the
-             same celestial family as the site's crescent brand and its "a star
-             to ship by" line, so it reads as this site's own rather than a
-             generic AI sparkle. In the docked pill it is the whole button. -->
-        <span class="ask-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="24" height="24">
-            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
-            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
-            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
-            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
-          </svg>
-        </span>
-        <input class="hero-ask-input" id="hero-ask-input" type="text"
-               placeholder="Ask anything…"
-               aria-label="Ask this portfolio a question" maxlength="280">
-        <!-- Same arrow as the drawer's send button, so the control that opens
-             the conversation looks like the one inside it. -->
-        <button class="hero-ask-go" id="hero-ask-go" type="submit" aria-label="Ask">
-          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
-          </svg>
-        </button>
-      </form>
-    </div>
 
-  <div class="ask-panel" id="ask-panel" role="complementary" aria-label="Ask Antares" hidden>
-    <header class="ask-panel-head">
-      <!-- The same star as the hero bar, so the control you clicked and the
-           panel it opened are visibly one thing. Replaced an earlier glowing
-           dot plus boxed "AI" chip, which announced the panel twice; the
-           footer under the composer carries that disclosure now. -->
-      <span class="ask-panel-title">
-        <span class="ask-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="21" height="21">
-            <g class="ask-star-main"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(7.2 6.65) scale(0.92)"/></g>
-            <g class="ask-spark ask-spark-1"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(2.2 2.65) scale(0.34)"/></g>
-            <g class="ask-spark ask-spark-2"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(23.2 3.65) scale(0.27)"/></g>
-            <g class="ask-spark ask-spark-3"><path d="M12 2.2c.28 3.02 1.1 5.2 2.46 6.56C15.82 10.12 18 10.94 21 11.22v1.56c-3 .28-5.18 1.1-6.54 2.46C13.1 16.6 12.28 18.78 12 21.8h-1.56c-.28-3.02-1.1-5.2-2.46-6.56C6.62 13.88 4.44 13.06 1.44 12.78v-1.56c3-.28 5.18-1.1 6.54-2.46C9.34 7.4 10.16 5.22 10.44 2.2H12z" transform="translate(3.2 21.65) scale(0.25)"/></g>
-          </svg>
-        </span>
-        ask Antares
-      </span>
-      <button class="ask-panel-icon" id="ask-panel-clear" type="button" aria-label="New conversation" title="New conversation">
-        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
-          <path d="M8 3.5v9M3.5 8h9"/>
-        </svg>
-      </button>
-      <button class="ask-panel-icon" id="ask-panel-close" type="button" aria-label="Close" title="Close">
-        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
-          <path d="M4 4l8 8M12 4l-8 8"/>
-        </svg>
-      </button>
-    </header>
-    <div class="ask-panel-log" id="ask-panel-log" tabindex="-1"></div>
-    <!-- Composer: one soft rounded card with the send button INSIDE it, which
-         is what ChatGPT, Claude and Doubao all do. A pill with the button
-         beside it reads as a search box, not a place to compose. -->
-    <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
-      <div class="ask-panel-field">
-        <input class="ask-panel-input" id="ask-panel-input" type="text" placeholder="Ask a follow-up…" aria-label="Ask a follow-up" maxlength="500">
-        <button class="ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">
-          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 13V3.5M8 3.5L4 7.5M8 3.5l4 4"/>
-          </svg>
-        </button>
-      </div>
-      <!-- Every reference carries a quiet line under the composer. Ours states
-           what the thing actually is, once, instead of repeating a disclaimer
-           on every single reply. -->
-      <p class="ask-panel-foot">AI answers from this site's content — it can be wrong.</p>
-    </form>
-  </div>
 
   <!-- ── CARD DETAIL PANEL ──────────────────────────────────────────
        Slides in from the right when a card is clicked. Closes on ESC,
@@ -1021,25 +921,19 @@
     <span>
       <a href="/admin/">edit</a> ·
       <a href="https://github.com/AntaresYuan/personal_website"
-         title="Open-source template — fork it freely; a link back is appreciated">source</a> ·
-      <a href="/llms.txt" title="agent-readable summary">/llms.txt</a>
+         title="Open-source template — fork it freely; a link back is appreciated">source</a>
     </span>
   </footer>
 
 </main>
 
 <!-- defer keeps these out of the critical path on slow mobile networks.
-     Pre-rendered HTML means no script is needed for first paint; these
-     just add interactivity (modal, terminal, ⌘K palette, hero "ask"). They
-     execute in document order after parse — qa-faq-data.js + qa-faq.js
-     (the CMS-authored FAQ +
-     retrieval) must come before render.js / palette.js. -->
+     Pre-rendered HTML means no script is needed for first paint; these add
+     Personal-only interactivity such as the modal, terminal and ⌘K palette. -->
 <script src="/scripts/i18n.js?v=331b4a11" defer></script>
-<script src="/scripts/qa-faq-data.js?v=2fbd2f90" defer></script>
-<script src="/scripts/qa-faq.js?v=acfd0a6f"      defer></script>
-<script src="/scripts/render.js?v=1f9e7e76"   defer></script>
-<script src="/scripts/terminal.js?v=ef73ed0e" defer></script>
-<script src="/scripts/palette.js?v=36a39fbd"  defer></script>
+<script src="/scripts/render.js?v=8315548b"   defer></script>
+<script src="/scripts/terminal.js?v=f5050e93" defer></script>
+<script src="/scripts/palette.js?v=9c38555c"  defer></script>
 <script src="/scripts/giscus-lazy.js?v=0521a30c" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c"   defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2"        defer></script>
