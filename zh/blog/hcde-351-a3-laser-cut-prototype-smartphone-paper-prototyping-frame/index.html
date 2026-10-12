@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | A3：激光切割原型——手机纸面原型框架 · Antares Yuan</title>
+<meta name="description" content="这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | A3：激光切割原型——手机纸面原型框架">
+<meta property="og:description" content="这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | A3：激光切割原型——手机纸面原型框架">
+<meta name="twitter:description" content="这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-02-01">2026年2月1日</time><span aria-hidden="true"> · </span>约 9 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | A3：激光切割原型——手机纸面原型框架</h1>
+      <p class="post-lead">这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>激光切割</li><li>线框图用户测试</li><li>2.5D 模型</li></ul>
+    </header>
+    <div class="prose">
+<h2 id="">产品概述：</h2>
+<p>这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。这个设计的目标是提升实用性和易用性：在帮助用户测试线框图用户流程的基础上，我也让用户能借助这个产品顺畅、直观地进行用户测试。在这个项目里，我探索了怎样用设计更好地回应用户测试线框图的需求（或者说，我自己就是这个产品的用户，因为我经常自己做用户测试），同时练习了制作 2.5D 产品的技能：把产品拆成若干部件来设计，再用插接等结构组装成足够结实的立体产品，不用任何胶水或其他粘合材料。</p>
+<p>在这篇记录里，我会讲我如何基于明确的用户需求进行头脑风暴、如何依据自己制定的评估标准做设计决策、如何收集用户和同学的反馈，以及找出了哪些需要改进的地方。我也会记录关键决策背后的理由，以及这些选择如何更好地服务目标用户。</p>
+<h2 id="">构思：</h2>
+<p>这个设计的目标，是做一个手机线框图原型的框架，用在早期的用户测试中，为主持测试的访谈者和参与测试的受访者都建立一个直观的用户流程。在这一节，我会讲我如何在不同的想法之间迭代，让方案更贴合设计目标。</p>
+<p>我先回想了自己主持用户测试、或作为受访者参与测试时的痛点。我想到了这些：</p>
+<p><strong>作为访谈者：</strong></p>
+<ul><li><strong>我没法向参与者展示用户流程（或者说，我拿不到关于用户流程的好反馈，因为他们盯着满是框框和乱七八糟箭头的线框图，看不太明白流程是什么样的）。他们得花很多时间去理解线框图里的用户流程。</strong></li><li><strong>用户能同时看到所有线框图，而真实的应用并不是这样。知道了下一步是什么，用户很容易反推出自己该怎么操作才能到下一步，这让我很难测试出所有交互在真实场景中是否足够直观。</strong></li></ul>
+<p><strong>作为受访者：</strong></p>
+<ul><li><strong>线框图用户测试时的指引总是不清楚。访谈者也许会给我一些提示，但我拿到最多的，是写在线框图上含糊又凌乱的句子，让我很难跟上。</strong></li><li><strong>做用户测试时，我没有手里拿着一部手机的感觉。他们总是只给我几张画着线框图的纸。</strong></li><li><strong>想对线框图提反馈时，我很少能找到我要找的那部分，因为它总是不够有条理。</strong></li></ul>
+<p>在从 Pinterest 上找灵感、思考怎样用设计回应这些点之前，我先制定了原型评估标准，并依据这些标准做了一些设计决策。</p>
+<p><strong>原型评估标准：</strong></p>
+<blockquote><p><strong>1. 可行性</strong>纸面原型框架应该能单手握持，并能容纳 5 英寸宽的纸面屏幕，手持使用时不会弯折或塌掉。<strong>2. 易用性</strong>在没有说明的情况下，用户应该能在每屏 3 秒内完成纸面屏幕的插入、取出和替换。<strong>3. 吸引力</strong>握着框架时，用户应该会觉得，比起看桌上散放的纸，这更像在用一部真实的设备。<strong>4. 影响</strong>这个框架应该让可用性测试在主持人尽量少介入的情况下进行（不需要解释方向，或该看哪里）。</p></blockquote>
+<p><strong>设计决策：</strong></p>
+<blockquote><p>框架为<strong>单手、竖屏使用</strong>而设计，模仿典型的手机交互。框架面向 <strong>6 英寸宽的纸面屏幕</strong>，与现代手机尺寸一致。整体外观应该像一部<strong>边框很窄的真实移动设备</strong>，同时保持足够的材料厚度，确保结构稳定。<strong>屏幕的插入和取出方式</strong>（从顶部、侧面或背面）会通过草图来探索，权衡速度和稳定性。<strong>手的摆放位置和握持示能</strong>会在画草图时研究，以支持舒适的单手使用。主要的测试场景是<strong>由主持人引导的演示测试</strong>，优先考虑快速换屏和使用过程中尽量少的解释。</p></blockquote>
+<p>明确了要设计什么产品之后，我开始画草图。</p>
+<p><strong>草图 1–4、7：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*yMOBpt1EL7r7JRjolkhlag@2x.jpeg" alt="" loading="lazy"></p>
+<p>草图 1</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*iJNlzK0PTnMmOcA1KwiWoQ@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*56lt-OqOhSEx_TkxjcF0FA@2x.jpeg" alt="" loading="lazy"></p>
+<p>草图 2、3</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*Ow7AU6l66ah85QogBo9hyg@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*XHUz3vVLdLG7nE420ZUlpA@2x.jpeg" alt="" loading="lazy"></p>
+<p>草图 4、7</p>
+<p>在草图 1–2 里，我试着检验第三条设计决策的答案。两者的主要区别是框架的边框：草图 1 的原型框架边框比草图 2 窄得多。草图 2 更宽的边框也许能减少误触中间画面的可能（不过说实话，这无所谓，反正只是一张纸），也更好握，但它抵消不了一个缺点：线框图的尺寸被大大压缩，也更不像一部手机（现在的手机边框都没有那么宽）。所以在后面的草图里，我都用了窄边框。草图 3 的开口方式和前两个不同：顶部有一个开口用来插入线框图，底部还有一个开口，用完之后线框图可以从这里落下去。这是对第四条设计决策的检验，我喜欢它在一张张线框图之间切换得很快。草图 4 和 7 里的原型用的是另一种线框图：像老式的翻页漫画书，所有画面以讲故事的方式连在一起。草图 4 的原型像一台胶片相机，线框图就是“胶片”，显示线框图的框就是胶片曝光的位置。它的缺点是，我没法确保参与者能转到完整显示线框图的“正确”角度。草图 7 的原型用的是折叠起来的纸质线框图，用户要拉动底部的纸，每次只展开一张，其他的保持折叠。这比其他方案复杂太多了。</p>
+<p><strong>草图 5–6、8–11：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*vHvpFDhzyx-99SkFF_cwKw@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*ei45Gl2dPxRsfPLqa05Qgg@2x.jpeg" alt="" loading="lazy"></p>
+<p>草图 5–6、8–11</p>
+<p>这些草图是我的试验场，我在这里尝试了插入和抽出纸张的不同方式，以及握持产品的不同方式。我选择用草图 1 和草图 3 来做低保真纸面原型，因为回看我的痛点、评估标准和设计决策，我认为这两个最贴合设计目标。（所以说，并不总是选最后一版，对吧？）</p>
+<h2 id="">原型：</h2>
+<p>在上面几节里，我讲了我如何制定评估标准、明确要做什么产品，然后探索不同的想法，并按照设计目标决定用哪两个来做纸面原型。这一节我会简单讲讲制作两个可测试的低保真纸面原型的过程，再用它们迭代出保真度更高的原型（用矢量编辑器和激光切割机），并展示它的样子。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*lRnla_9J18ianfItv8va3Q@2x.jpeg" alt="" loading="lazy"></p>
+<p>左：草图 1 的纸面原型；右：草图 3 的纸面原型</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:3024/1*PSfxsNCQUg_vJEpZ5MB5fg@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*6Vy75TxO9fbUuagpty33iA@2x.jpeg" alt="" loading="lazy"></p>
+<p>左：草图 1 的纸面原型；右：草图 3 的纸面原型</p>
+<p>在草图 1 的纸面原型里，我做了一些细微的改动：改变了各部件的连接方式，看看会不会更稳。草图 1 的纸面原型结构上有问题：框架正面和背面的中间没有任何部件连接，拿在手里时框架会左右晃动。草图 3 的纸面原型也有类似的问题：中间有连接，但四个角没有，所以四个角会动，稳定性更差。我还从第二张草图里得到了灵感，决定在中间做多块插板，放在桌上，方便在不同的线框图之间切换。我记住了这一点，结合两个纸面原型的连接结构，做出了最终版。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*q2kag8b0WvFeY8o-TqANSw@2x.jpeg" alt="" loading="lazy"></p>
+<p>在 Inkscape 中矢量化的设计</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*sOI78MAE0v4iZtQK4l7U-g@2x.jpeg" alt="" loading="lazy"></p>
+<p>激光切割</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*yWG2M6qbwrf6IaIRLkWLLA@2x.jpeg" alt="" loading="lazy"></p>
+<p>最终设计</p>
+<p>这就是我的最终设计：它贴合设计目标，通过了评估标准，也满足了我的设计决策。插板上有两个切槽。下面那个用来固定线框图；它上面那个小一些的，可以给参与者留提示和指引。访谈者先把线框图固定好，再在上面留一些说明，比如“点击 XXX 可以进入这一页”，或者这一页该怎么操作。访谈者要确保这两者位于插板的两面。然后访谈者把插板翻过来，对用户隐藏线框图，让用户从手机原型框架中间把插板抽出来，下一块翻好的插板等着被插入。这样，我列出的所有痛点都被解决了，操作起来也依然简单。</p>
+<h2 id="">反馈：</h2>
+<p>课上，我和同学三人一组进行了一轮评图。轮到我时，我把原型交给他们，自己保持沉默，让他们自己摸索怎么用。以下是我收到的反馈：</p>
+<p>哪些地方做得好？</p>
+<ul><li>原型<strong>稳固、结构结实</strong>，不用外力支撑就能立住。</li><li>主要部件可以<strong>轻松地插入和取出</strong>，基本交互顺畅、省力。</li><li>整体的实体结构让人觉得<strong>牢固可靠</strong>，用户拿在手里很有信心。</li></ul>
+<p>哪些地方可以更好？</p>
+<ul><li><strong>放评论便利贴的部分在抽出时可能会卡住</strong>，反复使用时会有阻力，可能影响长期的易用性。</li><li><strong>放评论便利贴的小切口让人困惑</strong>，看不出它的功能，也不知道该怎么用。</li><li>有些用户<strong>一开始误解了交互的方向</strong>，说明示能不够一目了然。</li><li>这个形态让人觉得它由<strong>多个框或多层</strong>组成，如果结构没有讲清楚，可能会增加认知负担。</li></ul>
+<h2 id="">收获：</h2>
+<p>同学和助教的反馈都表明，我的设计确实贴合了设计目标，回应了痛点，也通过了基于设计决策的评估标准。但这个设计还有一些小问题，可能会、也可能不会影响它的功能。如果做到下面几点，它会更好：</p>
+<ul><li><strong>让示能更清晰</strong>，让交互方向更直观。</li><li><strong>重新设计放评论便利贴的部分</strong>，减少阻力，避免卡住。</li><li><strong>简化小部件</strong>，让它们的功能更容易理解。</li></ul>
+<h2 id="">致谢：</h2>
+<p>特别感谢我的组员、助教 Nichole Sams 和授课老师 Brock Craft 给出的宝贵反馈。</p>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我用 ChatGPT 修改语法和错别字；</li><li>我用 NotebookLM 帮我整理用户反馈；</li><li>我和 ChatGPT 讨论了根据收到的反馈，应该改进哪些地方。</li></ul>
+<p><strong>写作参考：</strong></p>
+<ul><li>这篇博客的整体结构参考了我上一篇博客，其中有一些我自己写的句子是相同的（部分过渡句和用词）。</li><li>参考的博客在这里：<a href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</a></li></ul>
+<p><strong>灵感参考：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*stajSu2T2dASQIPhHHvgEw.png" alt="" loading="lazy"></p>
+<p><a href="https://www.pinterest.com/pin/833869687282567882/" target="_blank" rel="noopener">https://www.pinterest.com/pin/833869687282567882/</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*bxR3E1PJw_pOwEkLfb4S8A.png" alt="" loading="lazy"></p>
+<p><a href="https://www.pinterest.com/pin/1151091986036608640/" target="_blank" rel="noopener">https://www.pinterest.com/pin/1151091986036608640/</a></p>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

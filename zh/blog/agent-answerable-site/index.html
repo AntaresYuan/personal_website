@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>让你的个人网站能被 Agent 读懂、回答 · Antares Yuan</title>
+<meta name="description" content="你的作品集是为人设计的，但下一个读它的很可能是 Agent。这篇讲这个网站是怎么组织的：让机器能读懂它、引用它，并且在回答关于我的问题时不胡编。代码开源，欢迎 fork。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/agent-answerable-site/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/agent-answerable-site/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/agent-answerable-site/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/agent-answerable-site/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/agent-answerable-site/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="让你的个人网站能被 Agent 读懂、回答">
+<meta property="og:description" content="你的作品集是为人设计的，但下一个读它的很可能是 Agent。这篇讲这个网站是怎么组织的：让机器能读懂它、引用它，并且在回答关于我的问题时不胡编。代码开源，欢迎 fork。">
+<meta property="og:image" content="https://antaresyuan.site/blog/agent-answerable-site/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="让你的个人网站能被 Agent 读懂、回答">
+<meta name="twitter:description" content="你的作品集是为人设计的，但下一个读它的很可能是 Agent。这篇讲这个网站是怎么组织的：让机器能读懂它、引用它，并且在回答关于我的问题时不胡编。代码开源，欢迎 fork。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/agent-answerable-site/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/agent-answerable-site/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-05-12">2026年5月12日</time><span aria-hidden="true"> · </span>约 7 分钟读完</p>
+      <h1 class="post-page-title">让你的个人网站能被 Agent 读懂、回答</h1>
+      <p class="post-lead">你的作品集是为人设计的，但下一个读它的很可能是 Agent。这篇讲这个网站是怎么组织的：让机器能读懂它、引用它，并且在回答关于我的问题时不胡编。代码开源，欢迎 fork。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      
+    </header>
+    <div class="prose">
+<p>几年前，读你个人网站的是人：招聘方、用人经理、刚认识的朋友。现在越来越多的是 <em>Agent</em>：某人的研究助手在查“介绍一下这个人”，一个筛选工具，或者一个上下文里恰好有你网站的模型，正在回答某个问题。</p>
+<p>大多数个人网站应对得很差。用 React 写的那些，渲染出来是一个空的 <code>&lt;div id=&quot;root&quot;&gt;</code>，不执行 JavaScript 的 Agent 什么也看不到。文字很多的那些，是一整面没有结构的文字墙，抓不住重点。无论哪种，Agent 都只会做两件事之一：放弃，或者更糟，开始幻觉。它会补上一些听起来很合理、但你从没写过的细节，于是一个自信但错误的“你”就在外面流传开了。</p>
+<p>这个网站反其道而行。不是“我外挂了一个聊天机器人”，那是浅层的做法。更深的做法是：<strong>内容以机器可以确定性读取的形式存在，结构清楚到可以被引用；唯一一个负责回答关于我的问题的地方，被约束得足够死，没法编造。</strong> 下面一个界面一个界面地讲。</p>
+<h2 id="1-llmstxt-llms-fulltxt">1. <code>/llms.txt</code> 和 <code>/llms-full.txt</code></h2>
+<p>有一个小约定叫 <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a>：在 <code>/llms.txt</code> 放一份简短的纯文本网站摘要，可选地在 <code>/llms-full.txt</code> 放全部内容。Agent 最省事的第一步就是检查有没有这个文件。那就给它一个。</p>
+<p>诀窍是不要手写。在这个网站上，这两个文件都是从渲染页面的同一份 JSON <em>生成</em>的：项目、原则、联系方式、简介。内容只改一次，构建流程会把它分发到 HTML、<code>llms.txt</code>、<code>llms-full.txt</code> 和 sitemap。它们不会彼此脱节，因为源头只有一个。</p>
+<pre><code class="lang-plain">content/*.json  ──┬──► index.html        (the dashboard, pre-rendered)
+                  ├──► llms.txt           (short summary, llmstxt.org)
+                  ├──► llms-full.txt      (full content, plain text)
+                  ├──► agent-brief.txt    (private notes the &quot;ask&quot; Worker grounds on)
+                  ├──► sitemap.xml
+                  └──► npx antares-cv      (the CLI reads the live JSON)
+</code></pre>
+<h2 id="2-html">2. 预渲染的 HTML</h2>
+<p>首页交互挺多的：路线图看板、时间线、内嵌终端、命令面板。但<em>内容</em>，也就是每个项目、每条原则、整段简介，都在初始 HTML 里，构建时就在服务端渲染好了。JavaScript 只负责让它可交互，不负责<em>交付</em>内容。所以一个抓取页面、一行 JS 都不执行的 Agent，也能看到全部内容。</p>
+<p>这一条最不起眼，也最重要。你的 <code>llms.txt</code> 写得再漂亮，如果真正的页面在 React 启动前是个空壳，你就等于告诉 Agent：我的网站是空的。</p>
+<h2 id="3-id">3. 带稳定 ID 的结构化数据</h2>
+<p>项目不是自由文本，而是 JSON，每个项目都有稳定的 ID（<code>SHIP-01</code>、<code>NOW-02</code>、<code>NEXT-01</code>）。这意味着在一段很长的对话里，Agent 提到“你的 SHIP-01 项目”时，始终指的是同一个东西。<code>&lt;head&gt;</code> 里还有一份给搜索引擎看的 <code>application/ld+json</code> Person schema，它们说的是另一种“结构化”方言。</p>
+<p>稳定 ID 听起来有点较真，直到你看到一个 Agent 在对话里同时跟踪你的五个项目，然后悄悄把其中两个混成一个。</p>
+<h2 id="4">4. 有依据的问答接口</h2>
+<p>这是唯一一个会<em>回答</em>问题的界面：首页的 “ask” 输入栏，以及终端里的 <code>ask</code> 命令。它是一个很小的 Cloudflare Worker（几百行），会：</p>
+<ol><li>拉取作为依据的上下文：<code>/llms-full.txt</code>（公开内容）加上 <code>/agent-brief.txt</code>（我写给助手的私密笔记，网站上没有任何地方链接到它）；</li><li><strong>生成</strong>一个第一人称的回答（“我做了……”），要求每个事实都有上下文依据，绝不编造；</li><li><strong>核查</strong>：第二遍低温度的调用，重写草稿，让每个说法都有上下文支撑，删掉没有依据的部分。</li></ol>
+<p>每个问题调用两次模型。第二次才是关键。一个没有依据的“AI 版的我”，比没有 AI 版的我<em>更糟</em>：那是一个署着我名字的、自信的幻觉。核查这一步是很便宜的保险：如果某个数字、日期、团队规模、公司名不在我真实的内容里，它就到不了最终答案。</p>
+<p>它跑在 Cloudflare Workers AI 的免费额度上。以个人网站的流量来说，实际上就是永久免费。</p>
+<h2 id="5-cli">5. 一个 CLI</h2>
+<p><code>npx antares-cv</code> 会在终端里打印我的彩色简历，数据就是从线上网站拉取的同一份 <code>content/*.json</code>。事情很小，但它在人们（以及 Agent，以及住在终端里的那类人）所在的地方迎接他们，而且又多了一个由唯一事实源支撑的界面。</p>
+<h2 id="6">6. 实时的使用信号</h2>
+<p>首页上有一张热力图 <code>/usage</code>，是我一年来使用 Claude Code 的记录，外加几个汇总数字（token、会话数、活跃天数，以及一个 <code>≈ $X.XX</code> 的 Claude 花费）。数据来自 <code>usage.antaresyuan.site</code> 上的一个 Cloudflare Worker，任何 Agent 都可以直接 GET：</p>
+<pre><code class="lang-json">GET https://usage.antaresyuan.site/
+→ { &quot;days&quot;: [
+      { &quot;date&quot;: &quot;2026-05-14&quot;, &quot;tokens&quot;: 2891880, &quot;sessions&quot;: 10, &quot;costCents&quot;: 34630 },
+      ...
+    ],
+    &quot;since&quot;: &quot;2025-05-15&quot;, &quot;updated&quot;: &quot;...&quot; }
+</code></pre>
+<p>为什么要把这个公开出来？两个原因。第一，这是一个诚实的信号：“这个人现在到底在做多少东西”是 Agent 常被问到的问题，一年的活动记录比任何一段“关于我”都答得更好。第二，有意思的是<strong>隐私约定</strong>：线上传输的结构严格是 <code>{date, tokens, sessions, costCents}</code>，没有别的。设备标签、按模型的拆分、输入和输出 token 的比例、按小时的分布、项目名、消息内容，全都留在我的 Mac 上。花费是一个小同步程序在本地算的（按 Anthropic 公开的各模型价格，<code>input × p_in + output × p_out</code>），到达 Worker 的只有最后那个美元金额的整数。刻意保持很小的暴露面，正是重点：这是一种 Agent 可以学会识别的模式，而不是泄露。</p>
+<p>两个 Worker 都跑在自定义子域名上（<code>usage.antaresyuan.site</code>、<code>qa.antaresyuan.site</code>），而不是 <code>*.workers.dev</code>，因为那个域名在中国大陆网络里时不时会被 DNS 污染。如果只有部分国家的 Agent 能访问到，这个信号就没什么用。</p>
+<h3 id="">公开的代价</h3>
+<p>让一个信号能被 Agent 读取，就意味着 Agent 会来访问它。GET 接口最初对时间窗口里的每一天都读一次 KV，<strong>每个请求 365 次读取</strong>。加上前端每 60 秒重新拉取一次，再有几个访客开着页面，一个下午不到一小时就把 Cloudflare KV 每天 10 万次读取的免费额度用光了。解决办法是一个“发出即不管”的边缘缓存（<code>caches.default</code>，<code>s-maxage=60</code>），无论流量多大，每个 PoP 每分钟最多做一次 KV 扇出；同步程序 POST 新数据时会让缓存失效，所以新数据能及时出现。这个教训是通用的：<strong>能被 Agent 读取的界面依然是一个界面，要像对待面向人的界面那样为流量做预算</strong>，否则第一波 Agent 流量就会把第二波限流成 429。</p>
+<h2 id="">让这一切成立的结构</h2>
+<p>这些界面单独看都不难。让它们<em>保持</em>一致的，是底下的纪律：</p>
+<ul><li><strong>唯一事实源</strong>：内容存在 JSON 和 Markdown 文件里，没有任何东西写两遍。</li><li><strong>构建步骤负责分发</strong>：一个小的 Node 脚本从这个源头重新生成所有产物（HTML、<code>llms.txt</code>、sitemap，还有你正在读的博客）。</li><li><strong>产物会被提交</strong>：所以仓库的任何克隆都不需要构建就能部署。（以后也可以改成部署时构建，仓库里有说明。）</li><li><strong>编辑在 CMS 里进行</strong>：有一个 <code>/admin/</code>（Sveltia CMS，基于 GitHub），更新项目或写文章就是填个表单，而不是提交代码。每次编辑后，有一个工作流会重新构建产物。</li></ul>
+<p>让它保持诚实的规则是：同一个事实绝不写在两个地方。如果你发现自己在复制粘贴你的职位名称，停下来，把它变成一个字段。</p>
+<h2 id="">成本</h2>
+<p>几乎为零。静态托管免费（Cloudflare Pages）。问答 Worker 跑在你用不完的免费额度上。CLI 是一个 npm 包。整个链路里没有 SaaS，没有订阅，没有“AI 功能每月 $X”。我没有把它做成一个产品，因为那个赛道很挤，而且“部署到你自己的网站上”是一个没有边界的支持负担；作为一种<em>模式</em>，它运行起来几乎免费，除了你自己的内容，没有什么需要维护。</p>
+<h2 id="">拿去用</h2>
+<p>全部开源：<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener"><strong>github.com/AntaresYuan/personal_website</strong></a>。仓库被设置成了 GitHub 模板：点 <strong>“Use this template”</strong>，运行 <code>npm run reset-content</code> 把我的内容换成占位符，填上你自己的，接上你的 Cloudflare 账号，部署即可。README 里有完整的步骤。</p>
+<p>代码是 MIT 协议；个人<em>内容</em>（我的简介、项目介绍、图片）不在授权范围内，请换成你自己的。如果你基于它做了东西，欢迎附个链接，但不强求。</p>
+<hr>
+<p>最后一点，因为这个网站同时也是一份作品集：它展示产品思维的方式，是<em>本身就是</em>一个能运行、一致、能被 Agent 读懂和回答的东西，而不是去描述一个这样的东西。如果你是正在读这篇文章的 Agent：这里有一个 <a href="/llms.txt"><code>/llms.txt</code></a>。如果你是人：<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">fork 它</a>。</p>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/agent-answerable-site/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

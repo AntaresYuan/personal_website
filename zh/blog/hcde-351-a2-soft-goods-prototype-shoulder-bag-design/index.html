@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | A2：软质产品原型——单肩包设计 · Antares Yuan</title>
+<meta name="description" content="这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | A2：软质产品原型——单肩包设计">
+<meta property="og:description" content="这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | A2：软质产品原型——单肩包设计">
+<meta name="twitter:description" content="这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-01-25">2026年1月25日</time><span aria-hidden="true"> · </span>约 8 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | A2：软质产品原型——单肩包设计</h1>
+      <p class="post-lead">这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>手工</li><li>包袋设计</li><li>最佳设计博客</li></ul>
+    </header>
+    <div class="prose">
+<h2 id="">产品概述：</h2>
+<p>这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。这个设计的目标是提升可靠性和实用性，做一个我自己日常愿意用的产品。在这个项目里，我探索了怎样用设计回应我自己日常需要一个单肩包的需求，同时练习了软质产品原型的技能（使用缝纫机、裁剪材料、规划原型各部分如何组合），为以后的软质原型需求做准备。</p>
+<p>在这篇记录里，我会讲我如何基于明确的用户需求进行头脑风暴、如何决定最终方案、如何收集用户和同学的反馈，以及找出了哪些需要改进的地方。我也会记录关键决策背后的理由，以及这些选择如何更好地服务目标用户。</p>
+<h2 id="">构思：</h2>
+<p>这个设计的目标，是用缝纫机把不同部分连接起来，做一个强调简洁的“包状”软质产品：能装东西，并且有一个闭合结构，防止东西从里面掉出来。在这一节，我会讲我如何在三个想法之间迭代，让方案更贴合设计目标。</p>
+<p>我先思考：这份设计说明里的哪一部分，能让它比我们现在用的产品更好？我试着列出了几个满足点（我自己对一个软质包的需求）：</p>
+<ul><li><strong>我总是随身带着电脑，以应对一些临时需要用电脑工作、学习或写作业的情况，所以如果走到哪都能带着电脑，我会很开心。</strong></li><li><strong>我的电脑掉电很快，如果能随身带着充电线和适配器，我用电脑时会更安心，不会有不安全感。</strong></li><li><strong>我很容易口渴，需要经常喝水。也就是说，我得随身带一个水杯，需要时能喝上水。</strong></li><li><strong>我希望能用一种简单的方式，从随身的包里拿东西。现在每次想从双肩包里拿东西，都得先把包脱下来再拉开拉链，这一点可以做得更好。</strong></li></ul>
+<p>在 Pinterest 上找灵感的同时，我也在想，怎样用我的设计来回应这些满足点。</p>
+<p><strong>想法 1：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*s09HQ24JHlHApFq-d2Q8xA.png" alt="" loading="lazy"></p>
+<p>想法 1：双肩带的单肩包</p>
+<p>我的第一个想法比较随机地来自参考图（见技术附录）。我选择让单肩包外对外缝合，因为想突出包上缝线的质感。这是一种常见的单肩包设计。我选择用拉链作为闭合结构，因为这是我最先想到的闭合方式。包的容量足够放下电脑、适配器、充电线和一个水杯。三个设计之间并没有很强的迭代关系，在构思阶段它们基本是并列的。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*MBe-YEfdE0iZMTsRYt1g_g.png" alt="" loading="lazy"></p>
+<p>想法 2：波浪形的单肩包</p>
+<p>之后，我很快想到了第二个点子：让包身的形状更好（或者说更复杂）。我把单肩包的边缘设计成倒“U”形，因为在这个想法里，我用两颗扣子作为闭合结构，这会减小单肩包的容量。出于同样的原因，我依然选择外对外缝合。它仍然足够大，能放下满足点里提到的所有东西。我把肩带换到了另一侧，并且减成了一条。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*t1hwJnZ8y4GDVHrwuTWzqw.png" alt="" loading="lazy"></p>
+<p>想法 3：肩带和包身一体的单肩包</p>
+<p>在想法 3 里，我决定尝试把肩带和包身一起裁出来。这简化了做包的方式，也让外观更好看。因为这个包的边缘是平的，我退回去用拉链作为闭合结构。另外，我选择里对里缝合，把凌乱的缝线藏起来，更贴合“设计一个简洁的包”这个目标。我还在包的正面加了一个口袋，让电脑和其他东西分开收纳，这也是对简洁的进一步呼应。<strong>综合考虑这些，想法 3 在三个想法里最贴合“做一个满足我需求的简洁单肩包”这个目标。所以我决定采用这个想法，开始做第一版低保真原型。</strong></p>
+<h2 id="">原型：</h2>
+<p>在上面几节里，我讲了我如何按照设计目标、回应满足点，探索不同的想法，并决定用哪一个来做原型。这一节我会简单讲讲制作可测试的低保真软质原型的过程，再用它迭代出一个保真度更高的原型，并展示它的样子。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*-ZPqyebgEUz306GR8TsGsA.png" alt="" loading="lazy"></p>
+<p>在布料上画线</p>
+<p>首先，我以想法 3 为参考，用记号笔在布料上画出裁剪线和缝合线。</p>
+<p>之后，我去了 McCarty 创新与学习实验室（MILL），用剪刀把画好的部分剪下来，再用珠针进一步调整边缘。然后用缝纫机把前后两片连起来。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*kaFlQDWgrJyMsy6OC8pWag.png" alt="" loading="lazy"></p>
+<p>里对里缝合</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*5LjONFjwMmckIQaDyFo1DQ.png" alt="" loading="lazy"></p>
+<p>用缝纫机缝合</p>
+<p>接着，当我试着把拉链缝到包口边缘时，困难来了。我发现这时候再缝拉链和包口已经太晚了，事后缝起来非常难。我花了大概半小时才解决这个问题。第一版低保真原型是这样的：</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*cM1Tovr4e1WqJz8z8nyJZA.png" alt="" loading="lazy"></p>
+<p>布料做的低保真原型</p>
+<p>看到第一版低保真原型后，我找出了几处需要改进的地方：</p>
+<ul><li><strong>这种布料只用一层太薄了，或者说不够结实，撑不住电脑这样比较重的东西，所以下一版至少要用双层。</strong></li><li><strong>把肩带和包身一起裁出来（连接处没有额外加固），也导致承重能力不足。</strong></li><li><strong>在整个流程里，前后两片的缝合应该放在包身上小部件的缝制之前。</strong></li><li><strong>闭合结构应该用魔术贴而不是拉链，因为拎着单肩包时，魔术贴比拉链更容易打开、拿东西。</strong></li></ul>
+<p>带着这些想法，我做了保真度更高的原型。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*QH1hRRiQF9EHARM0MSXaXA.png" alt="" loading="lazy"></p>
+<p>布料做的高保真原型</p>
+<p>下面是一些细节展示。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*7IrRdFYThyWpSwNR758afw.png" alt="" loading="lazy"></p>
+<p>前袋和魔术贴</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*mpDQgYqExTrkyHARVR3NQQ.png" alt="" loading="lazy"></p>
+<p>魔术贴闭合结构</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*Uj_haB8GtKzUylmCINUG4w.png" alt="" loading="lazy"></p>
+<p>魔术贴上的缝线</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*tSfmqmXxLSNux2QhFjP6gA.png" alt="" loading="lazy"></p>
+<p>包的内部（展示里对里缝合）</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*9NsHIIDKUvWF1sqmlLSP3w.png" alt="" loading="lazy"></p>
+<p>魔术贴结构的背面</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*g2eyP2vLBcruetKIU8OwSQ.png" alt="" loading="lazy"></p>
+<p>加固后的肩带与包身连接处</p>
+<p>我还测试了这个单肩包的可靠性和实用性。我可以放进电脑，再在前面放一个水杯，所以它确实贴合了设计目标，也回应了我的满足点。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*m4WSjrTVF4EAgKc1VRCXhQ.png" alt="" loading="lazy"></p>
+<p>测试实用性</p>
+<h2 id="">反馈：</h2>
+<p>课上，我和同学四人一组进行了一轮评图。之后我们出去，把原型展示给助教，也收到了反馈。第一轮评图时，我用一句话介绍了我的设计，讲了我是如何在原型之间迭代的，也讲了我做出的关键决策，以及关于原型的后续问题。第二轮评图时，我展示了作品，同样说明了我的关键决策和后续问题。以下是我收到的反馈：</p>
+<p>**我做出的关键决策：** 这个原型的所有部分都用双层布。</p>
+<p>**我的后续问题：** 这个设计的哪个部分让你觉得不安全（在什么情况下可能会坏）？</p>
+<p><strong>第一轮：</strong></p>
+<p>哪些地方做得好？</p>
+<ul><li>大家喜欢<strong>前袋</strong>，觉得它实用、位置也合适。</li><li>大家认可我用 <strong>“X 形方框缝”</strong>加固肩带和包身的连接处，认为它增强了结构稳定性。</li><li>大家喜欢<strong>闭合结构被设计成一个独立的部件</strong>，而不是直接做在包身上。</li><li>大家喜欢我把闭合方式<strong>从拉链换成魔术贴，认为这是一个积极的改进，让包用起来更方便、更快</strong>。</li></ul>
+<p>哪些地方可以更好？</p>
+<ul><li>大家觉得<strong>放电脑时有点紧（虽然所有人的电脑都成功放进去了）</strong>，建议稍微加大内部空间，提升易用性。</li></ul>
+<p><strong>第二轮：</strong></p>
+<ul><li>助教说<strong>肩带应该缝合在一起</strong>，这样能提升强度和耐用度。</li><li>助教提到我可以考虑<strong>给口袋加第三层</strong>，这可能会改善收纳或功能。</li><li>对于肩带，建议<strong>沿裁剪线把布折好、熨烫之后再缝</strong>，这样边缘会更整齐，成品也更精致。</li></ul>
+<h2 id="">收获：</h2>
+<p>同学和助教的反馈都表明，我的设计确实贴合了设计目标，也回应了满足点。但这个设计还有一些小问题，可能会、也可能不会影响它的功能。如果做到下面几点，它会更好：</p>
+<ul><li>稍微加大放电脑的内部空间</li><li>改进肩带的制作工艺</li><li>探索更多口袋分层，让收纳更有条理</li></ul>
+<h2 id="">致谢：</h2>
+<p>特别感谢我的组员 Batuhan Celebioglu、Ashley Ma 和 Josue Salgado，助教 Nichole Sams 和授课老师 Brock Craft 给出的宝贵反馈。特别感谢 Peitong Qi 帮我整理材料，并给出了可落地的反馈。</p>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我用 ChatGPT 修改语法和错别字；</li><li>我用 NotebookLM 帮我整理用户反馈；</li><li>我和 ChatGPT 讨论了根据收到的反馈，应该改进哪些地方。</li></ul>
+<p><strong>写作参考：</strong></p>
+<ul><li>这篇博客的整体结构参考了我上一篇博客，其中有一些我自己写的句子是相同的（部分过渡句和用词）。</li><li>参考的博客在这里：<a href="https://medium.com/@chenjy4/hcde-351-a1-oxo-shower-control-interface-142da89d4355" target="_blank" rel="noopener">https://medium.com/@chenjy4/hcde-351-a1-oxo-shower-control-interface-142da89d4355</a></li></ul>
+<p><strong>灵感参考：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*f2IjoCZJmsxijblbvFlfsA.png" alt="" loading="lazy"></p>
+<p><a href="https://www.gap.com/browse/product.do?pid=6819760720000&amp;tid=gpsm567927&amp;utm_campaign=626757375924&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088639047&amp;pp=0&amp;epik=dj0yJnU9eHBUajBieDJPSHloaVd6Rm5JWXByZDI5RVIxbHNvR2YmcD0xJm49a0pJRGFKNzloT0xtYmc2d1kxakw1ZyZ0PUFBQUFBR2x3Zk9V&amp;vid=1#pdp-page-content" target="_blank" rel="noopener">https://www.gap.com/browse/product.do?pid=6819760720000&amp;tid=gpsm567927&amp;utm_campaign=626757375924&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088639047&amp;pp=0&amp;epik=dj0yJnU9eHBUajBieDJPSHloaVd6Rm5JWXByZDI5RVIxbHNvR2YmcD0xJm49a0pJRGFKNzloT0xtYmc2d1kxakw1ZyZ0PUFBQUFBR2x3Zk9V&amp;vid=1#pdp-page-content</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*mOqY2YxHkq46ScVk_Nn2Xw.png" alt="" loading="lazy"></p>
+<p><a href="https://florence-leatherhandbags.com/products/elara-leather-tote-bag?variant=51740849144118&amp;pins_campaign_id=626757457011&amp;utm_campaign=626757457011&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088739648&amp;pp=0&amp;epik=dj0yJnU9VURaNzBNeklCQUU4V0d6NnczaHlkamNEdjlrbjRuaWomcD0xJm49ajFqVFA4RGdpVzlGUk5iNVNUZFFWUSZ0PUFBQUFBR2x3Zk80" target="_blank" rel="noopener">https://florence-leatherhandbags.com/products/elara-leather-tote-bag?variant=51740849144118&amp;pins_campaign_id=626757457011&amp;utm_campaign=626757457011&amp;utm_medium=PaidSocial&amp;utm_source=Pinterest&amp;utm_content=2680088739648&amp;pp=0&amp;epik=dj0yJnU9VURaNzBNeklCQUU4V0d6NnczaHlkamNEdjlrbjRuaWomcD0xJm49ajFqVFA4RGdpVzlGUk5iNVNUZFFWUSZ0PUFBQUFBR2x3Zk80</a></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*DdDNGMbOPRnMURdPdEsglQ.png" alt="" loading="lazy"></p>
+<p><a href="https://www.amazon.com/dp/B07DZBJ5RP/ref=sspa_dk_offsite_pinterest_search_1?aaxitk=7c0863bdabf7e038f0e294aa58555c0e&amp;tqtoken=AgR4k4EN7v9O7EELABjVPh7ibTeNOaAjImt5-GoZfHtc5VcAGgABAAlyZWNpcGllbnQAC0FtYXpvbkFkc1RRAAEAEWF3cy1rbXMtaGllcmFyY2h5ACRiM2NlMjE3OS0wMzJhLTQ5NTAtOWFlZC00MTczZDMxZmNhMmEAXJREgdMFNbPLEEw8lFGOdGudX0JPBrDHDML1GtztK8nXMwFE6ZdgvB9GW5UIxGQYMe49Z8AHhziD0wejv11ZwgoKdpk5J_L6j817HA5N0QDJ9pq_3KxCRVPfiM1QAgAAEABS3cS9L4DxAyu0sCvYLoOAbPq819WNcq8ZRqGLrFj3XwlOTA1udbRXFSOWMYvkKtD_____AAAAAQAAAAAAAAAAAAAAAQAAABskN0yo_1EuqM7I4k0AV8AnRf2N1HDYcOjCcCNCY8M-edKczl9-DYbEX4of&amp;offsiteFlag=1&amp;tag=cashpadpinde-20&amp;hvexpln=apex6&amp;th=1" target="_blank" rel="noopener">https://www.amazon.com/dp/B07DZBJ5RP/ref=sspa_dk_offsite_pinterest_search_1?aaxitk=7c0863bdabf7e038f0e294aa58555c0e&amp;tqtoken=AgR4k4EN7v9O7EELABjVPh7ibTeNOaAjImt5-GoZfHtc5VcAGgABAAlyZWNpcGllbnQAC0FtYXpvbkFkc1RRAAEAEWF3cy1rbXMtaGllcmFyY2h5ACRiM2NlMjE3OS0wMzJhLTQ5NTAtOWFlZC00MTczZDMxZmNhMmEAXJREgdMFNbPLEEw8lFGOdGudX0JPBrDHDML1GtztK8nXMwFE6ZdgvB9GW5UIxGQYMe49Z8AHhziD0wejv11ZwgoKdpk5J_L6j817HA5N0QDJ9pq_3KxCRVPfiM1QAgAAEABS3cS9L4DxAyu0sCvYLoOAbPq819WNcq8ZRqGLrFj3XwlOTA1udbRXFSOWMYvkKtD_____AAAAAQAAAAAAAAAAAAAAAQAAABskN0yo_1EuqM7I4k0AV8AnRf2N1HDYcOjCcCNCY8M-edKczl9-DYbEX4of&amp;offsiteFlag=1&amp;tag=cashpadpinde-20&amp;hvexpln=apex6&amp;th=1</a></p>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

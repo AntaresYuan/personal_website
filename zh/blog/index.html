@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>文章 · Antares Yuan</title>
+<meta name="description" content="Antares Yuan 的项目复盘与笔记。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="文章">
+<meta property="og:description" content="Antares Yuan 的项目复盘与笔记。">
+<meta property="og:image" content="https://antaresyuan.site/blog/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="文章">
+<meta name="twitter:description" content="Antares Yuan 的项目复盘与笔记。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <section class="writing" aria-labelledby="writing-title">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title" id="writing-title">文章</h1>
+        <p class="page-sub">项目复盘、拆解，以及做东西时的笔记。</p>
+      </div>
+      <a class="pill-link" href="/blog/feed.xml">RSS</a>
+    </header>
+    <div class="filters" role="group" aria-label="按主题筛选" data-filter-for="post-grid">
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">全部</button><button class="filter" type="button" data-filter="视频原型" aria-pressed="false">视频原型</button><button class="filter" type="button" data-filter="行为原型" aria-pressed="false">行为原型</button><button class="filter" type="button" data-filter="手工" aria-pressed="false">手工</button><button class="filter" type="button" data-filter="期末反思" aria-pressed="false">期末反思</button><button class="filter" type="button" data-filter="课程反思" aria-pressed="false">课程反思</button><button class="filter" type="button" data-filter="自助终端软件" aria-pressed="false">自助终端软件</button>
+    </div>
+    <ul class="post-grid" id="post-grid">
+      <li class="post-card is-feature" data-tags="">
+        <a class="post-link" href="/zh/blog/agent-answerable-site/">
+          <div class="post-cover" style="--hue: 262"><img src="/media/blog/agent-answerable-cover-v2.webp" alt="" loading="eager" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-05-12">2026年5月12日</time><span aria-hidden="true"> · </span>约 7 分钟读完</p>
+            <h2 class="post-title">让你的个人网站能被 Agent 读懂、回答</h2>
+            <p class="post-summary">你的作品集是为人设计的，但下一个读它的很可能是 Agent。这篇讲这个网站是怎么组织的：让机器能读懂它、引用它，并且在回答关于我的问题时不胡编。代码开源，欢迎 fork。</p>
+            
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="期末反思|课程反思">
+        <a class="post-link" href="/zh/blog/hcde-351-final-reflection/">
+          <div class="post-cover" style="--hue: 305"><img src="https://miro.medium.com/v2/resize:fit:1400/1*XtCYl-wueWif9yw_-Ni50Q.jpeg" alt="" loading="eager" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-03-16">2026年3月16日</time><span aria-hidden="true"> · </span>约 4 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | 期末反思</h2>
+            <p class="post-summary">这篇过程记录是我对 HCDE 351 这门课的反思：这一学期的课堂学习，以及我完成的七个项目。</p>
+            <ul class="post-tags"><li>期末反思</li><li>课程反思</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="自助终端软件|纸板原型|移动应用开发|视频原型|行为原型">
+        <a class="post-link" href="/zh/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+          <div class="post-cover" style="--hue: 200"><img src="https://miro.medium.com/v2/resize:fit:1400/1*WFYUxOBNyOwOHyJnPqCuoQ.png" alt="" loading="eager" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-03-15">2026年3月15日</time><span aria-hidden="true"> · </span>约 10 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | 期末项目：纺织废弃物管理——Community Closet</h2>
+            <p class="post-summary">这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。</p>
+            <ul class="post-tags"><li>自助终端软件</li><li>纸板原型</li><li>移动应用开发</li><li>视频原型</li><li>行为原型</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="行为原型">
+        <a class="post-link" href="/zh/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/">
+          <div class="post-cover" style="--hue: 285"><img src="https://miro.medium.com/v2/resize:fit:700/1*FyeCGSdlBZDw7mX6SWIGnw.png" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-03-01">2026年3月1日</time><span aria-hidden="true"> · </span>约 6 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A6：行为原型——Minecraft AI 助手</h2>
+            <p class="post-summary">这篇过程记录记录了一个游戏策略助手的行为原型：它通过实时对话，帮助用户在玩游戏时做决策。</p>
+            <ul class="post-tags"><li>行为原型</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="视频原型">
+        <a class="post-link" href="/zh/blog/hcde-351-a5-video-prototype-pre-sleep-phone-use-control-app/">
+          <div class="post-cover" style="--hue: 150"><img src="https://miro.medium.com/v2/resize:fit:434/1*3Zu6Sd1XievSt_pgCrvr6A.png" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-02-22">2026年2月22日</time><span aria-hidden="true"> · </span>约 7 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A5：视频原型——睡前手机使用管控 App</h2>
+            <p class="post-summary">这篇过程记录记录了一个睡前手机使用管控 App 的视频原型：它是一个更好的社交媒体，让用户不容易沉迷其中，进而影响睡眠质量和第二天的安排。</p>
+            <ul class="post-tags"><li>视频原型</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="3d 打印|计算机辅助设计">
+        <a class="post-link" href="/zh/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+          <div class="post-cover" style="--hue: 235"><img src="https://miro.medium.com/v2/resize:fit:1000/1*Qc1-sD6ExGeDOWA0Z3oEqg.png" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-02-15">2026年2月15日</time><span aria-hidden="true"> · </span>约 6 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A4：3D 打印原型——牙膏挤压器</h2>
+            <p class="post-summary">这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。</p>
+            <ul class="post-tags"><li>3D 打印</li><li>计算机辅助设计</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="激光切割|线框图用户测试|2.5d 模型">
+        <a class="post-link" href="/zh/blog/hcde-351-a3-laser-cut-prototype-smartphone-paper-prototyping-frame/">
+          <div class="post-cover" style="--hue: 262"><img src="https://miro.medium.com/v2/resize:fit:1000/1*yMOBpt1EL7r7JRjolkhlag@2x.jpeg" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-02-01">2026年2月1日</time><span aria-hidden="true"> · </span>约 9 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A3：激光切割原型——手机纸面原型框架</h2>
+            <p class="post-summary">这篇过程记录记录了一个手机纸面原型框架的设计：用户可以用它向参与者展示、测试自己手绘的线框图。</p>
+            <ul class="post-tags"><li>激光切割</li><li>线框图用户测试</li><li>2.5D 模型</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="手工|包袋设计|最佳设计博客">
+        <a class="post-link" href="/zh/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/">
+          <div class="post-cover" style="--hue: 305"><img src="https://miro.medium.com/v2/resize:fit:700/1*s09HQ24JHlHApFq-d2Q8xA.png" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-01-25">2026年1月25日</time><span aria-hidden="true"> · </span>约 8 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A2：软质产品原型——单肩包设计</h2>
+            <p class="post-summary">这篇过程记录记录了一个棉布单肩包的设计：主袋可以放笔记本电脑，前袋放键盘、鼠标、电源适配器和充电线，另外还有一个魔术贴扣带作为闭合结构，防止电脑滑出来。</p>
+            <ul class="post-tags"><li>手工</li><li>包袋设计</li><li>最佳设计博客</li></ul>
+          </div>
+        </a>
+      </li>
+      <li class="post-card" data-tags="原型|用户测试|手工">
+        <a class="post-link" href="/zh/blog/hcde-351-a1-oxo-shower-control-interface/">
+          <div class="post-cover" style="--hue: 200"><img src="https://miro.medium.com/v2/resize:fit:700/1*K0pOUkhNbk5k-nQVT3e_DA.png" alt="" loading="lazy" decoding="async"></div>
+          <div class="post-body">
+            <p class="post-meta"><time datetime="2026-01-16">2026年1月16日</time><span aria-hidden="true"> · </span>约 8 分钟读完</p>
+            <h2 class="post-title">HCDE 351 | A1：OXO 淋浴控制界面</h2>
+            <p class="post-summary">这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。</p>
+            <ul class="post-tags"><li>原型</li><li>用户测试</li><li>手工</li></ul>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </section>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+</body>
+</html>

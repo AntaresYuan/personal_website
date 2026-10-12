@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | A4：3D 打印原型——牙膏挤压器 · Antares Yuan</title>
+<meta name="description" content="这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | A4：3D 打印原型——牙膏挤压器">
+<meta property="og:description" content="这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | A4：3D 打印原型——牙膏挤压器">
+<meta name="twitter:description" content="这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-02-15">2026年2月15日</time><span aria-hidden="true"> · </span>约 6 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | A4：3D 打印原型——牙膏挤压器</h1>
+      <p class="post-lead">这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>3D 打印</li><li>计算机辅助设计</li></ul>
+    </header>
+    <div class="prose">
+<h2 id="">产品概述：</h2>
+<p>这篇过程记录记录了一个牙膏挤压器的设计：用户可以用它把快用完的牙膏，或任何快用完的管状产品里剩下的部分挤出来。这个设计的目标是提升实用性和易用性。我希望这个产品能真正帮到我：很多化妆品因为没法用干净而被我扔掉，有了它就能接着用，也更环保。在这个项目里，我练习了用 3D 建模软件设计立体产品的技能，并把它打印出来进行用户测试。</p>
+<p>在这篇记录里，我会讲我如何基于明确的用户需求进行头脑风暴、如何依据自己制定的评估标准做设计决策、如何收集用户和同学的反馈，以及找出了哪些需要改进的地方。我也会记录关键决策背后的理由，以及这些选择如何更好地服务目标用户。</p>
+<h2 id="">构思：</h2>
+<p>这个设计的目标，是做一个牙膏挤压器，可以用来挤牙膏和其他管状产品。在这一节，我会讲我如何在不同的想法之间迭代，让方案更贴合设计目标。</p>
+<p>我先回想了自己挤牙膏时的痛点。我想到了这个：</p>
+<p><strong>痛点：</strong></p>
+<ul><li><strong>有时候牙膏还没用完，我就扔掉了很多，因为没有别的办法把它挤出来。</strong></li></ul>
+<p>在从 Pinterest 上找灵感、思考怎样用设计回应这个痛点之前，我先提出了关键的设计假设，并依据这些标准做了一些设计决策。</p>
+<p><strong>关键设计假设：</strong></p>
+<blockquote><p><strong><em>可行性：</em></strong> PLA 滚轴和外壳之间的间隙与几何结构，足以压扁一支标准牙膏管，既不打滑也不会撕裂，同时可以单手操作。</p></blockquote>
+<p><strong>设计决策：</strong></p>
+<blockquote><p><strong>整体形态为单手操作而设计：滚轴的位置让人可以连续挤压，同时外壳可以抵在平面上保持稳定。</strong> 这个决策优先检验打印出来的几何结构在真实使用中能否提供足够的杠杆和稳定性。<strong>滚轴和外壳之间的间距被有意限定为适合标准牙膏管，同时允许管体材料有一定的形变。</strong> 这个决策检验的是尺寸公差和压缩表现，这些用低保真原型无法评估。<strong>滚轴被设计成一个单独打印的部件，可以在外壳里转动。</strong> 这让我们能评估 PLA 的接触摩擦、轴的间隙，以及转动是否真的能减小牙膏管受到的剪切力。<strong>和牙膏管接触的边缘都做成圆角，降低压缩时撕裂的风险。</strong> 这个决策处理的是刚性打印件和柔性消费品包装之间的材料相互作用。</p></blockquote>
+<p>明确了要设计什么产品之后，我开始画草图。</p>
+<p><strong>草图 1–6：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*Qc1-sD6ExGeDOWA0Z3oEqg.png" alt="" loading="lazy"></p>
+<p><strong>草图 1–6</strong></p>
+<p>在这一部分，我尝试了几种不同的挤牙膏方式。第一张草图里，我试了一个盒子形状的挤压器；第二张草图里，试了一个没有任何其他机构的挤压器。我觉得这个结构可能有点难挤，所以在第三张里加了一些锯齿结构。然后我想，也许需要一个夹扣结构把两片挤压器锁在一起，这就是第四张草图的由来。在第五张草图里，我探索了能不能加一个滑块。后来我发现，在盒子里加一个可以转动的手柄，就能自动地把牙膏挤出来。</p>
+<p><strong>草图 7–9：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*2FRxIF5WkgRhpxnmB_ntsA.png" alt="" loading="lazy"></p>
+<p><strong>草图 7–9</strong></p>
+<p>在这一部分，我继续探索怎样更好地让转动自动化，实现完美的挤牙膏体验。我先加大了手握转动手柄的面积，同时尝试改进夹住牙膏的那部分。最后我选了第九张草图，它能容纳更多，也能把剩下的部分固定在上面。（我觉得它最能满足我的设计目标和痛点。）</p>
+<h2 id="">原型：</h2>
+<p>在上面几节里，我讲了我如何制定评估标准、明确要做什么产品，然后探索不同的想法，并按照设计目标决定用哪两个来做纸面原型。这一节我会简单讲讲制作两个可测试的低保真纸面原型的过程，再用它们迭代出保真度更高的原型（用 CAD 和 3D 打印机），并展示它的样子。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*zWEY7cNa346GpXzHcj-mBg@2x.jpeg" alt="" loading="lazy"></p>
+<p>低保真原型</p>
+<p>在这一部分，我探索了这个结构的可行性：用一张小票模拟扁平的物体，再通过转动一支笔验证了自动化的方式。于是我决定在 CAD 软件里分别做出两个部件，然后在 priuser 里切片，完成 3D 打印。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*Frfx2C2oSme8WeOKsogbQQ@2x.jpeg" alt="" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:4032/1*RBQA-gExs8vmfM1_AH8Pvg@2x.jpeg" alt="" loading="lazy"></p>
+<p>3D 打印</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1000/1*z4RYD8NiZxhpXz5yyBdaHA@2x.jpeg" alt="" loading="lazy"></p>
+<p>最终设计</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*n84SKvZzT0a-ddTutoLzAA@2x.jpeg" alt="" loading="lazy"></p>
+<p>最终设计（另一个角度）</p>
+<p>这就是我的最终设计：它贴合设计目标，通过了评估标准，也满足了我的设计决策。牙膏管或任何管状产品的尾端，可以插进转动手柄中间的槽里，然后两者一起插进大盒子。转动手柄，就能轻松地把剩下的牙膏全都往前挤。</p>
+<h2 id="">反馈：</h2>
+<p>课上，我把材料留在桌上，收集大家贴的评图便利贴。（那时我还没有实物模型，只有 CAD 视图，所以收到的反馈有点奇怪。）以下是我收到的反馈：</p>
+<p>哪些地方做得好？</p>
+<ul><li>概念 / 想法很好</li><li>思路清晰，看得出花了心思</li><li>关注了人体工学和美观</li><li>设计决策是有意为之的</li></ul>
+<p>哪些地方可以更好？</p>
+<ul><li>没有实体原型，很难评估（现在已经解决）</li><li>尺寸和适配不清楚</li><li>机构不够清晰</li><li>需要更清楚地说明各个选择的理由</li></ul>
+<h2 id="">收获：</h2>
+<p>同学和助教的反馈都表明，我的设计确实贴合了设计目标，回应了痛点，也通过了基于设计决策的评估标准。但这个设计还有一些小问题，可能会、也可能不会影响它的功能。如果做到下面几点，它会更好：</p>
+<ul><li><strong>快速做一个实体原型</strong>，让大家能评估尺寸、舒适度和易用性，而不是从 CAD 图上去猜</li><li><strong>清楚地展示尺寸</strong>（标注尺寸 + 拿在手里 / 放在牙膏旁边的照片），回答适配的问题</li><li><strong>用不同大小的手来测试</strong>，并记录根据反馈做了哪些改动</li></ul>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我用 ChatGPT 修改语法和错别字；</li><li>我用 NotebookLM 帮我整理用户反馈；</li><li>我和 ChatGPT 讨论了根据收到的反馈，应该改进哪些地方。</li></ul>
+<p><strong>写作参考：</strong></p>
+<ul><li>这篇博客的整体结构参考了我上一篇博客，其中有一些我自己写的句子是相同的（部分过渡句和用词）。</li><li>参考的博客在这里：<a href="https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a2-soft-goods-prototype-shoulder-bag-design/</a></li></ul>
+<p><strong>灵感参考：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:488/1*hOmzHQXI4OuOs-eeCpZ6Ig.png" alt="" loading="lazy"></p>
+<p><a href="https://www.walmart.com/ip/Raindrops-3-Pcs-Squeeze-Toothpaste-Device-Squeezing-Tool-Roller-Dispenser-Child/16170971908?wmlspartner=wlpa&amp;selectedSellerId=102489398&amp;utm_source=Pinterest&amp;utm_medium=organic" target="_blank" rel="noopener">https://www.walmart.com/ip/Raindrops-3-Pcs-Squeeze-Toothpaste-Device-Squeezing-Tool-Roller-Dispenser-Child/16170971908?wmlspartner=wlpa&amp;selectedSellerId=102489398&amp;utm_source=Pinterest&amp;utm_medium=organic</a></p>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-a4-3d-printed-prototype-toothpaste-squeezer/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

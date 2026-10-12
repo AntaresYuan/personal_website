@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | 期末项目：纺织废弃物管理——Community Closet · Antares Yuan</title>
+<meta name="description" content="这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-final-project-textile-waste-management-community-closet/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | 期末项目：纺织废弃物管理——Community Closet">
+<meta property="og:description" content="这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-final-project-textile-waste-management-community-closet/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | 期末项目：纺织废弃物管理——Community Closet">
+<meta name="twitter:description" content="这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-final-project-textile-waste-management-community-closet/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-final-project-textile-waste-management-community-closet/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-03-15">2026年3月15日</time><span aria-hidden="true"> · </span>约 10 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | 期末项目：纺织废弃物管理——Community Closet</h1>
+      <p class="post-lead">这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>自助终端软件</li><li>纸板原型</li><li>移动应用开发</li><li>视频原型</li><li>行为原型</li></ul>
+    </header>
+    <div class="prose">
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*WFYUxOBNyOwOHyJnPqCuoQ.png" alt="" loading="lazy"></p>
+<h2 id="">产品概述：</h2>
+<p>这篇过程记录记录了 Community Closet 系统的设计：一个衣物租借平台，让用户从社区里的其他人那里租衣服，而不是买新衣服，从而减少纺织废弃物。这个系统结合了移动应用、实体自助站和配送系统，让用户可以轻松地租借、上架、取走和归还衣物。</p>
+<p>这个原型的目标，是通过多种原型方法，探索这个概念的易用性、吸引力和可行性。我们模拟了在手机界面上浏览衣服、到自助站取衣服，以及整个租借流程中的交互，想了解用户是否觉得这个系统直观、可信，并且能有效应对过度消费衣物的问题。</p>
+<p>在这个项目里，我练习了快速原型和以用户为中心的设计：和队友一起定义关键场景，用不同的媒介（视频、移动端和实体）制作原型，并通过用户测试评估人们如何与系统交互。这些原型让我们能以相对低的成本快速检验想法，同时仍然模拟出真实的用户体验。</p>
+<p>在这篇记录里，我会讲我们团队如何从发现的可持续问题出发形成概念，如何设计和制作原型，以及如何组织测试、收集用户反馈。我也会反思关键的设计决策、背后的理由，以及这些选择如何服务于整体目标：在提供便捷、有吸引力的衣物租借体验的同时，减少纺织废弃物。</p>
+<h2 id="">构思：</h2>
+<p>这个设计的目标，是提出一个系统层面的概念，应对纺织品过度消费的问题。**我们的项目对应联合国可持续发展目标 12：确保可持续的消费和生产模式。** 具体来说，我们的设计目标是让衣物在社区内被共享和再利用，而不是买来穿几次就丢掉，从而减少纺织废弃物。</p>
+<p>头脑风暴时，我们聚焦在日常生活中衣物过度消费的问题上。很多衣服是为了特定场合买的，只穿一两次就被收起来或扔掉。虽然已经有二手店、捐赠这样的方案，但每年仍有大量纺织废弃物被送进垃圾填埋场。</p>
+<p>我们探索了几种可能的思路，包括换衣活动、社区捐赠网络和线上转售平台。但我们发现现有方案有两个主要局限：很多平台仍然依赖反复的购买和转售；而运输这样的物流环节又会带来额外的环境成本。</p>
+<p><strong>产品：</strong></p>
+<blockquote><p>基于这些讨论，我们提出了 Community Closet 的概念：一个让人们在本地社区内租借和共享衣物的系统。用户可以通过移动应用浏览和租借衣服，实体自助站则作为本地的投递和取件点，减少运输带来的浪费。在一些场景下，也可以为附近的用户提供无人机配送。</p></blockquote>
+<p>这个系统设计希望让同一件衣服能在一段时间内被多个用户穿着，减少重复生产的需求，从而应对更广泛的纺织废弃物问题。</p>
+<p><strong>系统：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*yyxaVB7tp8f-CkySsGVEmQ.png" alt="" loading="lazy"></p>
+<p>系统示意图</p>
+<p>我们的系统由一个 App（数字体验）和我们设计的包裹 / 自助站系统（实体体验）连接而成。我们通过这样一些问题，让用户体验超越数字体验本身：什么是最理想的收包裹方式？寄包裹呢？（无人机）哪种配送方式是可持续的（本地配送 vs 区域配送）？对用户来说哪种方式更划算？（自助站投递）最终我们设计出这样一个系统：用户通过 App 决定想要什么，以及如何收发包裹，可以走无人机，也可以走自助站。App 还和自助站打通，用户可以用自己的设备登录，让体验更加顺畅。</p>
+<p><strong>评估方法：</strong></p>
+<blockquote><p><strong>移动应用原型</strong>原型方法：视频场景原型，展示系统的完整生命周期，包括下载 App、租借衣服，以及通过自助站或无人机配送收到衣物。评估方法：参与者看完视频后进行半结构化访谈。评估目标：了解这个概念的吸引力，包括用户是否觉得这个想法有吸引力、是否会考虑使用这个系统，以及他们可能有哪些顾虑（比如卫生、信任、衣物质量或物流）。<strong>自助站纸板原型</strong>原型方法：用 Figma 制作的可交互移动端界面原型，模拟浏览衣服、上架和租借的流程。评估方法：有主持人引导的可用性测试，参与者用 Figma 原型完成指定任务。评估目标：评估界面的易用性，包括用户能否轻松地在 App 中导航、上架衣服、租借衣物，并理解价格和租期。<strong>视频原型</strong>原型方法：衣物投递和取件自助站的纸板原型。评估方法：基于场景的交互测试，用户亲手操作自助站，模拟投递或取回衣物。评估目标：评估实体交互的可行性，包括指引是否清晰、是否易用，以及自助站的尺寸和结构能否支撑预期的交互。<strong>行为原型</strong>原型方法：模拟真实世界的交互，用户通过移动端界面下单，再用二维码从自助站取走衣物。评估方法：行为层面的用户测试，观察用户的操作并追问。评估目标：了解用户如何走完端到端的系统流程，找出数字界面和实体取件流程之间让人困惑的地方。</p></blockquote>
+<h2 id="">原型：</h2>
+<p>在上面几节里，我讲了我们如何明确要为什么场景做设计，然后探索想法，并按照联合国可持续发展目标和设计目标推进到最终的设计。这一节我会简单讲讲，四个原型如何帮助我们做设计决策、推动项目前进。</p>
+<p><strong>移动应用原型</strong></p>
+<p>在设计这个移动应用时，我们最初想在 Figma 里做一个高保真原型。但经过团队讨论、并咨询教学团队之后，我们决定用 AI vibe coding 做一个只有前端、没有后端的可交互高保真原型。这让用户可以模拟输入，测试体验也更真实。我们用 FigMake 制作了高保真原型，通过反复和 AI 确认需求，最终做出了这个包含 2 条主要用户流程的高保真原型，支持用户的租借和归还流程。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*M0UOOpWMgami-uHYo9k6nw.png" alt="" loading="lazy"></p>
+<p>移动应用：首页</p>
+<p>我们做了一个好看的首页，让用户浏览想租的衣服，上面标有价格和衣服的详细信息。这样信息保持透明，用户就能一直走在顺利的路径上。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*ZBhRBsC9KOurZlsuV_TJng.png" alt="" loading="lazy"></p>
+<p>移动应用：租借</p>
+<p>这里是用户租衣服的地方。他们可以选择租期和取件方式。为了更好地帮助忙碌的人坚持可持续的目标，我们还提供了无人机配送选项（我们尽量不用会消耗化石燃料、产生温室气体的汽车）。我们也给用户一个选项：把自己很少穿的衣服寄出来，赚取积分，租别人的衣服时可以用。这样我们鼓励用户去穿已经被生产出来的衣服，而不是去找新衣服。这贴合了联合国的可持续发展目标，也贴合我们的设计目标。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*dGyngEgMZO89UKbQ6xMEwA.png" alt="" loading="lazy"></p>
+<p>移动应用：上传</p>
+<p>就像上面说的，这里是人们为自己的衣服建立档案、供别人租借的地方。他们可以填写衣服的详细信息，设定购入价格和每日租金。</p>
+<p>下面是 FigMake 的链接，你可以亲自试试这个用户流程：（如果链接打不开，请试试下面说明里的那个）</p>
+<p><a href="https://www.figma.com/make/OMAdyKXqH4eE9j8sJjw1Zb/Clothing-Rental-App?t=rVGSCkvCTKpOFIz4-1" target="_blank" rel="noopener">https://www.figma.com/make/OMAdyKXqH4eE9j8sJjw1Zb/Clothing-Rental-App?t=rVGSCkvCTKpOFIz4-1</a></p>
+<p><strong>自助站纸板原型</strong></p>
+<p>与此同时，我们也开始设计自助站。在我们的设计里，自助站由两部分组成：操作机和储物柜。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*CwmjSLVXHLhHoVVRod7bKA.jpeg" alt="" loading="lazy"></p>
+<p>界面和自助站设计草图</p>
+<p>成功预订或上传衣服后，用户会通过邮件收到一个条形码，然后可以来到每个社区设置的自助站，选择对应的服务（投递 / 取件），扫描条形码打开储物柜。如果是投递，打开柜门后，显示屏会引导用户把衣服放到正确的位置，然后提醒用户关上柜门；如果是取件，打开柜门后我们会告诉用户衣服就在里面，并提醒他们取出后关上柜门。这个设计让我们更贴合设计目标。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*ePOzssXZ4YSMzKVpN9w_KQ.jpeg" alt="" loading="lazy"></p>
+<p>储物柜纸板原型展示</p>
+<p>这就是我们在用户测试（行为原型阶段）中用到的储物柜。</p>
+<p><strong>视频原型</strong></p>
+<p>完成移动应用的设计之后，我们基于前面的 2 条用户流程设计了两个使用场景。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*RPFs3yZuSctgUk2WKl0jig.jpeg" alt="" loading="lazy"></p>
+<p>故事板草图</p>
+<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/bOAOnHdlzrY" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p>视频原型</p>
+<p><strong>行为原型</strong></p>
+<p>同时，为了测试用户与移动应用和自助站的交互，我们基于视频原型设计了三个关键的交互测试场景：租借衣服、上传衣服和取衣服。</p>
+<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/SJc7wVg-K54" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p><strong>最终视频演示</strong></p>
+<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/wkGKUCf9Xes" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p>综合以上四个原型，我们完成了最终的视频演示，简要展示了我们的产品概念以及实现方式。</p>
+<h2 id="">反馈：</h2>
+<p>课上，我们进行了一次小组反馈讨论。以下是我们收到的反馈：</p>
+<p>哪些地方做得好？</p>
+<p>这个项目提出了一个点对点的衣物租借系统，鼓励衣物再利用，与<strong>联合国“负责任的可持续消费”这一可持续发展目标</strong>高度契合。团队很好地设计了一个<strong>把移动端界面和实体自助站结合起来的完整系统</strong>，让这个概念显得实际、扎根于真实的使用场景。</p>
+<p><strong>移动端原型做得精致、用心</strong>，有效地展示了用户如何浏览、上架和租借衣服。团队用了多个原型（移动端 UI、纸板自助站模型和视频原型）来探索系统的不同方面，这有助于呈现整体的用户体验和设计概念。总的来说，这个项目成功传达了设计目标，也在应对一个复杂系统上付出了有意义的努力。</p>
+<p>哪些地方可以更好？</p>
+<p>概念虽然很强，但<strong>实体原型还可以进一步完善</strong>，更好地模拟系统在实际中如何运作。纸板自助站原型有些简单，没有完整展示<strong>衣物投递、取件流程，以及押金 / 归还机制</strong>这些交互。扩展实体原型，或者做一个<strong>数字化的自助站界面原型</strong>，能更有效地评估自助站的易用性。</p>
+<p>另外，<strong>系统的物流可以讲得更清楚</strong>，尤其是配送如何运作。比如，设计里同时提到了<strong>配送和自助站取件</strong>，但这两种方式如何配合并不完全清楚。聚焦一种主要的配送方式，或者讲清楚两者之间的关系，能让系统更容易理解。</p>
+<p>最后，视频原型可以更清楚地展示<strong>用户与自助站的交互</strong>，把移动端体验和整个系统中的实体交互连接起来。</p>
+<h2 id="">收获：</h2>
+<p>同学和助教的反馈都表明，我们的设计确实贴合了设计目标，回应了痛点，也遵循了我的场景设定。但这个设计还有一些小问题，可能会、也可能不会影响它的功能。如果做到下面几点，它会更好：</p>
+<ul><li>进一步完善<strong>实体自助站原型</strong>，更好地模拟用户在系统中如何投递和取走衣服。</li><li><strong>在视频原型里更清楚地展示自助站的交互</strong>，表现用户如何从移动应用过渡到自助站。</li><li><strong>给实体原型加入更多功能细节</strong>，比如押金系统，或者更清晰的交互步骤。</li></ul>
+<h2 id="">致谢：</h2>
+<p>特别感谢我的组员 Rachel Berg、Stephanie Nguyen，助教 Nichole Sams 和授课老师 Brock Craft，以及 HCDE 351 2026 年冬季学期所有同学给出的宝贵反馈。</p>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我们用 ChatGPT 修改语法和错别字；</li><li>我们用 NotebookLM 帮我整理用户反馈；</li><li>我们和 ChatGPT 讨论了根据收到的反馈，应该改进哪些地方。</li><li>我们用 FigMake AI 帮我们制作移动应用原型。</li></ul>
+<p><strong>写作参考：</strong></p>
+<ul><li>这篇博客的整体结构参考了我上一篇博客，其中有一些我自己写的句子是相同的（部分过渡句和用词）。</li><li>参考的博客在这里：<a href="https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a6-behavioral-prototype-minecraft-ai-assistant/</a></li></ul>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-final-project-textile-waste-management-community-closet/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

@@ -73,7 +73,7 @@ Outcomes:
 
 ---
 
-## Kaboo · ByteDance · Internal Open Source · Token Efficiency
+## Kaboo · ByteDance · Internal Open Source · Token Efficiency · 10K+ DAU
 
 URL: /projects/kaboo/
 

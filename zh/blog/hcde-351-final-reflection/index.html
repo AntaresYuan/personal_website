@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | 期末反思 · Antares Yuan</title>
+<meta name="description" content="这篇过程记录是我对 HCDE 351 这门课的反思：这一学期的课堂学习，以及我完成的七个项目。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-final-reflection/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-final-reflection/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-final-reflection/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-final-reflection/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-final-reflection/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | 期末反思">
+<meta property="og:description" content="这篇过程记录是我对 HCDE 351 这门课的反思：这一学期的课堂学习，以及我完成的七个项目。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-final-reflection/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | 期末反思">
+<meta name="twitter:description" content="这篇过程记录是我对 HCDE 351 这门课的反思：这一学期的课堂学习，以及我完成的七个项目。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-final-reflection/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-final-reflection/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-03-16">2026年3月16日</time><span aria-hidden="true"> · </span>约 4 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | 期末反思</h1>
+      <p class="post-lead">这篇过程记录是我对 HCDE 351 这门课的反思：这一学期的课堂学习，以及我完成的七个项目。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>期末反思</li><li>课程反思</li></ul>
+    </header>
+    <div class="prose">
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*XtCYl-wueWif9yw_-Ni50Q.jpeg" alt="" loading="lazy"></p>
+<h2 id="">项目概述：</h2>
+<p>这篇过程记录是我对 HCDE 351 这门课的反思，包括这一学期的课堂学习，以及我完成的七个项目。这些作业涵盖了界面重设计、软质产品原型、激光切割、3D 打印、视频原型、行为原型，以及期末的系统设计项目，让我尝试了很多种原型方法和设计流程。在这篇反思里，我会总结这学期我对设计和原型的理解发生了怎样的变化，评估自己的作品，并聊聊在个人和团队工作中遇到的挑战和收获。</p>
+<h2 id=""><strong>学习</strong>：</h2>
+<p>这门课最有价值的一课，是让我意识到原型不只是“做出一个东西”，而是用不同的材料和方法，快速地探索想法、检验假设。学期开始时，我以为原型主要是一个技术活，重点是做出一个能用的物件。但通过<strong>纸面原型框架</strong>、<strong>睡前手机管控 App 的视频原型</strong>，以及 <strong>Minecraft AI 助手的行为原型</strong>这些项目，我认识到原型可以代表的是行为、交互或体验，而不一定是一个完成的产品。</p>
+<p>另一个收获是<strong>迭代和反馈</strong>的重要性。同学之间的评图和讨论，常常能发现制作过程中不容易察觉的设计问题。比如在<strong>软质单肩包原型</strong>里，关于背带耐用度和内部收纳的反馈，让我注意到了自己忽略的实际可用性问题。这让我看到，合作和评图本身就是设计过程中不可或缺的一部分。</p>
+<p>我也没想到，不同的加工方式会这样影响设计思路。做<strong>激光切割和 3D 打印</strong>时，我必须仔细考虑材料厚度、公差和组装方式这些约束。这些限制逼着我打磨想法，并在设计早期就考虑可制造性。</p>
+<h2 id=""><strong>成果</strong>：</h2>
+<p>总的来说，我认为我的项目达成了每次作业的设计目标。我的作品尝试了多种原型技术，并且始终聚焦于理解用户的交互和行为。</p>
+<p><strong>期末项目</strong>是一个叫 Community Closet 的纺织废弃物管理系统，也是我这学期最完整的作品。它没有只聚焦在单个物件上，而是设计了一整套系统，通过点对点租借和社区自助站，鼓励衣物的可持续再利用。这个项目的一个优点，是它和<strong>联合国可持续发展目标中的“负责任消费”</strong>高度契合。原型通过移动端界面和实体交互场景来传达这个概念。</p>
+<p>不过也有不足。同学的反馈指出，视频原型里对实体自助站的交互和押金机制可以展示得更清楚。另外，纸板原型缺少一些交互细节，而这些细节本可以让系统概念更扎实。</p>
+<p>如果再做一个原型项目，我会更注重<strong>更早地测试交互流程</strong>，而不是把主要精力放在打磨视觉上。更频繁的用户测试也能更早地暴露可用性问题。</p>
+<h2 id=""><strong>贡献</strong>：</h2>
+<p>整个学期，我积极参与评图、讨论和协作设计活动。在小组里，我在头脑风暴时贡献想法，并把设计决策和用户需求、可持续目标联系起来，帮助打磨系统概念。</p>
+<p>团队合作中的一个挑战，是协调大家对“每个阶段原型该做到多细”的不同看法。有的组员更关注视觉完成度，有的更重视交互逻辑。处理这些分歧，让我更理解设计团队是如何在探索和执行之间取得平衡的。</p>
+<p>协作也提升了我通过草图、原型和展示，把设计想法讲清楚的能力。</p>
+<h2 id="">收获：</h2>
+<p>总之，HCDE 351 改变了我对原型的看法。现在我不再把原型只看作最终产品的呈现，而是把它看作<strong>思考、沟通和探索的工具</strong>。这门课也让我看到，不同的材料和原型方法，会揭示一个设计的不同侧面。最重要的是，这段经历让我更加确信：设计是一个<strong>迭代学习的过程</strong>。每一个原型，无论多简单，都可能带来让下一轮更好的洞察。</p>
+<h2 id="">致谢：</h2>
+<p>特别感谢和我合作、给我的设计提反馈的同学。特别感谢我们的教学团队：助教 Nichole Sams、助教 Nimesh Mohanakrishnan 和授课老师 Brock Craft，感谢他们给予的巨大帮助和宝贵反馈。特别感谢 Peitong Qi 帮我整理材料，并给出了可落地的反馈。</p>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我用 ChatGPT 修改语法和错别字；</li><li>我用 NotebookLM 帮我整理思路；</li></ul>
+<p><strong>写作参考：</strong></p>
+<ul><li>这篇博客的整体结构参考了我上一篇博客，其中有一些我自己写的句子是相同的（部分过渡句和用词）。</li><li>参考的博客在这里：<a href="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/" target="_blank" rel="noopener">https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/</a></li></ul>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-final-reflection/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>

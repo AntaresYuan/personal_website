@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HCDE 351 | A1：OXO 淋浴控制界面 · Antares Yuan</title>
+<meta name="description" content="这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/blog/hcde-351-a1-oxo-shower-control-interface/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/blog/hcde-351-a1-oxo-shower-control-interface/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://antaresyuan.site/zh/blog/hcde-351-a1-oxo-shower-control-interface/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="HCDE 351 | A1：OXO 淋浴控制界面">
+<meta property="og:description" content="这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。">
+<meta property="og:image" content="https://antaresyuan.site/blog/hcde-351-a1-oxo-shower-control-interface/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HCDE 351 | A1：OXO 淋浴控制界面">
+<meta name="twitter:description" content="这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home writing-page post-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/blog/hcde-351-a1-oxo-shower-control-interface/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/blog/hcde-351-a1-oxo-shower-control-interface/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/projects/" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/blog/" aria-current="page" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="post">
+    <a class="back-link" href="/zh/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>文章</a>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-01-16">2026年1月16日</time><span aria-hidden="true"> · </span>约 8 分钟读完</p>
+      <h1 class="post-page-title">HCDE 351 | A1：OXO 淋浴控制界面</h1>
+      <p class="post-lead">这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。</p>
+      <div class="byline">
+        <img src="/media/buddy/felt-still.webp" alt="" width="32" height="32" loading="lazy">
+        <span>Antares Yuan</span>
+      </div>
+      <ul class="post-tags"><li>原型</li><li>用户测试</li><li>手工</li></ul>
+    </header>
+    <div class="prose">
+<h2 id="">产品概述：</h2>
+<p>这篇过程记录记录了一个智能淋浴控制界面的设计：用户可以用它直观地看到水温、当前水量和出水口的信息。这个设计的目标，是提升日常洗澡时的可及性和易用性。浴室环境很特殊，用户的手常常是湿的、沾着泡沫，视线也受限。在这个项目里，我通过制作一个低保真的实体原型，并经过两轮评图和用户测试收集改进意见，探索了怎样让设计更好地回应这些物理条件。</p>
+<p>这个设计由两个相互连接的部分组成：一个装在墙上的界面，实时显示水温、水流量和出水口；以及一个手持花洒，用户可以通过上面的实体按键和滑块直接控制。</p>
+<p>在这篇记录里，我会讲我如何基于明确的用户需求进行头脑风暴、如何决定最终方案、如何收集用户和同学的反馈，以及找出了哪些需要改进的地方。我也会记录关键决策背后的理由，以及这些选择如何更好地服务目标用户。</p>
+<h2 id="">构思：</h2>
+<p>这个设计的目标，是做一个数字化的淋浴控制界面，让用户即使手上有泡沫、视线受限，也能顺畅地使用。在这一节，我会讲我如何在三个想法之间迭代，让方案更贴合设计目标。</p>
+<p>我先思考：这份设计说明里的哪一部分，能让它比我们现在用的产品更好？我试着列出了自己在家用淋浴控制系统时的痛点：</p>
+<ul><li><strong>洗澡时我不知道确切的水温，所以每次都得把控制杆左右来回拧，试着找到那个“刚刚好的位置”。</strong></li><li><strong>不同出水口之间怎么切换没有清晰的标识，所以每次都得猜自己是不是拧对了阀门。</strong></li><li><strong>每次出水的流量都不稳定，找到“刚刚好的位置”和调水温一样难。</strong></li><li><strong>当手上有泡沫，或者头发打湿后视线受限时，上面这些都会变得格外困难。</strong></li></ul>
+<p>在 Pinterest 上找灵感的同时，我也在想，怎样用我的设计来回应这些痛点。</p>
+<p><strong>想法 1：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*K0pOUkhNbk5k-nQVT3e_DA.png" alt="" title="想法 1：全触屏的控制面板，手持花洒用磁吸固定在右侧" loading="lazy"></p>
+<p>这个想法是一个全触屏的控制面板，手持花洒用磁吸固定在它的右侧。我把所有的角都做成了圆角，考虑的是用户的安全：我在 Pinterest 上看到很多智能淋浴面板都有尖角，让我担心洗澡时滑倒的危险。温度下方有一个滑动条，用户要先点选择按钮，选好要调的项目，再用滑动条去调。我意识到，我通过提供清晰的信息部分解决了痛点，但调节的过程仍然很费劲。同时回看设计目标，这个方案在视线受限或手上有泡沫时几乎没法用。所以我在它的基础上继续想，怎样更好地回应痛点、贴合设计目标。</p>
+<p><strong>想法 2：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*h--YwHiM4b8CXnyALe8A0A.png" alt="" title="想法 2：数字显示屏加实体按键，手持花洒挂在支架上" loading="lazy"></p>
+<p>和想法 1 相比，想法 2 用实体按键来控制温度、水量，以及在不同出水口之间切换。这样手上有泡沫也很好用，因为不需要复杂的手势操作，可及性和易用性都大大提升，也更贴合设计目标。我加了一个蓝牙连接指示灯，告诉用户这个手持花洒已经和墙上的主体连上，可以用主体上的按键来调节。在电子控制取代机械控制的场景下，这也能给用户更多信心。我试着用一个实体支架来挂花洒，因为磁吸有掉下来的可能。后来我发现，横向布局的显示屏容易让人困惑，尺寸也没必要那么大，而且用户有可能误操作。所以我决定进入第三个想法。</p>
+<p><strong>想法 3：</strong></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*VLoqP7wlPvtUUcN7x-1qpA.png" alt="" title="想法 3：显示屏在中间，一个“O”形的手持花洒磁吸在控制屏上" loading="lazy"></p>
+<p>最终在第三个想法里，我把显示屏放在中间，一个“O”形的手持花洒磁吸在控制屏上。这样既解决了花洒会掉下来的问题，又保持了外观的美感。屏幕用来显示信息，上面的两个按键比各个单独部件的控制层级更高。左边那个是锁，用户可以用它避免误触按键、意外改变水温或切换出水口。带播放图标的那个按键，控制三个出水口里是否有水流出。用户洗澡途中可以随时暂停去抹洗发水，再按一下继续（恢复），所有设置都会恢复原样。<strong>我把控制温度和水量的按键、以及出水口切换器都转移到了手持花洒上，因为用户可能需要在视线受限、手上有泡沫的情况下调水温。这样他们能很快达到目的，这让这个想法在三个想法里最贴合设计目标，也解决了我前面列出的所有痛点。</strong></p>
+<h2 id="">原型：</h2>
+<p>在上面几节里，我讲了我如何按照设计目标、回应痛点来迭代想法。这一节我会简单讲讲制作可测试的低保真实体原型的过程，并展示它的样子。</p>
+<p>首先，我找了一个快递纸箱，把设计简化成几何形状。原型的大致形状是：中间一个小盒子，一个更大的盒子代表花洒头，中间开一个长方形的孔，再加一个圆柱体当手柄。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*V7usIxq181kqdHgPbenvMQ.png" alt="" title="切割纸板" loading="lazy"></p>
+<p>我用铅笔在纸板上戳孔来确定边缘，再把孔连起来画出切割线。然后用胶水和胶带把它做成立体的原型。之后，我用记号笔在屏幕上画出显示内容，在按键上画出图标，又剪了一些小纸板片来表现实体按键的质感。</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*yrYNS4MibHpMnwuIZVZceg.png" alt="" title="接近完成的原型" loading="lazy"></p>
+<p>后来，我细化了花洒头上小孔的细节，并用便利贴模拟了一个可交互的界面。最终的样子是这样的：</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*5ZwG-aCQBozQw9LQo_m4og.png" alt="" title="用于测试的原型" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*l0Mf0mqH3LsKW-DUwdFlEQ.png" alt="" title="显示屏细节" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*kZvffOQZoPpVvMCHiFWDpg.png" alt="" title="可交互便利贴的细节" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*HlUK1-J1bEJ_y_NXCAACFw.png" alt="" title="手柄上按键的细节" loading="lazy"></p>
+<p><img src="https://miro.medium.com/v2/resize:fit:700/1*cae8gKeN1WZD6ahUalvavg.png" alt="" title="手柄上切换器的细节" loading="lazy"></p>
+<h2 id="">反馈：</h2>
+<p>课上，我和同学三人一组进行了两轮评图。第一轮，我把原型交给他们，自己保持沉默，让他们自己摸索怎么用。第二轮，我告诉他们我最想听反馈的地方：怎样让屏幕的显示效果更好，或者让两个部分之间的对应关系更清楚。以下是我收到的反馈：</p>
+<p><strong>第一轮：</strong></p>
+<p>哪些地方做得好？</p>
+<ul><li>同学们<strong>认出了</strong>这个系统有<strong>两个不同的部分</strong>（墙上模块 + 手持花洒）。</li><li>界面成功传达出：这是一个可交互的设备，而不是被动的硬件。</li><li>同学们能想象出真实的使用场景。</li></ul>
+<p>哪些地方可以更好？</p>
+<p><strong>系统对应关系不清楚：</strong></p>
+<ul><li>同学们不理解墙上模块和手持花洒之间的<strong>关系</strong>。</li><li>不清楚哪个部分是主控制器，哪个是输出设备。</li></ul>
+<p><strong>滑块让人困惑：</strong></p>
+<ul><li>同学们<strong>不确定</strong>这个滑块是：可交互的还是装饰性的 / 触屏的一部分还是实体控件 / 控制温度还是水流</li><li>滑块在手持花洒上的位置，让人觉得它和墙上的部分<strong>脱节</strong>。</li></ul>
+<p><strong>功能被误解：</strong></p>
+<ul><li>“Pulse”被<strong>误以为</strong>是扬声器 / 音频功能。</li><li><strong>当前温度显示</strong>被认为没有必要。</li><li><strong>锁定 / 解锁按键</strong>的用途不清楚。</li></ul>
+<p><strong>实体设计上的顾虑：</strong></p>
+<ul><li>手持部分比<strong>预期的大</strong>。</li><li>同学们期待有一个<strong>挂钩</strong>来放花洒。</li><li>激活逻辑（挂在墙上 vs. 取下来）不够明显。</li></ul>
+<p><strong>第二轮：</strong></p>
+<p>把滑块移回墙上模块，让对应关系更清楚。</p>
+<p>改进显示，更好地区分：</p>
+<ul><li>可交互的控件和只显示信息的元素</li><li>墙上部分和手持部分各自的职责。</li></ul>
+<p>之后，我做了一次半结构化的用户测试。结果如下：</p>
+<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/3qGPEiIi7uI" title="Embedded video" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<ul><li>“T”按键不够直观，用户不知道按它可以升高温度。</li><li>切换器应该回到墙上的部分。</li></ul>
+<h2 id="">收获：</h2>
+<p>同学和参与者的反馈都表明，我的设计确实贴合了设计目标，也解决了痛点。但这个设计还有一些小问题，可能会、也可能不会影响它的功能。如果做到下面几点，它会更好：</p>
+<ul><li>强化<strong>心智模型</strong>：“墙上 = 控制，花洒 = 输出”。</li><li>重新设计：“pulse” → “开始 / 结束”；“锁定按键” → 锁的标志，默认自动锁定，按两下才解锁。</li><li>增加更清晰的实体示能（挂钩 + 调整尺寸）。</li></ul>
+<p><strong>感谢阅读！: )</strong></p>
+<h2 id="">技术附录：</h2>
+<p><strong>AI 使用说明：</strong></p>
+<ul><li>我用 ChatGPT 修改语法和错别字；</li><li>我和 ChatGPT 讨论了这篇博客的整体结构；</li><li>我用 NotebookLM 帮我整理用户反馈；</li><li>我和 ChatGPT 讨论了 1 分钟用户测试视频该怎么规划；</li><li>我和 ChatGPT 讨论了根据收到的反馈，应该改进哪些地方。</li></ul>
+<p><strong>灵感参考：</strong></p>
+<p><a href="https://www.pinterest.com/pin/551057704427893123/" target="_blank" rel="noopener"><img src="https://miro.medium.com/v2/resize:fit:700/1*cASXkgW3sKggSEGWDOHaiA.png" alt="" loading="lazy"></a></p>
+<p><a href="https://www.pinterest.com/pin/375417318952460132/" target="_blank" rel="noopener"><img src="https://miro.medium.com/v2/resize:fit:700/1*asnYAI63EPFrQ7ZCe_NQow.png" alt="" loading="lazy"></a></p>
+<p><a href="https://www.pinterest.com/pin/1152077148439350973/" target="_blank" rel="noopener"><img src="https://miro.medium.com/v2/resize:fit:700/1*wUmhI43BY8d9tWaBR6XniQ.png" alt="" loading="lazy"></a></p>
+    </div>
+    <section class="discuss" data-discuss
+        data-endpoint="https://comments.antaresyuan.site"
+        data-page="/blog/hcde-351-a1-oxo-shower-control-interface/"
+        data-turnstile="0x4AAAAAAFSoyL7NWjynbTIt"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">评论</h2>
+      <noscript><p class="discuss-note">评论需要启用 JavaScript。</p></noscript>
+    </section>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/comments.js?v=4966cf56" defer></script>
+</body>
+</html>
