@@ -10,6 +10,14 @@
 (function () {
   'use strict';
 
+  // The page's words (work-shell embeds them as #ui-strings, per language).
+  // English is the fallback written here; Chinese comes from content/zh/strings.json.
+  var UI = (function () { try { return JSON.parse(document.getElementById('ui-strings').textContent) || {}; } catch (e) { return {}; } })();
+  var T = function (key, fallback, vars) {
+    var v = key.split('.').reduce(function (o, k) { return o && o[k]; }, UI);
+    var s = typeof v === 'string' ? v : fallback;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; }) : s;
+  };
   var doc = document;
   var $ = function (id) { return doc.getElementById(id); };
   var box = $('lightbox');
@@ -59,7 +67,7 @@
     link.hidden = !it.link;
     if (it.link) link.href = it.link;
     thumbs.innerHTML = (it.images || []).map(function (p, k) {
-      return '<button type="button" aria-label="Picture ' + (k + 1) + '" aria-pressed="false"><img src="' +
+      return '<button type="button" aria-label="' + escape(T('gallery.picture', 'Picture {n}', { n: k + 1 })) + '" aria-pressed="false"><img src="' +
         escape(p.thumb || p.src) + '" alt="" decoding="async"></button>';   // small; lazy would stall inside a just-opened dialog
     }).join('');
     thumbs.hidden = (it.images || []).length < 2;

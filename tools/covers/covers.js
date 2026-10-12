@@ -7,7 +7,9 @@
      node tools/covers/covers.js              # every cover below
      node tools/covers/covers.js roundtable   # one
 
-   Writes media/projects/<slug>/cover.svg. The SVG is inlined into the page
+   Writes media/projects/<slug>/cover.svg, and cover.zh.svg from the
+   Chinese words in content/zh/covers.json (same layout; each list is
+   matched to the English one by position). The SVG is inlined into the page
    (scripts/lib/projects.js → coverBox), so it takes the page's fonts and
    theme tokens and swaps with light/dark. Its one colour is the project's
    --hue (an OKLCH hue angle, set on the cover box from the project's `hue`):
@@ -151,7 +153,11 @@ const SHARED = `.pc { --pc-h: var(--hue, 262);
 .pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }`;
 
-function draw(slug, cfg) {
+// Legend labels sit in a row, so their widths are estimated: a Han
+// character is about as wide as the 15px font, a Latin one about half.
+const textWidth = (s) => [...s].reduce((w, ch) => w + (/[\u2e80-\u9fff\uff00-\uffef]/.test(ch) ? 15 : 8.2), 0);
+
+function draw(slug, cfg, file = 'cover.svg') {
   const scope = `pc-${slug}`;
 
   const arrow = (x1, x2, y) =>
@@ -191,15 +197,30 @@ function draw(slug, cfg) {
   let lx = 34;
   for (const [t, label] of cfg.legend) {
     L.push(`<g class="pc-t${t}"><rect class="pc-b" x="${lx}" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="${lx}" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="${lx + 26}" y="439">${label}</text>`);
-    lx += 26 + label.length * 8.2 + 34;
+    lx = Math.round((lx + 26 + textWidth(label) + 34) * 10) / 10;
   }
   L.push('</svg>');
 
-  const out = path.join(ROOT, 'media', 'projects', slug, 'cover.svg');
+  const out = path.join(ROOT, 'media', 'projects', slug, file);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, L.join('\n') + '\n');
   console.log(`✓ wrote ${path.relative(ROOT, out)}`);
 }
 
+// The Chinese cover: the English layout with the words from content/zh/covers.json.
+const ZH_FILE = path.join(ROOT, 'content', 'zh', 'covers.json');
+const ZH = fs.existsSync(ZH_FILE) ? JSON.parse(fs.readFileSync(ZH_FILE, 'utf8')) : {};
+const inChinese = (cfg, zh) => ({
+  ...cfg,
+  label: zh.label ?? cfg.label,
+  cols: cfg.cols.map(([h, s, me], i) => [zh.cols?.[i]?.[0] ?? h, zh.cols?.[i]?.[1] ?? s, me]),
+  nodes: cfg.nodes.map(([c, r, t, title, sub], i) => [c, r, t, zh.nodes?.[i]?.[0] ?? title, zh.nodes?.[i]?.[1] ?? sub]),
+  legend: cfg.legend.map(([t, label], i) => [t, zh.legend?.[i] ?? label]),
+});
+
 const only = process.argv[2];
-for (const [slug, cfg] of Object.entries(COVERS)) if (!only || only === slug) draw(slug, cfg);
+for (const [slug, cfg] of Object.entries(COVERS)) {
+  if (only && only !== slug) continue;
+  draw(slug, cfg);
+  if (ZH[slug]) draw(slug, inChinese(cfg, ZH[slug]), 'cover.zh.svg');
+}

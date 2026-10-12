@@ -8,11 +8,17 @@
    Paths are root-relative throughout: these pages live at /, /blog/…,
    /gallery/ and /skills/…, and a relative asset path would break on all but
    the first.
+
+   Every piece takes a `lang` ('en' | 'zh', lib/i18n.js): its words come
+   from content/strings.json (+ content/zh/), its links point into the same
+   language's pages, and the top bar carries the EN / zh switch.
    ───────────────────────────────────────────────────────────────────────── */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { escape } = require('./html-replace');
+const i18n = require('./i18n');
+const { t } = i18n;
 
 const root = path.join(__dirname, '..', '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -32,8 +38,8 @@ const ICONS = {
 
 /* `active` is the nav id of the current page; an item with no href is a page
    that does not exist yet and renders as a disabled "soon" item. */
-const railItemsHtml = (active) => {
-  const work = read('content/work.json');
+const railItemsHtml = (active, lang = 'en') => {
+  const work = i18n.content('content/work.json', lang);
   const site = read('content/site.json');
   const items = (work.nav ?? []).filter((item) =>
     item.id !== 'about' || site.features?.about !== false);
@@ -44,11 +50,11 @@ const railItemsHtml = (active) => {
       : `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[item.icon] ?? ICONS.doc}</svg>`;
     if (!item.href) {
       return `
-    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="${escape(item.id)}" data-label="${label} · soon" aria-label="${label} (coming soon)">${glyph}</span></li>`;
+    <li><span class="rail-item is-soon" role="link" aria-disabled="true" tabindex="0" data-id="${escape(item.id)}" data-label="${label} · ${escape(t('shell.rail.soon', lang))}" aria-label="${label} (${escape(t('shell.rail.soon', lang))})">${glyph}</span></li>`;
     }
     const on = item.id === active;
     return `
-    <li><a class="rail-item${on ? ' is-active' : ''}" href="${escape(item.href)}"${on ? ' aria-current="page"' : ''} data-id="${escape(item.id)}" data-label="${label}" aria-label="${label}">${glyph}</a></li>`;
+    <li><a class="rail-item${on ? ' is-active' : ''}" href="${escape(i18n.localPath(item.href, lang))}"${on ? ' aria-current="page"' : ''} data-id="${escape(item.id)}" data-label="${label}" aria-label="${label}">${glyph}</a></li>`;
   }).join('') + '\n  ';
 };
 
@@ -57,25 +63,39 @@ const ICON_AUTO  = '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 
 const ICON_LIGHT = '<circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/>';
 const ICON_DARK  = '<path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/>';
 
-const topbarInner = () => `
-  <nav class="space-switch glass" id="space-switch" aria-label="Space" data-lens>
+/* The language switch links to this page in the other language. The
+   ?lang= query is for the edge middleware (functions/_middleware.js): it
+   remembers the choice in a cookie, so a visitor who picks English is not
+   sent back to Chinese by their location. On a page that has only an
+   English build (/usage/), scripts/i18n.js translates in the browser and
+   marks the active option itself (data-language-toggle). */
+const langSwitchHtml = (lang, pagePath) => {
+  const opt = (l) => `<a class="lang-opt${l === lang ? ' is-active' : ''}" href="${escape(i18n.localPath(pagePath, l))}?lang=${l}" hreflang="${i18n.HTML_LANG[l]}" lang="${i18n.HTML_LANG[l]}" data-lang="${l}"${l === lang ? ' aria-current="true"' : ''} title="${escape(t(`shell.lang.${l}Title`, l))}">${escape(t(`shell.lang.${l}`, l))}</a>`;
+  return `<nav class="lang-switch glass" id="lang-switch" aria-label="${escape(t('shell.lang.aria', lang))}" data-language-toggle data-no-translate data-lens>${i18n.LANGS.map(opt).join('')}</nav>`;
+};
+
+const topbarInner = (lang = 'en', pagePath = '/') => `
+  <nav class="space-switch glass" id="space-switch" aria-label="${escape(t('shell.space.aria', lang))}" data-lens>
     <span class="space-thumb" aria-hidden="true"></span>
-    <a class="space-opt is-active" href="/" data-space="work">Work</a>
-    <a class="space-opt" href="/personal/" data-space="personal">Personal</a>
+    <a class="space-opt is-active" href="${escape(i18n.localPath('/', lang))}" data-space="work">${escape(t('shell.space.work', lang))}</a>
+    <a class="space-opt" href="/personal/" data-space="personal">${escape(t('shell.space.personal', lang))}</a>
   </nav>
 
+  <div class="top-right">
+  ${langSwitchHtml(lang, pagePath)}
   <div class="theme-switch glass" id="theme-switch" data-lens>
     <button class="theme-btn theme-current" id="theme-current" type="button"
-            aria-label="Appearance" aria-expanded="false" aria-controls="theme-options">
+            aria-label="${escape(t('shell.theme.aria', lang))}" aria-expanded="false" aria-controls="theme-options">
       <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true">${ICON_AUTO}</svg>
       <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true">${ICON_LIGHT}</svg>
       <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true">${ICON_DARK}</svg>
     </button>
-    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="Appearance">
-      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="Automatic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_AUTO}</svg></button>
-      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="Light"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_LIGHT}</svg></button>
-      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="Dark"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_DARK}</svg></button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="${escape(t('shell.theme.aria', lang))}">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="${escape(t('shell.theme.auto', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_AUTO}</svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="${escape(t('shell.theme.light', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_LIGHT}</svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="${escape(t('shell.theme.dark', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_DARK}</svg></button>
     </div>
+  </div>
   </div>
 `;
 
@@ -83,7 +103,7 @@ const topbarInner = () => `
    Questions float above it as chips; answers open in the side panel, so the
    page being read is pushed aside rather than covered. */
 const SEND_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg>';
-const askInner = () => `
+const askInner = (lang = 'en') => `
   <div class="ask-suggest" id="ask-suggest" hidden></div>
   <div class="ask-shell glass" id="ask-shell" data-lens>
     <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
@@ -91,43 +111,43 @@ const askInner = () => `
         <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
       </button>
       <input class="ask-input" id="ask-input" type="text" maxlength="500"
-             placeholder="Ask Antares anything" aria-label="Ask Antares anything">
-      <button class="ask-send" id="ask-send" type="submit" aria-label="Send">${SEND_ICON}</button>
+             placeholder="${escape(t('shell.ask.placeholder', lang))}" aria-label="${escape(t('shell.ask.aria', lang))}">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="${escape(t('shell.ask.send', lang))}">${SEND_ICON}</button>
     </form>
   </div>
 `;
 
-const askPanelInner = () => `
+const askPanelInner = (lang = 'en') => `
   <header class="ask-panel-head">
     <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
-    <span class="ask-panel-title"><strong>Ask Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+    <span class="ask-panel-title"><strong>${escape(t('shell.ask.title', lang))}</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
       <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
-      <span>Local first · cloud fallback</span>
+      <span>${escape(t('shell.ask.source', lang))}</span>
     </span></span>
-    <button class="ask-icon" id="ask-new" type="button" aria-label="New conversation" title="New conversation">
+    <button class="ask-icon" id="ask-new" type="button" aria-label="${escape(t('shell.ask.new', lang))}" title="${escape(t('shell.ask.new', lang))}">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
     </button>
-    <button class="ask-icon" id="ask-close" type="button" aria-label="Close" title="Close">
+    <button class="ask-icon" id="ask-close" type="button" aria-label="${escape(t('shell.ask.close', lang))}" title="${escape(t('shell.ask.close', lang))}">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
     </button>
   </header>
   <div class="ask-log" id="ask-log" aria-live="polite"></div>
   <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
     <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
-           placeholder="Ask a follow-up…" aria-label="Ask a follow-up">
-    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="Send">${SEND_ICON}</button>
+           placeholder="${escape(t('shell.ask.followUp', lang))}" aria-label="${escape(t('shell.ask.followUpAria', lang))}">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="${escape(t('shell.ask.send', lang))}">${SEND_ICON}</button>
   </form>
 `;
 
 /* ── Footer ───────────────────────────────────────────────────────────── */
-const footerInner = () => {
+const footerInner = (lang = 'en') => {
   const site = read('content/site.json');
   const parts = [];
   if (site.footer?.copyright) parts.push(escape(site.footer.copyright));
-  parts.push('<a href="/admin/">Edit</a>');
+  parts.push(`<a href="/admin/">${escape(t('shell.footer.edit', lang))}</a>`);
   parts.push('<a href="/blog/feed.xml">RSS</a>');
   parts.push('<a href="/llms.txt">llms.txt</a>');
-  parts.push('<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">Source</a>');
+  parts.push(`<a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">${escape(t('shell.footer.source', lang))}</a>`);
   return parts.join('<span aria-hidden="true"> · </span>');
 };
 
@@ -142,25 +162,38 @@ const THEME_INIT = `<script>
   })();
 </script>`;
 const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-const SCRIPTS = ['scripts/i18n.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'];
+// Work pages are rendered per language, so they don't load scripts/i18n.js
+// (the runtime translator Personal still uses) — except a page built in
+// English only, which asks for it with `runtimeI18n`.
+const SCRIPTS = ['scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'];
 
 /* ── Whole page, for the generated Work pages ─────────────────────────────
    The home page is a template filled in place by build-html.js instead, but
    it takes its rail, top controls, ask and footer from this same module. */
-const pageHtml = ({ title, description, canonical, ogType, ogImage, active, bodyClass, main, scripts, styles }) => {
+/* `path` is the page's English path ('/projects/kaboo/'); with it the
+   canonical URL, the hreflang pair and the language switch follow `lang`.
+   (A bare `canonical` is still accepted for a page with one language.) */
+const uiStringsJson = (lang) => JSON.stringify(i18n.clientStrings(lang)).replace(/</g, '\\u' + '003c');
+const pageHtml = ({ title, description, canonical, ogType, ogImage, active, bodyClass, main, scripts, styles, lang = 'en', path: pagePath, runtimeI18n = false }) => {
   const site = read('content/site.json');
+  const base = (site.meta?.url ?? '').replace(/\/+$/, '');
+  const canon = pagePath ? `${base}${i18n.localPath(pagePath, lang)}` : canonical;
+  const alternates = pagePath
+    ? i18n.LANGS.map((l) => `<link rel="alternate" hreflang="${i18n.HTML_LANG[l]}" href="${escape(base + i18n.localPath(pagePath, l))}">`).join('\n')
+      + `\n<link rel="alternate" hreflang="x-default" href="${escape(base + pagePath)}">`
+    : '';
   const siteName = site.meta?.siteName ?? site.meta?.title ?? '';
   const desc = String(description || site.meta?.description || '').replace(/\s+/g, ' ').trim();
   const img = ogImage || (site.meta?.url && site.meta?.ogImage
     ? `${site.meta.url.replace(/\/+$/, '')}/${site.meta.ogImage.replace(/^\/+/, '')}` : '');
-  const extra = (scripts ?? []).map((rel) => `<script src="/${rel}?v=${hashOf(rel)}" defer></script>`).join('\n');
+  const extra = [...(scripts ?? []), ...(runtimeI18n ? ['scripts/i18n.js'] : [])].map((rel) => `<script src="/${rel}?v=${hashOf(rel)}" defer></script>`).join('\n');
   const extraStyles = (styles ?? []).map((rel) => `<link rel="stylesheet" href="/${rel}?v=${hashOf(rel)}">`).join('\n');
   return `<!DOCTYPE html>
 <!--
   Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
   GENERATED — do not edit by hand. Regenerate: \`node scripts/build.js\`
 -->
-<html lang="${escape(site.meta?.lang ?? 'en')}">
+<html lang="${i18n.HTML_LANG[lang]}">
 <head>
 <meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
 <meta charset="UTF-8">
@@ -168,13 +201,14 @@ const pageHtml = ({ title, description, canonical, ogType, ogImage, active, body
 <title>${escape(title)} · ${escape(siteName)}</title>
 <meta name="description" content="${escape(desc)}">
 <meta name="author" content="${escape(site.meta?.author ?? siteName)}">
-<link rel="canonical" href="${escape(canonical)}">
+<link rel="canonical" href="${escape(canon)}">${alternates ? '\n' + alternates : ''}
 <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="alternate" type="application/rss+xml" title="Writing — ${escape(siteName)}" href="/blog/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="${escape(t('shell.feedTitle', lang, { site: siteName }))}" href="/blog/feed.xml">
 <meta property="og:type" content="${escape(ogType || 'website')}">
-<meta property="og:url" content="${escape(canonical)}">
+<meta property="og:url" content="${escape(canon)}">
+<meta property="og:locale" content="${i18n.OG_LOCALE[lang]}">
 <meta property="og:site_name" content="${escape(siteName)}">
 <meta property="og:title" content="${escape(title)}">
 <meta property="og:description" content="${escape(desc)}">${img ? `\n<meta property="og:image" content="${escape(img)}">` : ''}
@@ -189,24 +223,25 @@ ${THEME_INIT}
 <link rel="stylesheet" href="/styles/work.css?v=${hashOf('styles/work.css')}">${extraStyles ? '\n' + extraStyles : ''}
 </head>
 <body class="work-home ${escape(bodyClass || '')}">
-<a class="skip-link" href="#main-content">Skip to content</a>
+<a class="skip-link" href="#main-content">${escape(t('shell.skip', lang))}</a>
 <div class="ambient" aria-hidden="true"></div>
 <div class="scroll-edge" aria-hidden="true"></div>
 
-<header class="topbar" id="topbar">${topbarInner()}</header>
+<header class="topbar" id="topbar">${topbarInner(lang, pagePath || '/')}</header>
 
-<nav class="rail glass" id="rail" aria-label="Site" data-lens>
+<nav class="rail glass" id="rail" aria-label="${escape(t('shell.rail.aria', lang))}" data-lens>
   <span class="rail-blob" aria-hidden="true"></span>
-  <ul class="rail-list" id="rail-list">${railItemsHtml(active)}</ul>
+  <ul class="rail-list" id="rail-list">${railItemsHtml(active, lang)}</ul>
 </nav>
 
 <main class="page" id="main-content">
 ${main}
-  <footer class="foot" id="footer">${footerInner()}</footer>
+  <footer class="foot" id="footer">${footerInner(lang)}</footer>
 </main>
 
-<div class="ask" id="ask" data-qa="${escape(site.qa?.workerUrl ?? '')}">${askInner()}</div>
-<aside class="ask-panel glass" id="ask-panel" aria-label="Ask Antares" hidden>${askPanelInner()}</aside>
+<div class="ask" id="ask" data-qa="${escape(site.qa?.workerUrl ?? '')}">${askInner(lang)}</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="${escape(t('shell.ask.title', lang))}" hidden>${askPanelInner(lang)}</aside>
+<script type="application/json" id="ui-strings">${uiStringsJson(lang)}</script>
 
 <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
 
@@ -218,5 +253,5 @@ ${SCRIPTS.map((rel) => `<script src="/${rel}?v=${hashOf(rel)}" defer></script>`)
 
 module.exports = {
   ICONS, railItemsHtml, topbarInner, askInner, askPanelInner, footerInner,
-  pageHtml, hashOf, SCRIPTS,
+  pageHtml, hashOf, SCRIPTS, uiStringsJson,
 };

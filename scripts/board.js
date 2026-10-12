@@ -25,6 +25,14 @@
 (function () {
   'use strict';
 
+  // The page's words (work-shell embeds them as #ui-strings, per language).
+  // English is the fallback written here; Chinese comes from content/zh/strings.json.
+  var UI = (function () { try { return JSON.parse(document.getElementById('ui-strings').textContent) || {}; } catch (e) { return {}; } })();
+  var T = function (key, fallback, vars) {
+    var v = key.split('.').reduce(function (o, k) { return o && o[k]; }, UI);
+    var s = typeof v === 'string' ? v : fallback;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; }) : s;
+  };
   var SVGNS = 'http://www.w3.org/2000/svg';
   var MIN_K = 0.2, MAX_K = 3;
   var COLORS = ['yellow', 'blue', 'green', 'pink', 'purple', 'gray'];
@@ -109,11 +117,11 @@
         '<div class="board-nodes"></div>' +
         '<div class="board-sel"></div>' +
       '</div>' +
-      '<div class="board-controls glass" role="toolbar" aria-label="Board view">' +
-        '<button type="button" data-act="out" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button>' +
-        '<button type="button" data-act="fit" class="board-zoom" aria-label="Fit to board">100%</button>' +
-        '<button type="button" data-act="in" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button>' +
-        '<button type="button" data-act="full" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg></button>' +
+      '<div class="board-controls glass" role="toolbar" aria-label="' + T('board.view', 'Board view') + '">' +
+        '<button type="button" data-act="out" aria-label="' + T('board.zoomOut', 'Zoom out') + '"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button>' +
+        '<button type="button" data-act="fit" class="board-zoom" aria-label="' + T('board.fit', 'Fit to board') + '">100%</button>' +
+        '<button type="button" data-act="in" aria-label="' + T('board.zoomIn', 'Zoom in') + '"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button>' +
+        '<button type="button" data-act="full" aria-label="' + T('board.full', 'Full screen') + '"><svg viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg></button>' +
       '</div>';
     this.world = root.querySelector('.board-world');
     this.framesEl = root.querySelector('.board-frames');

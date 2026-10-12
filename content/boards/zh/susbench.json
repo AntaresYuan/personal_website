@@ -1,0 +1,574 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1460,
+      "y": 564,
+      "w": 660,
+      "h": 520,
+      "text": "05 · 发现"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1400,
+      "h": 520,
+      "text": "04 · 我的贡献"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · 方法"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · 难点"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · 研究问题"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "dark pattern 会骗到 agent 吗？"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "原本用来骗人的设计，现在遇上了替人上网的 agent。"
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "pink",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**Dark pattern**\n故意诱导用户做出非本意操作的界面设计。网上到处都是。"
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**Agent 开始替我们操作**\nComputer-use agent 替用户在真实界面上自主操作。"
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "评测环境既要可控，又要真实"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "要测得准，两者缺一不可；常见的做法只能占一头。"
+    },
+    {
+      "id": "rc",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 468,
+      "y": 146,
+      "w": 200,
+      "h": 120,
+      "text": "**可控**\n出现在哪、属于哪一类，都能设计"
+    },
+    {
+      "id": "rr",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 468,
+      "y": 316,
+      "w": 200,
+      "h": 120,
+      "text": "**真实**\n否则结果代表不了真实网站"
+    },
+    {
+      "id": "om",
+      "type": "sticky",
+      "color": "gray",
+      "x": 700,
+      "y": 136,
+      "w": 230,
+      "h": 140,
+      "text": "**自己搭假网站**\n可控，但不真实。"
+    },
+    {
+      "id": "ol",
+      "type": "sticky",
+      "color": "gray",
+      "x": 700,
+      "y": 306,
+      "w": 230,
+      "h": 140,
+      "text": "**直接用线上网站**\n真实，但不可控。"
+    },
+    {
+      "id": "ans",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 962,
+      "y": 231,
+      "w": 210,
+      "h": 120,
+      "text": "**我们的做法**\n在真实网站上注入 dark pattern"
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "SusBench：注入真实网站的 dark pattern"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "一个在线 benchmark。ACM IUI 2026（智能用户界面会议）长文。"
+    },
+    {
+      "id": "m1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1288,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**9 类**\ndark pattern，来自已有的分类体系"
+    },
+    {
+      "id": "m2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1570,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**代码注入**\n到真实的消费类网站"
+    },
+    {
+      "id": "m3",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 1852,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**313 个任务**\n覆盖 55 个网站"
+    },
+    {
+      "id": "m4",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 1570,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**29 人用户实验**\n大多数人没发现是后加的"
+    },
+    {
+      "id": "m5",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1852,
+      "y": 316,
+      "w": 240,
+      "h": 110,
+      "text": "**5 个 agent**\n评测了 SOTA 的 computer-use agent"
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1344,
+      "h": 30,
+      "text": "benchmark 中我负责的两块"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1344,
+      "h": 40,
+      "text": "A：评测框架。   B：评测用例。"
+    },
+    {
+      "id": "ta",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 676,
+      "w": 500,
+      "h": 24,
+      "text": "**A · 评测框架**"
+    },
+    {
+      "id": "a1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 28,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**注入**\n把 dark pattern 注入线上网站"
+    },
+    {
+      "id": "a2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 312,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**执行**\nagent 完成任务"
+    },
+    {
+      "id": "a3",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 596,
+      "y": 729,
+      "w": 240,
+      "h": 110,
+      "text": "**判定**\nagent 有没有被诱导？"
+    },
+    {
+      "id": "a4",
+      "type": "sticky",
+      "color": "gray",
+      "x": 880,
+      "y": 714,
+      "w": 280,
+      "h": 140,
+      "text": "同一条链路，让每个 agent 面对同样的页面、同样的 dark pattern、同样的判定。"
+    },
+    {
+      "id": "ra",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 729,
+      "w": 188,
+      "h": 110,
+      "text": "**5 个 agent**\n在同一套环境里评测"
+    },
+    {
+      "id": "tb",
+      "type": "text",
+      "size": "body",
+      "x": 28,
+      "y": 880,
+      "w": 500,
+      "h": 24,
+      "text": "**B · 评测用例**"
+    },
+    {
+      "id": "b0",
+      "type": "shape",
+      "shape": "round",
+      "color": "yellow",
+      "x": 28,
+      "y": 916,
+      "w": 180,
+      "h": 130,
+      "text": "**9 类**\n落到具体网站的具体任务上"
+    },
+    {
+      "id": "b1",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 236,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**1 · 任务目标**\n任务要 agent 做什么。"
+    },
+    {
+      "id": "b2",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 560,
+      "y": 916,
+      "w": 300,
+      "h": 130,
+      "text": "**2 · 注入位置**\ndark pattern 出现在哪一步。"
+    },
+    {
+      "id": "b3",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 884,
+      "y": 916,
+      "w": 276,
+      "h": 130,
+      "text": "**3 · 怎样算被诱导**\nagent 做了哪个操作，就算中招。"
+    },
+    {
+      "id": "rb",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1184,
+      "y": 926,
+      "w": 188,
+      "h": 110,
+      "text": "**313 个任务**\n覆盖 55 个网站"
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1488,
+      "y": 592,
+      "w": 604,
+      "h": 30,
+      "text": "人在哪里中招，agent 也在哪里中招"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1488,
+      "y": 630,
+      "w": 604,
+      "h": 40,
+      "text": "由此引出三个问题。"
+    },
+    {
+      "id": "fs",
+      "type": "sticky",
+      "color": "pink",
+      "x": 1488,
+      "y": 704,
+      "w": 290,
+      "h": 160,
+      "text": "**两者都最容易中招**\n- 预选项（Preselection）\n- 误导性措辞（Trick Wording）\n- 隐藏信息（Hidden Information）"
+    },
+    {
+      "id": "fr",
+      "type": "sticky",
+      "color": "green",
+      "x": 1802,
+      "y": 704,
+      "w": 290,
+      "h": 160,
+      "text": "**两者都有抵抗力**\n面对比较明显的 dark pattern，人和 agent 都扛住了。"
+    },
+    {
+      "id": "tw",
+      "type": "text",
+      "size": "body",
+      "x": 1488,
+      "y": 880,
+      "w": 400,
+      "h": 24,
+      "text": "**意义**"
+    },
+    {
+      "id": "w1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1488,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**可信**\n怎么做出值得信任的 agent"
+    },
+    {
+      "id": "w2",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1695,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**评估**\nagent 可能代替人去评估欺骗性设计"
+    },
+    {
+      "id": "w3",
+      "type": "sticky",
+      "color": "blue",
+      "x": 1902,
+      "y": 916,
+      "w": 190,
+      "h": 130,
+      "text": "**监管**\n当越来越多的上网行为来自 agent"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p1",
+      "to": "rc"
+    },
+    {
+      "id": "e2",
+      "from": "p2",
+      "to": "rr"
+    },
+    {
+      "id": "e3",
+      "from": "rc",
+      "to": "om"
+    },
+    {
+      "id": "e4",
+      "from": "rr",
+      "to": "ol"
+    },
+    {
+      "id": "e5",
+      "from": "om",
+      "to": "ans"
+    },
+    {
+      "id": "e6",
+      "from": "ol",
+      "to": "ans"
+    },
+    {
+      "id": "e7",
+      "from": "ans",
+      "to": "m1"
+    },
+    {
+      "id": "e8",
+      "from": "m1",
+      "to": "m2"
+    },
+    {
+      "id": "e9",
+      "from": "m2",
+      "to": "m3"
+    },
+    {
+      "id": "e10",
+      "from": "m2",
+      "to": "m4",
+      "dashed": true,
+      "label": "够真吗？",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e11",
+      "from": "m3",
+      "to": "m5",
+      "fromSide": "b",
+      "toSide": "t"
+    },
+    {
+      "id": "e12",
+      "from": "a1",
+      "to": "a2"
+    },
+    {
+      "id": "e13",
+      "from": "a2",
+      "to": "a3"
+    },
+    {
+      "id": "e14",
+      "from": "a3",
+      "to": "a4"
+    },
+    {
+      "id": "e15",
+      "from": "a4",
+      "to": "ra"
+    },
+    {
+      "id": "e16",
+      "from": "b0",
+      "to": "b1"
+    },
+    {
+      "id": "e17",
+      "from": "b1",
+      "to": "b2"
+    },
+    {
+      "id": "e18",
+      "from": "b2",
+      "to": "b3"
+    },
+    {
+      "id": "e19",
+      "from": "b3",
+      "to": "rb"
+    },
+    {
+      "id": "e20",
+      "from": "ra",
+      "to": "fs",
+      "dashed": true,
+      "label": "发现"
+    }
+  ]
+}

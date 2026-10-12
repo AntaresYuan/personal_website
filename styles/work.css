@@ -291,31 +291,54 @@ body::after {
 }
 .topbar > * { pointer-events: auto; }
 
-.topbar-actions {
+.top-right {
   display: flex;
   align-items: center;
   gap: 10px;
-  pointer-events: auto;
 }
-.language-switch {
-  min-width: 54px;
-  height: 44px;
-  padding: 0 15px;
+
+/* Language: two links, this page in English and in Chinese (work-shell.js).
+   Same capsule as the theme switch; the current one wears the knob. */
+.lang-switch {
+  display: flex;
+  align-items: center;
+  padding: 4px;
   border-radius: 999px;
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  box-shadow: var(--glass-shadow);
+}
+.lang-opt {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
   color: var(--text-2);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 650;
   letter-spacing: 0.01em;
-  transition: color 0.2s, transform 0.2s var(--spring), background 0.2s;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
 }
-.language-switch:hover { color: var(--text); transform: translateY(-1px); }
-.language-switch:active { transform: scale(0.96); }
+.lang-opt:hover { color: var(--text); }
+.lang-opt.is-active { color: var(--text); background: var(--knob-bg); box-shadow: var(--knob-shadow); }
+.lang-opt[lang="zh-CN"] { font-family: var(--font-zh); font-size: 14px; }
 
-:root[data-language="zh"] body { font-family: var(--font-zh), var(--font); }
+/* Chinese pages: the CJK faces first, and none of the negative tracking the
+   Latin display type uses — it crowds Han characters. */
+:root:lang(zh-CN),
+:root[data-language="zh"] {
+  --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          "Noto Sans SC", "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          "Noto Sans SC", "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+}
+:root:lang(zh-CN) :is(h1, h2, h3, h4, p, li, dd, dt, figcaption, blockquote),
+:root:lang(zh-CN) :is(.featured-title, .skill-name, .lb-title, .case-section-title, .discuss-title) {
+  letter-spacing: 0;
+}
+:root:lang(zh-CN) .prose { line-height: 1.85; }
+/* Han characters have no italic; a slanted one is a fake. Emphasis stays upright. */
+:root:lang(zh-CN) :is(em, i) { font-style: normal; }
 
 .space-switch {
   display: inline-flex;
@@ -363,7 +386,7 @@ body::after {
   border-radius: 999px;
 }
 
-.article-language-note {
+.post-lang-note {
   margin: 0 0 28px;
   padding: 12px 16px;
   border: 1px solid var(--hairline);
@@ -2311,7 +2334,8 @@ html.board-lock { overflow: hidden; }
   .page { padding-top: 92px; padding-bottom: 104px; }   /* tab bar: 16px + 60px, plus ~28px */
   .topbar { top: 14px; }
   .space-opt { padding: 9px 16px; }
-  .topbar-actions { gap: 7px; }
+  .top-right { gap: 7px; }
+  .lang-opt { min-width: 32px; padding: 0 8px; }
   .language-switch { min-width: 46px; height: 44px; padding: 0 12px; font-size: 12px; }
 
   .update { flex-wrap: wrap; row-gap: 4px; padding: 14px 16px; }

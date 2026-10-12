@@ -21,6 +21,15 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   };
+  // The page's words (work-shell embeds them as #ui-strings, per language).
+  // English is the fallback written here; Chinese comes from content/zh/strings.json.
+  var UI = (function () { try { return JSON.parse($('ui-strings').textContent) || {}; } catch (e) { return {}; } })();
+  var T = function (key, fallback, vars) {
+    var v = key.split('.').reduce(function (o, k) { return o && o[k]; }, UI);
+    var s = typeof v === 'string' ? v : fallback;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; }) : s;
+  };
+  var LOCALE = /^zh/i.test(root.lang || '') ? 'zh-CN' : 'en-US';
   var timeout = function (ms) {
     return (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(ms) : undefined;
   };
@@ -208,16 +217,16 @@
     return AGENT_NAMES[key] || (key.charAt(0).toUpperCase() + key.slice(1));
   };
   var dayLabel = function (iso, opts) {
-    return new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', Object.assign({ timeZone: 'UTC' }, opts));
+    return new Date(iso + 'T00:00:00Z').toLocaleDateString(LOCALE, Object.assign({ timeZone: 'UTC' }, opts));
   };
   var ago = function (iso) {
     var t = Date.parse(iso || '');
     if (!isFinite(t)) return '';
     var s = Math.max(0, Math.round((Date.now() - t) / 1000));
-    if (s < 60) return 'updated just now';
-    if (s < 3600) return 'updated ' + Math.round(s / 60) + 'm ago';
-    if (s < 86400) return 'updated ' + Math.round(s / 3600) + 'h ago';
-    return 'updated ' + Math.round(s / 86400) + 'd ago';
+    if (s < 60) return T('updated.now', 'updated just now');
+    if (s < 3600) return T('updated.m', 'updated {n}m ago', { n: Math.round(s / 60) });
+    if (s < 86400) return T('updated.h', 'updated {n}h ago', { n: Math.round(s / 3600) });
+    return T('updated.d', 'updated {n}d ago', { n: Math.round(s / 86400) });
   };
 
   var series = null;      // [{date, v}] — the last BARS days
@@ -247,7 +256,7 @@
       var ay = top + plotH - (avg / max) * plotH;
       out.push('<line class="avg" x1="0" x2="' + W + '" y1="' + ay.toFixed(1) + '" y2="' + ay.toFixed(1) + '"/>');
       // Left end: the right end is today, usually the tallest bar of the lot.
-      out.push('<text class="avg-label" x="0" y="' + (ay - 5).toFixed(1) + '">avg ' + fmtCompact(avg) + '</text>');
+      out.push('<text class="avg-label" x="0" y="' + (ay - 5).toFixed(1) + '">' + escape(T('usage.avg', 'avg {n}', { n: fmtCompact(avg) })) + '</text>');
     }
     chartEl.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">' + out.join('') + '</svg>';
     chartEl.classList.toggle('is-skeleton', !series);
@@ -270,7 +279,7 @@
       chartEl.querySelectorAll('.bar.is-hover').forEach(function (b) { if (b !== bar) b.classList.remove('is-hover'); });
       bar.classList.add('is-hover');
       if (!tip) { tip = doc.createElement('div'); tip.className = 'chart-tip'; chartEl.appendChild(tip); }
-      tip.innerHTML = escape(d.v > 0 ? fmtCompact(d.v) + ' tokens' : 'No activity') +
+      tip.innerHTML = escape(d.v > 0 ? T('usage.tokens', '{n} tokens', { n: fmtCompact(d.v) }) : T('usage.none', 'No activity')) +
         '<span>' + escape(dayLabel(d.date, { weekday: 'short', month: 'short', day: 'numeric' })) + '</span>';
       var br = bar.getBoundingClientRect();
       tip.style.left = Math.min(r.width - 40, Math.max(40, br.left - r.left + br.width / 2)) + 'px';
@@ -319,7 +328,7 @@
           var first = days.filter(function (d) { return dayTokens(d) > 0; })[0];
           var since = first && first.date;
           $('kpi-total').innerHTML = escape(fmtCompact(total)) +
-            (since ? '<small>since ' + escape(dayLabel(String(since).slice(0, 10), { month: 'long', year: 'numeric' })) + '</small>' : '');
+            (since ? '<small>' + escape(T('usage.since', 'since {date}', { date: dayLabel(String(since).slice(0, 10), { month: 'long', year: 'numeric' }) })) + '</small>' : '');
 
           // Top agent across the whole window, when the Worker publishes the split.
           var bySource = {};
@@ -335,7 +344,7 @@
           var kpiAgent = $('kpi-agent');
           if (ranked.length) {
             var sum = ranked.reduce(function (a, k) { return a + bySource[k]; }, 0);
-            kpiAgent.innerHTML = escape(agentName(ranked[0])) + '<small>' + Math.round((bySource[ranked[0]] / sum) * 100) + '% of all tokens</small>';
+            kpiAgent.innerHTML = escape(agentName(ranked[0])) + '<small>' + escape(T('usage.share', '{pct}% of all tokens', { pct: Math.round((bySource[ranked[0]] / sum) * 100) })) + '</small>';
           } else {
             kpiAgent.parentElement.hidden = true;
           }
@@ -344,7 +353,7 @@
           drawChart();
           // Freshness lives in the title link's tooltip.
           var titleLink = usage.querySelector('.col-link');
-          if (titleLink && data.updated) titleLink.title = 'All charts · ' + ago(data.updated);
+          if (titleLink && data.updated) titleLink.title = T('usage.allCharts', 'All charts · {ago}', { ago: ago(data.updated) });
         })
         .catch(function (e) {
           // Quietly gone, never broken. Console is for whoever maintains it.
@@ -387,7 +396,7 @@
       if (count) {
         var a = Math.min(n, first + 1);
         var b = atEnd ? n : Math.min(n, first + visible);
-        count.textContent = n ? (a === b ? a : a + '–' + b) + ' of ' + n : '';
+        count.textContent = n ? T('carousel.count', '{range} of {n}', { range: a === b ? a : a + '–' + b, n: n }) : '';
       }
     };
     var go = function (dir) {
@@ -446,7 +455,7 @@
       var label = b.querySelector('span');
       var was = label ? label.textContent : '';
       b.classList.add('is-done');
-      if (label) label.textContent = 'Copied';
+      if (label) label.textContent = T('copied', 'Copied');
       setTimeout(function () { b.classList.remove('is-done'); if (label) label.textContent = was; }, 1400);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
@@ -529,17 +538,16 @@
     };
     var setSource = function (source, model) {
       if (!sourceEl) return;
-      var zh = root.dataset.language === 'zh' || /^zh/i.test(root.lang || '');
       var labels = {
-        idle: zh ? '\u672c\u5730\u4f18\u5148 \u00b7 \u4e91\u7aef\u515c\u5e95' : 'Local first \u00b7 cloud fallback',
-        pending: zh ? '\u6b63\u5728\u9009\u62e9\u53ef\u7528\u6a21\u578b\u2026' : 'Choosing an available model\u2026',
-        local: (zh ? '\u672c\u5730 \u00b7 ' : 'Local \u00b7 ') + (model || 'Ollama'),
-        cloud: zh ? '\u4e91\u7aef \u00b7 Workers AI' : 'Cloud \u00b7 Workers AI',
-        offline: zh ? '\u5185\u7f6e FAQ \u00b7 \u65e0\u6a21\u578b' : 'Built-in FAQ \u00b7 no model'
+        idle: T('ask.source.idle', 'Local first \u00b7 cloud fallback'),
+        pending: T('ask.source.pending', 'Choosing an available model\u2026'),
+        local: T('ask.source.local', 'Local \u00b7 {model}', { model: model || 'Ollama' }),
+        cloud: T('ask.source.cloud', 'Cloud \u00b7 Workers AI'),
+        offline: T('ask.source.offline', 'Built-in FAQ \u00b7 no model')
       };
       sourceEl.setAttribute('data-source', source);
       sourceEl.innerHTML = (sourceIcons[source] || sourceIcons.idle) + '<span>' + escape(labels[source] || labels.idle) + '</span>';
-      sourceEl.title = model ? (zh ? '\u6a21\u578b\uff1a' : 'Model: ') + model : '';
+      sourceEl.title = model ? T('ask.source.model', 'Model: {model}', { model: model }) : '';
     };
     setSource('idle');
 
@@ -549,11 +557,18 @@
       send.disabled = busy || !input.value.trim();
       pSend.disabled = busy || !pInput.value.trim();
     };
+    // Starter questions: the FAQ's starters (content/faq.json). A Chinese
+    // page asks each one by its first Chinese alias.
+    var zhPage = /^zh/i.test(root.lang || '');
+    var HAN = /[\u3400-\u9fff]/;
     var starters = function (n) {
       var faq = (window.QA && typeof window.QA.starters === 'function')
         ? window.QA.starters(n)
         : ((window.QA && Array.isArray(window.QA.FAQ)) ? window.QA.FAQ.slice(0, n) : []);
-      return faq.map(function (f) { return f.q; }).filter(Boolean);
+      return faq.map(function (f) {
+        var zh = zhPage && (f.aliases || []).filter(function (a) { return HAN.test(a); })[0];
+        return zh || f.q;
+      }).filter(Boolean);
     };
     var chip = function (q) {
       var label = q.charAt(0).toUpperCase() + q.slice(1);
@@ -569,7 +584,7 @@
 
     var renderLog = function (pending) {
       if (!convo.length && !pending) {
-        log.innerHTML = '<p class="ask-empty">Ask about a project, what I’m building, how I think, or how to reach me.</p>' +
+        log.innerHTML = '<p class="ask-empty">' + escape(T('ask.empty', 'Ask about a project, what I’m building, how I think, or how to reach me.')) + '</p>' +
           '<div class="ask-starters">' + starters(4).map(chip).join('') + '</div>';
         return;
       }
@@ -577,7 +592,7 @@
         return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + '</div>';
       }).join('');
       if (pending) {
-        html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="Thinking"><span></span><span></span><span></span></div></div>';
+        html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="' + escape(T('ask.thinking', 'Thinking')) + '"><span></span><span></span><span></span></div></div>';
       }
       log.innerHTML = html;
       log.scrollTop = log.scrollHeight;
@@ -639,8 +654,8 @@
         var m = (window.QA && typeof window.QA.match === 'function') ? window.QA.match(q, cards) : null;
         try { if (typeof window.SITE_BEACON === 'function') window.SITE_BEACON('qa_ask', m ? 'answered' : 'unanswered'); } catch (e) {}
         var first = convo.filter(function (x) { return x.role === 'assistant'; }).length === 0;
-        var note = first ? "\n\n(Quick FAQ answer — the live answer service couldn't be reached from your network. Try again later, or email chenjy4@uw.edu.)" : '';
-        return (m ? m.answer : "I don't have that one written down yet — try asking about a project, what I'm working on, or how to reach me.") + note;
+        var note = first ? '\n\n' + T('ask.offlineNote', "(Quick FAQ answer — the live answer service couldn't be reached from your network. Try again later, or email chenjy4@uw.edu.)") : '';
+        return (m ? m.answer : T('ask.noAnswer', "I don't have that one written down yet — try asking about a project, what I'm working on, or how to reach me.")) + note;
       });
     };
 

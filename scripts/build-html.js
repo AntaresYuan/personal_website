@@ -10,6 +10,11 @@
    their innerHTML. Idempotent — re-running with unchanged content produces
    an identical file.
 
+   Two languages from the one template (lib/i18n.js): English is written
+   back over index.html, Chinese to zh/index.html. Words that are not
+   content (labels, aria) carry data-i18n / data-i18n-attr in the template
+   and come from content/strings.json.
+
    Work and Personal no longer share markup or styles. Work is this page,
    styled by styles/work.css and driven by scripts/work.js. Personal is built
    by build-spaces.js from templates/personal.html and keeps styles/main.css
@@ -24,13 +29,14 @@ const path = require('path');
 const crypto = require('crypto');
 const { escape, replaceInner, setAttr } = require('./lib/html-replace');
 const shell = require('./lib/work-shell');
+const i18n = require('./lib/i18n');
+const { t } = i18n;
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 
-const site    = read('content/site.json');
-const profile = read('content/profile.json');
-const work    = read('content/work.json');
+// Set per language by render(); the helpers below read them.
+let site, profile, work, LANG;
 
 /* Rail, top controls, ask and footer come from scripts/lib/work-shell.js,
    shared with every other Work page. */
@@ -57,20 +63,34 @@ const tagsHtml = () => (profile.tagsWork ?? profile.tags ?? [])
   .map((t) => `<li class="tag">${escape(t)}</li>`).join('');
 
 /* ── Update line ──────────────────────────────────────────────────────── */
-const shortDate = (iso) => {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso ?? '')) return '';
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-};
+const shortDate = (iso) => i18n.fmtDate(iso, LANG);
 
 /* ── Projects ─────────────────────────────────────────────────────────────
    Cards from scripts/lib/projects.js, shared with /projects/; each links to
    its case study. */
 const { projectList, projectCardHtml } = require('./lib/projects');
-const projectsHtml = () => projectList().map(projectCardHtml).join('') + '\n      ';
+const projectsHtml = () => projectList(LANG).map(projectCardHtml).join('') + '\n      ';
+
+/* Template words that aren't content: data-i18n="key" sets an element's
+   text, data-i18n-attr="aria-label:key;title:key" sets attributes. */
+const localizeStatic = (html, lang) => html
+  .replace(/(<([a-z0-9]+)\b[^>]*\sdata-i18n="([\w.]+)"[^>]*>)[^<]*(<\/\2>)/g,
+    (m, open, tag, key, close) => `${open}${escape(t(key, lang))}${close}`)
+  .replace(/<[a-z0-9]+\b[^>]*\sdata-i18n-attr="([^"]+)"[^>]*>/g, (tag, spec) => spec.split(';').reduce((out, pair) => {
+    const [name, key] = pair.split(':');
+    return out.replace(new RegExp(`(\\s${name}=")[^"]*(")`), `$1${escape(t(key, lang))}$2`);
+  }, tag));
 
 /* ── Apply replacements ───────────────────────────────────────────────── */
 const tplPath = path.join(root, 'index.html');
-let html = fs.readFileSync(tplPath, 'utf8');
+const TEMPLATE = fs.readFileSync(tplPath, 'utf8');
+
+function render(lang) {
+LANG = lang;
+site    = i18n.content('content/site.json', lang);
+profile = i18n.content('content/profile.json', lang);
+work    = i18n.content('content/work.json', lang);
+let html = TEMPLATE;
 
 // Insert (or refresh), right after <!DOCTYPE>, two banners: an attribution
 // note (so a fork that rebuilds keeps the lineage even if someone scrubs the
@@ -137,12 +157,19 @@ if (site.meta?.description) {
   setMetaContent('name="twitter:description"', site.meta.description);
 }
 if (site.meta?.author)   setMetaContent('name="author"', site.meta.author);
+const home = `${(site.meta?.url ?? '').replace(/\/+$/, '')}${i18n.localPath('/', lang)}`;
 if (site.meta?.url) {
-  setMetaContent('property="og:url"', site.meta.url);
-  setLinkHref('canonical',            site.meta.url);
+  setMetaContent('property="og:url"', home);
+  setLinkHref('canonical',            home);
 }
+// <html lang> and the hreflang pair (stripped and re-added: idempotent).
+html = html.replace(/(<html\b[^>]*\slang=")[^"]*(")/i, `$1${i18n.HTML_LANG[lang]}$2`);
+html = html.replace(/[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?/g, '');
+html = html.replace(/(<link\s+rel=["']canonical["'][^>]*>\n?)/i, (m) => m + i18n.LANGS
+  .map((l) => `<link rel="alternate" hreflang="${i18n.HTML_LANG[l]}" href="${escape((site.meta?.url ?? '').replace(/\/+$/, '') + i18n.localPath('/', l))}">\n`).join('')
+  + `<link rel="alternate" hreflang="x-default" href="${escape((site.meta?.url ?? '').replace(/\/+$/, '') + '/')}">\n`);
 if (site.meta?.siteName) setMetaContent('property="og:site_name"', site.meta.siteName);
-if (site.meta?.locale)   setMetaContent('property="og:locale"',    site.meta.locale);
+setMetaContent('property="og:locale"', i18n.OG_LOCALE[lang]);
 if (site.meta?.ogImage) {
   const ogUrl = absoluteUrl(site.meta.ogImage);
   setMetaContent('property="og:image"',  ogUrl);
@@ -172,8 +199,8 @@ const personLd = {
 html = replaceInner(html, 'ld-person', JSON.stringify(personLd, null, 2));
 
 // Rail + hero
-html = replaceInner(html, 'topbar',      shell.topbarInner());
-html = replaceInner(html, 'rail-list',   shell.railItemsHtml('home'));
+html = replaceInner(html, 'topbar',      shell.topbarInner(lang, '/'));
+html = replaceInner(html, 'rail-list',   shell.railItemsHtml('home', lang));
 html = replaceInner(html, 'hero-name',   nameHtml());
 html = replaceInner(html, 'hero-native', escape(work.name?.native ?? ''));
 html = replaceInner(html, 'hero-links',  resumeLinksHtml());
@@ -208,9 +235,13 @@ if (site.usage?.enabled === false || !site.usage?.endpoint) {
 }
 html = setAttr(html, 'ask', 'data-qa', escape(site.qa?.workerUrl ?? ''));
 
-html = replaceInner(html, 'ask', shell.askInner());
-html = replaceInner(html, 'ask-panel', shell.askPanelInner());
-html = replaceInner(html, 'footer', shell.footerInner());
+html = replaceInner(html, 'ask', shell.askInner(lang));
+html = replaceInner(html, 'ask-panel', shell.askPanelInner(lang));
+html = replaceInner(html, 'footer', shell.footerInner(lang));
+html = replaceInner(html, 'ui-strings', shell.uiStringsJson(lang));
+// The chart's "all charts" link goes to the same language's /usage/.
+html = html.replace(/(<a class="col-link" href=")[^"]*(")/, `$1${i18n.localPath('/usage/', lang)}$2`);
+html = localizeStatic(html, lang);
 
 // Cache-bust the runtime assets: append a content hash as `?v=`. index.html is
 // served must-revalidate but .js/.css get a longer CDN TTL — without this a
@@ -218,7 +249,7 @@ html = replaceInner(html, 'footer', shell.footerInner());
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/i18n.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),
@@ -234,6 +265,14 @@ const hashOf = (rel) => crypto.createHash('sha1')
   );
 }
 
+// zh/index.html sits one level down: relative asset paths must start at /.
+if (lang !== 'en') html = html.replace(/\s(href|src)="(?!\/|https?:|#|mailto:|data:)([^"]+)"/g, ' $1="/$2"');
+return html;
+}
+
 /* ── Write ────────────────────────────────────────────────────────────── */
-fs.writeFileSync(tplPath, html);
-console.log(`✓ wrote index.html     (${fs.statSync(tplPath).size} bytes, Work home)`);
+fs.writeFileSync(tplPath, render('en'));
+const zhDir = i18n.outRoot('zh');
+fs.mkdirSync(zhDir, { recursive: true });
+fs.writeFileSync(path.join(zhDir, 'index.html'), render('zh'));
+console.log(`✓ wrote index.html     (${fs.statSync(tplPath).size} bytes, Work home) + zh/index.html`);

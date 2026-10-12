@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadPosts, mdToHtml, escapeHtml } = require('./lib/blog');
 const shell = require('./lib/work-shell');
+const i18n = require('./lib/i18n');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -30,8 +31,12 @@ const AUTHOR = [profile.name, profile.nameAccent].filter(Boolean).join(' ') || S
 const FEED_TITLE = `Writing — ${SITE_NAME}`;
 const FEED_DESC = `Writeups and notes from building — by ${AUTHOR}.`;
 const readMinutes = (md) => {
-  const words = String(md).replace(/```[\s\S]*?```/g, ' ').replace(/[#>*_`~\-\[\]()!|]/g, ' ').split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.round(words / 200));
+  const text = String(md).replace(/```[\s\S]*?```/g, ' ');
+  // Chinese has no spaces to count words by: ~400 characters a minute, and
+  // ~200 words a minute for whatever is written in Latin script.
+  const han = (text.match(/[\u3400-\u9fff\uf900-\ufaff]/g) || []).length;
+  const words = text.replace(/[\u3400-\u9fff\uf900-\ufaff]/g, ' ').replace(/[#>*_`~\-\[\]()!|]/g, ' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200 + han / 400));
 };
 // "2026-05-12" → "Tue, 12 May 2026 00:00:00 GMT"  (RSS pubDate)
 const rfc822 = (ymd) => { const d = new Date(`${ymd}T12:00:00Z`); return isNaN(d) ? new Date().toUTCString() : d.toUTCString(); };
@@ -69,30 +74,23 @@ const giscusBlock = giscusReady
 const comments = site.comments ?? {};
 const discussEndpoint = process.env.COMMENTS_ENDPOINT || comments.endpoint || '';
 const discussKey = process.env.COMMENTS_SITEKEY || comments.turnstileSiteKey || '';
-const discussBlock = (slug) => `<section class="discuss" data-discuss
-        data-endpoint="${e(discussEndpoint)}"
-        data-page="/blog/${e(slug)}/"
-        data-turnstile="${e(discussKey)}"
-        aria-labelledby="discuss-title">
-      <h2 class="discuss-title" id="discuss-title">Comments</h2>
-      <noscript><p class="discuss-note">Comments need JavaScript.</p></noscript>
-    </section>`;
+
 
 /* ── render ───────────────────────────────────────────────────────────── */
-const posts = loadPosts().map((p) => ({ ...p, readMin: readMinutes(p.body) }));
+// Pages per language (L); the RSS feed and posts.json stay English-only.
+let L = 'en';
+const t = (key, vars) => i18n.t(key, L, vars);
+const href = (p) => i18n.localPath(p, L);
 
-const niceDate = (ymd) => /^\d{4}-\d{2}-\d{2}$/.test(ymd || '')
-  ? new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-  : '';
-const metaLine = (p) => [p.date ? `<time datetime="${e(p.date)}">${e(niceDate(p.date))}</time>` : '', `${p.readMin} min read`]
+const metaLine = (p) => [p.date ? `<time datetime="${e(p.date)}">${e(i18n.fmtDate(p.date, L, true))}</time>` : '', e(t('blog.minRead', { n: p.readMin }))]
   .filter(Boolean).join('<span aria-hidden="true"> · </span>');
 // A frontmatter cover stays out of the article body. Older posts can still
 // use their first Markdown image as a backwards-compatible fallback.
 const coverOf = (md) => { const m = /!\[[^\]]*\]\(\s*([^)\s]+)/.exec(md || ''); return m ? m[1] : ''; };
 const HUES = [262, 305, 200, 285, 150, 235];   // OKLCH hue angles, as the projects
-const tagSlug = (t) => String(t).toLowerCase();
+const tagSlug = (x) => String(x).toLowerCase();
 const tagList = (tags) => (tags && tags.length)
-  ? `<ul class="post-tags">${tags.map((t) => `<li>${e(t)}</li>`).join('')}</ul>` : '';
+  ? `<ul class="post-tags">${tags.map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : '';
 
 const postCard = (p, i) => {
   const cover = p.cover || coverOf(p.body);
@@ -101,7 +99,7 @@ const postCard = (p, i) => {
     : `<span class="post-cover-mark">${e((p.title || '?').trim().charAt(0))}</span>`;
   return `
       <li class="post-card${i === 0 ? ' is-feature' : ''}" data-tags="${e((p.tags || []).map(tagSlug).join('|'))}">
-        <a class="post-link" href="/blog/${e(p.slug)}/">
+        <a class="post-link" href="${href(`/blog/${e(p.slug)}/`)}">
           <div class="post-cover" style="--hue: ${HUES[i % HUES.length]}">${art}</div>
           <div class="post-body">
             <p class="post-meta">${metaLine(p)}</p>
@@ -114,54 +112,76 @@ const postCard = (p, i) => {
 };
 
 // Topic chips: the most used tags, only when there is more than one to pick.
-const tagCounts = new Map();
-posts.forEach((p) => (p.tags || []).forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1)));
-const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([t]) => t);
-const filterRow = topTags.length > 1
-  ? `<div class="filters" role="group" aria-label="Filter by topic" data-filter-for="post-grid">
-      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">All</button>${topTags.map((t) =>
-        `<button class="filter" type="button" data-filter="${e(tagSlug(t))}" aria-pressed="false">${e(t)}</button>`).join('')}
+const filterRow = (posts) => {
+  const tagCounts = new Map();
+  posts.forEach((p) => (p.tags || []).forEach((x) => tagCounts.set(x, (tagCounts.get(x) || 0) + 1)));
+  const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([x]) => x);
+  return topTags.length > 1
+    ? `<div class="filters" role="group" aria-label="${e(t('blog.filterAria'))}" data-filter-for="post-grid">
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">${e(t('blog.all'))}</button>${topTags.map((x) =>
+        `<button class="filter" type="button" data-filter="${e(tagSlug(x))}" aria-pressed="false">${e(x)}</button>`).join('')}
     </div>`
-  : '';
+    : '';
+};
 
 // /blog/ — the Writing index
-const indexMain = `  <section class="writing" aria-labelledby="writing-title">
+const indexMain = (posts) => `  <section class="writing" aria-labelledby="writing-title">
     <header class="page-head">
       <div>
-        <h1 class="page-title" id="writing-title">Writing</h1>
-        <p class="page-sub">Writeups, teardowns and notes from building.</p>
+        <h1 class="page-title" id="writing-title">${e(t('blog.title'))}</h1>
+        <p class="page-sub">${e(t('blog.sub'))}</p>
       </div>
       <a class="pill-link" href="/blog/feed.xml">RSS</a>
     </header>
-    ${filterRow}
+    ${filterRow(posts)}
     ${posts.length
     ? `<ul class="post-grid" id="post-grid">${posts.map(postCard).join('')}
     </ul>`
-    : '<p class="empty">Nothing here yet.</p>'}
+    : `<p class="empty">${e(t('blog.empty'))}</p>`}
   </section>`;
 
-fs.mkdirSync(path.join(root, 'blog'), { recursive: true });
-// A compact post manifest — the ⌘K palette (scripts/palette.js) fetches this
-// to index posts; small + cacheable.
-fs.writeFileSync(path.join(root, 'blog', 'posts.json'),
-  JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date, tags: p.tags })), null, 2) + '\n');
-const ogCard = (rel) => fs.existsSync(path.join(root, rel)) ? `${SITE_URL}/${rel}` : undefined;
-fs.writeFileSync(path.join(root, 'blog', 'index.html'), shell.pageHtml({
-  title: 'Writing',
-  description: `Writeups and notes from building — by ${AUTHOR}.`,
-  canonical: `${SITE_URL}/blog/`,
-  ogType: 'website',
-  ogImage: ogCard('blog/og.png'),
-  active: 'writing',
-  bodyClass: 'writing-page',
-  main: indexMain,
-}));
+const discussBlock = (slug) => `<section class="discuss" data-discuss
+        data-endpoint="${e(discussEndpoint)}"
+        data-page="/blog/${e(slug)}/"
+        data-turnstile="${e(discussKey)}"
+        aria-labelledby="discuss-title">
+      <h2 class="discuss-title" id="discuss-title">${e(t('blog.comments'))}</h2>
+      <noscript><p class="discuss-note">${e(t('blog.commentsNeedJs'))}</p></noscript>
+    </section>`;
 
-// /blog/<slug>/ — one page per post: a centred reading column, then comments
+const ogCard = (rel) => fs.existsSync(path.join(root, rel)) ? `${SITE_URL}/${rel}` : undefined;
+let posts = [];
 let postPages = 0;
-for (const p of posts) {
-  const main = `  <article class="post">
-    <a class="back-link" href="/blog/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>Writing</a>
+for (const lang of i18n.LANGS) {
+  L = lang;
+  posts = loadPosts({ lang }).map((p) => ({ ...p, readMin: readMinutes(p.body) }));
+  const outDir = path.join(i18n.outRoot(lang), 'blog');
+  fs.mkdirSync(outDir, { recursive: true });
+  if (lang === 'en') {
+    // A compact post manifest — the ⌘K palette (scripts/palette.js) fetches
+    // this to index posts; small + cacheable.
+    fs.writeFileSync(path.join(outDir, 'posts.json'),
+      JSON.stringify(posts.map((p) => ({ slug: p.slug, title: p.title, summary: p.summary, date: p.date, tags: p.tags })), null, 2) + '\n');
+  }
+  fs.writeFileSync(path.join(outDir, 'index.html'), shell.pageHtml({
+    title: t('blog.title'),
+    description: t('blog.description', { author: AUTHOR }),
+    lang,
+    path: '/blog/',
+    ogType: 'website',
+    ogImage: ogCard('blog/og.png'),
+    active: 'writing',
+    bodyClass: 'writing-page',
+    main: indexMain(posts),
+  }));
+
+  // /blog/<slug>/ — one page per post: a centred reading column, then
+  // comments. Both languages share one comment thread (data-page is the
+  // English path).
+  for (const p of posts) {
+    const note = lang !== 'en' && !p.translated ? `<p class="post-lang-note">${e(t('blog.untranslated'))}</p>` : '';
+    const main = `  <article class="post">
+    <a class="back-link" href="${href('/blog/')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>${e(t('blog.title'))}</a>
     <header class="post-head">
       <p class="post-meta">${metaLine(p)}</p>
       <h1 class="post-page-title">${e(p.title)}</h1>
@@ -171,37 +191,39 @@ for (const p of posts) {
         <span>${e(AUTHOR)}</span>
       </div>
       ${tagList(p.tags)}
-    </header>
+    </header>${note}
     <div class="prose">
 ${mdToHtml(p.body)}
     </div>
-    ${discussEndpoint ? discussBlock(p.slug) : `<section class="post-comments" aria-label="Comments">
+    ${discussEndpoint ? discussBlock(p.slug) : `<section class="post-comments" aria-label="${e(t('blog.comments'))}">
       ${giscusBlock}
     </section>`}
   </article>`;
-  const dir = path.join(root, 'blog', p.slug);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'index.html'), shell.pageHtml({
-    title: p.title,
-    description: p.summary,
-    canonical: `${SITE_URL}/blog/${p.slug}/`,
-    ogType: 'article',
-    ogImage: ogCard(`blog/${p.slug}/og.png`),
-    active: 'writing',
-    bodyClass: 'writing-page post-page',
-    main,
-    scripts: discussEndpoint ? ['scripts/comments.js'] : [],
-  }));
-  postPages++;
-}
+    const dir = path.join(outDir, p.slug);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'index.html'), shell.pageHtml({
+      title: p.title,
+      description: p.summary,
+      lang,
+      path: `/blog/${p.slug}/`,
+      ogType: 'article',
+      ogImage: ogCard(`blog/${p.slug}/og.png`),
+      active: 'writing',
+      bodyClass: 'writing-page post-page',
+      main,
+      scripts: discussEndpoint ? ['scripts/comments.js'] : [],
+    }));
+    postPages++;
+  }
 
-// Drop stale post directories — a post that was deleted or flipped to draft.
-const keep = new Set(posts.map((p) => p.slug));
-for (const ent of fs.readdirSync(path.join(root, 'blog'), { withFileTypes: true })) {
-  if (ent.isDirectory() && !keep.has(ent.name)) {
-    fs.rmSync(path.join(root, 'blog', ent.name), { recursive: true, force: true });
+  // Drop stale post directories — a post that was deleted or flipped to draft.
+  const keep = new Set(posts.map((p) => p.slug));
+  for (const ent of fs.readdirSync(outDir, { withFileTypes: true })) {
+    if (ent.isDirectory() && !keep.has(ent.name)) fs.rmSync(path.join(outDir, ent.name), { recursive: true, force: true });
   }
 }
+L = 'en';
+posts = loadPosts().map((p) => ({ ...p, readMin: readMinutes(p.body) }));
 
 // /blog/feed.xml — RSS 2.0. Full post HTML in content:encoded (so readers and
 // Medium's "import from RSS" get the whole post), with absolute URLs.
@@ -227,4 +249,4 @@ ${feedItems}
 `;
 fs.writeFileSync(path.join(root, 'blog', 'feed.xml'), feed);
 
-console.log(`✓ wrote blog/          (index + ${postPages} post page${postPages === 1 ? '' : 's'} + feed.xml + posts.json)`);
+console.log(`✓ wrote blog/          (index + ${postPages} post pages in ${i18n.LANGS.length} languages + feed.xml + posts.json)`);

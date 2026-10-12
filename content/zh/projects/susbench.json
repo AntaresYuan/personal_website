@@ -1,0 +1,65 @@
+{
+  "slug": "susbench",
+  "kind": "ACM IUI 2026 · 研究 · Computer-Use Agent · Benchmark",
+  "summary": "一个在线 benchmark：在 55 个真实网站中注入 dark pattern，测试 computer-use agent 会不会被这些原本用来骗人的设计骗到。",
+  "facts": [
+    {
+      "label": "发表",
+      "value": "ACM IUI 2026，长文"
+    },
+    {
+      "label": "署名",
+      "value": "第二作者（共十位）"
+    },
+    {
+      "label": "机构",
+      "value": "华盛顿大学"
+    },
+    {
+      "label": "规模",
+      "value": "313 个任务，55 个网站"
+    }
+  ],
+  "story": [
+    {
+      "title": "研究问题",
+      "body": "Computer-use agent 开始替用户在真实界面上自主操作了。网站上有很多 **dark pattern**，也就是故意诱导用户做出非本意操作的界面设计。\n\n我们想回答的是：这些原本用来骗人的设计，会不会也骗到 agent？"
+    },
+    {
+      "title": "难点",
+      "body": "这个问题难在评测环境。要测得准，dark pattern 得**可控**：出现在哪、属于哪一类都要能设计。但环境又得足够**真实**，不然结果代表不了 agent 在真实网站上的表现。\n\n自己搭假网站可控但不真实，直接用线上网站真实但不可控。"
+    },
+    {
+      "title": "方法",
+      "body": "我们的做法是在真实的消费类网站上，用代码注入的方式构造 dark pattern。从已有的分类体系里选了 **9 类**常见的 dark pattern，在 **55 个网站**上设计了 **313 个评测任务**。\n\n为了验证注入得够不够真，我们做了一个 **29 人**的用户实验，绝大多数参与者没有发现这些 dark pattern 是研究团队加进去的。\n\n然后在这个 benchmark 上评测了 **5 个 SOTA 的 computer-use agent**。"
+    },
+    {
+      "title": "发现",
+      "body": "人和 agent 的弱点很像：都特别容易中**预选项**（Preselection）、**误导性措辞**（Trick Wording）和**隐藏信息**（Hidden Information）这三类；对比较明显的 dark pattern，反而都有抵抗力。"
+    },
+    {
+      "title": "意义",
+      "body": "这项工作指向三个方向：\n\n1. **可信**：怎么做出更值得信任的 computer-use agent。\n2. **评估**：agent 有可能代替人去评估欺骗性设计。\n3. **监管**：当上网的越来越多是 agent 时，线上环境该怎么监管。"
+    },
+    {
+      "title": "我的贡献",
+      "body": "我主要负责两块。\n\n**搭建评测框架。** 把“在真实网站上注入 dark pattern、让 agent 执行任务、判断它有没有被诱导”这条链路搭起来，让 5 个 agent 能在同一套环境下被评测。\n\n**设计评测用例。** 把 9 类 dark pattern 落到具体网站的具体任务上。每个用例要定清楚三件事：\n\n1. 任务目标是什么。\n2. dark pattern 注入在哪一步。\n3. agent 做了什么操作算被诱导。\n\n最终的 benchmark 覆盖 55 个网站、313 个任务。"
+    }
+  ],
+  "outcomes": [
+    {
+      "label": "评测任务，覆盖 55 个真实网站和 9 类 dark pattern"
+    },
+    {
+      "label": "真实性实验的参与者，大多数没有察觉注入的 dark pattern"
+    },
+    {
+      "label": "ACM 智能用户界面会议（IUI）长文"
+    }
+  ],
+  "links": [
+    {
+      "label": "arXiv 上的论文"
+    }
+  ]
+}

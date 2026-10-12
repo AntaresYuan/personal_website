@@ -376,7 +376,16 @@
   }
 
   function addLanguageSwitch() {
-    if (document.querySelector('[data-language-toggle]')) return;
+    var existing = document.querySelector('[data-language-toggle]');
+    if (existing) {
+      // A Work page's own switch (scripts/lib/work-shell.js): show the language in use.
+      existing.querySelectorAll('[data-lang]').forEach(function (a) {
+        var on = a.getAttribute('data-lang') === language;
+        a.classList.toggle('is-active', on);
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      });
+      return;
+    }
     var button = document.createElement('button');
     button.type = 'button';
     button.className = 'language-switch';

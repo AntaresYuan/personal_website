@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="pc pc-agentic-hiring" viewBox="0 0 1200 480" role="img" aria-label="Agentic Hiring：从未被满足的招聘诉求，到 Agent 推荐质量的指标">
+<!-- agentic-hiring cover, drawn by tools/covers/covers.js — edit that, not this. -->
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<!-- column heads -->
+<text class="pc-h" x="128" y="46">业务问题</text><text class="pc-hs" x="128" y="70">诉求没被满足</text>
+<text class="pc-h" x="352" y="46">业务场景</text><text class="pc-hs" x="352" y="70">人 × 岗位</text>
+<text class="pc-h" x="576" y="46">产品形态</text><text class="pc-hs" x="576" y="70">TA 工作台</text>
+<text class="pc-h pc-me" x="812" y="46">我的工作</text><text class="pc-hs" x="812" y="70">在 Agent 上</text>
+<text class="pc-h" x="1060" y="46">衡量指标</text><text class="pc-hs" x="1060" y="70">Agent 推荐质量</text>
+<!-- groups: my work, metrics -->
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<!-- nodes -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">效率</text><text class="pc-s" x="128" y="179">并发、流转</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">供给</text><text class="pc-s" x="352" y="179">量大、信息新的</text><text class="pc-s" x="352" y="201">人才库</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">基建能力</text><text class="pc-s" x="576" y="179">供给、漏斗、</text><text class="pc-s" x="576" y="201">需求对齐、约面</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">体验迭代</text><text class="pc-s" x="812" y="179">基于反馈的</text><text class="pc-s" x="812" y="201">预制 prompt</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">全不全</text><text class="pc-s" x="1060" y="179">漏推的</text><text class="pc-s" x="1060" y="201">候选人</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">质量</text><text class="pc-s" x="128" y="331">依赖 TA</text><text class="pc-s" x="128" y="353">个人能力</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">需求理解</text><text class="pc-s" x="352" y="331">岗位真正要</text><text class="pc-s" x="352" y="353">什么样的人</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Agentic Hiring</text><text class="pc-s" x="576" y="331">澄清、召回、</text><text class="pc-s" x="576" y="353">精评、精排</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">效果优化</text><text class="pc-s" x="812" y="331">badcase</text><text class="pc-s" x="812" y="353">归因</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">准不准</text><text class="pc-s" x="1060" y="331">通过率</text><text class="pc-s" x="1060" y="353">21% → <tspan class="pc-k">25%</tspan></text></g>
+<!-- arrows -->
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<!-- legend -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">效率线</text>
+<g class="pc-tb"><rect class="pc-b" x="139" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="139" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="165" y="439">质量线</text>
+</svg>

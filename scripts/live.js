@@ -12,6 +12,14 @@
 (function () {
   'use strict';
 
+  // The page's words (work-shell embeds them as #ui-strings, per language).
+  // English is the fallback written here; Chinese comes from content/zh/strings.json.
+  var UI = (function () { try { return JSON.parse(document.getElementById('ui-strings').textContent) || {}; } catch (e) { return {}; } })();
+  var T = function (key, fallback, vars) {
+    var v = key.split('.').reduce(function (o, k) { return o && o[k]; }, UI);
+    var s = typeof v === 'string' ? v : fallback;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; }) : s;
+  };
   var NARROW = 600;
 
   function mount(fig) {
@@ -36,7 +44,7 @@
       if (view.clientWidth < NARROW) { window.open(url, '_blank', 'noopener'); return; }
       frame = document.createElement('iframe');
       frame.src = url;
-      frame.title = (fig.getAttribute('data-live-title') || 'Live app') + ' — live';
+      frame.title = T('live.frameTitle', '{title} — live', { title: fig.getAttribute('data-live-title') || 'Live app' });
       frame.setAttribute('allow', 'clipboard-write; fullscreen');
       frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
       frame.addEventListener('load', function () { fig.classList.add('is-loaded'); });
@@ -52,7 +60,7 @@
     var setFull = function (on) {
       fig.classList.toggle('is-full', on);
       document.documentElement.classList.toggle('board-lock', on);
-      fullBtn.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
+      fullBtn.setAttribute('aria-label', on ? T('live.exitFull', 'Exit full screen') : T('live.full', 'Full screen'));
       fullBtn.title = fullBtn.getAttribute('aria-label');
       if (frame) {
         if (on) { frame.style.width = '100%'; frame.style.height = '100%'; frame.style.transform = 'none'; }

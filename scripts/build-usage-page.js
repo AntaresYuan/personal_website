@@ -110,6 +110,7 @@ const html = shell.pageHtml({
   description: `Full AI-coding usage dashboard for ${AUTHOR} — tokens, cost, working rhythm and per-tool breakdowns, updated automatically.`,
   canonical: `${SITE_URL}/usage/`,
   active: 'home',
+  runtimeI18n: true,                  // no /zh/ build yet: translated in the browser
   bodyClass: 'usage-page-body',
   main,
   styles: ['styles/usage-work.css'],

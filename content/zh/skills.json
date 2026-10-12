@@ -1,0 +1,57 @@
+{
+  "items": [
+    {
+      "slug": "eynap",
+      "category": "Claude Code 技能包",
+      "tagline": "AI 产品经理需要的一切",
+      "summary": "一套 AI 产品经理技能包：一个按阶段路由的总控，六个从调研到 PRD 的技能，加上所有技能共用的一层底座。",
+      "stats": [
+        {
+          "label": "个技能，每个都能单独调用"
+        },
+        {
+          "label": "项静态检查全部通过"
+        },
+        {
+          "label": "当前版本"
+        }
+      ]
+    },
+    {
+      "slug": "agent-memory-hub",
+      "category": "Agent 基建",
+      "tagline": "ChatGPT、Claude、Codex 和 Claude Code 共用的记忆",
+      "summary": "基于 Markdown 和 Git 的记忆层，用 MCP 工具提供持久上下文、按范围召回、记忆整理，以及跨 Agent 的交接。"
+    },
+    {
+      "slug": "devloop",
+      "category": "Claude Code 技能",
+      "tagline": "无人值守地帮你清空 issue 队列的开发循环",
+      "summary": "自主运行的开发循环：开分支 → 小步实现 → 测试 → 提 PR → 子 Agent 评审 → 合并 → 验证部署 → 下一个。"
+    },
+    {
+      "slug": "iterate",
+      "category": "Claude Code 技能",
+      "tagline": "让其他技能持续改进的循环，由人把关",
+      "summary": "读取技能的运行日志，积累反复出现的摩擦点，证据充分时提出一个修改 SKILL.md 的 PR——从不自动合并。"
+    },
+    {
+      "slug": "ai-pm-resume",
+      "category": "Claude Code 技能",
+      "tagline": "像 AI 产品经理面试官一样读简历",
+      "summary": "AI 产品经理简历评审：8 个维度的信号审查、5 种读者视角的点评、防编造护栏，并按目标公司档位调整。"
+    },
+    {
+      "slug": "interview-sim",
+      "category": "Claude Code 技能",
+      "tagline": "读起来像真实录音转写的模拟访谈",
+      "summary": "模拟访谈生成器：访谈提纲 + 受访者画像 → 按时长控制的访谈稿，读起来像录音转写，而不是 LLM 的问答。"
+    },
+    {
+      "slug": "Claude Credit Watchdog",
+      "category": "Claude Code 插件",
+      "tagline": "额度一恢复，就接着跑你的 Claude Code 任务",
+      "summary": "一个轻量的菜单栏守护程序：盯着你的 Claude Code 会话，额度恢复的那一刻提醒你，并自动继续之前的工作。"
+    }
+  ]
+}

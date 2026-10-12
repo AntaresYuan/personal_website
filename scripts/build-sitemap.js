@@ -75,6 +75,13 @@ const urls = [
     : []),
 ];
 
+// Each Work page's Chinese copy (/zh/…), when it was built.
+const i18n = require('./lib/i18n');
+urls.push(...urls
+  .map((u) => u.loc.slice(SITE_URL.length))
+  .filter((p) => i18n.LOCALIZED.test(p) && fs.existsSync(path.join(root, 'zh', p.replace(/^\//, ''), 'index.html')))
+  .map((p) => ({ ...urls.find((u) => u.loc === SITE_URL + p), loc: `${SITE_URL}/zh${p}` })));
+
 /* ── Emit ─────────────────────────────────────────────────────────────── */
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
