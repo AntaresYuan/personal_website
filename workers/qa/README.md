@@ -7,6 +7,8 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
 
 1. **Retrieve.** The Worker fetches `/ask-index.json`. This is the site cut into
    titled passages by `scripts/build-ask-index.js`:
+   - the concise `/llms.txt` site summary is pinned and included with every
+     answer when enabled in CMS → Assistant → Website context;
    - CMS-authored FAQ answer briefs are checked first by canonical question
      and aliases; a match becomes authoritative guidance for the answer
    - the Work case studies

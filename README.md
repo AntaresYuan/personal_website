@@ -16,7 +16,7 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── board.json          ← project cards (status: shipped/now/next/later)
 │   ├── lens.json           ← short-form principles
 │   ├── contact.json        ← email + socials + "open to" line
-│   ├── assistant/          ← four CMS tabs for all owner-managed Ask context
+│   ├── assistant/          ← four CMS tabs for all owner-managed Ask context, including llms.txt
 │   ├── doodles.json        ← special-day "doodles" — the moon mark becomes a glyph (holidays, birthday…)
 │   ├── skills.json         ← /skills section ("dotfiles for AI") — Claude Code skills, agent infra, configs I use
 │   ├── work.json           ← Work home: name, message, update line, projects heading, site rail

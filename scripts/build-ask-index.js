@@ -22,6 +22,10 @@ const { loadAssistant } = require('./lib/assistant');
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
 const tryRead = (p, fallback) => { try { return read(p); } catch { return fallback; } };
+const tryReadText = (p, fallback = '') => {
+  try { return fs.readFileSync(path.join(root, p), 'utf8'); }
+  catch { return fallback; }
+};
 
 const profile = read('content/profile.json');
 const work = read('content/work.json');
@@ -82,7 +86,7 @@ const add = (id, title, url, text, pin = false) => {
   }));
 };
 
-/* ── Pinned: the owner's guide, notes, and an overview ────────────────── */
+/* ── Pinned: the owner's guide, llms.txt summary, notes, and overview ─ */
 const guide = assistant.guidance ?? {};
 const guideText = [
   guide.identity ? `Identity: ${guide.identity}` : '',
@@ -91,6 +95,15 @@ const guideText = [
   guide.additional ? `Additional guidance: ${guide.additional}` : '',
 ].filter(Boolean).join('\n\n');
 if (guideText) add('assistant-guide', 'Assistant response guide', '', guideText, true);
+
+// /llms.txt is the concise, agent-readable summary of the public site. Keep
+// it visible as an explicit Assistant source and send it with every answer
+// when enabled. /llms-full.txt remains the Worker's safety fallback if this
+// richer passage index cannot be loaded.
+if (sourceOn('llmsSummary')) {
+  const llmsSummary = tryReadText('llms.txt');
+  if (llmsSummary) add('llms-summary', 'Site summary from llms.txt', '/llms.txt', llmsSummary, true);
+}
 
 (assistant.knowledge ?? []).filter((n) => n && n.enabled !== false)
   .forEach((n, i) => add(`knowledge-${i + 1}`, `Background knowledge: ${n.title || 'untitled'}`, '', n.body, true));

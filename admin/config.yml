@@ -836,10 +836,11 @@ collections:
           - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
           - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions that should apply to every answer. Safety and fact-grounding rules remain enforced by the Worker." }
       - file: "content/assistant/sources.json"
-        label: "Context sources"
+        label: "Website context"
         name: "assistant_sources"
         format: "json"
         fields:
+          - { label: "llms.txt site summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Include the concise /llms.txt summary with every answer. It is generated from Site meta and Profile. /llms-full.txt remains the automatic fallback if the primary retrieval index is unavailable." }
           - { label: "Profile and current status", name: "profile", widget: "boolean", default: true }
           - { label: "Homepage message and update", name: "home", widget: "boolean", default: true }
           - { label: "Project case studies", name: "projects", widget: "boolean", default: true }

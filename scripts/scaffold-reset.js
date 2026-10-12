@@ -138,7 +138,7 @@ write('content/assistant/guide.json', {
   additional: '',
 });
 write('content/assistant/sources.json', {
-  profile: true, home: true, projects: true, skills: true, writing: true,
+  llmsSummary: true, profile: true, home: true, projects: true, skills: true, writing: true,
   gallery: true, projectLog: true, lens: true, contact: true,
 });
 write('content/assistant/faqs.json', { items: [] });
@@ -173,8 +173,8 @@ console.log(`
   1. media/avatar-calm.png + media/avatar-talking.png — replace with your own
      images (or delete them and update content/profile.json → avatar). Same for
      any résumé PDFs in media/ (set profile.json → resumeEn / resumeZh, or "").
-  2. content/assistant/ — four CMS tabs for response guidance, website-source
-     switches, FAQ answers, and background knowledge for the "ask" assistant.
+  2. content/assistant/ — four CMS tabs for response guidance, website/llms
+     context switches, FAQ answers, and background knowledge for the "ask" assistant.
      Edit it directly or in /admin/ → Assistant.
   3. content/site.json → meta.url, footer, and (optionally) the analytics /
      giscus / qa tokens. README has the setup steps for each.
