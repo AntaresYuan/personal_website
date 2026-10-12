@@ -103,11 +103,11 @@
      three options and back. */
   var themeSwitch = $('theme-switch');
   var sysDark = window.matchMedia('(prefers-color-scheme: dark)');
-  // No stored choice = dark: Work reads best dark. "auto" is stored like the
-  // others, so it survives the default (and Personal, which shares the key).
+  // With no stored choice, follow the visitor's system preference. Explicit
+  // light / dark / auto choices still persist across Work and Personal.
   var storedMode = function () {
-    try { var t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark' || t === 'auto') ? t : 'dark'; }
-    catch (e) { return 'dark'; }
+    try { var t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark' || t === 'auto') ? t : 'auto'; }
+    catch (e) { return 'auto'; }
   };
   var applyMode = function (m) {
     root.setAttribute('data-theme-mode', m);

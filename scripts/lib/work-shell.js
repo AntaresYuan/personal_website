@@ -154,7 +154,7 @@ const footerInner = (lang = 'en') => {
 /* ── Assets ───────────────────────────────────────────────────────────── */
 const THEME_INIT = `<script>
   (function () {
-    var d = document.documentElement, m = 'dark';
+    var d = document.documentElement, m = 'auto';
     try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);

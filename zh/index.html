@@ -84,14 +84,14 @@
       media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
-<!-- Theme: the stored choice ('light' | 'dark' | 'auto'), else dark — Work
-     reads best dark. Same key as Personal, so a choice follows the visitor
-     across spaces (Personal's own default stays auto).
+<!-- Theme: the stored choice ('light' | 'dark' | 'auto'), otherwise Work
+     follows the visitor's system preference. Same key as Personal, so an
+     explicit choice follows the visitor across spaces.
      Runs before the stylesheet so <html data-theme> is set before first paint.
      Work has no skins — light, dark and auto are the whole menu. -->
 <script>
   (function () {
-    var d = document.documentElement, m = 'dark';
+    var d = document.documentElement, m = 'auto';
     try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
     var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     d.setAttribute('data-theme-mode', m);
@@ -583,7 +583,7 @@
 <script src="/scripts/qa-faq-data.js?v=58fd6933" defer></script>
 <script src="/scripts/qa-faq.js?v=acfd0a6f" defer></script>
 <script src="/scripts/ask-history.js?v=565b016f" defer></script>
-<script src="/scripts/work.js?v=9c042b37" defer></script>
+<script src="/scripts/work.js?v=020d03dc" defer></script>
 <script src="/scripts/buddy.js?v=9a4fd889" defer></script>
 </body>
 </html>
