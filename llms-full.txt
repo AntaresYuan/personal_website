@@ -9,6 +9,322 @@ Role: AI Product Manager
 Location: Seattle | Beijing · currently working at ByteDance as an AI PM intern
 Tags: Pi-Shaped AI PM, AI Agent Native, 0→1, HCI Researcher, HCDE @ UDub
 
+# Work — case studies
+
+## Agentic Hiring · ByteDance · AI Agent · Intern Project · 2K+ DAU · Staged rollout
+
+URL: /projects/agentic-hiring/
+
+Summary: A recruiting workbench for ByteDance's talent-acquisition team, with an agent that turns a role brief into a ranked shortlist for the hiring manager.
+
+Company: ByteDance
+Team: Institute of Management Strategy (IMS)
+Role: AI Product Manager Intern
+Users: TAs, sourcers, hiring managers
+
+### The problem
+
+ByteDance's hiring process wasn't meeting what the company needed from it, in two ways.
+
+It wasn't fast enough: too little concurrency, and candidates moved through the pipeline too slowly. And it wasn't good enough: the quality of a hire leaned heavily on the skill of the individual TA (talent-acquisition partner) running the search.
+
+### Why it happens
+
+To see why, look at what hiring is: deciding whether a candidate fits a role. Doing that well takes two things. On the candidate side, there have to be enough candidates, with up-to-date information. That is a supply problem. On the role side, someone has to understand who the role really needs. That is a demand-understanding problem.
+
+Today the TA carries both. Supply means digging candidates out of the talent pool by hand while running many roles in parallel, and that is the efficiency bottleneck. Understanding the role rests on each TA's own grasp of the business, so quality varies from person to person.
+
+So we set out to do two things:
+
+1. Build a TA workbench that turns supply, and the rest of a TA's daily toolkit, into platform infrastructure.
+2. Improve recommendation quality, so the agent understands a role precisely and recommends precisely.
+
+### The product
+
+The result is a recruiting workbench. Its primary users are TAs and sourcers; hiring managers are secondary users. It has two halves, one for each of those two things.
+
+Infrastructure brings what a TA uses every day into the workbench.
+- Supply. Sourcing adds people who aren't in the talent pool yet, from careers-site applications, referrals, internal transfers and external channels. Activation refreshes the people already in it: how open they are to a move, their new projects and roles.
+- The rest of the day. A hiring-funnel analysis for each TA's own roles, a place to pin down the hiring brief with the hiring manager, and interview scheduling once a candidate passes review.
+
+Agentic Hiring. A TA or sourcer hands the agent the requirements for a role. The agent first clarifies them, then runs three steps (recall, evaluation, ranking) and sends the shortlist to the hiring manager for review.
+
+### My work
+
+I owned two things.
+
+Recommendation quality. I pulled bad cases from live data, traced each to its cause, and fixed the causes one at a time. A bad case is a candidate the agent recommended and the hiring manager rejected. The attribution showed that misunderstandings of the role fall into three kinds:
+
+1. The need was clear; the AI misread it. An AI product-manager role would surface people with algorithm backgrounds: people who do a different job. I built a job taxonomy, with the job family at level one and what the role actually does at level two. It tags live roles and candidates for recall, and it is written into the ranking stage's system prompt. In an A/B test during the staged rollout, the pass rate rose from 21% to 25%, four percentage points.
+2. The user didn't say it clearly. When a requirement is vague, the agent checks itself and flags it back to the user. When it is incomplete, the agent asks follow-up questions against a complete checklist of criteria.
+3. The user's own bar is unclear. This one is solved over time, with long-term preference memory: the bar is distilled from the user's past behavior.
+
+Product experience. I iterated on the product from user feedback. Users didn't know how to describe a role to the agent clearly, for instance, so we added preset prompts: they start from a ready-made draft and edit it, instead of facing a blank box.
+
+### How we measure it
+
+Two metrics tell us whether the work is paying off.
+- Accuracy: the hiring manager's résumé-review pass rate, meaning candidates who pass review divided by all the candidates the agent recommended. The benchmark is human TAs, and the goal is to approach the best of them.
+- Coverage: for the same role, the candidates a TA recommended who passed review, but whom the agent never surfaced.
+
+Outcomes:
+  - 21% → 25%: Hiring managers' pass rate on the agent's picks, after the job taxonomy (A/B test, staged rollout)
+  - 3: Kinds of bad case found by attribution, each with its own fix
+
+---
+
+## Kaboo · ByteDance · Internal Open Source · Token Efficiency
+
+URL: /projects/kaboo/
+
+Summary: An open-source token-analysis project inside ByteDance, built without hand-offs: I raised the problem, designed the Token Efficiency Leaderboard, tested it and shipped it myself.
+
+Company: ByteDance
+Project: Kaboo, internal open source
+My part: Token Efficiency Leaderboard
+Reach: 10,000+ internal users
+
+### What it is
+
+Kaboo is an open-source project inside ByteDance that analyzes token consumption.
+
+The most interesting thing about it, though, isn't what it does but how it was made: with a new way of working together.
+
+### How we work
+
+There's no relay of people here, no "file a requirement, schedule it, build it, test it, ship it." Whoever raises a problem designs the fix, runs the tests and deploys it to production themselves. Each person owns their part, end to end.
+
+Quality rests on two safeguards:
+
+1. Before release, an agent checks the change for problems.
+2. After release, anything that goes wrong can be rolled back quickly.
+
+### Why it works
+
+It works because the infrastructure is in place. We build on mew, a project-management platform that builds agents into the software-development process, and it is connected to Lark.
+
+The road from idea to implementation is already paved. As long as you can say clearly what you want, you can build it and ship it yourself.
+
+### What I did
+
+Working this way, I owned the Token Efficiency Leaderboard and the efficiency-analysis module.
+
+I raised the problem. Everyone looked at where agents failed; nobody looked at tasks that succeeded but were wasteful along the way.
+
+I designed the fix:
+- I defined criteria for five kinds of waste.
+- I designed a diagnosis that uses only metadata and never touches content.
+- I normalized cost across different models with Effective Tokens.
+
+Then I tested it and shipped it myself. It now covers more than 10,000 internal users.
+
+### What I learned
+
+This gave me a very concrete picture of how collaboration works in the AI era. Once the infrastructure flattens the cost of implementation, the bottleneck becomes whether you can think a problem through and say it clearly.
+
+A person's value lies more in judgment than in execution.
+
+Outcomes:
+  - 10K+: Internal users the leaderboard and the analysis now cover
+  - 5: Kinds of waste, each with a criterion for spotting it
+  - Metadata only: The diagnosis never reads the content of a session
+
+---
+
+## Roundtable · ByteDance AI Full-Stack Challenge · Agent Orchestration · Top 3
+
+URL: /projects/roundtable/
+
+Summary: A group-chat platform where a team of AI agents takes a goal, agrees on a plan and splits the work itself, with the user in control at three gates.
+
+Event: ByteDance AI Full-Stack Development Challenge
+Result: Top 3, finals demo
+Role: Team lead
+Model: Seed 2.0 Pro
+
+### The problem
+
+Multi-agent collaboration can now take on complex development work, but using it runs into two problems.
+
+The barrier is high. How to split the task, which agents to give it to, in what order they work together: all of it is orchestrated by the user, so people new to AI coding can't get started. And reuse is poor. Experienced users can build flows that work well, but they build them from scratch every time, and good flows never get kept.
+
+### Why it happens
+
+To see why, look at what multi-agent collaboration is. You use several agents because some complex tasks are too much for one agent: they have to be split up and divided among agents. So at heart it is a task-decomposition problem, and how well the task is split decides how good the output is.
+
+Today that decomposition rests entirely on the user. Newcomers don't know how to split a task, so the barrier is high. Experts split well, but have to do it all over again each time, so reuse is poor.
+
+A workflow fixes one way of splitting: who does what, in what order and how work is handed off are all settled, and multi-agent collaboration becomes controllable. But the existing approaches sit at two extremes. Either you get one fixed process, which is controllable but not flexible, or fully open orchestration, which is flexible but puts the splitting back on the user.
+
+So we designed the product around two things: let the agents do the decomposition, and keep the whole process under the user’s control.
+
+### The product
+
+Roundtable is a multi-agent collaboration platform shaped like a group chat. The user picks a few agents to form a team and sets a goal; the agent team does the rest.
+
+The agents do the decomposition. The system first recommends a workflow, a ready-made way of splitting the task. The agents discuss an execution plan on top of it, and a PM Agent breaks the plan into concrete tasks and hands them out to the agents. A workflow that works can be kept in a visual editor and a template marketplace, and reused directly.
+
+Control comes from three gates:
+
+1. Before execution, the user reviews the plan.
+2. During execution, the PM Agent watches progress and escalates problems to the user.
+3. Before delivery, the output has to pass the Test Agent's tests.
+
+### My work
+
+I owned two things, both on the decomposition side.
+
+Workflow recommendation at the planning entry. The first step of decomposition is choosing the right way to collaborate. Choose wrong here, and the cost of executing every node after it is wasted. So I set the bar for success as recognizing exactly where each workflow applies, and telling easily confused scenarios apart. I got there in three steps:
+
+1. Metadata. I defined metadata for each workflow: task type, the scenarios it fits, agent roles, inputs and outputs, process nodes and constraints.
+2. An eval set. I built a 30-case evaluation set, deliberately seeded with look-alike cases.
+3. Bad-case attribution. The root cause was that the model didn't know these workflows. So I added five few-shot examples, each with positive and negative cases and the reasoning behind them, and used an ICE-structured prompt with schema-structured output to keep the model from hallucinating.
+
+Seed 2.0 Pro's rate of picking the right workflow rose from 16/30 to 28/30, up 40 percentage points.
+
+Keeping good decompositions. I built the visual editor and the template marketplace. A workflow that works can be saved, edited and reused by anyone else as it is. Experts no longer rebuild their flows each time, and newcomers have ready-made ones to start from.
+
+In the end, I led the team to the top three of ByteDance's AI Full-Stack Development Challenge, and presented the demo in the finals.
+
+### How we measure it
+
+How do we tell whether the decomposition is any good? What we measure now is the entry: the planning entry's accuracy, meaning whether the system recommends the right workflow on an evaluation set that includes look-alike cases. It currently stands at 28/30. I chose it because once the entry picks wrong, all the work downstream is wasted; it is the precondition for the quality of the output.
+
+This was a project of one competition cycle, so the end-to-end results haven't been measured systematically yet. If I kept going, I'd add two metrics:
+- Output quality: the Test Agent's first-pass rate.
+- Reuse: how many tasks start from a template.
+
+Outcomes:
+  - 16 → 28 of 30: Workflows recognized correctly at the planning entry (Seed 2.0 Pro), up 40 points
+  - Top 3: ByteDance's AI Full-Stack Development Challenge, with a finals demo
+
+---
+
+## Lark Loom · Lark Campus AI Challenge · AI Agent · Memory & Retrieval
+
+URL: /projects/lark-loom/
+
+Summary: A project agent that lives in Lark group chats: it remembers what the team worked out and turns the discussion into specs, task tables and slides.
+
+Event: Lark Campus AI Challenge
+Role: AI PM + delivery-layer dev
+Team: 3 people
+Models: Seed 1.5 Lite, Seed 2.0 Pro
+
+### The problem
+
+A team's project context really lives in IM. Requirements, decisions and who does what all get worked out in chat.
+
+But that content doesn't turn into anything a model can consume well. So when it's time to help produce documents, task tables or reports, the model can't use that context.
+
+### Why it happens
+
+To see why, look at what collaborating over IM is like. The information is fragmented: one requirement may be spread over dozens of messages across several days, mixed in with small talk and other topics, and phrased casually. To help produce something, though, a model needs context that is relevant to the task at hand, complete and clean.
+
+So at heart the scenario is two problems:
+- Storage: how to keep the context from the chat in a better form.
+- Selection: when it's needed, how to pick out exactly the right context to help the user generate content.
+
+### The product
+
+Lark Loom is a project-collaboration agent that lives in Lark group chats. It listens to the group continuously, picks up intent without being @-mentioned, and turns the group's discussion into structured output: requirement docs, task tables, slide decks. The output lands where the team already works: task tables in Lark Base, requirement and meeting notes in Lark Docs, report decks as native Lark Slides. Its design answers the two problems above.
+
+Storage is Memory. The group's discussion is organized into structured memories and stored that way, rather than kept only as raw messages.
+
+Selection is recall. Each kind of output is one of 13 preset Skills, and only the Q&A Skill needs an @-mention. When a Skill runs, it selects the context the current task needs from Memory, and hands it to the model to generate the content.
+
+### My work
+
+I did two main things.
+
+I redesigned storage and selection. The original approach ran semantic-similarity search straight over the message history and gave the top 20 results to the model. The trouble is that IM messages are so fragmented that what is close in meaning isn't necessarily what the current task needs, so recall drifts. I split it into two steps:
+- Storage: Seed 1.5 Lite extracts the messages into structured Memory.
+- Selection: targeted extraction along two paths, keywords and task type. Exact keyword matching reins in the semantic drift; the task type bounds the scope of recall.
+
+On a 60-case evaluation set, the pass rate rose from 65% to 80%.
+
+I tiered model calls by how complex each subtask is. Deterministic processing, like extracting and structuring context, goes to Seed 1.5 Lite; Seed 2.0 Pro does only the core reasoning and generation, which cuts the tokens the large model has to read and write. Average response time per task fell from 95 seconds to 50, down 47%, with no noticeable difference in quality in manual spot checks.
+
+### How we measure it
+
+How do we tell whether storing and selecting work well? Two metrics.
+- Quality: the pass rate on the evaluation set. The set is distilled from what it takes to complete each task and from the model's reasoning chains, so it judges not what was recalled, but whether the model, given that context, gets the task right.
+- Speed: the average response time per task. The agent lives in a group chat; if it answers too slowly, the rhythm of the conversation breaks.
+
+Outcomes:
+  - 65% → 80%: Pass rate on a 60-case eval set, after structured memory and two-path recall
+  - 95s → 50s: Average response time per task, down 47%, with models tiered by subtask
+
+Links:
+  - Code on GitHub: https://github.com/EdwinjJ1/lark-loom
+
+---
+
+## SusBench · ACM IUI 2026 · Research · Computer-Use Agents · Benchmark
+
+URL: /projects/susbench/
+
+Summary: An online benchmark that injects dark patterns into 55 real websites, to test whether computer-use agents fall for designs made to fool people.
+
+Venue: ACM IUI 2026, full paper
+Authorship: Second author of ten
+Institution: University of Washington
+Benchmark: 313 tasks, 55 websites
+
+### The question
+
+Computer-use agents have started operating real interfaces on their own, on their users' behalf. The web is full of dark patterns: interface designs built to steer people into actions they didn't mean to take.
+
+We wanted to answer one question: do designs made to fool people fool agents too?
+
+### Why it's hard
+
+The hard part is the test environment. To measure accurately, the dark patterns have to be controllable: where each one appears and which type it is must be up to us. But the environment also has to be realistic, or the results won't say anything about how agents behave on real websites.
+
+A mock website you build yourself is controllable but not realistic. Live websites are realistic but not controllable.
+
+### Method
+
+We built the dark patterns into real consumer websites by injecting code. From existing taxonomies we picked 9 common types of dark pattern, and designed 313 evaluation tasks across 55 websites.
+
+To check that the injections were convincing, we ran a user study with 29 participants. The great majority never noticed that the dark patterns had been added by the research team.
+
+We then evaluated 5 state-of-the-art computer-use agents on the benchmark.
+
+### Findings
+
+People and agents share the same weak spots. Both are especially susceptible to three types: Preselection, Trick Wording and Hidden Information. Against the more overt dark patterns, both hold up well.
+
+### Why it matters
+
+The work points three ways:
+
+1. Trust: how to build computer-use agents people can trust.
+2. Evaluation: agents might stand in for people in auditing deceptive designs.
+3. Regulation: how online environments should be governed as more of the web is browsed by agents.
+
+### My contribution
+
+I was responsible for two parts.
+
+The evaluation framework. I built the pipeline that injects a dark pattern into a real website, has an agent carry out a task, and judges whether it was misled, so that all five agents could be evaluated in the same environment.
+
+The test cases. I turned the 9 types of dark pattern into concrete tasks on specific websites. Each case pins down three things:
+
+1. What the task asks the agent to do.
+2. At which step the dark pattern is injected.
+3. Which action by the agent counts as being misled.
+
+The final benchmark covers 55 websites and 313 tasks.
+
+Outcomes:
+  - 313: Evaluation tasks across 55 real websites and 9 types of dark pattern
+  - 29: People in the realism study; most never noticed the injected patterns
+  - ACM IUI 2026: Full paper at the ACM Conference on Intelligent User Interfaces
+
+Links:
+  - Paper on arXiv: https://arxiv.org/abs/2510.11035
+
 # Shipped
 
 ## SHIP-01 · SHIPPED · Lark Loom
