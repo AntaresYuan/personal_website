@@ -48,5 +48,5 @@ enabled = true
 #   npx wrangler secret put ACCESS_CLIENT_ID
 #   npx wrangler secret put ACCESS_CLIENT_SECRET
 [vars]
-LOCAL_LLM_URL = ""
+LOCAL_LLM_URL = "https://llm.antaresyuan.site"
 
