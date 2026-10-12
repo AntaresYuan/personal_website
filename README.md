@@ -198,7 +198,7 @@ Production: <https://antaresyuan.site> on Cloudflare Pages.
 
 Two Cloudflare Workers back it (each deploys itself — see the README in its folder):
 - `workers/decap-oauth/` — GitHub OAuth proxy for `/admin/` sign-in. (The folder name stuck from Decap; Sveltia speaks the same OAuth protocol.)
-- `workers/qa/` — the Work-only "ask" assistant: checks CMS-authored FAQ briefs first, retrieves supporting Work passages from `/ask-index.json`, and answers in the visitor's language from the model on my Mac when it's reachable (`ops/local-llm/`), else Workers AI. Personal has no chat and its roadmap/Lens/Contact data are excluded from the model corpus.
+- `workers/qa/` — the Work-only "ask" assistant: checks CMS-authored FAQ briefs first, retrieves supporting Work passages from `/ask-index.json`, and answers in the visitor's language from the model on my Mac when it's reachable (`ops/local-llm/`), else Workers AI. Its conversation is cached only in that visitor's browser, expires after one hour without a new turn, and reopens from the docked composer; Personal has no chat and its roadmap/Lens/Contact data are excluded from the model corpus.
 - `workers/comments/` — reactions and comments on Writing posts (Worker + D1, Turnstile, Llama Guard screening, an `/admin` moderation page). Optional: while `site.json → comments.endpoint` is empty, posts keep giscus.
 
 ## Add-ons (configured via `content/site.json` or `/admin/`)

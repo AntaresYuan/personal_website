@@ -243,13 +243,23 @@ html = replaceInner(html, 'ui-strings', shell.uiStringsJson(lang));
 html = html.replace(/(<a class="col-link" href=")[^"]*(")/, `$1${i18n.localPath('/usage/', lang)}$2`);
 html = localizeStatic(html, lang);
 
+// Work home predates the shared shell's script array, so ensure newly shared
+// runtimes are inserted as well as merely cache-busted. The history module
+// must execute before work.js restores the conversation.
+if (!/scripts\/ask-history\.js/.test(html)) {
+  html = html.replace(
+    /(<script src="scripts\/work\.js(?:\?v=[^"]*)?" defer><\/script>)/,
+    '<script src="scripts/ask-history.js" defer></script>\n$1'
+  );
+}
+
 // Cache-bust the runtime assets: append a content hash as `?v=`. index.html is
 // served must-revalidate but .js/.css get a longer CDN TTL — without this a
 // fresh page can pair with a stale stylesheet. Idempotent.
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/ask-history.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),

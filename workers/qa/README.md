@@ -38,6 +38,12 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
 
 No API keys touch the frontend; CORS is locked to the site origin.
 
+The Work frontend stores the current conversation in browser `localStorage`
+after every turn. It is a rolling one-hour cache: a new message refreshes the
+timestamp, expiry removes it, and the **New conversation** button clears it.
+Clicking the docked Ask composer restores a valid cached conversation directly
+in the right-hand panel. Personal never loads this cache module.
+
 If `content/site.json` → `qa.workerUrl` is empty (or the Worker can't be
 reached), the Ask panel falls back to the same CMS-authored FAQ compiled from
 `content/assistant/faqs.json` into `scripts/qa-faq-data.js`.

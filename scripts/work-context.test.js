@@ -41,8 +41,14 @@ assert.equal('projectLog' in sources, false);
 assert.equal('lens' in sources, false);
 assert.equal('contact' in sources, false);
 
-for (const marker of ['id="hero-ask"', 'id="ask-panel"', 'scripts/qa-faq', 'scripts/ask-selection']) {
+for (const marker of ['id="hero-ask"', 'id="ask-panel"', 'scripts/qa-faq', 'scripts/ask-selection', 'scripts/ask-history']) {
   assert.equal(personal.includes(marker), false, `Personal still includes AI chat marker: ${marker}`);
+}
+for (const file of fs.readdirSync('work').map((slug) => `work/${slug}/index.html`)) {
+  const detail = read(file);
+  for (const marker of ['id="ask-panel"', 'scripts/work-detail', 'scripts/ask-selection', 'scripts/ask-history']) {
+    assert.equal(detail.includes(marker), false, `Personal detail ${file} still includes AI chat marker: ${marker}`);
+  }
 }
 assert.equal(terminal.includes('cmds.ask'), false);
 assert.equal(terminal.includes('ask <question>'), false);

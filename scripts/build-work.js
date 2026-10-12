@@ -13,9 +13,8 @@
    from titles, verified unique, and stored in board.json so a later title edit
    cannot silently move a published URL.
 
-   The AI panel opens on the right here — on a detail page the visitor is
-   already looking at one specific thing, which is exactly when asking about it
-   makes sense. The home page does the opposite; see build-html.js.
+   These routes belong to Personal's roadmap, so they deliberately do not load
+   Ask Antares. The assistant exists only across the Work space.
    ───────────────────────────────────────────────────────────────────────── */
 const fs = require('fs');
 const path = require('path');
@@ -42,8 +41,6 @@ const i18nV = hashOf('scripts/i18n.js');
 const skinsV = hashOf('scripts/skins.js');
 const skinRtV = hashOf('scripts/skin-runtime.js');
 const spacesV = hashOf('scripts/spaces.js');
-const workV = hashOf('scripts/work-detail.js');
-const selV = hashOf('scripts/ask-selection.js');
 
 const STATUS_LABEL = { shipped: 'SHIPPED', now: 'NOW', next: 'NEXT', later: 'LATER' };
 
@@ -74,8 +71,7 @@ function detailPage(card) {
   ).join('');
 
   /* `details` is empty on most cards today. Rather than printing a blank slab,
-     fall back to the summary and let the assistant carry the rest — the panel
-     is right there and knows the whole board. */
+     fall back to the summary. */
   const bodyText = (card.details || '').trim() || (card.summary || '').trim();
 
   const dates = [
@@ -173,57 +169,10 @@ function detailPage(card) {
   </nav>
 </main>
 
-<!-- The ask panel, same markup as the home page so scripts/work-detail.js can
-     drive it with the shared stylesheet. It opens automatically here. -->
-<div class="ask-panel" id="ask-panel" role="complementary" aria-label="Ask Antares" hidden>
-  <div class="ask-panel-head">
-    <span class="ask-panel-title">
-      <svg class="ask-mark" viewBox="0 0 32 32" width="21" height="21" aria-hidden="true">
-        <path d="M16 0 L18.4 13.6 L32 16 L18.4 18.4 L16 32 L13.6 18.4 L0 16 L13.6 13.6 Z"
-              transform="translate(7.2 6.65) scale(0.92)"/>
-        <path d="M16 0 L18.4 13.6 L32 16 L18.4 18.4 L16 32 L13.6 18.4 L0 16 L13.6 13.6 Z"
-              class="ask-spark ask-spark-1" transform="translate(2.2 2.65) scale(0.34)"/>
-        <path d="M16 0 L18.4 13.6 L32 16 L18.4 18.4 L16 32 L13.6 18.4 L0 16 L13.6 13.6 Z"
-              class="ask-spark ask-spark-2" transform="translate(23.2 3.65) scale(0.27)"/>
-        <path d="M16 0 L18.4 13.6 L32 16 L18.4 18.4 L16 32 L13.6 18.4 L0 16 L13.6 13.6 Z"
-              class="ask-spark ask-spark-3" transform="translate(3.2 21.65) scale(0.25)"/>
-      </svg>
-      ask Antares
-    </span>
-    <span class="ask-panel-actions">
-      <button class="ask-panel-btn" id="ask-panel-clear" type="button" title="New conversation" aria-label="New conversation">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>
-      </button>
-      <button class="ask-panel-btn" id="ask-panel-close" type="button" title="Close" aria-label="Close">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-      </button>
-    </span>
-  </div>
-  <div class="ask-panel-log" id="ask-panel-log" role="log" aria-live="polite"></div>
-  <div class="ask-quote-chip" id="ask-quote-chip" hidden></div>
-  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
-    <div class="ask-panel-field">
-      <input class="ask-panel-input" id="ask-panel-input" type="text"
-             placeholder="Ask a follow-up…" aria-label="Ask a question">
-      <button class="ask-panel-send" type="submit" aria-label="Send">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor"
-             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 13V3M4 6.5L8 2.7l4 3.8"/></svg>
-      </button>
-    </div>
-    <p class="ask-panel-foot">AI answers from this site's content — it can be wrong.</p>
-  </form>
-</div>
-
-<script>window.WORK_CARD = ${JSON.stringify({ slug: card.slug, title: card.title, status: card.status })};</script>
 <script src="/scripts/i18n.js?v=${i18nV}" defer></script>
 <script src="/scripts/skins.js?v=${skinsV}" defer></script>
 <script src="/scripts/skin-runtime.js?v=${skinRtV}" defer></script>
 <script src="/scripts/spaces.js?v=${spacesV}" defer></script>
-<script src="/scripts/work-detail.js?v=${workV}" defer></script>
-<script src="/scripts/ask-selection.js?v=${selV}" defer></script>
 </body>
 </html>
 `;

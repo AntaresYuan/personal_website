@@ -522,9 +522,17 @@
     var avatarSlot = $('ask-panel-avatar');
     var sourceEl = $('ask-model-source');
     var qaUrl = (ask.getAttribute('data-qa') || '').trim();
-    var convo = [];
+    var historyCache = window.ASK_HISTORY || null;
+    var restoredHistory = historyCache ? historyCache.load() : null;
+    var convo = restoredHistory ? restoredHistory.messages : [];
     var busy = false;
     var boardCards = null;
+    var saveHistory = function () {
+      if (historyCache) historyCache.save(convo);
+    };
+    var clearHistory = function () {
+      if (historyCache) historyCache.clear();
+    };
 
     /* The route is decided per answer: the Mac is tried first, then Workers
        AI takes over if it is unavailable. Keep that decision in the panel
@@ -549,7 +557,18 @@
       sourceEl.innerHTML = (sourceIcons[source] || sourceIcons.idle) + '<span>' + escape(labels[source] || labels.idle) + '</span>';
       sourceEl.title = model ? T('ask.source.model', 'Model: {model}', { model: model }) : '';
     };
-    setSource('idle');
+    var setSourceFromHistory = function () {
+      var last = null;
+      for (var i = convo.length - 1; i >= 0; i--) {
+        if (convo[i].role === 'assistant') { last = convo[i]; break; }
+      }
+      if (last && (last.via === 'local' || last.via === 'cloud' || last.via === 'offline')) {
+        setSource(last.via, last.model || '');
+      } else {
+        setSource('idle');
+      }
+    };
+    setSourceFromHistory();
 
     var isOpen = function () { return ask.classList.contains('is-open'); };
     var panelOpen = function () { return panel.classList.contains('is-open'); };
@@ -643,6 +662,24 @@
       panelTimer = setTimeout(function () { if (!panelOpen()) panel.hidden = true; }, 420);
     };
 
+    /* The cache is a rolling one-hour window. Re-read it at the moment the
+       visitor clicks the docked composer, not only at page load: a tab may
+       have been sitting open past the expiry, or another Work tab may have
+       added/cleared a conversation in the meantime. */
+    var refreshHistory = function () {
+      if (!historyCache || busy) return convo.length > 0;
+      var cached = historyCache.load();
+      convo = cached ? cached.messages : [];
+      setSourceFromHistory();
+      return convo.length > 0;
+    };
+    var openCachedHistory = function () {
+      if (!refreshHistory()) return false;
+      openPanel();
+      setTimeout(function () { if (!busy) pInput.focus({ preventScroll: true }); }, 50);
+      return true;
+    };
+
     var loadCards = function () {
       if (boardCards) return Promise.resolve(boardCards);
       return fetch('/content/board.json').then(function (r) { return r.json(); })
@@ -663,6 +700,7 @@
       var q = String(raw || '').trim().slice(0, 500);
       if (!q || busy) return;
       convo.push({ role: 'user', content: q });
+      saveHistory();
       input.value = '';
       pInput.value = '';
       busy = true;
@@ -695,6 +733,7 @@
         else if (via === 'cloud') setSource('cloud', model);
         else setSource('offline');
         convo.push({ role: 'assistant', content: answer, via: via, model: model });
+        saveHistory();
         busy = false;
         renderLog(false);
         // Talk for roughly as long as the answer takes to skim, then beam.
@@ -706,7 +745,9 @@
       });
     };
 
-    input.addEventListener('focus', open);
+    input.addEventListener('focus', function () {
+      if (!openCachedHistory()) open();
+    });
     [input, pInput].forEach(function (field) {
       field.addEventListener('input', function () {
         updateSend();
@@ -721,9 +762,12 @@
     });
     // The collapsed capsule is all one target, not just the text field.
     $('ask-shell').addEventListener('click', function (ev) {
-      if (!isOpen() && !ev.target.closest('button[type="submit"]')) input.focus();
+      if (isOpen() || ev.target.closest('button[type="submit"]')) return;
+      if (!openCachedHistory()) input.focus();
     });
-    $('ask-avatar').addEventListener('click', function () { if (!panelOpen()) input.focus(); });
+    $('ask-avatar').addEventListener('click', function () {
+      if (!panelOpen() && !openCachedHistory()) input.focus();
+    });
     form.addEventListener('submit', function (ev) { ev.preventDefault(); ask$(input.value); });
     pForm.addEventListener('submit', function (ev) { ev.preventDefault(); ask$(pInput.value); });
     [suggest, log].forEach(function (box) {
@@ -736,9 +780,17 @@
     $('ask-new').addEventListener('click', function () {
       if (busy) return;
       convo = [];
+      clearHistory();
       setSource('idle');
       renderLog(false);
       pInput.focus();
+    });
+    window.addEventListener('storage', function (ev) {
+      if (!historyCache || ev.key !== historyCache.key || busy) return;
+      var cached = historyCache.load();
+      convo = cached ? cached.messages : [];
+      setSourceFromHistory();
+      if (panelOpen()) renderLog(false);
     });
     // Clicking away folds the composer down. The panel is not modal: it stays
     // until closed, so the page beside it can be read and clicked.
