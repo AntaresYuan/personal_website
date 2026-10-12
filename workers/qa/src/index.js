@@ -120,7 +120,7 @@ async function askLocal(env, messages) {
         'content-type': 'application/json',
         ...(env.ACCESS_CLIENT_ID ? { 'CF-Access-Client-Id': env.ACCESS_CLIENT_ID, 'CF-Access-Client-Secret': env.ACCESS_CLIENT_SECRET } : {}),
       },
-      body: JSON.stringify({ messages, max_tokens: 700, temperature: 0.3 }),
+      body: JSON.stringify({ messages, max_tokens: 700, temperature: 0.1 }),
       signal: AbortSignal.timeout(Number(env.LOCAL_TIMEOUT_MS) || LOCAL_TIMEOUT_MS),
     });
     if (r.status === 503) return null;   // busy with another visitor: fall back, but don't park
@@ -141,11 +141,11 @@ async function cloud(env, messages, temperature, maxTokens) {
 }
 
 async function askCloud(env, context, lang, turns) {
-  const draft = await cloud(env, [{ role: 'system', content: genPrompt(context, lang) }, ...turns], 0.2, 480);
+  const draft = await cloud(env, [{ role: 'system', content: genPrompt(context, lang) }, ...turns], 0.1, 480);
   if (!draft) throw new Error('the model returned an empty answer');
   let answer = draft, verified = false;
   try {
-    const checked = await cloud(env, [{ role: 'system', content: verifyPrompt(context, lang) }, { role: 'user', content: `DRAFT:\n${draft}` }], 0.1, 480);
+    const checked = await cloud(env, [{ role: 'system', content: verifyPrompt(context, lang) }, { role: 'user', content: `DRAFT:\n${draft}` }], 0, 480);
     if (checked) { answer = checked; verified = true; }
   } catch { /* verify unavailable — keep the grounded draft */ }
   return { answer, model: env.CLOUD_MODEL || CLOUD_MODEL, via: 'cloud', verified };
