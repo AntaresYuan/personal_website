@@ -18,7 +18,7 @@
   // cardId | anchor | href as "where to go for more".
   var FAQ = [
     { q: 'are you looking for a job / open to roles?', a: 'Yes — open to AI PM roles at top labs & big-tech, founder conversations, and independent collaborations.', anchor: '#contact' },
-    { q: "what's your strongest shipped project?", a: 'SusBench — an IUI 2025 benchmark for how susceptible computer-use agents are to UI dark patterns; cited by 2 papers.', cardId: 'SHIP-03' },
+    { q: 'walk me through your most mature project.', a: 'Agentic Hiring — a recruiting workbench I worked on at ByteDance. Its agent turns a role brief into a ranked candidate shortlist; a job taxonomy I designed raised the hiring-manager pass rate from 21% to 25% in a staged-rollout A/B test.', href: '/projects/agentic-hiring/' },
     { q: 'what are you building right now?', a: 'Lark Loom (a collaborative AI agent in the Lark ecosystem), Gmail++ (AI email ranking), and ApplyMint (one-click job-application autofill).', anchor: '#now' },
     { q: 'how do I get in touch / contact you?', a: "Email and socials are in the Contact section — that's the fastest way.", anchor: '#contact' },
     { q: 'where did you study / education?', a: 'Human-Centered Design & Engineering (HCDE) at the University of Washington.', anchor: '#main-content' },
