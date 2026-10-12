@@ -1,0 +1,207 @@
+{
+  "shell": {
+    "skip": "跳到正文",
+    "feedTitle": "文章 — {site}",
+    "space": {
+      "aria": "空间",
+      "work": "工作",
+      "personal": "个人"
+    },
+    "lang": {
+      "aria": "语言"
+    },
+    "theme": {
+      "aria": "外观",
+      "auto": "自动",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "rail": {
+      "aria": "站点导航",
+      "soon": "即将上线"
+    },
+    "ask": {
+      "placeholder": "有什么想问的",
+      "aria": "向 Antares 提问",
+      "send": "发送",
+      "title": "问问 Antares",
+      "disclaimer": "回答依据本站内容生成，可能有误。",
+      "new": "新对话",
+      "close": "关闭",
+      "followUp": "继续追问…",
+      "followUpAria": "继续追问",
+      "source": "优先本地模型 · 云端兜底"
+    },
+    "footer": {
+      "edit": "编辑",
+      "source": "源码"
+    }
+  },
+  "home": {
+    "intro": "简介",
+    "usage": "个人 Token 消耗",
+    "usageAll": "全部图表",
+    "usageTotal": "Token 总量",
+    "usageAgent": "最常用的 Agent",
+    "usageChart": "近四周每日 Token 用量",
+    "update": "最新动态",
+    "projectsList": "项目",
+    "prev": "上一组项目",
+    "next": "更多项目"
+  },
+  "project": {
+    "back": "项目",
+    "overview": "概述",
+    "did": "我做了什么",
+    "process": "过程",
+    "board": "画板",
+    "outcome": "成果",
+    "pictures": "图片",
+    "links": "链接",
+    "prev": "上一个",
+    "next": "下一个",
+    "moreAria": "更多项目",
+    "boardAria": "{title} 的画板",
+    "boardHint": "拖动画布移动 · ⌘ / Ctrl + 滚轮或双指缩放 · 全屏查看更清楚",
+    "live": {
+      "title": "在线演示",
+      "full": "全屏",
+      "open": "在新标签页打开",
+      "try": "在线试用",
+      "posterAlt": "{title} 打开时的样子",
+      "hint": "这是真实的应用，直接运行在本页中，全屏可以占满整个窗口。如果加载不出来{blocked}，请在新标签页中打开。",
+      "blocked": "（vercel.app 在部分地区无法访问）"
+    }
+  },
+  "blog": {
+    "title": "文章",
+    "sub": "项目复盘、拆解，以及做东西时的笔记。",
+    "description": "{author} 的项目复盘与笔记。",
+    "filterAria": "按主题筛选",
+    "all": "全部",
+    "empty": "这里还什么都没有。",
+    "minRead": "约 {n} 分钟读完",
+    "comments": "评论",
+    "commentsNeedJs": "评论需要启用 JavaScript。",
+    "untranslated": "这篇文章还没有中文版，下面是英文原文。"
+  },
+  "gallery": {
+    "filterAria": "按类型筛选",
+    "all": "全部",
+    "empty": "这里还没有作品。",
+    "prev": "上一张",
+    "next": "下一张",
+    "pictures": "图片",
+    "processLog": "阅读过程记录",
+    "close": "关闭"
+  },
+  "skills": {
+    "title": "AI 技能",
+    "sub": "我为 Claude Code 和其他 Agent 做的技能与插件。每一行都直接通往它的官网或 GitHub 仓库。",
+    "description": "Antares Yuan 为 Claude Code 和其他 Agent 做的技能与插件：官网与源码仓库。",
+    "search": "搜索技能",
+    "filterAria": "按类型筛选",
+    "all": "全部",
+    "empty": "没有匹配的技能。",
+    "featured": "精选",
+    "visit": "访问官网",
+    "copy": "复制",
+    "copyAria": "复制安装命令",
+    "cat": {
+      "kits": "技能包",
+      "skills": "技能",
+      "plugins": "插件",
+      "infra": "Agent 基建"
+    }
+  },
+  "client": {
+    "updated": {
+      "now": "刚刚更新",
+      "m": "{n} 分钟前更新",
+      "h": "{n} 小时前更新",
+      "d": "{n} 天前更新"
+    },
+    "usage": {
+      "tokens": "{n} tokens",
+      "none": "无记录",
+      "allCharts": "全部图表 · {ago}",
+      "avg": "日均 {n}",
+      "since": "自 {date}起",
+      "share": "占全部 token 的 {pct}%"
+    },
+    "carousel": {
+      "count": "{range} / {n}"
+    },
+    "copied": "已复制",
+    "ask": {
+      "empty": "可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。",
+      "thinking": "思考中",
+      "offlineNote": "（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）",
+      "noAnswer": "这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。",
+      "source": {
+        "idle": "优先本地模型 · 云端兜底",
+        "pending": "正在选择可用模型…",
+        "local": "本地 · {model}",
+        "cloud": "云端 · Workers AI",
+        "offline": "内置 FAQ · 无模型",
+        "model": "模型：{model}"
+      }
+    },
+    "comments": {
+      "title": "评论",
+      "reactions": "表态",
+      "empty": "还没有评论——来说第一句吧。",
+      "author": "作者",
+      "pending": "正在等待快速审核——目前只有你能看到。",
+      "reply": "回复",
+      "comment": "评论",
+      "placeholder": "写下评论…",
+      "replyPlaceholder": "写下回复…",
+      "name": "昵称",
+      "email": "邮箱，用于接收回复提醒（选填，不会公开）",
+      "emailLabel": "邮箱（选填）",
+      "hint": "友善发言。带链接的评论需要先经过快速审核。",
+      "cancel": "取消",
+      "post": "发布",
+      "justNow": "刚刚",
+      "unavailable": "评论暂时无法使用，请稍后再来。",
+      "tsFailed": "人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？",
+      "checking": "正在确认你是真人，请稍候…",
+      "posting": "发布中…",
+      "offline": "连不上评论服务器，请检查网络。",
+      "failed": "发布失败，请再试一次。",
+      "react": {
+        "like": "赞",
+        "love": "喜欢",
+        "insight": "有启发",
+        "fun": "有趣"
+      },
+      "errors": {
+        "verification-failed": "没能确认你是真人，请再试一次。",
+        "slow-down": "发得有点快——过几分钟再试吧。",
+        "name-required": "请填一个昵称，让大家知道是谁在说话。",
+        "name-too-long": "昵称请控制在 40 个字符以内。",
+        "name-has-link": "昵称里不能包含链接。",
+        "bad-email": "这个邮箱格式好像不对。",
+        "body-required": "先写点什么吧。",
+        "body-too-long": "请控制在 2000 个字符以内。",
+        "bad-parent": "这条评论已经不能回复了。"
+      }
+    },
+    "board": {
+      "view": "画板视图",
+      "zoomOut": "缩小",
+      "fit": "适应画板",
+      "zoomIn": "放大",
+      "full": "全屏"
+    },
+    "live": {
+      "frameTitle": "{title}（在线版）",
+      "full": "全屏",
+      "exitFull": "退出全屏"
+    },
+    "gallery": {
+      "picture": "第 {n} 张图"
+    }
+  }
+}

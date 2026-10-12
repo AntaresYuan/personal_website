@@ -119,6 +119,39 @@ Glass (`.glass`) is for the navigation/control layer — never content cards,
 never glass on glass. Refraction (`data-lens`) is Chromium-only by design;
 other engines get the blur-and-rim fallback.
 
+### Two languages: English at `/`, Chinese at `/zh/`
+
+The Work pages are built twice, by the same builders: English at the site
+root, Chinese under `/zh/` (`/zh/`, `/zh/projects/…`, `/zh/blog/…`,
+`/zh/gallery/`, `/zh/skills/`). `scripts/lib/i18n.js` is the whole model:
+
+- **Content overlay.** `content/<file>` is English and complete;
+  `content/zh/<same path>` holds only the Chinese for the fields that have it.
+  `i18n.content(rel, lang)` merges them — objects by key, lists by `slug` /
+  `id` or else by position, empty = keep the English. So a missing
+  translation falls back to English, never to a blank. Posts:
+  `content/zh/blog/<same file>.md` (title, summary, tags, body); without one
+  the /zh/ post shows the English with a note. Boards:
+  `content/boards/zh/<id>.json`, a full copy (same layout, Chinese text).
+  Covers: `content/zh/covers.json` → `node tools/covers/covers.js` →
+  `cover.zh.svg`.
+- **UI words** come from `content/strings.json` / `content/zh/strings.json`
+  via `t('key', lang)`. Browser scripts read theirs from the
+  `#ui-strings` JSON each page embeds (its `client` section); the English is
+  the fallback written in the script.
+- **Paths.** `i18n.localPath(path, lang)` maps a link to the reader's
+  language — only paths matched by `LOCALIZED` have a /zh/ twin. `/usage/`
+  (and the switched-off `/about/`) are English-only for now; `/usage/` keeps
+  the browser-side translator `scripts/i18n.js`, which Personal also uses.
+  A new localized page: build it in the `for (const lang of LANGS)` loop with
+  `pageHtml({ lang, path })`, and add its prefix to `LOCALIZED` **and** to
+  the copy in `functions/_middleware.js` (the test checks they match).
+- **Who sees which.** `functions/_middleware.js` (routes in `_routes.json`):
+  a visitor from mainland China (CN only), or one who picked Chinese
+  (`site_lang_pref` cookie, set by the switch's `?lang=` link), is redirected
+  from an English Work page to its /zh/ twin. /zh/ URLs and crawlers are
+  never redirected; hreflang links tell search engines about both.
+
 ### `index.html` is BOTH source template AND artifact
 
 `scripts/build-html.js` mutates `index.html` (the Work home) in-place every build:
@@ -159,19 +192,22 @@ assembled JSON in `caches.default` for `GET_CACHE_TTL_S` (60s). POST handler
 sync agent's data lags by up to 60s. Background: `workers/usage/README.md` §
 "Edge cache (read-rate control)".
 
-### Public OSS repos: pure English
+### Code is English; Chinese lives in content
 
-Repos that get pushed to public GitHub — this one, plus the user's open-source
-Claude Code skills (`~/code/claude-devloop`, `~/code/ai-pm-resume`,
-`~/code/claude-skill-interview-sim`) — are **pure English**. No CJK characters
-in any committed file (SKILL.md, README.md, code comments, anything). Verify
-before commit:
+The site is bilingual (see "Two languages" below), so Chinese is allowed in
+**content** — `content/zh/`, `content/boards/zh/` — and in the pages
+generated from it (`zh/`, `media/projects/*/cover.zh.svg`). Everything else
+stays **pure English**: code, code comments, READMEs, CLAUDE.md, CMS labels.
+A script that needs a Chinese word reads it from a strings table instead of
+spelling it (a `\uXXXX` escape is the last resort). `scripts/i18n.test.js`
+checks the i18n code; for anything else you touched:
 
 ```sh
-grep -rP '[\x{4e00}-\x{9fff}]' <files>   # must return zero
+grep -nP '[\x{4e00}-\x{9fff}]' <code files>   # must return zero
 ```
 
-Local-only files (memory, scratch notes) are bilingual-OK.
+The user's other public repos (`~/code/claude-devloop`, `~/code/ai-pm-resume`,
+`~/code/claude-skill-interview-sim`) remain pure English throughout.
 
 ### Doodle glyphs + UI icons: hand SVG, never emoji
 
@@ -210,15 +246,15 @@ embedded `"`, `$`, or backticks.
 
 ### Don't commit pure artifacts in feature PRs
 
-`blog/`, `llms-full.txt`, `sitemap.xml`, `agent-brief.txt`, `glyphs.html`,
-`ask-index.json` are pure outputs. The bot rebuilds them after merge. Reset
-before commit:
+`blog/`, `zh/blog/`, `llms-full.txt`, `sitemap.xml`, `agent-brief.txt`,
+`glyphs.html`, `ask-index.json` are pure outputs. The bot rebuilds them after
+merge. Reset before commit:
 
 ```sh
-git checkout -- blog/ llms-full.txt sitemap.xml agent-brief.txt glyphs.html ask-index.json
+git checkout -- blog/ zh/blog/ llms-full.txt sitemap.xml agent-brief.txt glyphs.html ask-index.json
 ```
 
-`index.html` is the exception — it's mutated in-place and must be committed
+`index.html` (and `zh/index.html`) is the exception — it's mutated in-place and must be committed
 with your source changes. The bot will re-run build and produce the same
 content (deterministic), so it's a no-op rebuild.
 

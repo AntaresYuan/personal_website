@@ -23,13 +23,17 @@ SOURCE (edit these — directly or via /admin/)
 │   ├── projects/*.json     ← one file per project: card + /projects/<slug>/ case study (CMS: Projects)
 │   ├── gallery.json        ← /gallery/ — pieces, pictures, captions
 │   ├── boards/*.json       ← whiteboards a project embeds (projects/<slug>.json → board)
-│   └── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/tags/draft + Markdown body)
+│   ├── blog/*.md           ← blog posts (YAML frontmatter: title/date/summary/tags/draft + Markdown body)
+│   ├── strings.json        ← UI words for the Work pages (buttons, labels, notes)
+│   └── zh/                 ← the Chinese: same paths as above, only the fields that are translated
+│                              (+ strings.json, covers.json; boards in boards/zh/)
 ├── styles/main.css         ← Personal: design tokens + dashboard styles
 ├── styles/work.css         ← Work home: Liquid Glass controls + layout (standalone)
 ├── scripts/
 │   ├── render.js           ← runtime: hydrates Personal for interactive use
 │   ├── work.js             ← runtime: Work home (usage chart, carousel, ask, glass)
-│   ├── i18n.js             ← runtime: English/Chinese UI, language switch + persisted preference
+│   ├── i18n.js             ← runtime: translates Personal and /usage/ in the browser
+│   ├── lib/i18n.js         ← shared: the two languages — content overlay, UI words, /zh/ paths
 │   ├── buddy.js            ← runtime: the felt avatar in the ask capsule (frames + moods)
 │   ├── gallery.js          ← runtime: the /gallery/ lightbox
 │   ├── board.js            ← runtime: whiteboards in case studies (Feishu-board style)
@@ -156,13 +160,19 @@ npx serve .
 # open http://localhost:3000
 ```
 
-Append `?lang=zh` or `?lang=en` to preview either language locally. On
-Cloudflare Pages, `functions/_middleware.js` chooses Chinese for visitors in
-CN, HK, MO and TW and English elsewhere. The current country choice is stored
-in a session cookie and refreshed on every page response. The language switch
-stores a one-year `site_lang_pref` cookie, so an explicit visitor choice always
-overrides the country default. Long-form Writing bodies stay in their
-original language and show a short notice in Chinese mode.
+The Work pages are built in two languages: English at `/`, Chinese at `/zh/`
+(open `/zh/` locally to preview it). On Cloudflare Pages,
+`functions/_middleware.js` sends visitors from mainland China to the Chinese
+pages and everyone else to the English ones. The language switch links to the
+other version with `?lang=`, which the middleware stores in a one-year
+`site_lang_pref` cookie, so a visitor's own choice always beats their
+location. A link to a /zh/ page is never redirected. Personal and `/usage/`
+are translated in the browser by `scripts/i18n.js`, from the same cookies.
+
+To translate something, add the Chinese for its fields under `content/zh/`
+(same file path; anything left out shows in English) — or use the "Work
+(Chinese)" collections in `/admin/`. A post's translation is
+`content/zh/blog/<same file name>.md`.
 
 ## Edit content
 

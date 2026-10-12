@@ -11,19 +11,35 @@
    `placeholder: true` is marked as one on its card; one with `draft: true`
    is left off the site (like a Writing draft). The section's heading
    and intro stay in content/work.json → projects.
+
+   In Chinese (lang 'zh'), content/zh/projects/<slug>.json is laid over each
+   project (lib/i18n.js → merge), links go to /zh/projects/<slug>/, and a
+   cover.zh.svg next to the cover replaces it.
    ───────────────────────────────────────────────────────────────────────── */
 const fs = require('fs');
 const path = require('path');
 const { escape } = require('./html-replace');
+const i18n = require('./i18n');
 
 const root = path.join(__dirname, '..', '..');
 const HUES = [262, 305, 200, 285, 170, 235];   // OKLCH hue angles, a cool family
 
 const DIR = path.join(root, 'content/projects');
-const projectList = () => {
+const ZH_DIR = path.join(root, 'content/zh/projects');
+const load = (f, lang) => {
+  const base = JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8'));
+  const zh = lang === 'zh' && fs.existsSync(path.join(ZH_DIR, f)) ? JSON.parse(fs.readFileSync(path.join(ZH_DIR, f), 'utf8')) : null;
+  const p = zh ? i18n.merge(base, zh) : base;
+  if (lang === 'zh' && p.cover && /\.svg$/i.test(p.cover)) {
+    const zhCover = p.cover.replace(/\.svg$/i, '.zh.svg');
+    if (fs.existsSync(path.join(root, zhCover.replace(/^\//, '')))) p.cover = zhCover;
+  }
+  return p;
+};
+const projectList = (lang = 'en') => {
   const files = fs.existsSync(DIR) ? fs.readdirSync(DIR).filter((f) => f.endsWith('.json')) : [];
   return files
-    .map((f) => ({ file: f, ...JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')) }))
+    .map((f) => ({ file: f, ...load(f, lang) }))
     .filter((p) => !p.draft)
     .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.file.localeCompare(b.file))
     .map(({ file, ...p }, i) => {
@@ -33,7 +49,8 @@ const projectList = () => {
         slug,
         num: String(i + 1).padStart(2, '0'),
         hue: p.hue ?? HUES[i % HUES.length],
-        url: p.href || `/projects/${slug}/`,
+        url: p.href || i18n.localPath(`/projects/${slug}/`, lang),
+        lang,
       };
     });
 };

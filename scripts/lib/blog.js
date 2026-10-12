@@ -220,8 +220,13 @@ function parseFrontmatter(raw) {
    Returns [{ slug, title, date('YYYY-MM-DD'), summary, draft, body, file }],
    newest first. `summary` is collapsed to one line. Drafts excluded unless
    includeDrafts. */
-function loadPosts({ includeDrafts = false } = {}) {
+/* `lang: 'zh'` lays content/zh/blog/<same file>.md over each post: its
+   title, summary, tags and body replace the English ones (date, cover,
+   draft and slug stay the English post's). `translated` says whether one
+   was found. */
+function loadPosts({ includeDrafts = false, lang = 'en' } = {}) {
   if (!fs.existsSync(BLOG_DIR)) return [];
+  const ZH_DIR = path.join(BLOG_DIR, '..', 'zh', 'blog');
   return fs.readdirSync(BLOG_DIR)
     .filter((f) => f.endsWith('.md') && !f.startsWith('_') && !f.startsWith('.'))
     .map((f) => {
@@ -240,7 +245,7 @@ function loadPosts({ includeDrafts = false } = {}) {
         const k = s.toLowerCase();
         if (s && !seen.has(k)) { seen.add(k); tags.push(s); }
       }
-      return {
+      const post = {
         slug,
         title: String(data.title || slug).trim(),
         date: String(data.date || '').trim().slice(0, 10),
@@ -250,7 +255,18 @@ function loadPosts({ includeDrafts = false } = {}) {
         draft: data.draft === true || data.draft === 'true',
         body: String(body).trim(),
         file: f,
+        translated: false,
       };
+      const zhFile = path.join(ZH_DIR, f);
+      if (lang === 'zh' && fs.existsSync(zhFile)) {
+        const zh = parseFrontmatter(fs.readFileSync(zhFile, 'utf8'));
+        if (zh.data.title) post.title = String(zh.data.title).trim();
+        if (zh.data.summary) post.summary = String(zh.data.summary).replace(/\s+/g, ' ').trim();
+        if (Array.isArray(zh.data.tags) && zh.data.tags.length) post.tags = zh.data.tags.map((x) => String(x).trim()).filter(Boolean);
+        if (String(zh.body).trim()) post.body = String(zh.body).trim();
+        post.translated = true;
+      }
+      return post;
     })
     .filter((p) => includeDrafts || !p.draft)
     .sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.slug.localeCompare(b.slug));

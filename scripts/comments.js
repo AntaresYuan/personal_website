@@ -13,24 +13,36 @@
 (function () {
   'use strict';
 
+  // The page's words (work-shell embeds them as #ui-strings, per language).
+  // English is the fallback written here; Chinese comes from content/zh/strings.json.
+  var UI = (function () { try { return JSON.parse(document.getElementById('ui-strings').textContent) || {}; } catch (e) { return {}; } })();
+  var T = function (key, fallback, vars) {
+    var v = key.split('.').reduce(function (o, k) { return o && o[k]; }, UI);
+    var s = typeof v === 'string' ? v : fallback;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; }) : s;
+  };
   var ICONS = {
     like: '<path d="M7.5 10.6v8.6M7.5 10.6l3.5-6.1a1.6 1.6 0 0 1 2.95 1.15l-.75 3.5h4.45a1.8 1.8 0 0 1 1.76 2.2l-1.3 6a2 2 0 0 1-1.96 1.55H7.5M7.5 10.6H5.2a1 1 0 0 0-1 1v6.6a1 1 0 0 0 1 1h2.3"/>',
     love: '<path d="M12 19.4s-7.1-4.2-7.1-9.3A3.9 3.9 0 0 1 12 7.9a3.9 3.9 0 0 1 7.1 2.2c0 5.1-7.1 9.3-7.1 9.3z"/>',
     insight: '<path d="M9.3 17.4h5.4M10.2 20.4h3.6M12 3.6a5.6 5.6 0 0 0-3.3 10.1c.6.45.95 1.15.95 1.9v.4h4.7v-.4c0-.75.35-1.45.95-1.9A5.6 5.6 0 0 0 12 3.6z"/>',
     fun: '<circle cx="12" cy="12" r="8.2"/><path d="M8.6 13.4a3.9 3.9 0 0 0 6.8 0M9.4 9.7v.1M14.6 9.7v.1"/>',
   };
-  var LABELS = { like: 'Like', love: 'Love', insight: 'Insightful', fun: 'Fun' };
-  var ERRORS = {
-    'verification-failed': 'Couldn’t confirm you’re human — please try again.',
-    'slow-down': 'That’s a lot in a row — try again in a few minutes.',
-    'name-required': 'Add a name, so people know who’s talking.',
-    'name-too-long': 'Keep the name under 40 characters.',
-    'name-has-link': 'Names can’t contain links.',
-    'bad-email': 'That email doesn’t look right.',
-    'body-required': 'Write something first.',
-    'body-too-long': 'Keep it under 2,000 characters.',
-    'bad-parent': 'That comment can’t be replied to any more.',
+  var LABELS = {
+    like: T('comments.react.like', 'Like'), love: T('comments.react.love', 'Love'),
+    insight: T('comments.react.insight', 'Insightful'), fun: T('comments.react.fun', 'Fun'),
   };
+  var ERRORS = {
+    'verification-failed': T('comments.errors.verification-failed', 'Couldn’t confirm you’re human — please try again.'),
+    'slow-down': T('comments.errors.slow-down', 'That’s a lot in a row — try again in a few minutes.'),
+    'name-required': T('comments.errors.name-required', 'Add a name, so people know who’s talking.'),
+    'name-too-long': T('comments.errors.name-too-long', 'Keep the name under 40 characters.'),
+    'name-has-link': T('comments.errors.name-has-link', 'Names can’t contain links.'),
+    'bad-email': T('comments.errors.bad-email', 'That email doesn’t look right.'),
+    'body-required': T('comments.errors.body-required', 'Write something first.'),
+    'body-too-long': T('comments.errors.body-too-long', 'Keep it under 2,000 characters.'),
+    'bad-parent': T('comments.errors.bad-parent', 'That comment can’t be replied to any more.'),
+  };
+  var LOCALE = /^zh/i.test(document.documentElement.lang || '') ? 'zh-CN' : 'en-US';
   var OWNER_AVATAR = '/media/buddy/felt-still.webp';
   var PENDING_DAYS = 14;
 
@@ -70,15 +82,15 @@
     var first = Array.from(String(c.name || '?').trim())[0] || '?';
     return '<span class="discuss-avatar" style="--h:' + hueOf(c.name || '') + '" aria-hidden="true">' + esc(first.toUpperCase()) + '</span>';
   };
-  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' }) : null;
+  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' }) : null;
   var when = function (ms) {
     var s = (Date.now() - ms) / 1000;
-    if (s < 60) return 'just now';
+    if (s < 60) return T('comments.justNow', 'just now');
     var steps = [[60, 'minute'], [3600, 'hour'], [86400, 'day']];
     if (rtf && s < 86400 * 30) {
       for (var i = steps.length - 1; i >= 0; i--) if (s >= steps[i][0]) return rtf.format(-Math.floor(s / steps[i][0]), steps[i][1]);
     }
-    return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(ms).toLocaleDateString(LOCALE, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   /* ── Turnstile, loaded on first use ───────────────────────────────────── */
@@ -132,9 +144,9 @@
     }).catch(function () {
       // A local preview against the live Worker: CORS only admits the site.
       var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !/\/\/(localhost|127\.0\.0\.1)/.test(self.endpoint);
-      self.root.innerHTML = '<h2 class="discuss-title">Comments</h2><p class="discuss-note">' + (local
+      self.root.innerHTML = '<h2 class="discuss-title">' + esc(T('comments.title', 'Comments')) + '</h2><p class="discuss-note">' + (local
         ? 'Local preview: the live comment service only answers antaresyuan.site. To try comments here, run the local Worker (workers/comments/README.md).'
-        : 'Comments are unavailable right now — please check back later.') + '</p>';
+        : esc(T('comments.unavailable', 'Comments are unavailable right now — please check back later.'))) + '</p>';
     }).then(function () { self.root.removeAttribute('aria-busy'); });
   };
 
@@ -162,11 +174,11 @@
     var all = (d.comments || []).concat(this.pending());
     var count = (d.comments || []).length;
     this.root.innerHTML =
-      (react ? '<div class="react" role="group" aria-label="Reactions">' + react + '</div>' : '') +
-      '<h2 class="discuss-title" id="discuss-title">Comments <span class="discuss-count">' + (count || '') + '</span></h2>' +
+      (react ? '<div class="react" role="group" aria-label="' + esc(T('comments.reactions', 'Reactions')) + '">' + react + '</div>' : '') +
+      '<h2 class="discuss-title" id="discuss-title">' + esc(T('comments.title', 'Comments')) + ' <span class="discuss-count">' + (count || '') + '</span></h2>' +
       this.composerHtml() +
       '<ol class="thread">' + this.threadHtml(all) + '</ol>' +
-      (all.length ? '' : '<p class="discuss-empty">No comments yet — start the conversation.</p>');
+      (all.length ? '' : '<p class="discuss-empty">' + esc(T('comments.empty', 'No comments yet — start the conversation.')) + '</p>');
 
     this.bind();
     var target = location.hash && /^#c-c_[a-z0-9]{12}$/.test(location.hash) && this.root.querySelector(location.hash);
@@ -191,12 +203,12 @@
     return '<article class="cmt' + (c.pending ? ' is-pending' : '') + '" id="c-' + esc(c.id) + '">' + avatarHtml(c) +
       '<div class="cmt-main">' +
         '<header class="cmt-head"><span class="cmt-name">' + esc(c.name) + '</span>' +
-          (c.owner ? '<span class="cmt-badge">Author</span>' : '') +
+          (c.owner ? '<span class="cmt-badge">' + esc(T('comments.author', 'Author')) + '</span>' : '') +
           '<time class="cmt-time" datetime="' + new Date(c.at).toISOString() + '">' + when(c.at) + '</time></header>' +
         '<div class="cmt-body">' + renderBody(c.body) + '</div>' +
         (c.pending
-          ? '<p class="cmt-pending-note">Waiting for a quick review — only you can see this for now.</p>'
-          : '<div class="cmt-actions"><button type="button" class="cmt-reply" data-reply="' + esc(topId) + '" data-name="' + esc(c.name) + '"' + (c.id !== topId ? ' data-mention' : '') + '>Reply</button></div>') +
+          ? '<p class="cmt-pending-note">' + esc(T('comments.pending', 'Waiting for a quick review — only you can see this for now.')) + '</p>'
+          : '<div class="cmt-actions"><button type="button" class="cmt-reply" data-reply="' + esc(topId) + '" data-name="' + esc(c.name) + '"' + (c.id !== topId ? ' data-mention' : '') + '>' + esc(T('comments.reply', 'Reply')) + '</button></div>') +
       '</div></article>';
   };
 
@@ -205,18 +217,18 @@
     var notify = this.data && this.data.notify;
     return '<form class="composer' + (parent ? ' is-reply' : '') + '" novalidate' + (parent ? ' data-parent="' + esc(parent) + '"' : '') + '>' +
       '<div class="composer-row">' +
-        '<textarea name="body" rows="1" maxlength="2000" placeholder="' + (parent ? 'Write a reply…' : 'Add a comment…') + '" aria-label="' + (parent ? 'Reply' : 'Comment') + '"></textarea>' +
+        '<textarea name="body" rows="1" maxlength="2000" placeholder="' + esc(parent ? T('comments.replyPlaceholder', 'Write a reply…') : T('comments.placeholder', 'Add a comment…')) + '" aria-label="' + esc(parent ? T('comments.reply', 'Reply') : T('comments.comment', 'Comment')) + '"></textarea>' +
       '</div>' +
       '<div class="composer-more"' + (parent ? '' : ' hidden') + '>' +
         '<div class="composer-fields">' +
-          '<input name="name" maxlength="40" autocomplete="nickname" placeholder="Name" aria-label="Name" value="' + esc(me.name || '') + '">' +
-          (notify ? '<input name="email" type="email" maxlength="254" autocomplete="email" placeholder="Email for reply notices (optional, never shown)" aria-label="Email (optional)" value="' + esc(me.email || '') + '">' : '') +
+          '<input name="name" maxlength="40" autocomplete="nickname" placeholder="' + esc(T('comments.name', 'Name')) + '" aria-label="' + esc(T('comments.name', 'Name')) + '" value="' + esc(me.name || '') + '">' +
+          (notify ? '<input name="email" type="email" maxlength="254" autocomplete="email" placeholder="' + esc(T('comments.email', 'Email for reply notices (optional, never shown)')) + '" aria-label="' + esc(T('comments.emailLabel', 'Email (optional)')) + '" value="' + esc(me.email || '') + '">' : '') +
         '</div>' +
         '<div class="composer-ts"></div>' +
         '<div class="composer-foot">' +
-          '<span class="composer-hint">Be kind. Comments with links wait for a quick review.</span>' +
-          '<span class="composer-btns">' + (parent ? '<button type="button" class="btn" data-cancel>Cancel</button>' : '') +
-          '<button type="submit" class="btn btn-primary">Post</button></span>' +
+          '<span class="composer-hint">' + esc(T('comments.hint', 'Be kind. Comments with links wait for a quick review.')) + '</span>' +
+          '<span class="composer-btns">' + (parent ? '<button type="button" class="btn" data-cancel>' + esc(T('comments.cancel', 'Cancel')) + '</button>' : '') +
+          '<button type="submit" class="btn btn-primary">' + esc(T('comments.post', 'Post')) + '</button></span>' +
         '</div>' +
         '<p class="composer-status" role="status" aria-live="polite"></p>' +
       '</div>' +
@@ -298,7 +310,7 @@
           'expired-callback': function () { token = ''; },
           'error-callback': function () { token = ''; },
         });
-      }).catch(function () { widget = null; say('Couldn’t load the human check — is something blocking challenges.cloudflare.com?', true); });
+      }).catch(function () { widget = null; say(T('comments.tsFailed', 'Couldn’t load the human check — is something blocking challenges.cloudflare.com?'), true); });
     };
 
     ta.addEventListener('focus', expand);
@@ -316,10 +328,10 @@
       var body = ta.value.trim();
       if (!body) { say(ERRORS['body-required'], true); ta.focus(); return; }
       if (!name) { say(ERRORS['name-required'], true); form.elements.name.focus(); return; }
-      if (!token) { say('Checking you’re human — one moment…'); expand(); setTimeout(function () { if (token) form.requestSubmit(); }, 1200); return; }
+      if (!token) { say(T('comments.checking', 'Checking you’re human — one moment…')); expand(); setTimeout(function () { if (token) form.requestSubmit(); }, 1200); return; }
 
       submit.disabled = true;
-      say('Posting…');
+      say(T('comments.posting', 'Posting…'));
       store.set('discuss:me', { name: name, email: email });
       self.api('/v1/comments', { page: self.page, name: name, email: email, body: body, parent: form.getAttribute('data-parent') || null, token: token })
         .then(function (d) {
@@ -336,7 +348,7 @@
           if (el) { el.classList.add('is-target'); el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
         })
         .catch(function (e) {
-          say(ERRORS[e.message] || (e instanceof TypeError ? 'Couldn’t reach the comments server — check your connection.' : 'Couldn’t post that — please try again.'), true);
+          say(ERRORS[e.message] || (e instanceof TypeError ? T('comments.offline', 'Couldn’t reach the comments server — check your connection.') : T('comments.failed', 'Couldn’t post that — please try again.')), true);
           submit.disabled = false;
           token = '';
           if (widget && window.turnstile) window.turnstile.reset(widget);

@@ -357,6 +357,190 @@ collections:
       - { label: "Draft", name: "draft", widget: "boolean", default: false, hint: "Drafts don’t appear on the site." }
       - { label: "Body", name: "body", widget: "markdown" }
 
+  # ── WORK, IN CHINESE — the /zh/ pages ────────────────────────────────
+  # content/zh/ holds only the Chinese for fields that have it; the English
+  # file is the base and fills every gap (scripts/lib/i18n.js). Leave a field
+  # empty to show the English. A file is matched to its English twin by path
+  # (content/zh/projects/kaboo.json ↔ content/projects/kaboo.json); list items
+  # by `slug` / `id`, or else by position. UI words (buttons, labels) live in
+  # content/zh/strings.json and are edited in the repo; boards in
+  # content/boards/zh/; cover words in content/zh/covers.json.
+  - divider: true
+    name: "div_work_zh"
+    label: "— WORK (CHINESE) —"
+    files: []
+
+  - name: "zh_work"
+    label: "Work home (Chinese)"
+    icon: translate
+    files:
+      - file: "content/zh/work.json"
+        label: "Work home (Chinese)"
+        name: "zh_work"
+        format: "json"
+        fields:
+          - label: "Message"
+            name: "message"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Heading", name: "title", widget: "string", required: false }
+              - { label: "Body", name: "body", widget: "text", required: false }
+          - label: "Update bar"
+            name: "update"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Text", name: "text", widget: "string", required: false }
+          - label: "Projects section"
+            name: "projects"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Heading", name: "title", widget: "string", required: false }
+              - { label: "Intro", name: "sub", widget: "text", required: false }
+          - label: "Left rail labels"
+            name: "nav"
+            widget: "list"
+            required: false
+            summary: "{{fields.id}} — {{fields.label}}"
+            fields:
+              - { label: "ID (as in the English rail)", name: "id", widget: "string" }
+              - { label: "Label", name: "label", widget: "string" }
+      - file: "content/zh/profile.json"
+        label: "Profile (Chinese)"
+        name: "zh_profile"
+        format: "json"
+        fields:
+          - { label: "Role", name: "role", widget: "string", required: false }
+          - { label: "Hero tags", name: "tagsWork", widget: "list", required: false }
+      - file: "content/zh/site.json"
+        label: "Site description (Chinese)"
+        name: "zh_site"
+        format: "json"
+        fields:
+          - label: "Meta"
+            name: "meta"
+            widget: "object"
+            fields:
+              - { label: "Description", name: "description", widget: "text", required: false }
+
+  - name: "zh_projects"
+    label: "Projects (Chinese)"
+    label_singular: "Project translation"
+    icon: translate
+    folder: "content/zh/projects"
+    create: true
+    format: "json"
+    extension: "json"
+    identifier_field: "slug"
+    slug: "{{fields.slug}}"
+    summary: "{{fields.slug}} — {{fields.kind}}"
+    fields:
+      - { label: "English project's slug", name: "slug", widget: "string", hint: "The file name of the English project (content/projects/<slug>.json)." }
+      - { label: "Title (empty = the English name)", name: "title", widget: "string", required: false }
+      - { label: "Kind (the chip)", name: "kind", widget: "string", required: false }
+      - { label: "One-line summary", name: "summary", widget: "text", required: false }
+      - label: "Facts (same order as the English)"
+        name: "facts"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}: {{fields.value}}"
+        fields:
+          - { label: "Label", name: "label", widget: "string", required: false }
+          - { label: "Value", name: "value", widget: "string", required: false }
+      - label: "Story (same sections, same order)"
+        name: "story"
+        widget: "list"
+        required: false
+        summary: "{{fields.title}}"
+        fields:
+          - { label: "Heading", name: "title", widget: "string", required: false }
+          - { label: "Body", name: "body", widget: "markdown", required: false }
+      - label: "Outcomes (same order)"
+        name: "outcomes"
+        widget: "list"
+        required: false
+        summary: "{{fields.value}} — {{fields.label}}"
+        fields:
+          - { label: "Value (empty = the English)", name: "value", widget: "string", required: false }
+          - { label: "Label", name: "label", widget: "string", required: false }
+      - label: "Link labels (same order)"
+        name: "links"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}"
+        fields:
+          - { label: "Label", name: "label", widget: "string", required: false }
+
+  - name: "zh_catalogues"
+    label: "AI Skills & Gallery (Chinese)"
+    icon: translate
+    files:
+      - file: "content/zh/skills.json"
+        label: "AI Skills (Chinese)"
+        name: "zh_skills"
+        format: "json"
+        fields:
+          - label: "Skills"
+            name: "items"
+            widget: "list"
+            summary: "{{fields.slug}} — {{fields.tagline}}"
+            fields:
+              - { label: "Slug (as in the English)", name: "slug", widget: "string" }
+              - { label: "Category (as shown)", name: "category", widget: "string", required: false }
+              - { label: "Tagline", name: "tagline", widget: "string", required: false }
+              - { label: "Summary", name: "summary", widget: "text", required: false }
+              - label: "Stat labels (same order)"
+                name: "stats"
+                widget: "list"
+                required: false
+                fields:
+                  - { label: "Label", name: "label", widget: "string", required: false }
+      - file: "content/zh/gallery.json"
+        label: "Gallery (Chinese)"
+        name: "zh_gallery"
+        format: "json"
+        fields:
+          - { label: "Title", name: "title", widget: "string", required: false }
+          - { label: "Intro", name: "sub", widget: "text", required: false }
+          - { label: "Categories (key → label)", name: "categories", widget: "object", required: false, fields: [
+              { label: "product", name: "product", widget: "string", required: false },
+              { label: "visual", name: "visual", widget: "string", required: false },
+              { label: "art3d", name: "art3d", widget: "string", required: false },
+              { label: "physical", name: "physical", widget: "string", required: false },
+              { label: "photo", name: "photo", widget: "string", required: false },
+              { label: "illustration", name: "illustration", widget: "string", required: false },
+              { label: "nft", name: "nft", widget: "string", required: false } ] }
+          - label: "Pieces"
+            name: "items"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.slug}} — {{fields.title}}"
+            fields:
+              - { label: "Slug (as in the English)", name: "slug", widget: "string" }
+              - { label: "Title", name: "title", widget: "string", required: false }
+              - { label: "Medium", name: "medium", widget: "string", required: false }
+              - { label: "Story", name: "summary", widget: "text", required: false }
+
+  # A post's Chinese is a file of the same name in content/zh/blog/. Without
+  # one, the /zh/ page shows the English with a note.
+  - name: "zh_blog"
+    label: "Writing (Chinese)"
+    label_singular: "Post translation"
+    icon: translate
+    folder: "content/zh/blog"
+    create: true
+    extension: "md"
+    slug: "{{fields.file}}"
+    summary: "{{title}}"
+    fields:
+      - { label: "English post's file name (without .md)", name: "file", widget: "string", required: false, hint: "Only used when creating: the translation must have the same file name as the English post." }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Summary", name: "summary", widget: "text", required: false }
+      - { label: "Tags", name: "tags", widget: "list", required: false, default: [] }
+      - { label: "Body", name: "body", widget: "markdown" }
+
   # ── PERSONAL — /personal/ ────────────────────────────────────────────
   - divider: true
     name: "div_personal"

@@ -1,0 +1,121 @@
+{
+  "shell": {
+    "skip": "Skip to content",
+    "feedTitle": "Writing — {site}",
+    "space": {
+      "aria": "Space",
+      "work": "Work",
+      "personal": "Personal"
+    },
+    "lang": {
+      "aria": "Language",
+      "en": "EN",
+      "zh": "中",
+      "enTitle": "English",
+      "zhTitle": "中文"
+    },
+    "theme": {
+      "aria": "Appearance",
+      "auto": "Automatic",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "rail": {
+      "aria": "Site",
+      "soon": "soon"
+    },
+    "ask": {
+      "placeholder": "Ask anything",
+      "aria": "Ask Antares anything",
+      "send": "Send",
+      "title": "Ask Antares",
+      "disclaimer": "Answers from this site's content — they can be wrong.",
+      "new": "New conversation",
+      "close": "Close",
+      "followUp": "Ask a follow-up…",
+      "followUpAria": "Ask a follow-up",
+      "source": "Local first · cloud fallback"
+    },
+    "footer": {
+      "edit": "Edit",
+      "source": "Source"
+    }
+  },
+  "home": {
+    "intro": "Introduction",
+    "usage": "Personal token consumption",
+    "usageAll": "All charts",
+    "usageTotal": "Total tokens",
+    "usageAgent": "Top agent",
+    "usageChart": "Daily tokens over the last four weeks",
+    "update": "Update",
+    "projectsList": "Projects",
+    "prev": "Previous projects",
+    "next": "More projects"
+  },
+  "project": {
+    "back": "Projects",
+    "overview": "Overview",
+    "did": "What I did",
+    "process": "Process",
+    "board": "Board",
+    "outcome": "Outcome",
+    "pictures": "Pictures",
+    "links": "Links",
+    "prev": "Previous",
+    "next": "Next",
+    "moreAria": "More projects",
+    "boardAria": "Whiteboard for {title}",
+    "boardHint": "Drag to move · ⌘ / Ctrl + scroll or pinch to zoom · full screen for a closer look",
+    "live": {
+      "title": "Live demo",
+      "full": "Full screen",
+      "open": "Open in a new tab",
+      "try": "Try it live",
+      "posterAlt": "{title}, as it looks when it opens",
+      "hint": "The real app, running inside this page — full screen gives it the whole window. If it doesn’t load{blocked}, open it in a new tab.",
+      "blocked": " (vercel.app is blocked in some regions)"
+    }
+  },
+  "blog": {
+    "title": "Writing",
+    "sub": "Writeups, teardowns and notes from building.",
+    "description": "Writeups and notes from building — by {author}.",
+    "filterAria": "Filter by topic",
+    "all": "All",
+    "empty": "Nothing here yet.",
+    "minRead": "{n} min read",
+    "comments": "Comments",
+    "commentsNeedJs": "Comments need JavaScript.",
+    "untranslated": "This post isn’t translated yet; here it is in English."
+  },
+  "gallery": {
+    "filterAria": "Filter by kind",
+    "all": "All",
+    "empty": "Nothing hung yet.",
+    "prev": "Previous picture",
+    "next": "Next picture",
+    "pictures": "Pictures",
+    "processLog": "Read the process log",
+    "close": "Close"
+  },
+  "skills": {
+    "title": "AI Skills",
+    "sub": "Skills and plugins I built for Claude Code and other agents. Each row goes straight to its official site or GitHub repository.",
+    "description": "Skills and plugins for Claude Code and other agents, by Antares Yuan — official sites and source repositories.",
+    "search": "Search skills",
+    "filterAria": "Filter by type",
+    "all": "All",
+    "empty": "No skill matches that.",
+    "featured": "Featured",
+    "visit": "Visit site",
+    "copy": "Copy",
+    "copyAria": "Copy install command",
+    "cat": {
+      "kits": "Skill kits",
+      "skills": "Skills",
+      "plugins": "Plugins",
+      "infra": "Agent infra"
+    }
+  }
+}

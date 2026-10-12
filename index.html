@@ -18,7 +18,10 @@
 <meta name="description" content="AI Product Manager. A living roadmap of what I&#39;ve shipped, what I&#39;m building, and where I&#39;m going.">
 <meta name="author" content="Chenjie (Antares) Yuan">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://antaresyuan.site">
+<link rel="canonical" href="https://antaresyuan.site/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/">
 
 <!-- ── Theme + favicon ───────────────────────────────────────────── -->
 <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
@@ -32,7 +35,7 @@
 
 <!-- ── Open Graph / Twitter ──────────────────────────────────────── -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://antaresyuan.site">
+<meta property="og:url" content="https://antaresyuan.site/">
 <meta property="og:site_name" content="Antares Yuan">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Antares Yuan">
@@ -96,14 +99,14 @@
   })();
 </script>
 
-<link rel="stylesheet" href="styles/work.css?v=6cdcfd49">
+<link rel="stylesheet" href="styles/work.css?v=cc533dfa">
   <!-- feature-beacon -->
   <script defer src="scripts/beacon.js?v=2dc05071"></script>
   <!-- /feature-beacon -->
 </head>
 <body class="work-home">
 
-<a class="skip-link" href="#main-content">Skip to content</a>
+<a class="skip-link" href="#main-content" data-i18n="shell.skip">Skip to content</a>
 
 <!-- Ambient colour field. Liquid Glass is a lens, and a lens over a flat
      colour shows nothing; this gives the floating controls something to bend. -->
@@ -119,6 +122,8 @@
     <a class="space-opt" href="/personal/" data-space="personal">Personal</a>
   </nav>
 
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="Language" data-language-toggle data-no-translate data-lens><a class="lang-opt is-active" href="/?lang=en" hreflang="en" lang="en" data-lang="en" aria-current="true" title="English">EN</a><a class="lang-opt" href="/zh/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" title="中文">中</a></nav>
   <div class="theme-switch glass" id="theme-switch" data-lens>
     <button class="theme-btn theme-current" id="theme-current" type="button"
             aria-label="Appearance" aria-expanded="false" aria-controls="theme-options">
@@ -132,13 +137,14 @@
       <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="Dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
     </div>
   </div>
+  </div>
 </header>
 
 <!-- ── SITE RAIL (glass layer) ─────────────────────────────────────────
      Persistent navigation. A vertical rail on wide screens, a tab bar along
      the bottom on phones. Items come from content/work.json → nav; an item
      with no href is a page that does not exist yet and renders as "soon". -->
-<nav class="rail glass" id="rail" aria-label="Site" data-lens>
+<nav class="rail glass" id="rail" aria-label="Site" data-i18n-attr="aria-label:shell.rail.aria" data-lens>
   <span class="rail-blob" aria-hidden="true"></span>
   <ul class="rail-list" id="rail-list">
     <li><a class="rail-item is-active" href="/" aria-current="page" data-id="home" data-label="Home" aria-label="Home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
@@ -152,7 +158,7 @@
 <main class="page" id="main-content">
 
   <!-- ── HERO: who · proof · voice ───────────────────────────────────── -->
-  <section class="hero" aria-label="Introduction">
+  <section class="hero" aria-label="Introduction" data-i18n-attr="aria-label:home.intro">
     <div class="hero-col hero-id">
       <h1 class="name" id="hero-name">Antares <span class="name-mid">(Chenjie)</span> Yuan</h1>
       <div class="hero-sub">
@@ -165,12 +171,12 @@
     <!-- Live AI usage. render: scripts/work.js. Hidden when the Worker cannot
          be reached — never a broken widget. See workers/usage/README.md. -->
     <section class="hero-col hero-usage" id="usage" aria-labelledby="usage-title" data-endpoint="https://usage.antaresyuan.site">
-      <h2 class="col-label" id="usage-title"><a class="col-link" href="/usage/" title="All charts">Personal token consumption<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></a></h2>
+      <h2 class="col-label" id="usage-title"><a class="col-link" href="/usage/" title="All charts" data-i18n-attr="title:home.usageAll"><span data-i18n="home.usage">Personal token consumption</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></a></h2>
       <dl class="kpis">
-        <div class="kpi"><dt>Total tokens</dt><dd id="kpi-total">—</dd></div>
-        <div class="kpi"><dt>Top agent</dt><dd id="kpi-agent">—</dd></div>
+        <div class="kpi"><dt data-i18n="home.usageTotal">Total tokens</dt><dd id="kpi-total">—</dd></div>
+        <div class="kpi"><dt data-i18n="home.usageAgent">Top agent</dt><dd id="kpi-agent">—</dd></div>
       </dl>
-      <div class="chart" id="usage-chart" role="img" aria-label="Daily tokens over the last four weeks"></div>
+      <div class="chart" id="usage-chart" role="img" aria-label="Daily tokens over the last four weeks" data-i18n-attr="aria-label:home.usageChart"></div>
     </section>
 
     <section class="hero-col hero-message" aria-labelledby="message-title">
@@ -185,23 +191,23 @@
       <h2 class="section-title" id="projects-title">Projects</h2>
       <div class="carousel-nav">
         <span class="carousel-count" id="carousel-count" aria-hidden="true"></span>
-        <button class="carousel-btn" id="carousel-prev" type="button" aria-label="Previous projects" disabled>
+        <button class="carousel-btn" id="carousel-prev" type="button" aria-label="Previous projects" data-i18n-attr="aria-label:home.prev" disabled>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>
         </button>
-        <button class="carousel-btn" id="carousel-next" type="button" aria-label="More projects">
+        <button class="carousel-btn" id="carousel-next" type="button" aria-label="More projects" data-i18n-attr="aria-label:home.next">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>
         </button>
       </div>
     </div>
 
     <div class="update" id="update">
-      <span class="update-label">Update</span>
+      <span class="update-label" data-i18n="home.update">Update</span>
       <time class="update-date" id="update-date" datetime="2026-10-10">Oct 10</time>
       <p class="update-text" id="update-text">The new Work version of my personal website is live — yay!</p>
     </div>
 
     <div class="carousel" id="carousel">
-      <ul class="carousel-track" id="project-track" tabindex="0" aria-label="Projects">
+      <ul class="carousel-track" id="project-track" tabindex="0" aria-label="Projects" data-i18n-attr="aria-label:home.projectsList">
         <li class="project-card" style="--hue: 262">
           <a class="project-link" href="/projects/agentic-hiring/">
             <div class="project-cover is-svg" style="--hue: 262" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-agentic-hiring" viewBox="0 0 1200 480" role="img" aria-label="Agentic hiring: from the unmet needs to the agent-quality metrics">
@@ -323,7 +329,7 @@
 <g class="pc-tb"><rect class="pc-b" x="184.2" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="184.2" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="210.2" y="439">What I built</text>
 </svg></div>
             <div class="project-body">
-              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part"><span class="chip-copy">ByteDance</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Internal Open Source</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Token Efficiency</span></span></span></span>
+              <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part"><span class="chip-copy">ByteDance</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Internal Open Source</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Token Efficiency</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">10K+ DAU</span></span></span></span>
               <h3 class="project-title">Kaboo</h3>
               <p class="project-summary">An open-source token-analysis project inside ByteDance, built without hand-offs: I raised the problem, designed the Token Efficiency Leaderboard, tested it and shipped it myself.</p>
             </div>
@@ -384,7 +390,7 @@
 <path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
 <path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
 <g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Decomposition track</text>
-<g class="pc-tb"><rect class="pc-b" x="249.79999999999998" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="249.79999999999998" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="275.79999999999995" y="439">Reuse track</text>
+<g class="pc-tb"><rect class="pc-b" x="249.8" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="249.8" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="275.8" y="439">Reuse track</text>
 </svg></div>
             <div class="project-body">
               <span class="project-chip"><img class="project-chip-logo" src="/media/logos/bytedance.svg" alt="" width="14" height="14"><span><span class="chip-part"><span class="chip-copy">ByteDance AI Full-Stack Challenge</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Agent Orchestration</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Top 3</span></span></span></span>
@@ -542,12 +548,12 @@
         <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
       </button>
       <input class="ask-input" id="ask-input" type="text" maxlength="500"
-             placeholder="Ask Antares anything" aria-label="Ask Antares anything">
+             placeholder="Ask anything" aria-label="Ask Antares anything">
       <button class="ask-send" id="ask-send" type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
     </form>
   </div>
 </div>
-<aside class="ask-panel glass" id="ask-panel" aria-label="Ask Antares" hidden>
+<aside class="ask-panel glass" id="ask-panel" aria-label="Ask Antares" data-i18n-attr="aria-label:shell.ask.title" hidden>
   <header class="ask-panel-head">
     <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
     <span class="ask-panel-title"><strong>Ask Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
@@ -573,10 +579,10 @@
      (Chromium only — other engines keep the blur-and-rim version). -->
 <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
 
-<script src="scripts/i18n.js?v=e9e78904" defer></script>
+<script type="application/json" id="ui-strings">{}</script>
 <script src="scripts/qa-faq-data.js?v=ba7b8655" defer></script>
 <script src="scripts/qa-faq.js?v=16189666" defer></script>
-<script src="scripts/work.js?v=823d96bd" defer></script>
+<script src="scripts/work.js?v=6042443f" defer></script>
 <script src="scripts/buddy.js?v=9a4fd889" defer></script>
 </body>
 </html>

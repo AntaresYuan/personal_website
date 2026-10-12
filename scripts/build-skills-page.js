@@ -17,15 +17,19 @@ const fs = require('fs');
 const path = require('path');
 const { escapeHtml: e } = require('./lib/blog');
 const shell = require('./lib/work-shell');
+const i18n = require('./lib/i18n');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
-const site = read('content/site.json');
-const SITE_URL = (site.meta?.url ?? 'https://example.com').replace(/\/$/, '');
-
-const skills = (() => { try { return read('content/skills.json'); } catch { return { items: [] }; } })();
-const items = (skills.items ?? []).slice()
+const sorted = (list) => (list ?? []).slice()
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99) || String(a.name).localeCompare(String(b.name)));
+// The filter category comes from the English category, whatever the page's
+// language shows.
+const EN_CAT = new Map(sorted((() => { try { return read('content/skills.json'); } catch { return { items: [] }; } })().items)
+  .map((s) => [s.slug, s.category]));
+// Per language; set in the write loop below.
+let L = 'en', items = [];
+const t = (key) => i18n.t(key, L);
 
 /* Categories, normalised for the filter row: "Claude Code skill" and
    "Claude Code Skill" are one category. */
@@ -36,7 +40,7 @@ const catKey = (c) => {
   if (k.includes('kit')) return 'kits';
   return 'skills';
 };
-const CAT_LABEL = { kits: 'Skill kits', skills: 'Skills', plugins: 'Plugins', infra: 'Agent infra' };
+const catOf = (s) => catKey(EN_CAT.get(s.slug) ?? s.category);
 
 /* ── Pieces ───────────────────────────────────────────────────────────── */
 const COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>';
@@ -51,7 +55,7 @@ const iconOf = (s, size) => {
 const installBox = (s) => s.install
   ? `<div class="install">
         <code class="install-cmd">${e(s.install)}</code>
-        <button class="copy-btn" type="button" data-copy="${e(s.install)}" aria-label="Copy install command">${COPY_ICON}<span>Copy</span></button>
+        <button class="copy-btn" type="button" data-copy="${e(s.install)}" aria-label="${e(t('skills.copyAria'))}">${COPY_ICON}<span>${e(t('skills.copy'))}</span></button>
       </div>`
   : '';
 
@@ -63,8 +67,9 @@ const searchText = (s) => [s.name, s.tagline, s.summary, s.category].filter(Bool
 const destinationOf = (s) => s.site || s.repo;
 
 /* ── Catalogue ────────────────────────────────────────────────────────── */
+const catalogueMain = () => {
 const featured = items.find((s) => s.featured);
-const cats = [...new Set(items.map((s) => catKey(s.category)))];
+const cats = [...new Set(items.map(catOf))];
 
 /* The featured kit. With a `cover` (a banner, e.g. the kit's own site hero)
    the card stacks: a compact, intentionally cropped banner on top and the
@@ -74,7 +79,7 @@ const cats = [...new Set(items.map((s) => catKey(s.category)))];
 const featuredHref = featured ? destinationOf(featured) : '';
 const featuredLinkAttrs = featuredHref ? ' target="_blank" rel="noopener"' : '';
 const featuredHtml = featured ? `
-    <section class="featured${featured.cover ? ' has-cover' : ''}" aria-label="Featured">
+    <section class="featured${featured.cover ? ' has-cover' : ''}" aria-label="${e(t('skills.featured'))}">
       ${featured.cover
         ? `<a class="featured-cover" href="${e(featuredHref)}"${featuredLinkAttrs} tabindex="-1"><img src="${e(featured.cover)}" alt="${e(featured.name)}: ${e(featured.tagline || '')}" decoding="async"></a>`
         : `<div class="featured-art" style="--hue: ${featured.hue ?? 222}" aria-hidden="true">
@@ -82,7 +87,7 @@ const featuredHtml = featured ? `
       </div>`}
       <div class="featured-body">
         <div class="featured-main">
-          <p class="featured-kicker">Featured · ${e(featured.category || '')}</p>
+          <p class="featured-kicker">${e(t('skills.featured'))} · ${e(featured.category || '')}</p>
           <h2 class="featured-title"><a href="${e(featuredHref)}"${featuredLinkAttrs}>${e(featured.name)}</a></h2>
           <p class="featured-tagline">${e((featured.cover ? featured.summary : featured.tagline) || featured.summary || '')}</p>
           ${statsRow(featured)}
@@ -90,7 +95,7 @@ const featuredHtml = featured ? `
         <div class="featured-side">
           ${installBox(featured)}
           <div class="skill-actions">
-            <a class="btn btn-primary" href="${e(featuredHref)}"${featuredLinkAttrs}>${featured.site ? 'Visit site' : 'GitHub'}${ARROW}</a>
+            <a class="btn btn-primary" href="${e(featuredHref)}"${featuredLinkAttrs}>${featured.site ? e(t('skills.visit')) : 'GitHub'}${ARROW}</a>
             ${featured.site && featured.repo ? `<a class="btn" href="${e(featured.repo)}" target="_blank" rel="noopener">GitHub${ARROW}</a>` : ''}
           </div>
         </div>
@@ -100,53 +105,59 @@ const featuredHtml = featured ? `
 const rowHtml = (s) => {
   const destination = destinationOf(s);
   return `
-        <li class="skill-row" data-tags="${catKey(s.category)}" data-search="${e(searchText(s))}">
+        <li class="skill-row" data-tags="${catOf(s)}" data-search="${e(searchText(s))}">
           <a class="skill-row-link" href="${e(destination)}" target="_blank" rel="noopener">
             ${iconOf(s)}
             <span class="skill-row-text">
               <span class="skill-row-name">${e(s.name)}</span>
               <span class="skill-row-sub">${e(s.tagline || s.summary || '')}</span>
             </span>
-            <span class="skill-get">${s.site ? 'Visit site' : 'GitHub'}${ARROW}</span>
+            <span class="skill-get">${s.site ? e(t('skills.visit')) : 'GitHub'}${ARROW}</span>
           </a>
         </li>`;
 };
 
-const catalogueMain = `  <section class="skills" aria-labelledby="skills-title">
+return `  <section class="skills" aria-labelledby="skills-title">
     <header class="page-head">
       <div>
-        <h1 class="page-title" id="skills-title">AI Skills</h1>
-        <p class="page-sub">Skills and plugins I built for Claude Code and other agents. Each row goes straight to its official site or GitHub repository.</p>
+        <h1 class="page-title" id="skills-title">${e(t('skills.title'))}</h1>
+        <p class="page-sub">${e(t('skills.sub'))}</p>
       </div>
       <label class="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
-        <input type="search" placeholder="Search skills" aria-label="Search skills" data-search-for="skill-list">
+        <input type="search" placeholder="${e(t('skills.search'))}" aria-label="${e(t('skills.search'))}" data-search-for="skill-list">
       </label>
     </header>
 ${featuredHtml}
-    <div class="filters" role="group" aria-label="Filter by type" data-filter-for="skill-list">
-      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">All</button>${cats.map((c) =>
-        `<button class="filter" type="button" data-filter="${c}" aria-pressed="false">${CAT_LABEL[c] || c}</button>`).join('')}
+    <div class="filters" role="group" aria-label="${e(t('skills.filterAria'))}" data-filter-for="skill-list">
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">${e(t('skills.all'))}</button>${cats.map((c) =>
+        `<button class="filter" type="button" data-filter="${c}" aria-pressed="false">${e(t(`skills.cat.${c}`))}</button>`).join('')}
     </div>
     <ul class="skill-list" id="skill-list">${items.map(rowHtml).join('')}
     </ul>
-    <p class="empty" id="skill-list-empty" hidden>No skill matches that.</p>
+    <p class="empty" id="skill-list-empty" hidden>${e(t('skills.empty'))}</p>
   </section>`;
+};
 
 /* ── Write ────────────────────────────────────────────────────────────── */
-const outDir = path.join(root, 'skills');
-fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'index.html'), shell.pageHtml({
-  title: 'AI Skills',
-  description: 'Skills and plugins for Claude Code and other agents, by Antares Yuan — official sites and source repositories.',
-  canonical: `${SITE_URL}/skills/`,
-  active: 'skills',
-  bodyClass: 'skills-page',
-  main: catalogueMain,
-}));
-// This catalogue deliberately has no internal detail pages. Every skill row
-// links to the project's official site or GitHub repository instead.
-for (const ent of fs.readdirSync(outDir, { withFileTypes: true })) {
-  if (ent.isDirectory()) fs.rmSync(path.join(outDir, ent.name), { recursive: true, force: true });
+for (const lang of i18n.LANGS) {
+  L = lang;
+  items = sorted((() => { try { return i18n.content('content/skills.json', lang); } catch { return { items: [] }; } })().items);
+  const outDir = path.join(i18n.outRoot(lang), 'skills');
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'index.html'), shell.pageHtml({
+    title: t('skills.title'),
+    description: t('skills.description'),
+    lang,
+    path: '/skills/',
+    active: 'skills',
+    bodyClass: 'skills-page',
+    main: catalogueMain(),
+  }));
+  // This catalogue deliberately has no internal detail pages. Every skill row
+  // links to the project's official site or GitHub repository instead.
+  for (const ent of fs.readdirSync(outDir, { withFileTypes: true })) {
+    if (ent.isDirectory()) fs.rmSync(path.join(outDir, ent.name), { recursive: true, force: true });
+  }
 }
-console.log(`✓ wrote skills/        (catalogue, ${items.length} direct links)`);
+console.log(`✓ wrote skills/        (catalogue, ${items.length} direct links, ${i18n.LANGS.length} languages)`);

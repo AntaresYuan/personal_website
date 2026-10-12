@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SusBench · Antares Yuan</title>
+<meta name="description" content="一个在线 benchmark：在 55 个真实网站中注入 dark pattern，测试 computer-use agent 会不会被这些原本用来骗人的设计骗到。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/projects/susbench/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/projects/susbench/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/projects/susbench/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/projects/susbench/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antaresyuan.site/zh/projects/susbench/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="SusBench">
+<meta property="og:description" content="一个在线 benchmark：在 55 个真实网站中注入 dark pattern，测试 computer-use agent 会不会被这些原本用来骗人的设计骗到。">
+<meta property="og:image" content="https://antaresyuan.site/media/avatar-calm.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SusBench">
+<meta name="twitter:description" content="一个在线 benchmark：在 55 个真实网站中注入 dark pattern，测试 computer-use agent 会不会被这些原本用来骗人的设计骗到。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home case-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/projects/susbench/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/projects/susbench/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/projects/" aria-current="page" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/blog/" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="case">
+    <a class="back-link" href="/zh/projects/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>项目</a>
+
+    <div class="case-cover is-svg" style="--hue: 285"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-susbench" viewBox="0 0 1200 480" role="img" aria-label="SusBench：原本用来骗人的 dark pattern，也会骗到 computer-use agent 吗？">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">研究问题</text><text class="pc-hs" x="128" y="70">agent 会中招吗？</text>
+<text class="pc-h" x="352" y="46">难点</text><text class="pc-hs" x="352" y="70">可控 vs. 真实</text>
+<text class="pc-h" x="576" y="46">方法</text><text class="pc-hs" x="576" y="70">SusBench</text>
+<text class="pc-h pc-me" x="812" y="46">我的工作</text><text class="pc-hs" x="812" y="70">在 benchmark 上</text>
+<text class="pc-h" x="1060" y="46">发现</text><text class="pc-hs" x="1060" y="70">agent vs. 人</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">Dark pattern</text><text class="pc-s" x="128" y="179">用来误导人的</text><text class="pc-s" x="128" y="201">界面设计</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">可控</text><text class="pc-s" x="352" y="179">出现在哪、</text><text class="pc-s" x="352" y="201">属于哪一类</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">代码注入</text><text class="pc-s" x="576" y="179">9 类，注入</text><text class="pc-s" x="576" y="201">55 个真实网站</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">评测框架</text><text class="pc-s" x="812" y="179">注入、执行、判定；</text><text class="pc-s" x="812" y="201">5 个 agent 同一环境</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">同样的弱点</text><text class="pc-s" x="1060" y="179">预选项、误导性措辞、</text><text class="pc-s" x="1060" y="201">隐藏信息</text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">Agent 在操作</text><text class="pc-s" x="128" y="331">替用户操作</text><text class="pc-s" x="128" y="353">真实界面</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">真实</text><text class="pc-s" x="352" y="331">否则结果</text><text class="pc-s" x="352" y="353">无法迁移</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">用户实验</text><text class="pc-s" x="576" y="331">29 人，大多数</text><text class="pc-s" x="576" y="353">没有察觉</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">评测用例</text><text class="pc-s" x="812" y="331">目标、注入步、误导操作：</text><text class="pc-s" x="812" y="353"><tspan class="pc-k">313</tspan> 个任务</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">明显的那些</text><text class="pc-s" x="1060" y="331">人和 agent</text><text class="pc-s" x="1060" y="353">都能抵抗</text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">可控线</text>
+<g class="pc-tb"><rect class="pc-b" x="139" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="139" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="165" y="439">真实线</text>
+</svg></div>
+
+    <header class="case-head">
+      <span class="project-chip"><span><span class="chip-part"><span class="chip-copy">ACM IUI 2026</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">研究</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Computer-Use Agent</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">Benchmark</span></span></span></span>
+      <h1 class="case-title">SusBench</h1>
+      <p class="case-summary">一个在线 benchmark：在 55 个真实网站中注入 dark pattern，测试 computer-use agent 会不会被这些原本用来骗人的设计骗到。</p>
+      <dl class="case-facts"><div><dt>发表</dt><dd>ACM IUI 2026，长文</dd></div><div><dt>署名</dt><dd>第二作者（共十位）</dd></div><div><dt>机构</dt><dd>华盛顿大学</dd></div><div><dt>规模</dt><dd>313 个任务，55 个网站</dd></div></dl>
+    </header>
+
+    <section class="case-section" aria-labelledby="st-susbench-1">
+      <h2 class="case-section-title" id="st-susbench-1">研究问题</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>Computer-use agent 开始替用户在真实界面上自主操作了。网站上有很多 <strong>dark pattern</strong>，也就是故意诱导用户做出非本意操作的界面设计。</p>
+<p>我们想回答的是：这些原本用来骗人的设计，会不会也骗到 agent？</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-susbench-2">
+      <h2 class="case-section-title" id="st-susbench-2">难点</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>这个问题难在评测环境。要测得准，dark pattern 得<strong>可控</strong>：出现在哪、属于哪一类都要能设计。但环境又得足够<strong>真实</strong>，不然结果代表不了 agent 在真实网站上的表现。</p>
+<p>自己搭假网站可控但不真实，直接用线上网站真实但不可控。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-susbench-3">
+      <h2 class="case-section-title" id="st-susbench-3">方法</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>我们的做法是在真实的消费类网站上，用代码注入的方式构造 dark pattern。从已有的分类体系里选了 <strong>9 类</strong>常见的 dark pattern，在 <strong>55 个网站</strong>上设计了 <strong>313 个评测任务</strong>。</p>
+<p>为了验证注入得够不够真，我们做了一个 <strong>29 人</strong>的用户实验，绝大多数参与者没有发现这些 dark pattern 是研究团队加进去的。</p>
+<p>然后在这个 benchmark 上评测了 <strong>5 个 SOTA 的 computer-use agent</strong>。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-susbench-4">
+      <h2 class="case-section-title" id="st-susbench-4">发现</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>人和 agent 的弱点很像：都特别容易中<strong>预选项</strong>（Preselection）、<strong>误导性措辞</strong>（Trick Wording）和<strong>隐藏信息</strong>（Hidden Information）这三类；对比较明显的 dark pattern，反而都有抵抗力。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-susbench-5">
+      <h2 class="case-section-title" id="st-susbench-5">意义</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>这项工作指向三个方向：</p>
+<ol><li><strong>可信</strong>：怎么做出更值得信任的 computer-use agent。</li><li><strong>评估</strong>：agent 有可能代替人去评估欺骗性设计。</li><li><strong>监管</strong>：当上网的越来越多是 agent 时，线上环境该怎么监管。</li></ol></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-susbench-6">
+      <h2 class="case-section-title" id="st-susbench-6">我的贡献</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>我主要负责两块。</p>
+<p><strong>搭建评测框架。</strong> 把“在真实网站上注入 dark pattern、让 agent 执行任务、判断它有没有被诱导”这条链路搭起来，让 5 个 agent 能在同一套环境下被评测。</p>
+<p><strong>设计评测用例。</strong> 把 9 类 dark pattern 落到具体网站的具体任务上。每个用例要定清楚三件事：</p>
+<ol><li>任务目标是什么。</li><li>dark pattern 注入在哪一步。</li><li>agent 做了什么操作算被诱导。</li></ol>
+<p>最终的 benchmark 覆盖 55 个网站、313 个任务。</p></div>
+      </div>
+    </section>
+
+
+    <section class="case-section is-wide" aria-labelledby="bd-susbench">
+      <h2 class="case-section-title" id="bd-susbench">画板</h2>
+      <div class="case-section-body">
+        <div class="board-embed" data-board-src="/content/boards/zh/susbench.json" role="img" aria-label="SusBench 的画板"></div>
+        <p class="board-hint">拖动画布移动 · ⌘ / Ctrl + 滚轮或双指缩放 · 全屏查看更清楚</p>
+      </div>
+    </section>
+
+    <section class="case-section" aria-labelledby="oc-susbench">
+      <h2 class="case-section-title" id="oc-susbench">成果</h2>
+      <div class="case-section-body">
+        <dl class="case-outcomes"><div><dd>313</dd><dt>评测任务，覆盖 55 个真实网站和 9 类 dark pattern</dt></div><div><dd>29</dd><dt>真实性实验的参与者，大多数没有察觉注入的 dark pattern</dt></div><div><dd>ACM IUI 2026</dd><dt>ACM 智能用户界面会议（IUI）长文</dt></div></dl>
+      </div>
+    </section>
+
+
+    <section class="case-section" aria-labelledby="ln-susbench">
+      <h2 class="case-section-title" id="ln-susbench">链接</h2>
+      <div class="case-section-body">
+        <div class="skill-actions"><a class="btn" href="https://arxiv.org/abs/2510.11035" target="_blank" rel="noopener">arXiv 上的论文<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+      </div>
+    </section>
+
+    <nav class="case-nav" aria-label="更多项目">
+      <a class="case-nav-link" href="/zh/projects/lark-loom/"><span>上一个</span><strong>Lark Loom</strong></a>
+      <a class="case-nav-link is-next" href="/zh/projects/agentic-hiring/"><span>下一个</span><strong>Agentic Hiring</strong></a>
+    </nav>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/board.js?v=d687d7ec" defer></script>
+</body>
+</html>

@@ -35,13 +35,13 @@ const path = require('path');
 const { escapeHtml: e, mdToHtml } = require('./lib/blog');
 const shell = require('./lib/work-shell');
 const { projectList, projectCardHtml, coverBox, chipHtml } = require('./lib/projects');
+const i18n = require('./lib/i18n');
 
 const root = path.join(__dirname, '..');
-const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
-const site = read('content/site.json');
-const work = read('content/work.json');
-const SITE_URL = (site.meta?.url ?? 'https://example.com').replace(/\/$/, '');
-const projects = projectList();
+
+// Set per language in the write loop below; the renderers read them.
+let LANG = 'en', work, projects;
+const t = (key, vars) => i18n.t(key, LANG, vars);
 
 /* Placeholder copy, shown wherever a project leaves a field empty. */
 const PH = {
@@ -84,16 +84,16 @@ const liveHtml = (p) => {
             <span class="live-dots" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="live-url">${e(host)}</span>
             <span class="live-acts">
-              <button type="button" class="live-act" data-live-act="full" aria-label="Full screen" title="Full screen" hidden>${FULL}</button>
-              <a class="live-act" href="${e(l.url)}" target="_blank" rel="noopener" aria-label="Open in a new tab" title="Open in a new tab">${OPEN}</a>
+              <button type="button" class="live-act" data-live-act="full" aria-label="${e(t('project.live.full'))}" title="${e(t('project.live.full'))}" hidden>${FULL}</button>
+              <a class="live-act" href="${e(l.url)}" target="_blank" rel="noopener" aria-label="${e(t('project.live.open'))}" title="${e(t('project.live.open'))}">${OPEN}</a>
             </span>
           </div>
           <div class="live-view">
-            ${l.poster ? `<img class="live-poster" src="${e(l.poster)}" alt="${e(p.title)}, as it looks when it opens" loading="lazy" decoding="async">` : ''}
-            <button type="button" class="btn btn-primary live-start" data-live-act="start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.6-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z"/></svg>Try it live</button>
+            ${l.poster ? `<img class="live-poster" src="${e(l.poster)}" alt="${e(t('project.live.posterAlt', { title: p.title }))}" loading="lazy" decoding="async">` : ''}
+            <button type="button" class="btn btn-primary live-start" data-live-act="start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.6-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z"/></svg>${e(t('project.live.try'))}</button>
           </div>
         </figure>
-        <p class="board-hint">The real app, running inside this page — full screen gives it the whole window. If it doesn’t load${/\.vercel\.app$/.test(host) ? ' (vercel.app is blocked in some regions)' : ''}, open it in a new tab.</p>`;
+        <p class="board-hint">${e(t('project.live.hint', { blocked: /\.vercel\.app$/.test(host) ? t('project.live.blocked') : '' }))}</p>`;
 };
 
 const section = (id, title, body, cls = '') => `
@@ -102,6 +102,10 @@ const section = (id, title, body, cls = '') => `
       <div class="case-section-body">${body}
       </div>
     </section>`;
+
+// A board's Chinese copy (content/boards/zh/<id>.json), when there is one.
+const boardSrc = (id) => (LANG === 'zh' && fs.existsSync(path.join(root, 'content/boards/zh', `${id}.json`))
+  ? `/content/boards/zh/${e(id)}.json` : `/content/boards/${e(id)}.json`);
 
 const caseMain = (p, i) => {
   const prev = projects[(i - 1 + projects.length) % projects.length];
@@ -127,7 +131,7 @@ const caseMain = (p, i) => {
     : '<span class="btn is-ph" aria-disabled="true">Placeholder · link</span><span class="btn is-ph" aria-disabled="true">Placeholder · demo</span>';
 
   return `  <article class="case">
-    <a class="back-link" href="/projects/">${BACK}Projects</a>
+    <a class="back-link" href="${i18n.localPath('/projects/', LANG)}">${BACK}${e(t('project.back'))}</a>
 
     ${coverBox(p, 'case-cover', { lazy: false, hidden: false })}
 
@@ -139,35 +143,35 @@ const caseMain = (p, i) => {
     </header>
 ${story.length ? story.map((st, k) => section(`st-${p.slug}-${k + 1}`, e(st.title), `
         <div class="prose case-prose">${mdToHtml(st.body || '')}</div>`)).join('') : [
-  (draft || has(p.overview)) && section('ov-' + p.slug, 'Overview', `
+  (draft || has(p.overview)) && section('ov-' + p.slug, e(t('project.overview')), `
         <p class="case-lead${ovPh ? ' ph' : ''}">${e(overview)}</p>`),
-  (draft || has(p.contribution)) && section('do-' + p.slug, 'What I did', `
+  (draft || has(p.contribution)) && section('do-' + p.slug, e(t('project.did')), `
         <ul class="case-list${coPh ? ' ph' : ''}">${contrib.map((c) => `<li>${e(c)}</li>`).join('')}</ul>`),
-  (draft || has(p.process)) && section('pr-' + p.slug, 'Process', `
+  (draft || has(p.process)) && section('pr-' + p.slug, e(t('project.process')), `
         <ol class="case-steps${stPh ? ' ph' : ''}">${steps.map((st, k) => `
           <li><span class="case-step-n">${String(k + 1).padStart(2, '0')}</span><strong>${e(st.title)}</strong><p>${e(st.body)}</p></li>`).join('')}
         </ol>`),
 ].filter(Boolean).join('')}
-${p.live && p.live.url ? section('lv-' + p.slug, 'Live demo', liveHtml(p), ' is-wide') : ''}
-${p.board ? section('bd-' + p.slug, 'Board', `
-        <div class="board-embed" data-board-src="/content/boards/${e(p.board)}.json" role="img" aria-label="Whiteboard for ${e(p.title)}"></div>
-        <p class="board-hint">Drag to move · ⌘ / Ctrl + scroll or pinch to zoom · full screen for a closer look</p>`, ' is-wide') : ''}
-${draft || has(p.outcomes) ? section('oc-' + p.slug, 'Outcome', `
+${p.live && p.live.url ? section('lv-' + p.slug, e(t('project.live.title')), liveHtml(p), ' is-wide') : ''}
+${p.board ? section('bd-' + p.slug, e(t('project.board')), `
+        <div class="board-embed" data-board-src="${boardSrc(p.board)}" role="img" aria-label="${e(t('project.boardAria', { title: p.title }))}"></div>
+        <p class="board-hint">${e(t('project.boardHint'))}</p>`, ' is-wide') : ''}
+${draft || has(p.outcomes) ? section('oc-' + p.slug, e(t('project.outcome')), `
         <dl class="case-outcomes${ouPh ? ' ph' : ''}">${outs.map((o) => `<div><dd>${e(o.value)}</dd><dt>${e(o.label)}</dt></div>`).join('')}</dl>`) : ''}
-${draft || has(p.images) ? section('im-' + p.slug, 'Pictures', `
+${draft || has(p.images) ? section('im-' + p.slug, e(t('project.pictures')), `
         <div class="case-gallery">${imgs}
         </div>`) : ''}
-${draft || has(p.links) ? section('ln-' + p.slug, 'Links', `
+${draft || has(p.links) ? section('ln-' + p.slug, e(t('project.links')), `
         <div class="skill-actions">${links}</div>`) : ''}
 
-    <nav class="case-nav" aria-label="More projects">
-      <a class="case-nav-link" href="${e(prev.url)}"><span>Previous</span><strong>${e(prev.title)}</strong></a>
-      <a class="case-nav-link is-next" href="${e(next.url)}"><span>Next</span><strong>${e(next.title)}</strong></a>
+    <nav class="case-nav" aria-label="${e(t('project.moreAria'))}">
+      <a class="case-nav-link" href="${e(prev.url)}"><span>${e(t('project.prev'))}</span><strong>${e(prev.title)}</strong></a>
+      <a class="case-nav-link is-next" href="${e(next.url)}"><span>${e(t('project.next'))}</span><strong>${e(next.title)}</strong></a>
     </nav>
   </article>`;
 };
 
-const indexMain = `  <section class="projects-page" aria-labelledby="projects-page-title">
+const indexMain = () => `  <section class="projects-page" aria-labelledby="projects-page-title">
     <header class="page-head">
       <div>
         <h1 class="page-title" id="projects-page-title">${e(work.projects?.title || 'Projects')}</h1>
@@ -179,34 +183,42 @@ const indexMain = `  <section class="projects-page" aria-labelledby="projects-pa
   </section>`;
 
 /* ── Write ────────────────────────────────────────────────────────────── */
-const outDir = path.join(root, 'projects');
-fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'index.html'), shell.pageHtml({
-  title: work.projects?.title || 'Projects',
-  description: work.projects?.sub,
-  canonical: `${SITE_URL}/projects/`,
-  active: 'projects',
-  bodyClass: 'projects-page-body',
-  main: indexMain,
-}));
-projects.forEach((p, i) => {
-  if (p.href) return;                    // lives elsewhere; no page of its own
-  const dir = path.join(outDir, p.slug);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'index.html'), shell.pageHtml({
-    title: p.title,
-    description: p.summary,
-    canonical: `${SITE_URL}/projects/${p.slug}/`,
+for (const lang of i18n.LANGS) {
+  LANG = lang;
+  work = i18n.content('content/work.json', lang);
+  projects = projectList(lang);
+  const outDir = path.join(i18n.outRoot(lang), 'projects');
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'index.html'), shell.pageHtml({
+    title: work.projects?.title || 'Projects',
+    description: work.projects?.sub,
+    lang,
+    path: '/projects/',
     active: 'projects',
-    bodyClass: 'case-page',
-    main: caseMain(p, i),
-    scripts: [p.board && 'scripts/board.js', p.live && p.live.url && 'scripts/live.js'].filter(Boolean),
+    bodyClass: 'projects-page-body',
+    main: indexMain(),
   }));
-});
-const keep = new Set(projects.map((p) => p.slug));
-for (const ent of fs.readdirSync(outDir, { withFileTypes: true })) {
-  if (ent.isDirectory() && !keep.has(ent.name)) fs.rmSync(path.join(outDir, ent.name), { recursive: true, force: true });
+  projects.forEach((p, i) => {
+    if (p.href) return;                    // lives elsewhere; no page of its own
+    const dir = path.join(outDir, p.slug);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'index.html'), shell.pageHtml({
+      title: p.title,
+      description: p.summary,
+      lang,
+      path: `/projects/${p.slug}/`,
+      active: 'projects',
+      bodyClass: 'case-page',
+      main: caseMain(p, i),
+      scripts: [p.board && 'scripts/board.js', p.live && p.live.url && 'scripts/live.js'].filter(Boolean),
+    }));
+  });
+  const keep = new Set(projects.map((p) => p.slug));
+  for (const ent of fs.readdirSync(outDir, { withFileTypes: true })) {
+    if (ent.isDirectory() && !keep.has(ent.name)) fs.rmSync(path.join(outDir, ent.name), { recursive: true, force: true });
+  }
 }
+LANG = 'en';
 /* ── /board-editor/ ───────────────────────────────────────────────────── */
 const TOOL = (id, label, key, icon) => `<button type="button" data-tool="${id}" title="${label} (${key})" aria-label="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></button>`;
 const editorHtml = `<!DOCTYPE html>

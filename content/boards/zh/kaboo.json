@@ -1,0 +1,539 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f5",
+      "type": "frame",
+      "x": 1272,
+      "y": 564,
+      "w": 848,
+      "h": 470,
+      "text": "05 · 我的体会"
+    },
+    {
+      "id": "f4",
+      "type": "frame",
+      "x": 0,
+      "y": 564,
+      "w": 1212,
+      "h": 470,
+      "text": "04 · 我做了什么"
+    },
+    {
+      "id": "f3",
+      "type": "frame",
+      "x": 1260,
+      "y": 0,
+      "w": 860,
+      "h": 474,
+      "text": "03 · 为什么能这样"
+    },
+    {
+      "id": "f2",
+      "type": "frame",
+      "x": 440,
+      "y": 0,
+      "w": 760,
+      "h": 474,
+      "text": "02 · 协作方式"
+    },
+    {
+      "id": "f1",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "w": 380,
+      "h": 474,
+      "text": "01 · 这是什么项目"
+    },
+    {
+      "id": "f1h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 28,
+      "w": 324,
+      "h": 30,
+      "text": "Kaboo：token 消耗分析"
+    },
+    {
+      "id": "f1s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 66,
+      "w": 324,
+      "h": 40,
+      "text": "字节内部的一个开源项目。比起做了什么，更重要的是怎么做的。"
+    },
+    {
+      "id": "p1",
+      "type": "sticky",
+      "color": "blue",
+      "x": 28,
+      "y": 136,
+      "w": 324,
+      "h": 140,
+      "text": "**做了什么**\n分析 token 消耗：Agent 的 token 都花在了哪里。"
+    },
+    {
+      "id": "p2",
+      "type": "sticky",
+      "color": "green",
+      "x": 28,
+      "y": 306,
+      "w": 324,
+      "h": 140,
+      "text": "**怎么做的**\n一种全新的协作方式：一个人把一项改动从问题一路带到上线。"
+    },
+    {
+      "id": "f2h",
+      "type": "text",
+      "size": "h2",
+      "x": 468,
+      "y": 28,
+      "w": 704,
+      "h": 30,
+      "text": "没有接力：一个人负责到底"
+    },
+    {
+      "id": "f2s",
+      "type": "text",
+      "size": "small",
+      "x": 468,
+      "y": 66,
+      "w": 704,
+      "h": 40,
+      "text": "谁提出问题，谁就把它一路做到上线。"
+    },
+    {
+      "id": "rl",
+      "type": "sticky",
+      "color": "gray",
+      "x": 468,
+      "y": 136,
+      "w": 230,
+      "h": 140,
+      "text": "**不是常见的接力**\n提需求 → 排期 → 开发 → 测试 → 上线，在多人之间传递。"
+    },
+    {
+      "id": "o1",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 738,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**提出**"
+    },
+    {
+      "id": "o2",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 852,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**解决**"
+    },
+    {
+      "id": "o3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 966,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**测试**"
+    },
+    {
+      "id": "o4",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1080,
+      "y": 166,
+      "w": 92,
+      "h": 80,
+      "text": "**上线**"
+    },
+    {
+      "id": "one",
+      "type": "text",
+      "size": "small",
+      "x": 738,
+      "y": 254,
+      "w": 434,
+      "h": 24,
+      "text": "四步都由同一个人完成，他对自己那一块负责。"
+    },
+    {
+      "id": "s1",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 468,
+      "y": 326,
+      "w": 340,
+      "h": 110,
+      "text": "**保险 1 · 上线前**\nAgent 检查改动有没有问题"
+    },
+    {
+      "id": "s2",
+      "type": "shape",
+      "shape": "round",
+      "color": "purple",
+      "x": 832,
+      "y": 326,
+      "w": 340,
+      "h": 110,
+      "text": "**保险 2 · 上线后**\n出了问题可以及时回滚"
+    },
+    {
+      "id": "f3h",
+      "type": "text",
+      "size": "h2",
+      "x": 1288,
+      "y": 28,
+      "w": 804,
+      "h": 30,
+      "text": "路已经铺好：接进飞书的 mew"
+    },
+    {
+      "id": "f3s",
+      "type": "text",
+      "size": "small",
+      "x": 1288,
+      "y": 66,
+      "w": 804,
+      "h": 40,
+      "text": "一个把 Agent 嵌进软件开发流程的项目管理平台。"
+    },
+    {
+      "id": "w1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1288,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**一个想法**\n说得清楚"
+    },
+    {
+      "id": "w2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1570,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**mew**\nAgent 嵌入开发流程"
+    },
+    {
+      "id": "w3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1852,
+      "y": 146,
+      "w": 240,
+      "h": 110,
+      "text": "**做出来、上线**\n由提出想法的人完成"
+    },
+    {
+      "id": "w4",
+      "type": "sticky",
+      "color": "gray",
+      "x": 1570,
+      "y": 316,
+      "w": 240,
+      "h": 120,
+      "text": "**接进了飞书**\n团队本来就在这里沟通和工作。"
+    },
+    {
+      "id": "w5",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 1288,
+      "y": 316,
+      "w": 240,
+      "h": 120,
+      "text": "**唯一的要求**\n能把自己想要什么说清楚。"
+    },
+    {
+      "id": "f4h",
+      "type": "text",
+      "size": "h2",
+      "x": 28,
+      "y": 592,
+      "w": 1156,
+      "h": 30,
+      "text": "Token 效率榜，从头到尾"
+    },
+    {
+      "id": "f4s",
+      "type": "text",
+      "size": "small",
+      "x": 28,
+      "y": 630,
+      "w": 1156,
+      "h": 40,
+      "text": "问题是我提的，解法是我想的，测试和上线也是我做的。"
+    },
+    {
+      "id": "bs",
+      "type": "sticky",
+      "color": "pink",
+      "x": 28,
+      "y": 700,
+      "w": 300,
+      "h": 300,
+      "text": "**盲区**\n大家只看 Agent 失败在哪。\n\n没人看任务成功了、但过程中浪费了大量 token 的情况。"
+    },
+    {
+      "id": "f1x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 700,
+      "w": 320,
+      "h": 90,
+      "text": "**五类浪费**\n每类都有明确的判定标准"
+    },
+    {
+      "id": "f2x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 805,
+      "w": 320,
+      "h": 90,
+      "text": "**只用元数据**\n诊断从不读取会话内容"
+    },
+    {
+      "id": "f3x",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 364,
+      "y": 910,
+      "w": 320,
+      "h": 90,
+      "text": "**Effective Tokens**\n把不同模型的成本放到同一把尺子上"
+    },
+    {
+      "id": "sh",
+      "type": "shape",
+      "shape": "round",
+      "color": "gray",
+      "x": 720,
+      "y": 790,
+      "w": 236,
+      "h": 120,
+      "text": "**自己测试、自己上线**\n效率榜和效率分析模块"
+    },
+    {
+      "id": "res",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 984,
+      "y": 795,
+      "w": 200,
+      "h": 110,
+      "text": "**10K+**\n覆盖的内部用户"
+    },
+    {
+      "id": "f5h",
+      "type": "text",
+      "size": "h2",
+      "x": 1300,
+      "y": 592,
+      "w": 792,
+      "h": 30,
+      "text": "判断力成了瓶颈"
+    },
+    {
+      "id": "f5s",
+      "type": "text",
+      "size": "small",
+      "x": 1300,
+      "y": 630,
+      "w": 792,
+      "h": 40,
+      "text": "这段经历改变了我对 AI 时代协作的看法。"
+    },
+    {
+      "id": "l1",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1300,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**实现变便宜了**\n基建抹平了实现的成本"
+    },
+    {
+      "id": "l2",
+      "type": "shape",
+      "shape": "round",
+      "color": "blue",
+      "x": 1570,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**瓶颈转移了**\n变成能不能把问题想清楚、说清楚"
+    },
+    {
+      "id": "l3",
+      "type": "shape",
+      "shape": "round",
+      "color": "green",
+      "x": 1840,
+      "y": 710,
+      "w": 238,
+      "h": 120,
+      "text": "**价值也跟着转移**\n从执行转到判断"
+    },
+    {
+      "id": "lq",
+      "type": "sticky",
+      "color": "yellow",
+      "x": 1300,
+      "y": 870,
+      "w": 778,
+      "h": 80,
+      "text": "**一个人的价值更多在判断上，而不在执行上。**"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "p2",
+      "to": "rl",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e2",
+      "from": "rl",
+      "to": "o1",
+      "dashed": true
+    },
+    {
+      "id": "e3",
+      "from": "o1",
+      "to": "o2"
+    },
+    {
+      "id": "e4",
+      "from": "o2",
+      "to": "o3"
+    },
+    {
+      "id": "e5",
+      "from": "o3",
+      "to": "o4"
+    },
+    {
+      "id": "e6",
+      "from": "o4",
+      "to": "w1"
+    },
+    {
+      "id": "e7",
+      "from": "w1",
+      "to": "w2"
+    },
+    {
+      "id": "e8",
+      "from": "w2",
+      "to": "w3"
+    },
+    {
+      "id": "e9",
+      "from": "w4",
+      "to": "w2",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e10",
+      "from": "w5",
+      "to": "w1",
+      "dashed": true,
+      "fromSide": "t",
+      "toSide": "b"
+    },
+    {
+      "id": "e11",
+      "from": "bs",
+      "to": "f1x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e12",
+      "from": "bs",
+      "to": "f2x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e13",
+      "from": "bs",
+      "to": "f3x",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e14",
+      "from": "f1x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e15",
+      "from": "f2x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e16",
+      "from": "f3x",
+      "to": "sh",
+      "fromSide": "r",
+      "toSide": "l"
+    },
+    {
+      "id": "e17",
+      "from": "sh",
+      "to": "res"
+    },
+    {
+      "id": "e18",
+      "from": "l1",
+      "to": "l2"
+    },
+    {
+      "id": "e19",
+      "from": "l2",
+      "to": "l3"
+    },
+    {
+      "id": "e20",
+      "from": "res",
+      "to": "l1",
+      "dashed": true,
+      "label": "让我明白"
+    }
+  ]
+}

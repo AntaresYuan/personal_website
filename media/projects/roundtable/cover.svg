@@ -57,5 +57,5 @@
 <path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
 <!-- legend -->
 <g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">Decomposition track</text>
-<g class="pc-tb"><rect class="pc-b" x="249.79999999999998" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="249.79999999999998" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="275.79999999999995" y="439">Reuse track</text>
+<g class="pc-tb"><rect class="pc-b" x="249.8" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="249.8" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="275.8" y="439">Reuse track</text>
 </svg>

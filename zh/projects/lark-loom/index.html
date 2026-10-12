@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<!--
+  Open-source template by Antares Yuan — https://github.com/AntaresYuan/personal_website (MIT).
+  GENERATED — do not edit by hand. Regenerate: `node scripts/build.js`
+-->
+<html lang="zh-CN">
+<head>
+<meta name="generator" content="personal_website by Antares Yuan — https://github.com/AntaresYuan/personal_website">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lark Loom · Antares Yuan</title>
+<meta name="description" content="一个住在飞书群聊里的项目 Agent：它记得团队聊出来的结论，并把讨论变成需求文档、分工表格和演示文稿。">
+<meta name="author" content="Chenjie (Antares) Yuan">
+<link rel="canonical" href="https://antaresyuan.site/zh/projects/lark-loom/">
+<link rel="alternate" hreflang="en" href="https://antaresyuan.site/projects/lark-loom/">
+<link rel="alternate" hreflang="zh-CN" href="https://antaresyuan.site/zh/projects/lark-loom/">
+<link rel="alternate" hreflang="x-default" href="https://antaresyuan.site/projects/lark-loom/">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="文章 — Antares Yuan" href="/blog/feed.xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antaresyuan.site/zh/projects/lark-loom/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Antares Yuan">
+<meta property="og:title" content="Lark Loom">
+<meta property="og:description" content="一个住在飞书群聊里的项目 Agent：它记得团队聊出来的结论，并把讨论变成需求文档、分工表格和演示文稿。">
+<meta property="og:image" content="https://antaresyuan.site/media/avatar-calm.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lark Loom">
+<meta name="twitter:description" content="一个住在飞书群聊里的项目 Agent：它记得团队聊出来的结论，并把讨论变成需求文档、分工表格和演示文稿。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<script>
+  (function () {
+    var d = document.documentElement, m = 'dark';
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'auto') m = t; } catch (e) {}
+    var sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    d.setAttribute('data-theme-mode', m);
+    d.setAttribute('data-theme', m === 'auto' ? (sysDark ? 'dark' : 'light') : m);
+  })();
+</script>
+<link rel="stylesheet" href="/styles/work.css?v=cc533dfa">
+</head>
+<body class="work-home case-page">
+<a class="skip-link" href="#main-content">跳到正文</a>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scroll-edge" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <nav class="space-switch glass" id="space-switch" aria-label="空间" data-lens>
+    <span class="space-thumb" aria-hidden="true"></span>
+    <a class="space-opt is-active" href="/zh/" data-space="work">工作</a>
+    <a class="space-opt" href="/personal/" data-space="personal">个人</a>
+  </nav>
+
+  <div class="top-right">
+  <nav class="lang-switch glass" id="lang-switch" aria-label="语言" data-language-toggle data-no-translate data-lens><a class="lang-opt" href="/projects/lark-loom/?lang=en" hreflang="en" lang="en" data-lang="en" title="English">EN</a><a class="lang-opt is-active" href="/zh/projects/lark-loom/?lang=zh" hreflang="zh-CN" lang="zh-CN" data-lang="zh" aria-current="true" title="中文">中</a></nav>
+  <div class="theme-switch glass" id="theme-switch" data-lens>
+    <button class="theme-btn theme-current" id="theme-current" type="button"
+            aria-label="外观" aria-expanded="false" aria-controls="theme-options">
+      <svg class="ti ti-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg>
+      <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg>
+      <svg class="ti ti-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="theme-options" id="theme-options" role="radiogroup" aria-label="外观">
+      <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="自动"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="浅色"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/></svg></button>
+      <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="深色"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<nav class="rail glass" id="rail" aria-label="站点导航" data-lens>
+  <span class="rail-blob" aria-hidden="true"></span>
+  <ul class="rail-list" id="rail-list">
+    <li><a class="rail-item" href="/zh/" data-id="home" data-label="首页" aria-label="首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.4 12 4.3l7.5 6.1v8.1a1.5 1.5 0 0 1-1.5 1.5h-3.6v-5.6H9.6V20H6a1.5 1.5 0 0 1-1.5-1.5z"/></svg></a></li>
+    <li><a class="rail-item is-active" href="/zh/projects/" aria-current="page" data-id="projects" data-label="项目" aria-label="项目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 7.6A1.6 1.6 0 0 1 5.4 6h3.9l2.1 2.1h7.2a1.6 1.6 0 0 1 1.6 1.6v7.7a1.6 1.6 0 0 1-1.6 1.6H5.4a1.6 1.6 0 0 1-1.6-1.6z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/skills/" data-id="skills" data-label="AI 技能" aria-label="AI 技能"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="4.5"/><path d="M12 7.4c.38 2.62 1.38 3.62 4 4-2.62.38-3.62 1.38-4 4-.38-2.62-1.38-3.62-4-4 2.62-.38 3.62-1.38 4-4z"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/gallery/" data-id="gallery" data-label="作品集" aria-label="作品集"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="13.6" rx="2.6"/><circle cx="9" cy="10" r="1.5"/><path d="m4.4 17 4.4-4.3 3.3 3.2 2.4-2.3 5.3 4.8"/></svg></a></li>
+    <li><a class="rail-item" href="/zh/blog/" data-id="writing" data-label="文章" aria-label="文章"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.8h6.6l4.6 4.6v10.2a1.6 1.6 0 0 1-1.6 1.6H7.2a1.6 1.6 0 0 1-1.6-1.6V5.4a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M13.6 3.9v4.7h4.7M8.8 12.6h6.4M8.8 15.9h4.4"/></svg></a></li>
+  </ul>
+</nav>
+
+<main class="page" id="main-content">
+  <article class="case">
+    <a class="back-link" href="/zh/projects/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg>项目</a>
+
+    <div class="case-cover is-svg" style="--hue: 155"><svg xmlns="http://www.w3.org/2000/svg" class="pc pc-lark-loom" viewBox="0 0 1200 480" role="img" aria-label="Lark Loom：从散在聊天里的 context，到结构化记忆和定向召回">
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<text class="pc-h" x="128" y="46">业务问题</text><text class="pc-hs" x="128" y="70">context 困在 IM</text>
+<text class="pc-h" x="352" y="46">业务场景</text><text class="pc-hs" x="352" y="70">聊天是碎片化的</text>
+<text class="pc-h" x="576" y="46">产品形态</text><text class="pc-hs" x="576" y="70">Lark Loom</text>
+<text class="pc-h pc-me" x="812" y="46">我的工作</text><text class="pc-hs" x="812" y="70">在记忆和模型上</text>
+<text class="pc-h" x="1060" y="46">衡量指标</text><text class="pc-hs" x="1060" y="70">质量和速度</text>
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">context 在 IM</text><text class="pc-s" x="128" y="179">需求、结论、分工</text><text class="pc-s" x="128" y="201">全在聊天里</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">储存</text><text class="pc-s" x="352" y="179">几天的消息，</text><text class="pc-s" x="352" y="201">夹着闲聊</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Memory</text><text class="pc-s" x="576" y="179">把聊天存成</text><text class="pc-s" x="576" y="201">结构化记忆</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">存与选</text><text class="pc-s" x="812" y="179">Lite 抽取；</text><text class="pc-s" x="812" y="201">关键词 + 任务召回</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">通过率</text><text class="pc-s" x="1060" y="179">60 条评测集</text><text class="pc-s" x="1060" y="201">65% → <tspan class="pc-k">80%</tspan></text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">用不上</text><text class="pc-s" x="128" y="331">模型消费不了</text><text class="pc-s" x="128" y="353">聊天记录</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">筛选</text><text class="pc-s" x="352" y="331">相关、完整、</text><text class="pc-s" x="352" y="353">干净的上下文</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Skills</text><text class="pc-s" x="576" y="331">用召回的 context</text><text class="pc-s" x="576" y="353">产出文档、表格、幻灯片</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">模型分层</text><text class="pc-s" x="812" y="331">Lite 做准备，</text><text class="pc-s" x="812" y="353">Pro 做推理</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">响应时间</text><text class="pc-s" x="1060" y="331">单任务</text><text class="pc-s" x="1060" y="353">95 秒 → <tspan class="pc-k">50 秒</tspan></text></g>
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">context 线</text>
+<g class="pc-tb"><rect class="pc-b" x="174.6" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="174.6" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="200.6" y="439">生成线</text>
+</svg></div>
+
+    <header class="case-head">
+      <span class="project-chip"><img class="project-chip-logo" src="/media/logos/lark.webp" alt="" width="14" height="14"><span><span class="chip-part"><span class="chip-copy">飞书校园 AI 挑战赛</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">AI Agent</span>&nbsp;·</span> <span class="chip-part"><span class="chip-copy">记忆与召回</span></span></span></span>
+      <h1 class="case-title">Lark Loom</h1>
+      <p class="case-summary">一个住在飞书群聊里的项目 Agent：它记得团队聊出来的结论，并把讨论变成需求文档、分工表格和演示文稿。</p>
+      <dl class="case-facts"><div><dt>赛事</dt><dd><img class="case-fact-icon" src="/media/logos/lark.webp" alt="" width="18" height="18">飞书校园 AI 挑战赛</dd></div><div><dt>角色</dt><dd>AI 产品经理 + 交付层开发</dd></div><div><dt>团队</dt><dd>3 人</dd></div><div><dt>模型</dt><dd>Seed 1.5 Lite、Seed 2.0 Pro</dd></div></dl>
+    </header>
+
+    <section class="case-section" aria-labelledby="st-lark-loom-1">
+      <h2 class="case-section-title" id="st-lark-loom-1">业务问题</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>团队做项目的 context 其实都在 IM 里，需求、结论、分工全是聊出来的。</p>
+<p>但这些内容没办法很好地变成模型可以消费的东西，所以后面要辅助产出文档、分工表、汇报材料的时候，模型用不上这些 context。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-lark-loom-2">
+      <h2 class="case-section-title" id="st-lark-loom-2">业务场景</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>为什么会这样，要看 IM 协作这个场景本身。IM 里的信息是碎片化的：一个需求可能散在几天的几十条消息里，中间夹着闲聊和别的话题，说法也很口语。而模型要辅助产出，需要的是和当前任务相关、完整、干净的上下文。</p>
+<p>所以这个场景本质上是两个问题：</p>
+<ul><li><strong>储存</strong>：怎么把聊天里的 context 更好地存下来。</li><li><strong>筛选</strong>：在需要的时候，怎么准确地选出对应的 context，用来帮用户辅助生成内容。</li></ul></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-lark-loom-3">
+      <h2 class="case-section-title" id="st-lark-loom-3">产品形态</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>Lark Loom 是一个住在飞书群聊里的项目协作 Agent。它持续监听群聊，不需要 @ 就能感知意图，把群里的讨论变成需求文档、分工表格、演示文稿这些结构化产出。产出就落在团队本来工作的地方：分工表进飞书多维表格，需求和会议纪要进飞书云文档，汇报材料是原生的飞书幻灯片。它的设计对应刚才的两个问题。</p>
+<p><strong>储存这一侧是 Memory。</strong> 群里的讨论会被整理成结构化的记忆存下来，而不是只留原始消息。</p>
+<p><strong>筛选这一侧是召回。</strong> 每种产出能力是 13 个预置 Skill 中的一个，只有问答 Skill 需要 @。Skill 执行时，按当前任务从 Memory 里选出对应的 context，再交给模型生成内容。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-lark-loom-4">
+      <h2 class="case-section-title" id="st-lark-loom-4">我的工作</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>我主要做了两件事。</p>
+<p><strong>重做了储存和筛选。</strong> 原来的做法是直接对历史消息做语义相似度检索，取 top-20 给模型。问题是 IM 消息太碎，语义相近的不一定是当前任务需要的，召回的内容会漂。我改成了两步：</p>
+<ul><li><strong>储存</strong>：用 Seed 1.5 Lite 把消息抽取成结构化的 Memory。</li><li><strong>筛选</strong>：按关键词和任务类型两路定向提取。关键词用精确匹配来收敛语义漂移，任务类型用来限定召回范围。</li></ul>
+<p>在一个 60 条的评测集上，通过率从 65% 提到 80%。</p>
+<p><strong>按子任务的复杂度分层调用模型。</strong> 上下文抽取、结构化这类确定性的处理交给 Seed 1.5 Lite，Seed 2.0 Pro 只做核心的推理和生成，减少大模型要处理和输出的 token。单任务平均响应时间从 95 秒降到 50 秒，降了 47%，人工抽检质量没有明显差异。</p></div>
+      </div>
+    </section>
+    <section class="case-section" aria-labelledby="st-lark-loom-5">
+      <h2 class="case-section-title" id="st-lark-loom-5">怎么衡量</h2>
+      <div class="case-section-body">
+        <div class="prose case-prose"><p>怎么衡量存和选做得好不好？看两个指标。</p>
+<ul><li><strong>质量</strong>：评测集上的通过率。这个评测集是从任务完成的维度和模型的推理链里提炼出来的，看的不是召回了什么，而是模型拿到这些 context 之后能不能把任务做对。</li><li><strong>速度</strong>：单任务的平均响应时间。Agent 住在群聊里，回得太慢，对话的节奏就断了。</li></ul></div>
+      </div>
+    </section>
+
+
+    <section class="case-section is-wide" aria-labelledby="bd-lark-loom">
+      <h2 class="case-section-title" id="bd-lark-loom">画板</h2>
+      <div class="case-section-body">
+        <div class="board-embed" data-board-src="/content/boards/zh/lark-loom.json" role="img" aria-label="Lark Loom 的画板"></div>
+        <p class="board-hint">拖动画布移动 · ⌘ / Ctrl + 滚轮或双指缩放 · 全屏查看更清楚</p>
+      </div>
+    </section>
+
+    <section class="case-section" aria-labelledby="oc-lark-loom">
+      <h2 class="case-section-title" id="oc-lark-loom">成果</h2>
+      <div class="case-section-body">
+        <dl class="case-outcomes"><div><dd>65% → 80%</dd><dt>60 条评测集上的通过率，来自结构化记忆和两路召回</dt></div><div><dd>95 秒 → 50 秒</dd><dt>单任务平均响应时间，按子任务分层调用模型后下降 47%</dt></div></dl>
+      </div>
+    </section>
+
+
+    <section class="case-section" aria-labelledby="ln-lark-loom">
+      <h2 class="case-section-title" id="ln-lark-loom">链接</h2>
+      <div class="case-section-body">
+        <div class="skill-actions"><a class="btn" href="https://github.com/EdwinjJ1/lark-loom" target="_blank" rel="noopener">GitHub 上的代码<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+      </div>
+    </section>
+
+    <nav class="case-nav" aria-label="更多项目">
+      <a class="case-nav-link" href="/zh/projects/roundtable/"><span>上一个</span><strong>Roundtable</strong></a>
+      <a class="case-nav-link is-next" href="/zh/projects/susbench/"><span>下一个</span><strong>SusBench</strong></a>
+    </nav>
+  </article>
+  <footer class="foot" id="footer">© 2026 Antares Yuan<span aria-hidden="true"> · </span><a href="/admin/">编辑</a><span aria-hidden="true"> · </span><a href="/blog/feed.xml">RSS</a><span aria-hidden="true"> · </span><a href="/llms.txt">llms.txt</a><span aria-hidden="true"> · </span><a href="https://github.com/AntaresYuan/personal_website" target="_blank" rel="noopener">源码</a></footer>
+</main>
+
+<div class="ask" id="ask" data-qa="https://qa.antaresyuan.site">
+  <div class="ask-suggest" id="ask-suggest" hidden></div>
+  <div class="ask-shell glass" id="ask-shell" data-lens>
+    <form class="ask-bar" id="ask-form" role="search" autocomplete="off">
+      <button class="ask-avatar" id="ask-avatar" type="button" tabindex="-1" aria-hidden="true" data-mood="idle">
+        <img src="/media/buddy/felt-still.webp" alt="" width="48" height="48" decoding="async">
+      </button>
+      <input class="ask-input" id="ask-input" type="text" maxlength="500"
+             placeholder="有什么想问的" aria-label="向 Antares 提问">
+      <button class="ask-send" id="ask-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </form>
+  </div>
+</div>
+<aside class="ask-panel glass" id="ask-panel" aria-label="问问 Antares" hidden>
+  <header class="ask-panel-head">
+    <span class="ask-panel-avatar" id="ask-panel-avatar"></span>
+    <span class="ask-panel-title"><strong>问问 Antares</strong><span class="ask-model-source" id="ask-model-source" data-source="idle" role="status" aria-live="polite">
+      <svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><path d="M4.5 8h7"/></svg>
+      <span>优先本地模型 · 云端兜底</span>
+    </span></span>
+    <button class="ask-icon" id="ask-new" type="button" aria-label="新对话" title="新对话">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>
+    </button>
+    <button class="ask-icon" id="ask-close" type="button" aria-label="关闭" title="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+    </button>
+  </header>
+  <div class="ask-log" id="ask-log" aria-live="polite"></div>
+  <form class="ask-panel-form" id="ask-panel-form" autocomplete="off">
+    <input class="ask-panel-input" id="ask-panel-input" type="text" maxlength="500"
+           placeholder="继续追问…" aria-label="继续追问">
+    <button class="ask-send ask-panel-send" id="ask-panel-send" type="submit" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+  </form>
+</aside>
+<script type="application/json" id="ui-strings">{"updated":{"now":"刚刚更新","m":"{n} 分钟前更新","h":"{n} 小时前更新","d":"{n} 天前更新"},"usage":{"tokens":"{n} tokens","none":"无记录","allCharts":"全部图表 · {ago}","avg":"日均 {n}","since":"自 {date}起","share":"占全部 token 的 {pct}%"},"carousel":{"count":"{range} / {n}"},"copied":"已复制","ask":{"empty":"可以问我做过的项目、正在做的事、我怎么思考，或者怎么联系我。","thinking":"思考中","offlineNote":"（这是内置 FAQ 的快速回答——你的网络暂时连不上在线问答服务。可以稍后再试，或发邮件到 chenjy4@uw.edu。）","noAnswer":"这个问题我还没写下答案——可以问问我的项目、正在做的事，或者怎么联系我。","source":{"idle":"优先本地模型 · 云端兜底","pending":"正在选择可用模型…","local":"本地 · {model}","cloud":"云端 · Workers AI","offline":"内置 FAQ · 无模型","model":"模型：{model}"}},"comments":{"title":"评论","reactions":"表态","empty":"还没有评论——来说第一句吧。","author":"作者","pending":"正在等待快速审核——目前只有你能看到。","reply":"回复","comment":"评论","placeholder":"写下评论…","replyPlaceholder":"写下回复…","name":"昵称","email":"邮箱，用于接收回复提醒（选填，不会公开）","emailLabel":"邮箱（选填）","hint":"友善发言。带链接的评论需要先经过快速审核。","cancel":"取消","post":"发布","justNow":"刚刚","unavailable":"评论暂时无法使用，请稍后再来。","tsFailed":"人机验证加载失败——是否有插件拦截了 challenges.cloudflare.com？","checking":"正在确认你是真人，请稍候…","posting":"发布中…","offline":"连不上评论服务器，请检查网络。","failed":"发布失败，请再试一次。","react":{"like":"赞","love":"喜欢","insight":"有启发","fun":"有趣"},"errors":{"verification-failed":"没能确认你是真人，请再试一次。","slow-down":"发得有点快——过几分钟再试吧。","name-required":"请填一个昵称，让大家知道是谁在说话。","name-too-long":"昵称请控制在 40 个字符以内。","name-has-link":"昵称里不能包含链接。","bad-email":"这个邮箱格式好像不对。","body-required":"先写点什么吧。","body-too-long":"请控制在 2000 个字符以内。","bad-parent":"这条评论已经不能回复了。"}},"board":{"view":"画板视图","zoomOut":"缩小","fit":"适应画板","zoomIn":"放大","full":"全屏"},"live":{"frameTitle":"{title}（在线版）","full":"全屏","exitFull":"退出全屏"},"gallery":{"picture":"第 {n} 张图"}}</script>
+
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs id="glass-defs"></defs></svg>
+
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666" defer></script>
+<script src="/scripts/work.js?v=6042443f" defer></script>
+<script src="/scripts/buddy.js?v=9a4fd889" defer></script>
+<script src="/scripts/board.js?v=d687d7ec" defer></script>
+</body>
+</html>

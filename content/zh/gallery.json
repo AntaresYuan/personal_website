@@ -1,0 +1,140 @@
+{
+  "title": "作品集",
+  "sub": "产品与视觉设计、3D、实体作品、摄影和插画。点开任意一件可以细看。",
+  "categories": {
+    "product": "产品设计",
+    "visual": "视觉传达",
+    "art3d": "3D 艺术",
+    "physical": "实体产品",
+    "photo": "摄影",
+    "illustration": "插画",
+    "nft": "NFT 艺术"
+  },
+  "items": [
+    {
+      "slug": "ai-museum-guide",
+      "title": "AI 博物馆导览",
+      "medium": "产品设计",
+      "summary": "一款应用概念：回答你关于眼前这幅画的问题。"
+    },
+    {
+      "slug": "outdoor-app",
+      "title": "户外应用概念",
+      "medium": "产品设计",
+      "summary": "一款移动端概念设计，展示了在山间帐篷里使用的场景。"
+    },
+    {
+      "slug": "in-car-app",
+      "title": "车载应用概念",
+      "medium": "产品设计",
+      "summary": "一款移动端概念设计，展示了在驾驶座上使用的场景。"
+    },
+    {
+      "slug": "logo-studies",
+      "title": "Logo 练习",
+      "medium": "视觉传达",
+      "summary": "一组 logo 和标志的探索草图。"
+    },
+    {
+      "slug": "spanish-culture-day",
+      "title": "西班牙文化日视觉识别",
+      "medium": "视觉传达",
+      "summary": "一套视觉识别，延展到文具、徽章和帆布袋上。"
+    },
+    {
+      "slug": "climate-collage",
+      "title": "气候拼贴",
+      "medium": "视觉传达",
+      "summary": "用关于气候的报纸标题拼成的拼贴画。"
+    },
+    {
+      "slug": "pocket-device",
+      "title": "口袋设备渲染",
+      "medium": "3D 艺术",
+      "summary": "一个带屏幕的小设备的 3D 渲染，两种配色。"
+    },
+    {
+      "slug": "wind-chimes",
+      "title": "玻璃风铃",
+      "medium": "3D 艺术",
+      "summary": "花枝前的一串玻璃风铃，3D 渲染。"
+    },
+    {
+      "slug": "snow-globe",
+      "title": "雪景球小屋",
+      "medium": "3D 艺术",
+      "summary": "雪景球里的一间小屋，3D 渲染。"
+    },
+    {
+      "slug": "light-panel",
+      "title": "壁挂灯板",
+      "medium": "实体产品",
+      "summary": "一块点亮的壁挂灯板。"
+    },
+    {
+      "slug": "studio-model",
+      "title": "综合材料模型",
+      "medium": "实体产品",
+      "summary": "工作室里的一件大型综合材料模型。"
+    },
+    {
+      "slug": "form-studies",
+      "title": "雕刻形态练习",
+      "medium": "实体产品",
+      "summary": "手工雕刻的形态练习，摆在它们的草图上。"
+    },
+    {
+      "slug": "mount-rainier",
+      "title": "雷尼尔山",
+      "medium": "摄影"
+    },
+    {
+      "slug": "orion-nebula",
+      "title": "猎户座星云",
+      "medium": "摄影",
+      "summary": "天文摄影。"
+    },
+    {
+      "slug": "meteor-night",
+      "title": "流星之夜",
+      "medium": "摄影",
+      "summary": "校园夜空中的流星。"
+    },
+    {
+      "slug": "milky-way",
+      "title": "银河",
+      "medium": "摄影",
+      "summary": "天文摄影。"
+    },
+    {
+      "slug": "sunset-cliff",
+      "title": "日落悬崖",
+      "medium": "插画",
+      "summary": "一幅数字绘画。"
+    },
+    {
+      "slug": "night-street",
+      "title": "夜街",
+      "medium": "插画",
+      "summary": "一幅数字绘画。"
+    },
+    {
+      "slug": "desert-airship",
+      "title": "沙漠飞艇",
+      "medium": "插画",
+      "summary": "一幅数字绘画。"
+    },
+    {
+      "slug": "cat-on-the-roof",
+      "title": "屋顶上的猫",
+      "medium": "NFT 艺术",
+      "summary": "一个系列：一只白猫舒展地趴在火车、轮船、公交车和飞机的顶上。"
+    },
+    {
+      "slug": "monochrome-figures",
+      "title": "黑白人物",
+      "medium": "NFT 艺术",
+      "summary": "一组黑白线条人物肖像。"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="pc pc-lark-loom" viewBox="0 0 1200 480" role="img" aria-label="Lark Loom：从散在聊天里的 context，到结构化记忆和定向召回">
+<!-- lark-loom cover, drawn by tools/covers/covers.js — edit that, not this. -->
+<style>
+.pc { --pc-h: var(--hue, 262);
+  --pc-glass: rgba(255,255,255,.62); --pc-group: rgba(255,255,255,.3); --pc-dash: rgba(29,29,31,.22);
+  --pc-ink: var(--text, #1D1D1F); --pc-ink-2: var(--text-2, #4F4F55); --pc-ink-3: var(--text-3, #6E6E73);
+  --pc-a: oklch(0.48 0.18 var(--pc-h)); --pc-a-tint: oklch(0.64 0.18 var(--pc-h) / .15); --pc-a-line: oklch(0.56 0.17 var(--pc-h) / .44);
+  --pc-b-line: rgba(0,0,0,.1);
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif); }
+:root[data-theme="dark"] .pc { --pc-glass: rgba(255,255,255,.045); --pc-group: rgba(255,255,255,.02); --pc-dash: rgba(255,255,255,.2);
+  --pc-a: oklch(0.85 0.13 var(--pc-h)); --pc-a-tint: oklch(0.62 0.16 var(--pc-h) / .25); --pc-a-line: oklch(0.78 0.14 var(--pc-h) / .46);
+  --pc-b-line: rgba(255,255,255,.13); }
+.pc text { text-anchor: middle; }
+.pc-h { font: 600 21px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.01em; fill: var(--pc-ink); }
+.pc-h.pc-me { fill: var(--pc-a); }
+.pc-hs { font-size: 15.5px; fill: var(--pc-ink-2); }
+.pc-g { fill: var(--pc-group); stroke: var(--pc-dash); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.pc-b { fill: var(--pc-glass); }
+.pc-c { stroke-width: 1.5; }
+.pc-ta .pc-c { fill: var(--pc-a-tint); stroke: var(--pc-a-line); }
+.pc-tb .pc-c { fill: none; stroke: var(--pc-b-line); }
+.pc-t { font: 600 22px var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif); letter-spacing: -.015em; }
+.pc-ta .pc-t { fill: var(--pc-a); }
+.pc-tb .pc-t { fill: var(--pc-ink); }
+.pc-s { font-size: 16px; fill: var(--pc-ink-2); }
+.pc-k { font-weight: 700; fill: var(--pc-a); }
+.pc-a { fill: none; stroke: var(--pc-ink-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pc-l { text-anchor: start !important; font-size: 15px; fill: var(--pc-ink-2); }
+</style>
+<!-- column heads -->
+<text class="pc-h" x="128" y="46">业务问题</text><text class="pc-hs" x="128" y="70">context 困在 IM</text>
+<text class="pc-h" x="352" y="46">业务场景</text><text class="pc-hs" x="352" y="70">聊天是碎片化的</text>
+<text class="pc-h" x="576" y="46">产品形态</text><text class="pc-hs" x="576" y="70">Lark Loom</text>
+<text class="pc-h pc-me" x="812" y="46">我的工作</text><text class="pc-hs" x="812" y="70">在记忆和模型上</text>
+<text class="pc-h" x="1060" y="46">衡量指标</text><text class="pc-hs" x="1060" y="70">质量和速度</text>
+<!-- groups: my work, metrics -->
+<rect class="pc-g" x="706" y="92" width="212" height="304" rx="32"/>
+<rect class="pc-g" x="954" y="92" width="212" height="304" rx="32"/>
+<!-- nodes -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="148">context 在 IM</text><text class="pc-s" x="128" y="179">需求、结论、分工</text><text class="pc-s" x="128" y="201">全在聊天里</text></g>
+<g class="pc-ta"><rect class="pc-b" x="258" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="148">储存</text><text class="pc-s" x="352" y="179">几天的消息，</text><text class="pc-s" x="352" y="201">夹着闲聊</text></g>
+<g class="pc-ta"><rect class="pc-b" x="482" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="148">Memory</text><text class="pc-s" x="576" y="179">把聊天存成</text><text class="pc-s" x="576" y="201">结构化记忆</text></g>
+<g class="pc-ta"><rect class="pc-b" x="718" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="148">存与选</text><text class="pc-s" x="812" y="179">Lite 抽取；</text><text class="pc-s" x="812" y="201">关键词 + 任务召回</text></g>
+<g class="pc-ta"><rect class="pc-b" x="966" y="104" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="104" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="148">通过率</text><text class="pc-s" x="1060" y="179">60 条评测集</text><text class="pc-s" x="1060" y="201">65% → <tspan class="pc-k">80%</tspan></text></g>
+<g class="pc-tb"><rect class="pc-b" x="34" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="34" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="128" y="300">用不上</text><text class="pc-s" x="128" y="331">模型消费不了</text><text class="pc-s" x="128" y="353">聊天记录</text></g>
+<g class="pc-tb"><rect class="pc-b" x="258" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="258" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="352" y="300">筛选</text><text class="pc-s" x="352" y="331">相关、完整、</text><text class="pc-s" x="352" y="353">干净的上下文</text></g>
+<g class="pc-tb"><rect class="pc-b" x="482" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="482" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="576" y="300">Skills</text><text class="pc-s" x="576" y="331">用召回的 context</text><text class="pc-s" x="576" y="353">产出文档、表格、幻灯片</text></g>
+<g class="pc-tb"><rect class="pc-b" x="718" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="718" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="812" y="300">模型分层</text><text class="pc-s" x="812" y="331">Lite 做准备，</text><text class="pc-s" x="812" y="353">Pro 做推理</text></g>
+<g class="pc-tb"><rect class="pc-b" x="966" y="256" width="188" height="128" rx="20"/><rect class="pc-c" x="966" y="256" width="188" height="128" rx="20"/><text class="pc-t" x="1060" y="300">响应时间</text><text class="pc-s" x="1060" y="331">单任务</text><text class="pc-s" x="1060" y="353">95 秒 → <tspan class="pc-k">50 秒</tspan></text></g>
+<!-- arrows -->
+<path class="pc-a" d="M228 168H252M246 162.5L252 168L246 173.5"/>
+<path class="pc-a" d="M452 168H476M470 162.5L476 168L470 173.5"/>
+<path class="pc-a" d="M676 168H702M696 162.5L702 168L696 173.5"/>
+<path class="pc-a" d="M228 320H252M246 314.5L252 320L246 325.5"/>
+<path class="pc-a" d="M452 320H476M470 314.5L476 320L470 325.5"/>
+<path class="pc-a" d="M676 320H702M696 314.5L702 320L696 325.5"/>
+<path class="pc-a" d="M923 244H949M943 238.5L949 244L943 249.5"/>
+<!-- legend -->
+<g class="pc-ta"><rect class="pc-b" x="34" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="34" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="60" y="439">context 线</text>
+<g class="pc-tb"><rect class="pc-b" x="174.6" y="426" width="16" height="16" rx="5"/><rect class="pc-c" x="174.6" y="426" width="16" height="16" rx="5"/></g><text class="pc-l" x="200.6" y="439">生成线</text>
+</svg>
