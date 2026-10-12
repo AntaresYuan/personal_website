@@ -15,7 +15,7 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
    - the Personal project log and Lens
 
    The response guide and background notes from CMS → **Assistant** →
-   `content/assistant.json` go with every question, along with an overview
+   the four files in `content/assistant/` go with every question, along with an overview
    assembled from the website sources enabled there. The rest are ranked against the question:
    - `@cf/baai/bge-m3`, a multilingual embedding model, so a Chinese question
      finds English passages;
@@ -37,7 +37,7 @@ No API keys touch the frontend; CORS is locked to the site origin.
 
 If `content/site.json` → `qa.workerUrl` is empty (or the Worker can't be
 reached), the Ask panel falls back to the same CMS-authored FAQ compiled from
-`content/assistant.json` into `scripts/qa-faq-data.js`.
+`content/assistant/faqs.json` into `scripts/qa-faq-data.js`.
 
 ## Deploy
 

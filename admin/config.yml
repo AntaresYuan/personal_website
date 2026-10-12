@@ -826,38 +826,36 @@ collections:
     label: "Assistant"
     icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
     files:
-      - file: "content/assistant.json"
-        label: "Assistant context"
-        name: "assistant_context"
+      - file: "content/assistant/guide.json"
+        label: "Response guide"
+        name: "assistant_guide"
         format: "json"
         fields:
-          - label: "Response guide"
-            name: "guidance"
-            widget: "object"
-            collapsed: false
-            hint: "These instructions are sent with every answer. Safety and fact-grounding rules remain enforced by the Worker."
-            fields:
-              - { label: "Identity", name: "identity", widget: "text", hint: "Who the assistant is speaking as." }
-              - { label: "Voice and style", name: "voice", widget: "text", hint: "How answers should sound and how detailed they should be." }
-              - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
-              - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions that should apply to every answer." }
-          - label: "Website context sources"
-            name: "sources"
-            widget: "object"
-            collapsed: false
-            hint: "Choose which parts of the public site may be retrieved and given to the model. The source text is still edited in its normal CMS section."
-            fields:
-              - { label: "Profile and current status", name: "profile", widget: "boolean", default: true }
-              - { label: "Homepage message and update", name: "home", widget: "boolean", default: true }
-              - { label: "Project case studies", name: "projects", widget: "boolean", default: true }
-              - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
-              - { label: "Writing", name: "writing", widget: "boolean", default: true }
-              - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
-              - { label: "Personal project log", name: "projectLog", widget: "boolean", default: true }
-              - { label: "Product lens", name: "lens", widget: "boolean", default: true }
-              - { label: "Contact information", name: "contact", widget: "boolean", default: true }
+          - { label: "Identity", name: "identity", widget: "text", hint: "Who the assistant is speaking as. This is sent with every answer." }
+          - { label: "Voice and style", name: "voice", widget: "text", hint: "How answers should sound and how detailed they should be." }
+          - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
+          - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions that should apply to every answer. Safety and fact-grounding rules remain enforced by the Worker." }
+      - file: "content/assistant/sources.json"
+        label: "Context sources"
+        name: "assistant_sources"
+        format: "json"
+        fields:
+          - { label: "Profile and current status", name: "profile", widget: "boolean", default: true }
+          - { label: "Homepage message and update", name: "home", widget: "boolean", default: true }
+          - { label: "Project case studies", name: "projects", widget: "boolean", default: true }
+          - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
+          - { label: "Writing", name: "writing", widget: "boolean", default: true }
+          - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
+          - { label: "Personal project log", name: "projectLog", widget: "boolean", default: true }
+          - { label: "Product lens", name: "lens", widget: "boolean", default: true }
+          - { label: "Contact information", name: "contact", widget: "boolean", default: true }
+      - file: "content/assistant/faqs.json"
+        label: "FAQ answers"
+        name: "assistant_faqs"
+        format: "json"
+        fields:
           - label: "FAQ answers — drag to reorder; starter questions use this order"
-            name: "faqs"
+            name: "items"
             widget: "list"
             collapsed: false
             summary: "{{fields.question}}"
@@ -874,8 +872,13 @@ collections:
                 field: { label: "Alias", name: "alias", widget: "string" }
               - { label: "Answer content", name: "answer", widget: "markdown", hint: "Edit the full answer here. The model may rephrase it and add facts retrieved from the site, but this content takes priority." }
               - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Used by the offline answer and command palette." }
+      - file: "content/assistant/knowledge.json"
+        label: "Background knowledge"
+        name: "assistant_knowledge"
+        format: "json"
+        fields:
           - label: "Background notes — used when no FAQ fully answers the question"
-            name: "knowledge"
+            name: "notes"
             widget: "list"
             collapsed: false
             summary: "{{fields.title}}"

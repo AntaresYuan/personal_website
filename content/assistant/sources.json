@@ -1,0 +1,11 @@
+{
+  "profile": true,
+  "home": true,
+  "projects": true,
+  "skills": true,
+  "writing": true,
+  "gallery": true,
+  "projectLog": true,
+  "lens": true,
+  "contact": true
+}

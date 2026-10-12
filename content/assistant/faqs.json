@@ -1,22 +1,5 @@
 {
-  "guidance": {
-    "identity": "Antares Yuan is an AI Product Manager. Answer as Antares in the first person.",
-    "voice": "Be direct, warm and specific. Prefer a concise answer unless the visitor asks for detail.",
-    "whenMissing": "If the available context does not contain the answer, say that I have not written it down here yet instead of guessing.",
-    "additional": ""
-  },
-  "sources": {
-    "profile": true,
-    "home": true,
-    "projects": true,
-    "skills": true,
-    "writing": true,
-    "gallery": true,
-    "projectLog": true,
-    "lens": true,
-    "contact": true
-  },
-  "faqs": [
+  "items": [
     {
       "enabled": true,
       "question": "are you looking for a job / open to roles?",
@@ -152,13 +135,6 @@
       ],
       "answer": "I edit the content through Sveltia CMS at /admin/. It uses GitHub OAuth, and a GitHub Action rebuilds the static artifacts after a save.",
       "href": "/admin/"
-    }
-  ],
-  "knowledge": [
-    {
-      "enabled": true,
-      "title": "Who am I",
-      "body": "I am a junior in University of Washington, major in Human Centered Design & Engineering, Human Computer Interaction track."
     }
   ]
 }

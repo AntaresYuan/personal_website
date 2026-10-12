@@ -6,7 +6,7 @@
    can pick the few that answer a question instead of truncating the whole
    site to its first few thousand words. Two kinds of passage are `pin`ned —
    sent with every question — : the guide and notes Antares manages in
-   content/assistant.json, plus an overview of the enabled website sources.
+   content/assistant/, plus an overview of the enabled website sources.
 
    Public content only: the same material as llms-full.txt and
    agent-brief.txt, both of which are already served.
@@ -17,6 +17,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { loadPosts } = require('./lib/blog');
 const { projectList } = require('./lib/projects');
+const { loadAssistant } = require('./lib/assistant');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -25,7 +26,7 @@ const tryRead = (p, fallback) => { try { return read(p); } catch { return fallba
 const profile = read('content/profile.json');
 const work = read('content/work.json');
 const contact = tryRead('content/contact.json', { items: [] });
-const assistant = tryRead('content/assistant.json', { guidance: {}, sources: {}, faqs: [], knowledge: [] });
+const assistant = loadAssistant(root);
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
 const board = tryRead('content/board.json', { cards: [] });

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ════════════════════════════════════════════════════════════════════════
-   build-agent-brief.js — compile content/assistant.json → agent-brief.txt
+   build-agent-brief.js — compile content/assistant/ → agent-brief.txt
 
    This is the "private knowledge" feed for the `ask` assistant (workers/qa/):
    This compatibility artifact contains all owner-managed Assistant context:
@@ -17,14 +17,12 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadAssistant } = require('./lib/assistant');
 
 const root = path.join(__dirname, '..');
 const outPath = path.join(root, 'agent-brief.txt');
 
-let assistant = { guidance: {}, faqs: [], knowledge: [] };
-try {
-  assistant = JSON.parse(fs.readFileSync(path.join(root, 'content/assistant.json'), 'utf8'));
-} catch (_) { /* missing / unreadable — treat as empty */ }
+const assistant = loadAssistant(root);
 
 const guidance = assistant.guidance || {};
 const faqs = Array.isArray(assistant.faqs) ? assistant.faqs.filter((x) => x && x.enabled !== false && x.question && x.answer) : [];
