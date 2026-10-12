@@ -6,7 +6,7 @@
 
    Replaces content/*.json + content/blog/*.md with placeholders, clears the
    tokens in content/site.json, and prints the remaining manual steps (the
-   images in media/, the FAQ in scripts/qa-faq.js, your Cloudflare config).
+   images in media/ and your Cloudflare config).
    It does NOT touch any code, styles, the CMS config, or the Workers.
 
    Safety: if the git remote is the original repo (AntaresYuan/personal_website)
@@ -162,8 +162,8 @@ console.log(`
   1. media/avatar-calm.png + media/avatar-talking.png — replace with your own
      images (or delete them and update content/profile.json → avatar). Same for
      any résumé PDFs in media/ (set profile.json → resumeEn / resumeZh, or "").
-  2. scripts/qa-faq.js — the hand-written FAQ behind ⌘K and the "ask" bar.
-     Edit the FAQ array for your site (a few Q&A pairs is plenty).
+  2. content/faq.json — the FAQ answer briefs behind ⌘K and the "ask" bar.
+     Edit them directly or in /admin/ → Assistant FAQ.
   3. content/site.json → meta.url, footer, and (optionally) the analytics /
      giscus / qa tokens. README has the setup steps for each.
   4. Deploy: point Cloudflare Pages at your fork. For /admin/ to work, deploy

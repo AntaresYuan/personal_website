@@ -10,7 +10,9 @@ globalThis.caches = { default: {
   put: async (k, res) => { store.set(k, await res.text()); },
 } };
 
-const INDEX = { version: 'v1', chunks: [
+const INDEX = { version: 'v1', faqs: [
+  { id: 'faq-1', question: 'walk me through your most mature project.', aliases: ['what is your most mature project?'], answer: 'Lead with Agentic Hiring and preserve the 21% to 25% result.', href: '/projects/agentic-hiring/' },
+], chunks: [
   { id: 'brief-1', title: 'Note', url: '', text: 'I study at UW.', pin: true },
   { id: 'p1', title: 'Project: Kaboo', url: '/projects/kaboo/', text: 'Kaboo analyzes token use.' },
   { id: 'p2', title: 'Project: SusBench', url: '/projects/susbench/', text: 'SusBench tests dark patterns.' },
@@ -64,6 +66,13 @@ await t('the Mac answers when it is up; thinking is stripped', async () => {
   // Retrieval: the pinned note, then the passage the question points at.
   assert.ok(lastLocalPrompt.indexOf('### Note') < lastLocalPrompt.indexOf('### Project: SusBench'));
   assert.match(lastLocalPrompt, /Reply in English/);
+});
+await t('a matched FAQ brief precedes the retrieved site evidence', async () => {
+  local = 'ok';
+  await ask('What is your most mature project?');
+  assert.ok(lastLocalPrompt.indexOf('### FAQ guidance') < lastLocalPrompt.indexOf('### Note'));
+  assert.match(lastLocalPrompt, /21% to 25%/);
+  assert.match(lastLocalPrompt, /FAQ FIRST/);
 });
 await t('passage vectors are cached for the index version', async () => {
   assert.ok(store.has('https://qa-cache.internal/vectors/v1'));

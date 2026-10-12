@@ -60,7 +60,7 @@ const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel))).digest('hex').slice(0, 8);
 
 [
-  'scripts/beacon.js', 'scripts/i18n.js', 'scripts/qa-faq.js', 'scripts/render.js',
+  'scripts/beacon.js', 'scripts/i18n.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/render.js',
   'scripts/terminal.js', 'scripts/palette.js', 'scripts/doodle.js',
   'scripts/skins.js', 'scripts/skin-runtime.js', 'scripts/skin-diva.js',
   'scripts/skin-characters.js', 'scripts/giscus-lazy.js', 'scripts/spaces.js',

@@ -15,7 +15,7 @@
      link    → open in new tab
 
    The palette doubles as a pure-retrieval "ask this portfolio" (#76 Phase 1):
-   a small hand-authored FAQ list (below) plus token-overlap scoring, so a
+   a small CMS-authored FAQ list plus token-overlap scoring, so a
    typed question like "are you looking for a job" surfaces the right FAQ
    entry / card. No embeddings, no model calls — just retrieval. */
 (() => {

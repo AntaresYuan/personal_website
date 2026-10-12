@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {
   normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
-  genPrompt, stripThinking, packVectors, unpackVectors,
+  matchFaqs, faqContextOf, genPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
 
 let pass = 0, fail = 0;
@@ -57,9 +57,21 @@ t('selection: pins always, best first, within budget', () => {
 t('context blocks carry title and page', () => {
   assert.match(contextOf([chunks[1]]), /^### Project: Kaboo \(\/projects\/kaboo\/\)\nKaboo/);
 });
+t('FAQ matching checks canonical questions and bilingual aliases first', () => {
+  const faqs = [
+    { question: 'walk me through your most mature project.', aliases: ['介绍一下你最成熟的项目。'], answer: 'Use Agentic Hiring.' },
+    { question: 'how can I contact you?', aliases: ['怎么联系你？'], answer: 'Use email.' },
+  ];
+  assert.equal(matchFaqs(faqs, 'What is your most mature project?')[0].answer, 'Use Agentic Hiring.');
+  assert.equal(matchFaqs(faqs, '介绍一下你最成熟的项目。')[0].answer, 'Use Agentic Hiring.');
+  assert.equal(matchFaqs([{ question: 'results?', answer: 'The pass rate rose from 21% to 25%.' }], 'Did the pass rate rise?')[0].question, 'results?');
+  assert.deepEqual(matchFaqs(faqs, 'Tell me about SusBench metrics'), []);
+  assert.match(faqContextOf([faqs[0]]), /authoritative[\s\S]*Use Agentic Hiring/);
+});
 t('prompt states the reply language', () => {
   assert.match(genPrompt('C', 'zh'), /Reply in Simplified Chinese/);
   assert.match(genPrompt('C', 'en'), /Reply in English/);
+  assert.match(genPrompt('C', 'en'), /FAQ FIRST/);
 });
 t('thinking blocks are removed', () => {
   assert.equal(stripThinking('<think>plan…</think>\nHello'), 'Hello');

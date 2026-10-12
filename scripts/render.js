@@ -2257,7 +2257,7 @@
      Self-contained — it never bounces the visitor into ⌘K. With the
      antares-qa Worker (site.json → qa.workerUrl) it answers inline with a
      grounded generation; otherwise (or if the Worker errors) it answers
-     inline from the hand-authored FAQ / card retrieval in qa-faq.js. */
+     inline from the CMS-authored FAQ / card retrieval in qa-faq.js. */
   // The multi-turn "ask Antares" chat panel. Returns { open(seedQ?) } so the
   // hero "ask" bar (wireHeroAsk) can pop it open with a question. Answers come
   // from the antares-qa Worker (site.json → qa.workerUrl) with the running
@@ -2296,10 +2296,12 @@
         /* Starter chips, not just a sentence. A tall empty panel with one line
            of prose gives the visitor nothing to act on, and "ask me anything"
            is the hardest possible prompt to answer. The questions are taken
-           from the hand-authored FAQ so a click always lands on an answer the
+           from the CMS-authored FAQ so a click always lands on an answer the
            offline path can serve even if the Worker is unreachable. */
-        const starters = (window.QA && Array.isArray(window.QA.FAQ) ? window.QA.FAQ : [])
-          .slice(0, 4).map((f) => f.q).filter(Boolean);
+        const starterEntries = (window.QA && typeof window.QA.starters === 'function')
+          ? window.QA.starters(4)
+          : (window.QA && Array.isArray(window.QA.FAQ) ? window.QA.FAQ.slice(0, 4) : []);
+        const starters = starterEntries.map((f) => f.q).filter(Boolean);
         const chips = starters.length
           ? `<div class="ask-starters">${starters.map((q) =>
               `<button class="ask-starter" type="button" data-q="${escape(q)}">${escape(q)}</button>`).join('')}</div>`
@@ -2325,7 +2327,7 @@
     };
     const setBusy = (b) => { busy = b; input.disabled = b; if (sendBtn) sendBtn.disabled = b; };
 
-    // Offline / network-degraded fallback: serve the hand-authored FAQ match
+    // Offline / network-degraded fallback: serve the CMS-authored FAQ match
     // (or a card-retrieval hit) so a visitor whose network can't reach the
     // Worker — common on mainland-China connections vs *.workers.dev, which
     // has DNS-poisoning + SNI-reset issues — still gets a useful answer

@@ -1031,13 +1031,15 @@
 <!-- defer keeps these out of the critical path on slow mobile networks.
      Pre-rendered HTML means no script is needed for first paint; these
      just add interactivity (modal, terminal, ⌘K palette, hero "ask"). They
-     execute in document order after parse — qa-faq.js (the shared FAQ +
+     execute in document order after parse — qa-faq-data.js + qa-faq.js
+     (the CMS-authored FAQ +
      retrieval) must come before render.js / palette.js. -->
 <script src="/scripts/i18n.js?v=e9e78904" defer></script>
-<script src="/scripts/qa-faq.js?v=b14c71dc"      defer></script>
-<script src="/scripts/render.js?v=b6308667"   defer></script>
+<script src="/scripts/qa-faq-data.js?v=ba7b8655" defer></script>
+<script src="/scripts/qa-faq.js?v=16189666"      defer></script>
+<script src="/scripts/render.js?v=1f9e7e76"   defer></script>
 <script src="/scripts/terminal.js?v=ef73ed0e" defer></script>
-<script src="/scripts/palette.js?v=1ac21297"  defer></script>
+<script src="/scripts/palette.js?v=36a39fbd"  defer></script>
 <script src="/scripts/giscus-lazy.js?v=0521a30c" defer></script>
 <script src="/scripts/doodle.js?v=3d1f7d5c"   defer></script>
 <script src="/scripts/skins.js?v=3be8d6c2"        defer></script>

@@ -26,7 +26,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 import {
   normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
-  genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+  matchFaqs, faqContextOf, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
 
 const SITE = 'https://antaresyuan.site';
@@ -174,11 +174,20 @@ export default {
     const index = await grab(env.INDEX_URL || INDEX_URL, 'json');
     let localCtx, cloudCtx;
     if (index && Array.isArray(index.chunks) && index.chunks.length) {
-      const wide = await retrieve(env, ctx, index, query, BUDGET.local);
-      localCtx = contextOf(wide);
+      const faqCtx = faqContextOf(matchFaqs(index.faqs, query));
+      const siteBudget = Math.max(2000, BUDGET.local - faqCtx.length);
+      const wide = await retrieve(env, ctx, index, query, siteBudget);
+      localCtx = [faqCtx, contextOf(wide)].filter(Boolean).join('\n\n');
       // The cloud budget is a prefix of the same ranking: pinned first, then by score.
       let used = 0;
-      cloudCtx = contextOf(wide.filter((c) => (used += c.text.length) <= BUDGET.cloud || c.pin));
+      const cloudSiteBudget = Math.max(1500, BUDGET.cloud - faqCtx.length);
+      const cloudPassages = wide.filter((c) => {
+        if (c.pin) { used += c.text.length; return true; }
+        if (used + c.text.length > cloudSiteBudget) return false;
+        used += c.text.length;
+        return true;
+      });
+      cloudCtx = [faqCtx, contextOf(cloudPassages)].filter(Boolean).join('\n\n');
     } else {
       const site = await grab(LLMS_FULL_URL);
       if (!site) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);

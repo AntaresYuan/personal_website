@@ -7,6 +7,8 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
 
 1. **Retrieve.** The Worker fetches `/ask-index.json`. This is the site cut into
    titled passages by `scripts/build-ask-index.js`:
+   - CMS-authored FAQ answer briefs are checked first by canonical question
+     and aliases; a match becomes authoritative guidance for the answer
    - the Work case studies
    - AI Skills and Gallery
    - every Writing post, section by section
@@ -33,8 +35,8 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
 No API keys touch the frontend; CORS is locked to the site origin.
 
 If `content/site.json` → `qa.workerUrl` is empty (or the Worker can't be
-reached), the Ask panel falls back to the hand-written FAQ in
-`scripts/qa-faq.js`.
+reached), the Ask panel falls back to the same CMS-authored FAQ compiled from
+`content/faq.json` into `scripts/qa-faq-data.js`.
 
 ## Deploy
 
@@ -79,10 +81,11 @@ History is capped at the last 8 turns; each turn at 600 characters.
   - `verifyPrompt`, the fact-check
   - `selectPassages`, the budget
   - `replyLang`
-- **Richer answers come from content, not the prompt.** The model can only
-  narrate what is written. Add it to the site (the case studies and the rest),
-  or, for things that shouldn't show on the page, to the CMS's
-  "Assistant knowledge".
+- **Recurring answers belong in Assistant FAQ.** Write the authoritative
+  answer brief and likely English/Chinese aliases in the CMS. A matched brief
+  takes priority; retrieved site passages can only support or expand it.
+- **Other background belongs in Assistant knowledge.** The model can only
+  narrate what is written on the site or in those supplemental notes.
 - **Budgets** (in characters) are `BUDGET` in `src/index.js`: about 12k for
   the Mac and 9k for the cloud.
 - **Rate limiting** is optional and off by default; uncomment the rate-limit

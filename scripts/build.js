@@ -21,6 +21,10 @@
   // from a fresh clone without dev deps must still get a working site.
   try { require('./gen-characters'); } catch (e) { console.log('  (characters skipped: ' + ((e && e.message) || e) + ')'); }
 
+  // CMS-authored FAQ data must exist before pages hash and include the browser
+  // assets that power starter questions and the offline answer path.
+  require('./build-faq');
+
   // Work home (index.html), then Personal (/personal/ from its own template).
   // The two share content/*.json but no markup or styles.
   require('./build-html');

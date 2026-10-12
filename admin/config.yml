@@ -635,6 +635,36 @@ collections:
             fields:
               - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers the embedded terminal's `ask` command. Empty = `ask` is unavailable; everything else works." }
 
+  # ── Assistant FAQ ──────────────────────────────────────────────────
+  # Authoritative answer briefs for recurring questions. The Q&A Worker
+  # checks these first, then supplements the matched brief with evidence
+  # retrieved from the rest of the site.
+  - name: "assistant_faq"
+    label: "Assistant FAQ"
+    icon: quiz
+    files:
+      - file: "content/faq.json"
+        label: "FAQ answer briefs"
+        name: "assistant_faq"
+        format: "json"
+        fields:
+          - label: "FAQ entries — drag to reorder; starter questions use this order"
+            name: "items"
+            widget: "list"
+            collapsed: true
+            summary: "{{fields.question}}"
+            fields:
+              - { label: "Question", name: "question", widget: "string", hint: "The canonical English wording. It is also shown verbatim when Starter question is enabled." }
+              - { label: "Starter question", name: "starter", widget: "boolean", required: false, default: false, hint: "Show this above Ask Antares. The first three enabled entries are used." }
+              - label: "Aliases / alternate phrasings"
+                name: "aliases"
+                widget: "list"
+                required: false
+                hint: "Add likely English and Chinese phrasings. These make deterministic FAQ matching more reliable before model generation."
+                field: { label: "Alias", name: "alias", widget: "string" }
+              - { label: "Answer brief (authoritative)", name: "answer", widget: "text", hint: "Write the position, facts and narrative you want preserved. The model may rephrase it and add facts retrieved from the site, but this brief takes priority." }
+              - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Used by the offline answer and command palette." }
+
   # ── Assistant knowledge ────────────────────────────────────────────
   # Private-ish notes that feed the "ask" assistant (workers/qa/) but are
   # NOT rendered on the public page. The build flattens them into

@@ -495,8 +495,8 @@
      Answers open in a side panel on the right, which pushes the page aside
      (body.ask-panel-open re-margins the layout) rather than covering what
      the visitor was reading; the avatar moves into the panel's header while
-     it is open. Answers come from the qa Worker; the hand-written FAQ
-     (scripts/qa-faq.js) answers when the Worker cannot be reached — common
+     it is open. Answers come from the qa Worker; the CMS-authored FAQ
+     (content/faq.json → scripts/qa-faq-data.js) answers when the Worker cannot be reached — common
      on mainland-China networks. */
   var ask = $('ask');
   var panel = $('ask-panel');
@@ -550,8 +550,10 @@
       pSend.disabled = busy || !pInput.value.trim();
     };
     var starters = function (n) {
-      var faq = (window.QA && Array.isArray(window.QA.FAQ)) ? window.QA.FAQ : [];
-      return faq.slice(0, n).map(function (f) { return f.q; }).filter(Boolean);
+      var faq = (window.QA && typeof window.QA.starters === 'function')
+        ? window.QA.starters(n)
+        : ((window.QA && Array.isArray(window.QA.FAQ)) ? window.QA.FAQ.slice(0, n) : []);
+      return faq.map(function (f) { return f.q; }).filter(Boolean);
     };
     var chip = function (q) {
       var label = q.charAt(0).toUpperCase() + q.slice(1);

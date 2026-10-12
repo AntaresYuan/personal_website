@@ -26,6 +26,7 @@ const profile = read('content/profile.json');
 const work = read('content/work.json');
 const contact = tryRead('content/contact.json', { items: [] });
 const brief = tryRead('content/agent-brief.json', { notes: [] });
+const faq = tryRead('content/faq.json', { items: [] });
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
 const board = tryRead('content/board.json', { cards: [] });
@@ -44,6 +45,17 @@ const plain = (s) => String(s ?? '')
   .replace(/`([^`]+)`/g, '$1')
   .replace(/\n{3,}/g, '\n\n')
   .trim();
+
+// FAQ answer briefs stay separate from ordinary passages. The Worker first
+// performs a deterministic question/alias match, then places the matching
+// brief ahead of the normal site retrieval context.
+const faqs = (faq.items ?? []).map((item, index) => ({
+  id: `faq-${index + 1}`,
+  question: String(item.question || '').trim(),
+  answer: plain(String(item.answer || '')),
+  aliases: Array.isArray(item.aliases) ? item.aliases.map((x) => String(x || '').trim()).filter(Boolean) : [],
+  ...(String(item.href || '').trim() ? { href: String(item.href).trim() } : {}),
+})).filter((item) => item.question && item.answer);
 
 // Split long text at paragraph boundaries into pieces of at most MAX chars.
 const pieces = (text) => {
@@ -137,8 +149,8 @@ if ((lens.items ?? []).length) {
 }
 
 /* ── Write ────────────────────────────────────────────────────────────── */
-const version = crypto.createHash('sha1').update(JSON.stringify(chunks)).digest('hex').slice(0, 12);
-const out = { version, chunks };
+const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks })).digest('hex').slice(0, 12);
+const out = { version, faqs, chunks };
 fs.writeFileSync(path.join(root, 'ask-index.json'), JSON.stringify(out) + '\n');
 const pinned = chunks.filter((c) => c.pin).length;
-console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);
+console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} FAQs, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);
