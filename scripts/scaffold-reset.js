@@ -137,9 +137,11 @@ write('content/assistant/guide.json', {
   whenMissing: 'Say the information is not written down here instead of guessing.',
   additional: '',
 });
-write('content/assistant/sources.json', {
-  llmsSummary: true, profile: true, home: true, projects: true, skills: true, writing: true,
-  gallery: true,
+// Tool settings. content/assistant/skills.json (each skill's system prompt)
+// is generic and stays as it is.
+write('content/assistant/tools.json', {
+  search: { sources: { llmsSummary: true, profile: true, home: true, projects: true, skills: true, writing: true, gallery: true } },
+  resources: { enabled: true, maxCards: 3 },
 });
 write('content/assistant/faqs.json', { items: [] });
 write('content/assistant/knowledge.json', { notes: [] });
@@ -173,9 +175,9 @@ console.log(`
   1. media/avatar-calm.png + media/avatar-talking.png — replace with your own
      images (or delete them and update content/profile.json → avatar). Same for
      any résumé PDFs in media/ (set profile.json → resumeEn / resumeZh, or "").
-  2. content/assistant/ — four CMS tabs for response guidance, website/llms
-     context switches, FAQ answers, and background knowledge for the "ask" assistant.
-     Edit it directly or in /admin/ → Assistant.
+  2. content/assistant/ — the "ask" assistant's Agent infra: response guide,
+     skills (each with its system prompt), QA pairs, background knowledge and
+     tool settings. Edit it directly or in /admin/ → Agent infra.
   3. content/site.json → meta.url, footer, and (optionally) the analytics /
      giscus / qa tokens. README has the setup steps for each.
   4. Deploy: point Cloudflare Pages at your fork. For /admin/ to work, deploy

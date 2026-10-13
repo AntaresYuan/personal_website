@@ -819,69 +819,126 @@ collections:
             fields:
               - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers Ask Antares across the Work space. Personal never loads the assistant." }
 
-  # ── Assistant ──────────────────────────────────────────────────────
-  # The single source of truth for every owner-managed input to Ask Antares:
-  # response guidance, website-source controls, FAQs, and background facts.
+  # ── Agent infra ────────────────────────────────────────────────────
+  # Everything the owner controls about Ask Antares (workers/qa/): the base
+  # system prompt, the skills (each with its own system prompt), the QA
+  # pairs the qa skill answers from, background knowledge, and the tools.
+  # Files stay in content/assistant/; scripts/build-ask-index.js carries
+  # them into /ask-index.json for the Worker.
   - name: "assistant"
-    label: "Assistant"
+    label: "Agent infra"
     icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
     files:
       - file: "content/assistant/guide.json"
-        label: "Response guide"
+        label: "Response guide (every skill)"
         name: "assistant_guide"
         format: "json"
         fields:
-          - { label: "Identity", name: "identity", widget: "text", hint: "Who the assistant is speaking as. This is sent with every answer." }
+          - { label: "Identity", name: "identity", widget: "text", hint: "Who the assistant is speaking as. Sent with every answer, whatever the skill." }
           - { label: "Voice and style", name: "voice", widget: "text", hint: "How answers should sound and how detailed they should be." }
           - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
-          - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions that should apply to every answer. Safety and fact-grounding rules remain enforced by the Worker." }
-      - file: "content/assistant/sources.json"
-        label: "Work context"
-        name: "assistant_sources"
+          - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions for every answer. Safety and fact-grounding rules remain enforced by the Worker." }
+      - file: "content/assistant/skills.json"
+        label: "Skills"
+        name: "assistant_skills"
         format: "json"
         fields:
-          - { label: "llms.txt Work summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Include the concise, Work-only /llms.txt summary with every answer. /llms-full.txt is also Work-only and remains the automatic fallback if the primary retrieval index is unavailable." }
-          - { label: "Work profile and current status", name: "profile", widget: "boolean", default: true }
-          - { label: "Work homepage message and update", name: "home", widget: "boolean", default: true }
-          - { label: "Work project case studies", name: "projects", widget: "boolean", default: true }
-          - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
-          - { label: "Writing", name: "writing", widget: "boolean", default: true }
-          - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
+          - label: "project — a named project, AI skill, post or gallery piece"
+            name: "project"
+            widget: "object"
+            hint: "Used when the question names a Work item (Kaboo, /devloop, the OXO post…) or briefly follows up on one. The model reads that item's own passages first."
+            fields:
+              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: such questions go to general." }
+              - { label: "System prompt", name: "prompt", widget: "text", required: false, hint: "Instructions for this skill. FOCUS (the item's name) is added after it. The fact-grounding rules always follow and win." }
+          - label: "qa — one of your QA pairs"
+            name: "qa"
+            widget: "object"
+            hint: "Used when the question matches a QA pair's question or an alias, or means the same. Your answer leads; the site only supports it."
+            fields:
+              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: QA pairs are no longer used for answers (they still feed the starter questions and the offline answer)." }
+              - { label: "System prompt", name: "prompt", widget: "text", required: false }
+          - label: "resources — a request for a file or link"
+            name: "resources"
+            widget: "object"
+            hint: "Used for “send me your résumé”, “the GitHub link for…”, “where can I download…”. The exact cards come from the Files & links tool; the model writes a sentence about them."
+            fields:
+              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: such questions go to the other skills, which still attach cards." }
+              - { label: "System prompt", name: "prompt", widget: "text", required: false }
+          - label: "usage — my own token usage"
+            name: "usage"
+            widget: "object"
+            hint: "Used for “how many tokens have you used (today / this month)?” when no Work item is named. Answered from the live usage numbers with a fixed sentence, without a model, so it has no system prompt."
+            fields:
+              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: token questions are answered from the site content instead of the live numbers." }
+          - label: "general — everything else"
+            name: "general"
+            widget: "object"
+            hint: "Used when no other skill claims the question. Always on."
+            fields:
+              - { label: "System prompt", name: "prompt", widget: "text", required: false }
       - file: "content/assistant/faqs.json"
-        label: "FAQ answers"
+        label: "QA pairs (qa skill)"
         name: "assistant_faqs"
         format: "json"
         fields:
-          - label: "FAQ answers — drag to reorder; starter questions use this order"
+          - label: "QA pairs — drag to reorder; starter questions use this order"
             name: "items"
             widget: "list"
             collapsed: false
             summary: "{{fields.question}}"
-            hint: "Each item contains both the question and its editable answer. Ask Antares uses the answer as authoritative guidance, then adds supporting facts from the site."
+            hint: "Each pair is a question and your own answer. When a visitor's question matches one, the qa skill answers with it and adds supporting facts from the site."
             fields:
-              - { label: "Give this FAQ to the model", name: "enabled", widget: "boolean", required: false, default: true }
+              - { label: "Give this pair to the model", name: "enabled", widget: "boolean", required: false, default: true }
               - { label: "Question", name: "question", widget: "string", hint: "The canonical English wording. It is also shown verbatim when Starter question is enabled." }
-              - { label: "Starter question", name: "starter", widget: "boolean", required: false, default: false, hint: "Show this above Ask Antares. The first three enabled entries are used." }
+              - { label: "Starter question", name: "starter", widget: "boolean", required: false, default: false, hint: "Show this above Ask Antares. The first three enabled entries are used; a Chinese page shows each one's first Chinese alias." }
               - label: "Aliases / alternate phrasings"
                 name: "aliases"
                 widget: "list"
                 required: false
-                hint: "Add likely English and Chinese phrasings. These make deterministic FAQ matching more reliable before model generation."
+                hint: "Likely English and Chinese phrasings. A question that matches one exactly always goes to this pair."
                 field: { label: "Alias", name: "alias", widget: "string" }
-              - { label: "Answer content", name: "answer", widget: "markdown", hint: "Edit the full answer here. The model may rephrase it and add facts retrieved from the site, but this content takes priority." }
-              - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Used by the offline answer and command palette." }
+              - { label: "Answer content", name: "answer", widget: "markdown", hint: "Your answer. The model may rephrase it and add facts from the site, but this content takes priority." }
+              - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Its page is read with the answer and attached as a card; also used by the offline answer and command palette." }
       - file: "content/assistant/knowledge.json"
         label: "Background knowledge"
         name: "assistant_knowledge"
         format: "json"
         fields:
-          - label: "Background notes — used when no FAQ fully answers the question"
+          - label: "Background notes — sent with every model-written answer"
             name: "notes"
             widget: "list"
             collapsed: false
             summary: "{{fields.title}}"
-            hint: "Use these for facts, preferences and stories that do not belong to one specific FAQ. They are not rendered as a page, but /agent-brief.txt is publicly fetchable."
+            hint: "Facts, preferences and stories that don't belong to one QA pair. They are not rendered as a page, but /agent-brief.txt is publicly fetchable."
             fields:
               - { label: "Give this note to the model", name: "enabled", widget: "boolean", required: false, default: true }
               - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
               - { label: "What the assistant should know", name: "body", widget: "markdown" }
+      - file: "content/assistant/tools.json"
+        label: "Tools"
+        name: "assistant_tools"
+        format: "json"
+        fields:
+          - label: "Work search — what the skills can read"
+            name: "search"
+            widget: "object"
+            hint: "The site content in the passage index. Personal is never included."
+            fields:
+              - label: "Sources"
+                name: "sources"
+                widget: "object"
+                fields:
+                  - { label: "llms.txt Work summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Send the concise, Work-only /llms.txt summary with every answer. /llms-full.txt remains the automatic fallback if the index is unavailable." }
+                  - { label: "Work profile and current status", name: "profile", widget: "boolean", default: true }
+                  - { label: "Work homepage message and update", name: "home", widget: "boolean", default: true }
+                  - { label: "Work project case studies", name: "projects", widget: "boolean", default: true }
+                  - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
+                  - { label: "Writing", name: "writing", widget: "boolean", default: true }
+                  - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
+          - label: "Files & links — exact cards under an answer"
+            name: "resources"
+            widget: "object"
+            hint: "Résumés, project pages, GitHub, papers, demos, images: found in the resource catalogue, never written by the model."
+            fields:
+              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: no cards, and the resources skill has nothing to hand over." }
+              - { label: "Most cards per answer", name: "maxCards", widget: "number", value_type: "int", min: 1, max: 5, default: 3 }
