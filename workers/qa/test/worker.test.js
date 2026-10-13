@@ -52,6 +52,7 @@ globalThis.fetch = async (url, init = {}) => {
 const VEC = { Note: [1, 0, 0], Kaboo: [0, 1, 0], SusBench: [0, 0, 1] };
 let usageCalls = 0;
 const traces = new Map();
+const d1Traces = new Map();
 const env = {
   LOCAL_LLM_URL: 'https://llm.example',
   ACCESS_CLIENT_ID: 'id', ACCESS_CLIENT_SECRET: 'secret',
@@ -74,6 +75,16 @@ const env = {
   QA_TRACE: { put: async (key, value, options) => {
     traces.set(key, { value: JSON.parse(value), options });
   } },
+  QA_DB: {
+    prepare: (sql) => ({
+      bind: (...args) => ({
+        run: async () => {
+          if (/INSERT INTO qa_traces/.test(sql)) d1Traces.set(args[0], JSON.parse(args[3]));
+          return { success: true };
+        },
+      }),
+    }),
+  },
 };
 const waits = [];
 const ctx = { waitUntil: (p) => { waits.push(p); return p; } };
@@ -117,7 +128,7 @@ await t('a matched FAQ brief precedes the retrieved site evidence', async () => 
   assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*\/projects\/agentic-hiring\//);
   assert.match(lastLocalPrompt, /Project: Agentic Hiring/);
   assert.doesNotMatch(lastLocalPrompt, /Project: Kaboo|Project: SusBench/);
-  const saved = traces.get(`trace:${r.body.traceId}`).value;
+  const saved = d1Traces.get(r.body.traceId);
   assert.deepEqual(saved.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
   assert.equal(saved.retrieval, 'faq-exact');
   assert.deepEqual(saved.passages.map((passage) => passage.id), ['assistant-guide', 'project-agentic-hiring']);
@@ -138,8 +149,8 @@ await t('streaming sends metadata before incremental local deltas and saves the 
   assert.deepEqual(done.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
   assert.equal(waits.length, beforeWaits + 1, 'stream trace work is registered before the response returns');
   await waits.at(-1);
-  assert.equal(traces.get(`trace:${done.traceId}`).value.answer, 'From my Mac.');
-  assert.equal(traces.get(`trace:${done.traceId}`).value.inference.promptTokens, 120);
+  assert.equal(d1Traces.get(done.traceId).answer, 'From my Mac.');
+  assert.equal(d1Traces.get(done.traceId).inference.promptTokens, 120);
 });
 await t('selected page text is included as untrusted reference context', async () => {
   local = 'ok';
@@ -179,10 +190,9 @@ await t('token question returns the exact live number without asking a model', a
   assert.ok(r.body.tools.includes('get_token_usage'));
   assert.ok(r.body.tools.includes('find_work_resources'));
   assert.equal(r.body.resources[0].url, '/usage/');
-  const saved = traces.get(`trace:${r.body.traceId}`);
-  assert.equal(saved.value.route, 'tool');
-  assert.equal(saved.value.usage.latestTokens, 800);
-  assert.equal(saved.options.expirationTtl, 14 * 24 * 60 * 60);
+  const saved = d1Traces.get(r.body.traceId);
+  assert.equal(saved.route, 'tool');
+  assert.equal(saved.usage.latestTokens, 800);
 });
 await t('today-token follow-up does not repeat the previous resume resource', async () => {
   const beforeLocal = localCalls;
@@ -195,7 +205,7 @@ await t('today-token follow-up does not repeat the previous resume resource', as
   assert.match(r.body.answer, /2026-10-13[\s\S]*800 tokens[\s\S]*1 个 sessions/);
   assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/usage/?lang=zh']);
   assert.equal(localCalls, beforeLocal);
-  const saved = traces.get(`trace:${r.body.traceId}`).value;
+  const saved = d1Traces.get(r.body.traceId);
   assert.equal(saved.query, '今天用了多少token你');
   assert.match(saved.retrievalQuery, /看看简历/);
   assert.deepEqual(saved.resources.map((resource) => resource.url), ['/usage/?lang=zh']);

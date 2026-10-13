@@ -53,6 +53,30 @@ const makeTraceId = () => {
 async function saveTrace(env, id, trajectory) {
   const record = { id, ...trajectory };
   console.log(JSON.stringify({ event: 'qa_trajectory', id, route: record.route, tools: record.tools, durationMs: record.durationMs }));
+  if (env.QA_DB && typeof env.QA_DB.prepare === 'function') {
+    try {
+      const expiresAt = Math.floor(Date.now() / 1000) + 14 * 24 * 60 * 60;
+      const insert = env.QA_DB.prepare(`
+        INSERT INTO qa_traces (id, received_at, expires_at, trajectory)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          received_at = excluded.received_at,
+          expires_at = excluded.expires_at,
+          trajectory = excluded.trajectory
+      `).bind(id, record.receivedAt || new Date().toISOString(), expiresAt, JSON.stringify(record));
+      // Roughly 1/64 writes also collect expired rows, avoiding a separate
+      // scheduled Worker while preserving the same 14-day retention policy.
+      if (parseInt(id.slice(-2), 16) < 4 && typeof env.QA_DB.batch === 'function') {
+        const cleanup = env.QA_DB.prepare('DELETE FROM qa_traces WHERE expires_at < ?').bind(Math.floor(Date.now() / 1000));
+        await env.QA_DB.batch([insert, cleanup]);
+      } else {
+        await insert.run();
+      }
+      return;
+    } catch (error) {
+      console.error(JSON.stringify({ event: 'qa_trace_d1_write_failed', id, error: String(error?.message || error) }));
+    }
+  }
   if (!env.QA_TRACE || typeof env.QA_TRACE.put !== 'function') return;
   try {
     await env.QA_TRACE.put(`trace:${id}`, JSON.stringify(record), { expirationTtl: 14 * 24 * 60 * 60 });

@@ -40,6 +40,14 @@ service = "antares-usage"
 binding = "QA_TRACE"
 id = "af132d82c9c84668a9b72656d51b317e"
 
+# D1 is the primary trajectory store. Unlike free-tier KV, its write budget is
+# appropriate for one record per assistant query. KV remains as a fallback for
+# existing deployments and can be removed after the migration settles.
+[[d1_databases]]
+binding = "QA_DB"
+database_name = "antares-qa-traces"
+database_id = "f893a25e-b68d-40b7-8857-f1156b40d23c"
+
 [observability]
 enabled = true
 
