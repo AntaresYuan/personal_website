@@ -12,6 +12,10 @@ globalThis.caches = { default: {
 
 const INDEX = { version: 'v1', faqs: [
   { id: 'faq-1', question: 'walk me through your most mature project.', aliases: ['what is your most mature project?'], answer: 'Lead with Agentic Hiring and preserve the 21% to 25% result.', href: '/projects/agentic-hiring/' },
+], resources: [
+  { id: 'resume-en', kind: 'pdf', lang: 'en', title: 'Antares Yuan — Résumé', titleZh: 'Antares Yuan — 英文简历', url: '/media/resume-en.pdf', keywords: ['resume', 'cv', '简历'] },
+  { id: 'resume-zh', kind: 'pdf', lang: 'zh', title: 'Antares Yuan — Chinese résumé', titleZh: '袁晨杰 — 中文简历', url: '/media/resume-zh.pdf', keywords: ['resume', 'cv', '简历'] },
+  { id: 'page-usage', kind: 'page', title: 'Personal token consumption', titleZh: '个人 Token 使用量', url: '/usage/', urlZh: '/usage/?lang=zh', keywords: ['token', 'usage', 'consumption', '使用量'] },
 ], chunks: [
   { id: 'brief-1', title: 'Note', url: '', text: 'I study at UW.', pin: true },
   { id: 'p1', title: 'Project: Kaboo', url: '/projects/kaboo/', text: 'Kaboo analyzes token use.' },
@@ -36,6 +40,7 @@ globalThis.fetch = async (url, init = {}) => {
 
 // Embeddings: one direction per passage; the question points at SusBench.
 const VEC = { Note: [1, 0, 0], Kaboo: [0, 1, 0], SusBench: [0, 0, 1] };
+let usageCalls = 0;
 const env = {
   LOCAL_LLM_URL: 'https://llm.example',
   ACCESS_CLIENT_ID: 'id', ACCESS_CLIENT_SECRET: 'secret',
@@ -44,6 +49,16 @@ const env = {
     const sys = input.messages[0].content;
     if (sys.startsWith('You are a strict fact-checker')) return { response: 'Checked: from the cloud.' };
     return { response: 'Draft from the cloud.' };
+  } },
+  USAGE: { fetch: async () => {
+    usageCalls++;
+    return new Response(JSON.stringify({
+      since: '2026-09-01', updated: '2026-10-13T10:00:00Z',
+      days: [
+        { date: '2026-10-12', totalTokens: 1200, sessions: 2, costCents: 30, bySource: { codex: { totalTokens: 1000 }, claude: { totalTokens: 200 } } },
+        { date: '2026-10-13', totalTokens: 800, sessions: 1, costCents: 20, bySource: { codex: { totalTokens: 800 } } },
+      ],
+    }));
   } },
 };
 const ctx = { waitUntil: (p) => p };
@@ -87,6 +102,27 @@ await t('passage vectors are cached for the index version', async () => {
 await t('a Chinese question gets a Chinese reply rule', async () => {
   await ask('\u4ecb\u7ecd\u4e00\u4e0b SusBench');
   assert.match(lastLocalPrompt, /Reply in Simplified Chinese/);
+});
+await t('resume request returns the exact PDF as a structured resource', async () => {
+  local = 'ok';
+  const r = await ask('Please send me your resume PDF');
+  assert.deepEqual(r.body.tools, ['find_work_resources']);
+  assert.equal(r.body.resources[0].url, '/media/resume-en.pdf');
+  assert.equal(r.body.resources[0].kind, 'pdf');
+  assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*resume-en\.pdf/);
+
+  const zh = await ask('\u628a\u4f60\u7684\u7b80\u5386\u53d1\u7ed9\u6211');
+  assert.equal(zh.body.resources[0].url, '/media/resume-zh.pdf');
+});
+await t('token question calls the usage service binding and grounds both models', async () => {
+  local = 'ok';
+  const before = usageCalls;
+  const r = await ask('How many tokens have you used?');
+  assert.equal(usageCalls, before + 1);
+  assert.ok(r.body.tools.includes('get_token_usage'));
+  assert.ok(r.body.tools.includes('find_work_resources'));
+  assert.equal(r.body.resources[0].url, '/usage/');
+  assert.match(lastLocalPrompt, /Tool result: live token usage[\s\S]*totalTokens=2000[\s\S]*updated=2026-10-13/);
 });
 await t('busy Mac → cloud, and the Mac is not parked', async () => {
   local = 'busy';

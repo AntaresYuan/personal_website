@@ -19,6 +19,7 @@ const crypto = require('crypto');
 const { loadPosts } = require('./lib/blog');
 const { projectList } = require('./lib/projects');
 const { loadAssistant } = require('./lib/assistant');
+const { content, t } = require('./lib/i18n');
 
 const root = path.join(__dirname, '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -33,6 +34,10 @@ const work = read('content/work.json');
 const assistant = loadAssistant(root);
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
+const zhSkills = tryRead('content/zh/skills.json', { items: [] });
+const zhGallery = tryRead('content/zh/gallery.json', { items: [] });
+const zhWork = content('content/work.json', 'zh');
+const zhNav = new Map((zhWork.nav ?? []).map((item) => [item.id, item.label]));
 const sourceOn = (name) => !assistant.sources || assistant.sources[name] !== false;
 
 const MAX = 1200;   // characters per passage, roughly 250–300 tokens
@@ -84,6 +89,71 @@ const add = (id, title, url, text, pin = false) => {
   }));
 };
 
+/* ── Public Work resource catalogue ──────────────────────────────────────
+   Passages answer “what”; resources answer “where can I open/get it?”. The
+   Worker searches this list as a tool and returns exact URLs separately from
+   model prose, so a résumé request can render the real PDF instead of asking
+   the model to reproduce a filename from memory. */
+const resources = [];
+const resourceUrls = new Set();
+const addResource = (item) => {
+  const url = String(item?.url || '').trim();
+  const title = String(item?.title || '').trim();
+  if (!url || !title || resourceUrls.has(url)) return;
+  resourceUrls.add(url);
+  resources.push({
+    id: String(item.id || `resource-${resources.length + 1}`),
+    kind: /^(pdf|image|page|link|data)$/.test(item.kind) ? item.kind : 'link',
+    title,
+    url,
+    description: String(item.description || '').trim(),
+    keywords: Array.isArray(item.keywords) ? item.keywords.map((x) => String(x || '').trim()).filter(Boolean) : [],
+    ...(item.titleZh ? { titleZh: String(item.titleZh) } : {}),
+    ...(item.descriptionZh ? { descriptionZh: String(item.descriptionZh) } : {}),
+    ...(item.urlZh ? { urlZh: String(item.urlZh) } : {}),
+    ...(item.lang ? { lang: String(item.lang) } : {}),
+  });
+};
+const linksIn = (text) => {
+  const source = String(text || '');
+  const found = [];
+  const markdown = /\[([^\]]+)\]\((https?:\/\/[^)\s]+|\/(?!\/)[^)\s]+)\)/g;
+  let match;
+  while ((match = markdown.exec(source))) found.push({ label: plain(match[1]), url: match[2] });
+  return found;
+};
+
+if (profile.resumeEn) addResource({
+  id: 'resume-en', kind: 'pdf', title: 'Antares Yuan — Résumé',
+  url: profile.resumeEn, description: 'English résumé · PDF', lang: 'en',
+  keywords: ['resume', 'résumé', 'cv', 'curriculum vitae', 'pdf', 'download'],
+});
+if (profile.resumeZh) addResource({
+  id: 'resume-zh', kind: 'pdf', title: 'Antares Yuan — Chinese résumé', titleZh: path.basename(profile.resumeZh, '.pdf'),
+  url: profile.resumeZh, description: 'Chinese résumé · PDF', lang: 'zh',
+  keywords: ['resume', 'résumé', 'cv', 'chinese resume', 'pdf', 'download'],
+});
+
+[
+  ['home', 'Work home', zhNav.get('home'), '/', '/zh/', 'Overview of Antares’s work', ['home', 'portfolio', 'work']],
+  ['projects', 'Projects', zhNav.get('projects'), '/projects/', '/zh/projects/', 'Product case studies', ['projects', 'case studies']],
+  ['skills', 'AI Skills', zhNav.get('skills'), '/skills/', '/zh/skills/', 'Skills, plugins and agent infrastructure', ['skills', 'plugins', 'github']],
+  ['gallery', 'Gallery', zhNav.get('gallery'), '/gallery/', '/zh/gallery/', 'Visual and product design work', ['gallery', 'design', 'images']],
+  ['writing', 'Writing', zhNav.get('writing'), '/blog/', '/zh/blog/', 'Essays and project notes', ['writing', 'articles', 'blog']],
+  ['usage', 'Personal token consumption', t('home.usage', 'zh'), '/usage/', '/usage/?lang=zh', 'Live AI usage dashboard', ['token', 'tokens', 'usage', 'consumption', 'dashboard']],
+].forEach(([id, title, titleZh, url, urlZh, description, keywords]) => addResource({
+  id: `page-${id}`, kind: 'page', title, titleZh, url, urlZh, description, keywords,
+}));
+
+[
+  ['llms-summary', 'Work summary for agents', '/llms.txt', 'Concise plain-text site context', ['llms', 'text', 'context', 'agent']],
+  ['llms-full', 'Full Work context for agents', '/llms-full.txt', 'Full plain-text Work corpus', ['llms full', 'text', 'context', 'corpus']],
+  ['rss', 'Writing RSS feed', '/blog/feed.xml', 'RSS feed · XML', ['rss', 'feed', 'xml']],
+  ['source', 'Website source on GitHub', 'https://github.com/AntaresYuan/personal_website', 'Open-source website repository', ['source', 'github', 'repository', 'repo']],
+].forEach(([id, title, url, description, keywords]) => addResource({
+  id: `file-${id}`, kind: id === 'source' ? 'link' : 'data', title, url, description, keywords,
+}));
+
 /* ── Pinned: the owner's guide, llms.txt summary, notes, and overview ─ */
 const guide = assistant.guidance ?? {};
 const guideText = [
@@ -107,6 +177,9 @@ if (sourceOn('llmsSummary')) {
   .forEach((n, i) => add(`knowledge-${i + 1}`, `Background knowledge: ${n.title || 'untitled'}`, '', n.body, true));
 
 const projects = projectList();
+const projectsZh = new Map(projectList('zh').map((p) => [p.slug, p]));
+const skillsZh = new Map((zhSkills.items ?? []).map((s) => [s.slug, s]));
+const galleryZh = new Map((zhGallery.items ?? []).map((g) => [g.slug, g]));
 const name = [work.name?.first || profile.name, work.name?.middle && `(${work.name.middle})`, work.name?.last || profile.nameAccent].filter(Boolean).join(' ');
 const overview = [
   sourceOn('profile') ? `I'm ${name}${work.name?.native ? ` (${work.name.native})` : ''}. ${profile.role || ''}. Based in ${profile.location || ''}.` : '',
@@ -122,6 +195,34 @@ if (overview) add('overview', 'Who I am and what is in the Work portfolio', '/',
 /* ── Work case studies ────────────────────────────────────────────────── */
 for (const p of sourceOn('projects') ? projects : []) {
   const url = `/projects/${p.slug}/`;
+  const pZh = projectsZh.get(p.slug) || {};
+  addResource({
+    id: `project-${p.slug}`, kind: 'page', title: p.title, titleZh: pZh.title || p.title,
+    url, urlZh: `/zh/projects/${p.slug}/`, description: p.summary || '', descriptionZh: pZh.summary || p.summary || '',
+    keywords: ['project', 'case study', p.title, p.kind].filter(Boolean),
+  });
+  if (p.cover) addResource({
+    id: `project-${p.slug}-cover`, kind: 'image', title: `${p.title} — Cover`, titleZh: `${pZh.title || p.title} — Cover`,
+    url: p.cover, description: 'Project cover image',
+    keywords: [p.title, 'project', 'cover', 'image'],
+  });
+  (p.links ?? []).forEach((link, i) => addResource({
+    id: `project-${p.slug}-link-${i + 1}`, kind: 'link', title: `${p.title} — ${link.label || 'Link'}`,
+    titleZh: `${pZh.title || p.title} — ${link.label || 'Link'}`, url: link.href,
+    description: p.summary || '', descriptionZh: pZh.summary || p.summary || '',
+    keywords: [p.title, link.label, 'link', 'paper', 'github'].filter(Boolean),
+  }));
+  if (p.live?.url) addResource({
+    id: `project-${p.slug}-live`, kind: 'link', title: `${p.title} — Live demo`, titleZh: `${pZh.title || p.title} — Live demo`,
+    url: p.live.url, description: 'Open the live product',
+    keywords: [p.title, 'live', 'demo', 'website'],
+  });
+  (p.story ?? []).flatMap((section) => linksIn(section.body)).forEach((link, i) => addResource({
+    id: `project-${p.slug}-story-link-${i + 1}`, kind: 'link', title: `${p.title} — ${link.label}`,
+    titleZh: `${pZh.title || p.title} — ${link.label}`, url: link.url,
+    description: 'Link referenced in the project case study',
+    keywords: [p.title, link.label, 'reference', 'link'],
+  }));
   add(`project-${p.slug}`, `Project: ${p.title}`, url, [
     `${p.title} — ${p.kind || ''}`,
     p.summary || '',
@@ -135,6 +236,13 @@ for (const p of sourceOn('projects') ? projects : []) {
 
 /* ── Work AI Skills, Gallery and Writing ──────────────────────────── */
 for (const s of sourceOn('skills') ? (skills.items ?? []) : []) {
+  const sZh = skillsZh.get(s.slug) || {};
+  (s.links ?? []).forEach((link, i) => addResource({
+    id: `skill-${s.slug}-link-${i + 1}`, kind: 'link', title: `${s.name} — ${link.label || 'Link'}`,
+    titleZh: `${sZh.name || s.name} — ${link.label || 'Link'}`, url: link.href,
+    description: s.tagline || s.summary || '', descriptionZh: sZh.tagline || sZh.summary || s.tagline || s.summary || '',
+    keywords: [s.name, s.slug, link.label, s.category, 'skill', 'plugin', 'github', 'website'].filter(Boolean),
+  }));
   add(`skill-${s.slug}`, `AI skill: ${s.name}`, `/skills/${s.slug}/`, [
     `${s.name} — ${s.category || ''}. ${s.tagline || ''}`,
     s.summary || '',
@@ -144,13 +252,38 @@ for (const s of sourceOn('skills') ? (skills.items ?? []) : []) {
   ].filter(Boolean).join('\n\n'));
 }
 for (const g of sourceOn('gallery') ? (gallery.items ?? []) : []) {
+  const gZh = galleryZh.get(g.slug) || {};
+  (g.images ?? []).forEach((image, i) => addResource({
+    id: `gallery-${g.slug}-${i + 1}`, kind: 'image', title: g.title, titleZh: gZh.title || g.title,
+    url: image.src, description: image.caption || g.summary || g.medium || '',
+    descriptionZh: (gZh.images?.[i]?.caption) || gZh.summary || image.caption || g.summary || '',
+    keywords: [g.title, g.medium, gallery.categories?.[g.category], 'gallery', 'image'].filter(Boolean),
+  }));
   add(`gallery-${g.slug}`, `Gallery: ${g.title}`, '/gallery/', [
     `${g.title}${g.year ? ` (${g.year})` : ''}${g.medium ? ` — ${g.medium}` : ''}. Category: ${gallery.categories?.[g.category] || g.category || ''}.`,
     g.summary || '',
   ].filter(Boolean).join('\n\n'));
 }
+const postsZh = new Map(loadPosts({ lang: 'zh' }).map((p) => [p.slug, p]));
 for (const post of sourceOn('writing') ? loadPosts() : []) {
   const url = `/blog/${post.slug}/`;
+  const postZh = postsZh.get(post.slug) || {};
+  addResource({
+    id: `post-${post.slug}`, kind: 'page', title: post.title, titleZh: postZh.title || post.title,
+    url, urlZh: `/zh/blog/${post.slug}/`, description: post.summary || '', descriptionZh: postZh.summary || post.summary || '',
+    keywords: [post.title, ...(post.tags || []), 'writing', 'article'],
+  });
+  if (post.cover) addResource({
+    id: `post-${post.slug}-cover`, kind: 'image', title: `${post.title} — Cover`, titleZh: `${postZh.title || post.title} — Cover`,
+    url: post.cover, description: 'Writing cover image',
+    keywords: [post.title, 'writing', 'cover', 'image'],
+  });
+  linksIn(post.body).forEach((link, i) => addResource({
+    id: `post-${post.slug}-link-${i + 1}`, kind: 'link', title: `${post.title} — ${link.label}`,
+    titleZh: `${postZh.title || post.title} — ${link.label}`, url: link.url,
+    description: 'Link referenced in the article',
+    keywords: [post.title, link.label, 'reference', 'link'],
+  }));
   add(`post-${post.slug}`, `Writing: ${post.title}`, url, [`${post.title} (${post.date || ''})`, post.summary || ''].join('\n\n'));
   // One passage per section, so a long post doesn't crowd out everything else.
   String(post.body || '').split(/\n(?=##\s)/).forEach((sec, i) => {
@@ -159,8 +292,8 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
   });
 }
 /* ── Write ────────────────────────────────────────────────────────────── */
-const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks })).digest('hex').slice(0, 12);
-const out = { version, faqs, chunks };
+const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks, resources })).digest('hex').slice(0, 12);
+const out = { version, faqs, resources, chunks };
 fs.writeFileSync(path.join(root, 'ask-index.json'), JSON.stringify(out) + '\n');
 const pinned = chunks.filter((c) => c.pin).length;
-console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} FAQs, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);
+console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} FAQs, ${resources.length} resources, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);

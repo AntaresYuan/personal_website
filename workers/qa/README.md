@@ -27,12 +27,18 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
    They are then taken in order until a character budget is spent. The FAQ and
    passage index refreshes within about a minute after a CMS deploy; passage
    vectors are computed once per content-derived index version and cached.
-2. **Answer from the Mac**, if `LOCAL_LLM_URL` is set. This is a Cloudflare
+2. **Run deterministic tools.** The same index contains a Work-only resource
+   catalogue: project pages, official/GitHub links, Writing, Gallery originals,
+   RSS, agent text files and both résumé PDFs. `find_work_resources` returns
+   exact URLs as structured cards instead of asking a model to invent links.
+   Token questions call `get_token_usage` through the `USAGE` service binding
+   to `antares-usage`, then inject the live totals into the model context.
+3. **Answer from the Mac**, if `LOCAL_LLM_URL` is set. This is a Cloudflare
    Tunnel, behind an Access service token, to a small proxy in front of Ollama
    on Antares's Mac (`ops/local-llm/`). It is skipped when the Mac is busy, and
    abandoned when it is unreachable or takes more than 25 s. After a failure the
    Mac is parked for a minute.
-3. **Answer from the cloud.** Workers AI (`@cf/meta/llama-3.1-8b-instruct-fast`)
+4. **Answer from the cloud.** Workers AI (`@cf/meta/llama-3.1-8b-instruct-fast`)
    drafts an answer. A second, low-temperature call then fact-checks the draft
    against the same passages.
 
@@ -56,8 +62,9 @@ npx wrangler deploy
 ```
 
 Bound to `qa.antaresyuan.site` (a custom domain on the site's zone; see
-CLAUDE.md). The only binding is `[ai] binding = "AI"`. To answer from the
-Mac, follow `ops/local-llm/README.md`, then:
+CLAUDE.md). It binds Workers AI as `AI` and the existing `antares-usage`
+Worker as the fetch-only `USAGE` service binding. To answer from the Mac,
+follow `ops/local-llm/README.md`, then:
 1. Set `LOCAL_LLM_URL`.
 2. Add the `ACCESS_CLIENT_ID` / `ACCESS_CLIENT_SECRET` secrets.
 3. Redeploy.
@@ -77,8 +84,12 @@ Content-Type: application/json
 
 # or a single question: { "q": "what's Kaboo?" }
 
-→ 200  { "answer": "…", "model": "qwen3.5:4b", "via": "local", "verified": false }
-→ 200  { "answer": "…", "model": "@cf/meta/llama-3.1-8b-instruct-fast", "via": "cloud", "verified": true }
+→ 200  { "answer": "…", "model": "qwen3.5:4b", "via": "local", "verified": false,
+         "resources": [{ "kind": "pdf", "title": "Antares Yuan — Résumé",
+                         "url": "/media/…pdf", "typeLabel": "PDF" }],
+         "tools": ["find_work_resources"] }
+→ 200  { "answer": "…", "model": "@cf/meta/llama-3.1-8b-instruct-fast", "via": "cloud", "verified": true,
+         "resources": [], "tools": ["get_token_usage"] }
 → 4xx/5xx  { "error": "…", "detail"?: "…" }
 ```
 

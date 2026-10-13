@@ -2,7 +2,7 @@
    antares-qa — "ask this portfolio" Q&A endpoint (Cloudflare Worker).
 
    POST /  { "messages": [{role, content}, …] } or { "q": "…" }, + "lang"?
-   →  { answer, model, via: 'local' | 'cloud', verified }      on success
+   →  { answer, model, via, verified, resources, tools }       on success
    →  { error, detail? }                                        on failure
 
    1. RETRIEVE — fetch /ask-index.json (the site cut into titled passages,
@@ -26,14 +26,15 @@
    ════════════════════════════════════════════════════════════════════════ */
 import {
   normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
-  matchFaqs, faqContextOf, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+  matchFaqs, faqContextOf, findResources, wantsUsage, summarizeUsage,
+  resourceContextOf, usageContextOf, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
 
 const SITE = 'https://antaresyuan.site';
 // Version the cache key when the corpus shape changes. The short TTL keeps a
 // CMS save from taking ten minutes to reach answers, while embeddings remain
 // cached by the index's content-derived version.
-const INDEX_URL = `${SITE}/ask-index.json?corpus=faq-v1`;
+const INDEX_URL = `${SITE}/ask-index.json?corpus=resource-tools-v1`;
 const LLMS_FULL_URL = `${SITE}/llms-full.txt`;          // fallback when the index is missing
 const ASSISTANT_CONTEXT_URL = `${SITE}/agent-brief.txt`; // owner-managed fallback context
 const CLOUD_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
@@ -104,6 +105,41 @@ async function retrieve(env, ctx, index, query, budget) {
     semantic = vecs.map((v) => cosine(qv, v));
   } catch { /* embeddings unavailable — the lexical score ranks alone */ }
   return selectPassages(index.chunks, { semantic, lexical, budget });
+}
+
+/* ── Tools ──────────────────────────────────────────────────────────────
+   Tools run before either model, so the Mac and Workers AI receive the same
+   fresh, deterministic evidence. Service Binding avoids a public round trip
+   and grants only fetch access to the usage Worker. */
+async function getLiveUsage(env) {
+  if (!env.USAGE || typeof env.USAGE.fetch !== 'function') return null;
+  try {
+    const response = await env.USAGE.fetch(new Request('https://usage.internal/', {
+      headers: { Origin: SITE },
+    }));
+    if (!response.ok) return null;
+    return summarizeUsage(await response.json());
+  } catch { return null; }
+}
+
+async function runTools(env, index, query, lang) {
+  const resources = findResources(index?.resources, query, lang, 5);
+  const tools = [];
+  const contexts = [];
+  if (resources.length) {
+    tools.push('find_work_resources');
+    contexts.push(resourceContextOf(resources, lang));
+  }
+  if (wantsUsage(query)) {
+    tools.push('get_token_usage');
+    const usage = await getLiveUsage(env);
+    contexts.push(usage
+      ? usageContextOf(usage, lang)
+      : (lang === 'zh'
+          ? '### 工具结果：实时 Token 使用量\n使用量服务暂时不可用。请明确说明现在无法读取实时数据，不要猜测数字。'
+          : '### Tool result: live token usage\nThe usage service is temporarily unavailable. Say that the live data cannot be read right now; do not guess a number.'));
+  }
+  return { resources, tools, context: contexts.filter(Boolean).join('\n\n') };
 }
 
 /* ── Answering ──────────────────────────────────────────────────────────── */
@@ -180,37 +216,39 @@ export default {
 
     // Grounding: the passage index; the old whole-site text if it's missing.
     const index = await grab(env.INDEX_URL || INDEX_URL, 'json', 60);
+    const toolResult = await runTools(env, index, query, lang);
+    const toolCtx = toolResult.context;
     let localCtx, cloudCtx;
     if (index && Array.isArray(index.chunks) && index.chunks.length) {
       const faqCtx = faqContextOf(matchFaqs(index.faqs, query));
-      const siteBudget = Math.max(2000, BUDGET.local - faqCtx.length - pageCtx.length);
+      const siteBudget = Math.max(2000, BUDGET.local - faqCtx.length - pageCtx.length - toolCtx.length);
       const wide = await retrieve(env, ctx, index, query, siteBudget);
-      localCtx = [pageCtx, faqCtx, contextOf(wide)].filter(Boolean).join('\n\n');
+      localCtx = [toolCtx, pageCtx, faqCtx, contextOf(wide)].filter(Boolean).join('\n\n');
       // The cloud budget is a prefix of the same ranking: pinned first, then by score.
       let used = 0;
-      const cloudSiteBudget = Math.max(1500, BUDGET.cloud - faqCtx.length - pageCtx.length);
+      const cloudSiteBudget = Math.max(1500, BUDGET.cloud - faqCtx.length - pageCtx.length - toolCtx.length);
       const cloudPassages = wide.filter((c) => {
         if (c.pin) { used += c.text.length; return true; }
         if (used + c.text.length > cloudSiteBudget) return false;
         used += c.text.length;
         return true;
       });
-      cloudCtx = [pageCtx, faqCtx, contextOf(cloudPassages)].filter(Boolean).join('\n\n');
+      cloudCtx = [toolCtx, pageCtx, faqCtx, contextOf(cloudPassages)].filter(Boolean).join('\n\n');
     } else {
       const [site, assistantContext] = await Promise.all([
         grab(LLMS_FULL_URL),
         grab(ASSISTANT_CONTEXT_URL),
       ]);
       if (!site) return reply({ error: "couldn't load the site content to ground the answer" }, 502, ch);
-      const fallback = [pageCtx, assistantContext, site].filter(Boolean).join('\n\n');
+      const fallback = [toolCtx, pageCtx, assistantContext, site].filter(Boolean).join('\n\n');
       localCtx = fallback.slice(0, BUDGET.local);
       cloudCtx = fallback.slice(0, BUDGET.cloud);
     }
 
     const local = await askLocal(env, [{ role: 'system', content: genPrompt(localCtx, lang) }, ...turns]);
-    if (local) return reply(local, 200, ch);
+    if (local) return reply({ ...local, resources: toolResult.resources, tools: toolResult.tools }, 200, ch);
     try {
-      return reply(await askCloud(env, cloudCtx, lang, turns), 200, ch);
+      return reply({ ...(await askCloud(env, cloudCtx, lang, turns)), resources: toolResult.resources, tools: toolResult.tools }, 200, ch);
     } catch (e) {
       return reply({ error: 'generation failed', detail: String((e && e.message) || e) }, 502, ch);
     }

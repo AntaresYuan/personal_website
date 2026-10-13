@@ -6,6 +6,7 @@ const fs = require('fs');
 const read = (file) => fs.readFileSync(file, 'utf8');
 const llms = read('llms.txt');
 const full = read('llms-full.txt');
+const home = read('index.html');
 const personal = read('personal/index.html');
 const terminal = read('scripts/terminal.js');
 const palette = read('scripts/palette.js');
@@ -31,11 +32,25 @@ assert.ok(index.chunks.some((chunk) => String(chunk.id).startsWith('project-')))
 assert.ok(index.chunks.some((chunk) => String(chunk.id).startsWith('skill-')));
 assert.ok(index.chunks.some((chunk) => String(chunk.id).startsWith('gallery-')));
 assert.ok(index.chunks.some((chunk) => String(chunk.id).startsWith('post-')));
+assert.ok(Array.isArray(index.resources) && index.resources.length >= 25, 'Work resource catalogue is unexpectedly small');
+assert.equal(index.resources.some((resource) => String(resource.url || '').startsWith('/personal/')), false);
+assert.ok(index.resources.some((resource) => resource.id === 'resume-en' && resource.kind === 'pdf'));
+assert.ok(index.resources.some((resource) => resource.id === 'resume-zh' && resource.kind === 'pdf'));
+assert.ok(index.resources.some((resource) => resource.id === 'page-usage'));
+assert.ok(index.resources.some((resource) => resource.id === 'file-llms-summary'));
+assert.ok(index.resources.some((resource) => resource.id === 'file-source' && /github\.com/.test(resource.url)));
+assert.ok(index.resources.some((resource) => String(resource.id).startsWith('project-') && resource.kind === 'link'));
+assert.ok(index.resources.some((resource) => String(resource.id).startsWith('skill-') && resource.kind === 'link'));
+assert.ok(index.resources.some((resource) => String(resource.id).startsWith('gallery-') && resource.kind === 'image'));
 for (const personalFaq of ["what does “a star to ship by” mean?", "what's Worth Fly?", "what's Gmail++ / Gmail Plus Plus?"]) {
   assert.equal(index.faqs.some((faq) => faq.question === personalFaq), false, `Personal FAQ leaked into ask-index: ${personalFaq}`);
   assert.equal(brief.includes(personalFaq), false, `Personal FAQ leaked into agent-brief: ${personalFaq}`);
 }
 assert.equal(brief.includes('embedded CLI'), false);
+
+assert.ok(home.includes('scripts/ask-render.js'), 'Work home must load the rich answer renderer');
+assert.ok(home.lastIndexOf('scripts/ask-history.js') < home.lastIndexOf('scripts/ask-render.js'));
+assert.ok(home.lastIndexOf('scripts/ask-render.js') < home.lastIndexOf('scripts/work.js'));
 
 assert.equal('projectLog' in sources, false);
 assert.equal('lens' in sources, false);

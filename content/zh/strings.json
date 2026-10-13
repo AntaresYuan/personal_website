@@ -151,6 +151,11 @@
         "cloud": "云端 · Workers AI",
         "offline": "内置 FAQ · 无模型",
         "model": "模型：{model}"
+      },
+      "resources": {
+        "aria": "相关文件与链接",
+        "link": "链接",
+        "image": "图片"
       }
     },
     "comments": {

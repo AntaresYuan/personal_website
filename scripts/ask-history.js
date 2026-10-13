@@ -14,7 +14,25 @@
   var TTL = 60 * 60 * 1000;
   var MAX_MESSAGES = 40;
   var MAX_CONTENT = 10000;
+  var MAX_RESOURCES = 6;
   var SOURCE = { local: true, cloud: true, offline: true };
+  var RESOURCE_KIND = { pdf: true, image: true, page: true, link: true, data: true };
+
+  var cleanResource = function (resource) {
+    if (!resource || typeof resource !== 'object') return null;
+    var url = String(resource.url || '').trim().slice(0, 1000);
+    if (/^\/(?!\/)/.test(url) && !/[\u0000-\u001f\u007f]/.test(url)) url = encodeURI(url);
+    else if (!/^https?:\/\/[^\s]+$/i.test(url)) return null;
+    var title = String(resource.title || '').trim().slice(0, 180);
+    if (!title) return null;
+    var kind = RESOURCE_KIND[resource.kind] ? resource.kind : 'link';
+    var item = { kind: kind, title: title, url: url };
+    var description = String(resource.description || '').trim().slice(0, 240);
+    var typeLabel = String(resource.typeLabel || '').trim().slice(0, 40);
+    if (description) item.description = description;
+    if (typeLabel) item.typeLabel = typeLabel;
+    return item;
+  };
 
   var clean = function (messages) {
     if (!Array.isArray(messages)) return [];
@@ -25,6 +43,10 @@
       var item = { role: message.role, content: content };
       if (message.role === 'assistant' && SOURCE[message.via]) item.via = message.via;
       if (message.role === 'assistant' && message.model) item.model = String(message.model).slice(0, 120);
+      if (message.role === 'assistant' && Array.isArray(message.resources)) {
+        var resources = message.resources.map(cleanResource).filter(Boolean).slice(0, MAX_RESOURCES);
+        if (resources.length) item.resources = resources;
+      }
       return item;
     }).filter(Boolean).slice(-MAX_MESSAGES);
   };

@@ -23,11 +23,16 @@ assert.equal(history.load(storage, now), null);
 
 history.save([
   { role: 'user', content: '  Tell me about Kaboo  ' },
-  { role: 'assistant', content: 'Kaboo is…', via: 'local', model: 'qwen' },
+  { role: 'assistant', content: 'Kaboo is…', via: 'local', model: 'qwen', resources: [
+    { kind: 'pdf', title: 'Résumé', url: '/media/resume.pdf', description: 'English PDF', typeLabel: 'PDF' },
+    { kind: 'link', title: 'unsafe', url: 'javascript:alert(1)' },
+  ] },
 ], storage, now);
 assert.deepEqual(JSON.parse(JSON.stringify(history.load(storage, now + history.ttl - 1).messages)), [
   { role: 'user', content: 'Tell me about Kaboo' },
-  { role: 'assistant', content: 'Kaboo is…', via: 'local', model: 'qwen' },
+  { role: 'assistant', content: 'Kaboo is…', via: 'local', model: 'qwen', resources: [
+    { kind: 'pdf', title: 'Résumé', url: '/media/resume.pdf', description: 'English PDF', typeLabel: 'PDF' },
+  ] },
 ]);
 
 assert.equal(history.load(storage, now + history.ttl), null, 'history expires after one hour');

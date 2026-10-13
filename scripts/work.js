@@ -694,7 +694,19 @@
         return;
       }
       var html = convo.map(function (m) {
-        return '<div class="msg msg-' + (m.role === 'user' ? 'you' : 'bot') + '">' + escape(m.content) + '</div>';
+        if (m.role === 'user') return '<div class="msg msg-you">' + escape(m.content) + '</div>';
+        var renderer = window.ASK_RENDER;
+        var body = renderer && typeof renderer.markdown === 'function'
+          ? renderer.markdown(m.content)
+          : '<p>' + escape(m.content).replace(/\n/g, '<br>') + '</p>';
+        var resources = renderer && typeof renderer.resources === 'function'
+          ? renderer.resources(m.resources, {
+              aria: T('ask.resources.aria', 'Related files and links'),
+              link: T('ask.resources.link', 'Link'),
+              image: T('ask.resources.image', 'Image')
+            })
+          : '';
+        return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + '</div>';
       }).join('');
       if (pending) {
         html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="' + escape(T('ask.thinking', 'Thinking')) + '"><span></span><span></span><span></span></div></div>';
@@ -805,7 +817,11 @@
             signal: timeout(45000),
           }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (d) {
-              if (r.ok && d && d.answer) return { answer: String(d.answer), via: d.via, model: d.model };
+              if (r.ok && d && d.answer) return {
+                answer: String(d.answer), via: d.via, model: d.model,
+                resources: Array.isArray(d.resources) ? d.resources : [],
+                tools: Array.isArray(d.tools) ? d.tools : []
+              };
               return offlineAnswer(q);
             });
           }).catch(function () { return offlineAnswer(q); })
@@ -815,10 +831,11 @@
         var answer = typeof res === 'string' ? res : res.answer;
         var via = res && res.via;
         var model = res && res.model ? String(res.model) : '';
+        var resources = res && Array.isArray(res.resources) ? res.resources : [];
         if (via === 'local') setSource('local', model);
         else if (via === 'cloud') setSource('cloud', model);
         else setSource('offline');
-        convo.push({ role: 'assistant', content: answer, via: via, model: model });
+        convo.push({ role: 'assistant', content: answer, via: via, model: model, resources: resources });
         saveHistory();
         busy = false;
         renderLog(false);

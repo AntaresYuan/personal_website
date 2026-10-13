@@ -123,5 +123,14 @@
       "plugins": "Plugins",
       "infra": "Agent infra"
     }
+  },
+  "client": {
+    "ask": {
+      "resources": {
+        "aria": "Related files and links",
+        "link": "Link",
+        "image": "Image"
+      }
+    }
   }
 }

@@ -27,6 +27,13 @@ compatibility_date = "2026-05-09"
 [ai]
 binding = "AI"
 
+# Live token totals stay behind Worker-to-Worker access. `antares-qa` gets a
+# fetch-only service binding to the existing usage Worker; no bearer secret or
+# browser-visible endpoint is needed for the assistant tool.
+[[services]]
+binding = "USAGE"
+service = "antares-usage"
+
 [observability]
 enabled = true
 

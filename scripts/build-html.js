@@ -252,6 +252,12 @@ if (!/scripts\/ask-history\.js/.test(html)) {
     '<script src="scripts/ask-history.js" defer></script>\n$1'
   );
 }
+if (!/scripts\/ask-render\.js/.test(html)) {
+  html = html.replace(
+    /(<script src="scripts\/work\.js(?:\?v=[^"]*)?" defer><\/script>)/,
+    '<script src="scripts/ask-render.js" defer></script>\n$1'
+  );
+}
 
 // Cache-bust the runtime assets: append a content hash as `?v=`. index.html is
 // served must-revalidate but .js/.css get a longer CDN TTL — without this a
@@ -259,7 +265,7 @@ if (!/scripts\/ask-history\.js/.test(html)) {
 const hashOf = (rel) => crypto.createHash('sha1')
   .update(fs.readFileSync(path.join(root, rel)))
   .digest('hex').slice(0, 8);
-['scripts/beacon.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/ask-history.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
+['scripts/beacon.js', 'scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/ask-history.js', 'scripts/ask-render.js', 'scripts/work.js', 'scripts/buddy.js'].forEach((rel) => {
   const v = hashOf(rel);
   html = html.replace(
     new RegExp(`src="${rel.replace(/\./g, '\\.')}(\\?v=[^"]*)?"`),

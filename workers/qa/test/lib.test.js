@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import {
   normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
-  matchFaqs, faqContextOf, genPrompt, stripThinking, packVectors, unpackVectors,
+  matchFaqs, faqContextOf, findResources, wantsUsage, summarizeUsage,
+  resourceContextOf, usageContextOf, genPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
 
 let pass = 0, fail = 0;
@@ -68,11 +69,44 @@ t('FAQ matching checks canonical questions and bilingual aliases first', () => {
   assert.deepEqual(matchFaqs(faqs, 'Tell me about SusBench metrics'), []);
   assert.match(faqContextOf([faqs[0]]), /authoritative[\s\S]*Use Agentic Hiring/);
 });
+t('resource tool returns the exact localized resume PDF', () => {
+  const resources = [
+    { id: 'resume-en', kind: 'pdf', lang: 'en', title: 'Antares resume', titleZh: '英文简历', url: '/media/resume-en.pdf', keywords: ['resume', 'cv', '简历'] },
+    { id: 'resume-zh', kind: 'pdf', lang: 'zh', title: 'Chinese resume', titleZh: '中文简历', url: '/media/resume-zh.pdf', keywords: ['resume', 'cv', '简历'] },
+    { id: 'page-usage', kind: 'page', title: 'Token usage', titleZh: 'Token 使用量', url: '/usage/', urlZh: '/usage/?lang=zh', keywords: ['token', 'usage', '使用量'] },
+  ];
+  assert.deepEqual(findResources(resources, 'Please send me your resume PDF', 'en'), [{
+    kind: 'pdf', title: 'Antares resume', description: '', url: '/media/resume-en.pdf', typeLabel: 'PDF',
+  }]);
+  assert.equal(findResources(resources, '把你的简历发给我', 'zh')[0].url, '/media/resume-zh.pdf');
+  assert.equal(findResources(resources, 'token 使用量', 'zh')[0].url, '/usage/?lang=zh');
+  assert.deepEqual(findResources(resources, 'hello there', 'en'), []);
+  assert.match(resourceContextOf(findResources(resources, 'resume', 'en'), 'en'), /exact[\s\S]*resume-en\.pdf/);
+});
+t('usage tool intent and summary use the dashboard token basis', () => {
+  assert.equal(wantsUsage('How many tokens have you used?'), true);
+  assert.equal(wantsUsage('你目前的 token 使用量是多少？'), true);
+  assert.equal(wantsUsage('Tell me about Kaboo'), false);
+  const summary = summarizeUsage({
+    since: '2026-09-01', updated: '2026-10-13T10:00:00Z', days: [
+      { date: '2026-10-12', tokens: 20, totalTokens: 170, sessions: 2, costCents: 20, bySource: { codex: { totalTokens: 150 }, claude: { tokens: 20 } } },
+      { date: '2026-10-13', tokens: 50, totalTokens: 0, sessions: 1, costCents: 10, bySource: { codex: { tokens: 50 } } },
+    ],
+  });
+  assert.deepEqual(summary, {
+    totalTokens: 220, last30Tokens: 220, sessions: 3, costCents: 30,
+    activeDays: 2, periodDays: 2, since: '2026-09-01', updated: '2026-10-13T10:00:00Z',
+    topSource: { name: 'codex', tokens: 200 },
+  });
+  assert.match(usageContextOf(summary, 'zh'), /totalTokens=220[\s\S]*updated=2026-10-13/);
+});
 t('prompt states the reply language', () => {
   assert.match(genPrompt('C', 'zh'), /Reply in Simplified Chinese/);
   assert.match(genPrompt('C', 'en'), /Reply in English/);
   assert.match(genPrompt('C', 'en'), /FAQ FIRST/);
   assert.match(genPrompt('C', 'en'), /UNTRUSTED PAGE TEXT/);
+  assert.match(genPrompt('C', 'en'), /Markdown links are allowed ONLY/);
+  assert.match(genPrompt('C', 'en'), /TOOL RESULTS/);
 });
 t('thinking blocks are removed', () => {
   assert.equal(stripThinking('<think>plan…</think>\nHello'), 'Hello');
