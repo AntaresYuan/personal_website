@@ -713,9 +713,11 @@
       var html = convo.map(function (m) {
         if (m.role === 'user') return '<div class="msg msg-you">' + escape(m.content) + '</div>';
         var renderer = window.ASK_RENDER;
-        var body = renderer && typeof renderer.markdown === 'function'
-          ? renderer.markdown(m.content)
-          : '<p>' + escape(m.content).replace(/\n/g, '<br>') + '</p>';
+        var body = m.pending && !m.content
+          ? '<div class="msg-dots" role="status" aria-label="' + escape(T('ask.thinking', 'Thinking')) + '"><span></span><span></span><span></span></div>'
+          : (renderer && typeof renderer.markdown === 'function'
+              ? renderer.markdown(m.content)
+              : '<p>' + escape(m.content).replace(/\n/g, '<br>') + '</p>');
         var resources = renderer && typeof renderer.resources === 'function'
           ? renderer.resources(m.resources, {
               aria: T('ask.resources.aria', 'Related files and links'),
@@ -729,7 +731,8 @@
           '</span><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.25" y="5.25" width="7.25" height="7.25" rx="1.25"/><path d="M3.5 10.5V4.75c0-.7.55-1.25 1.25-1.25h5.75"/></svg></button>' : '';
         return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + trace + '</div>';
       }).join('');
-      if (pending) {
+      var alreadyPending = convo.some(function (message) { return message.role === 'assistant' && message.pending; });
+      if (pending && !alreadyPending) {
         html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="' + escape(T('ask.thinking', 'Thinking')) + '"><span></span><span></span><span></span></div></div>';
       }
       log.innerHTML = html;
@@ -820,23 +823,58 @@
       if (!q || busy) return;
       convo.push({ role: 'user', content: q });
       saveHistory();
+      // Do not send the empty streaming placeholder back as conversation
+      // history. It only reserves the assistant bubble that deltas update.
+      var requestMessages = convo.map(function (message) {
+        return { role: message.role, content: message.content };
+      });
+      var responseMessage = { role: 'assistant', content: '', pending: true, resources: [], traceId: '' };
+      convo.push(responseMessage);
       input.value = '';
       pInput.value = '';
       busy = true;
       updateSend();
       openPanel();
       setSource('pending');
-      renderLog(true);
+      renderLog(false);
       setMood('thinking');
+
+      var renderQueued = false;
+      var renderStream = function () {
+        if (renderQueued) return;
+        renderQueued = true;
+        requestAnimationFrame(function () {
+          renderQueued = false;
+          renderLog(false);
+        });
+      };
+      var applySource = function (via, model) {
+        if (via === 'local') setSource('local', model);
+        else if (via === 'cloud') setSource('cloud', model);
+        else if (via === 'tool') setSource('tool', model);
+      };
 
       var reply = qaUrl
         ? fetch(qaUrl, {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ q: q, messages: convo, lang: document.documentElement.lang || 'en' }),
-            // Room for the Mac's model (up to ~25 s) and then the cloud fallback.
-            signal: timeout(45000),
+            headers: { 'content-type': 'application/json', accept: 'application/x-ndjson, application/json' },
+            body: JSON.stringify({ q: q, messages: requestMessages, lang: document.documentElement.lang || 'en', stream: true }),
+            // Once tokens are visible a longer ceiling is safe; this also
+            // leaves room for a cold local model or the cloud fallback.
+            signal: timeout(90000),
           }).then(function (r) {
+            var streaming = window.ASK_STREAM;
+            if (r.ok && streaming && streaming.isStreaming(r)) {
+              return streaming.consume(r, function (event, partial) {
+                responseMessage.content = partial.answer;
+                responseMessage.via = partial.via;
+                responseMessage.model = partial.model;
+                responseMessage.resources = partial.resources;
+                responseMessage.traceId = partial.traceId;
+                applySource(partial.via, partial.model);
+                renderStream();
+              });
+            }
             return r.json().catch(function () { return {}; }).then(function (d) {
               if (r.ok && d && d.answer) return {
                 answer: String(d.answer), via: d.via, model: d.model,
@@ -855,11 +893,14 @@
         var model = res && res.model ? String(res.model) : '';
         var resources = res && Array.isArray(res.resources) ? res.resources : [];
         var traceId = res && res.traceId ? String(res.traceId) : '';
-        if (via === 'local') setSource('local', model);
-        else if (via === 'cloud') setSource('cloud', model);
-        else if (via === 'tool') setSource('tool', model);
+        if (via === 'local' || via === 'cloud' || via === 'tool') applySource(via, model);
         else setSource('offline');
-        convo.push({ role: 'assistant', content: answer, via: via, model: model, resources: resources, traceId: traceId });
+        responseMessage.content = answer;
+        responseMessage.via = via;
+        responseMessage.model = model;
+        responseMessage.resources = resources;
+        responseMessage.traceId = traceId;
+        responseMessage.pending = false;
         saveHistory();
         busy = false;
         renderLog(false);

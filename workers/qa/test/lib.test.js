@@ -1,7 +1,7 @@
 /* Offline tests for the qa Worker's pure helpers (src/lib.js). */
 import assert from 'node:assert/strict';
 import {
-  normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
+  normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, selectFaqPassages, contextOf,
   matchFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
   resourceContextOf, usageContextOf, usageAnswer, genPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
@@ -54,6 +54,21 @@ t('selection: pins always, best first, within budget', () => {
   // Without embeddings, only passages with a lexical hit are added.
   const lex = selectPassages(chunks, { semantic: null, lexical: [0, 3, 0, 0], budget: 1000 });
   assert.deepEqual(lex.map((c) => c.id), ['brief-1', 'p1']);
+});
+t('FAQ selection keeps Assistant context and only its exact linked page', () => {
+  const corpus = [
+    { id: 'assistant-guide', title: 'Guide', url: '', text: 'Be concise.', pin: true },
+    { id: 'knowledge-1', title: 'Background', url: '', text: 'I am an AI PM.', pin: true },
+    { id: 'overview#1', title: 'Overview', url: '/', text: 'All projects.', pin: true },
+    { id: 'agentic-1', title: 'Agentic Hiring', url: '/projects/agentic-hiring/', text: 'A recruiting workbench.' },
+    { id: 'agentic-2', title: 'Metrics', url: '/zh/projects/agentic-hiring/', text: 'Pass rate: 21% to 25%.' },
+    { id: 'kaboo-1', title: 'Kaboo', url: '/projects/kaboo/', text: 'Token efficiency.' },
+  ];
+  assert.deepEqual(
+    selectFaqPassages(corpus, [{ href: '/projects/agentic-hiring/' }]).map((chunk) => chunk.id),
+    ['assistant-guide', 'knowledge-1', 'agentic-1', 'agentic-2']
+  );
+  assert.deepEqual(selectFaqPassages(corpus, [{ href: 'mailto:a@example.com' }]).map((chunk) => chunk.id), ['assistant-guide', 'knowledge-1']);
 });
 t('context blocks carry title and page', () => {
   assert.match(contextOf([chunks[1]]), /^### Project: Kaboo \(\/projects\/kaboo\/\)\nKaboo/);

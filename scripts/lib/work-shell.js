@@ -184,7 +184,7 @@ const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;7
 // Work pages are rendered per language, so they don't load scripts/i18n.js
 // (the runtime translator Personal still uses) — except a page built in
 // English only, which asks for it with `runtimeI18n`.
-const SCRIPTS = ['scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/ask-history.js', 'scripts/ask-render.js', 'scripts/work.js', 'scripts/buddy.js'];
+const SCRIPTS = ['scripts/qa-faq-data.js', 'scripts/qa-faq.js', 'scripts/ask-history.js', 'scripts/ask-render.js', 'scripts/ask-stream.js', 'scripts/work.js', 'scripts/buddy.js'];
 
 /* ── Whole page, for the generated Work pages ─────────────────────────────
    The home page is a template filled in place by build-html.js instead, but

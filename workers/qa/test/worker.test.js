@@ -18,7 +18,8 @@ const INDEX = { version: 'v1', faqs: [
   { id: 'page-usage', kind: 'page', title: 'Personal token consumption', titleZh: '个人 Token 使用量', url: '/usage/', urlZh: '/usage/?lang=zh', keywords: ['token', 'usage', 'consumption', '使用量'] },
   { id: 'project-agentic-hiring', kind: 'page', title: 'Agentic Hiring', titleZh: 'Agentic Hiring', url: '/projects/agentic-hiring/', urlZh: '/zh/projects/agentic-hiring/', description: 'Recruiting workbench.', descriptionZh: '招聘工作台。', keywords: ['project', 'Agentic Hiring'] },
 ], chunks: [
-  { id: 'brief-1', title: 'Note', url: '', text: 'I study at UW.', pin: true },
+  { id: 'assistant-guide', title: 'Note', url: '', text: 'I study at UW.', pin: true },
+  { id: 'project-agentic-hiring', title: 'Project: Agentic Hiring', url: '/projects/agentic-hiring/', text: 'Agentic Hiring is a recruiting workbench. Pass rate rose from 21% to 25%.' },
   { id: 'p1', title: 'Project: Kaboo', url: '/projects/kaboo/', text: 'Kaboo analyzes token use.' },
   { id: 'p2', title: 'Project: SusBench', url: '/projects/susbench/', text: 'SusBench tests dark patterns.' },
 ] };
@@ -30,10 +31,18 @@ globalThis.fetch = async (url, init = {}) => {
   if (url.includes('/ask-index.json')) return new Response(JSON.stringify(INDEX));
   if (url.startsWith('https://llm.example/')) {
     localCalls++;
-    lastLocalPrompt = JSON.parse(init.body).messages[0].content;
+    const request = JSON.parse(init.body);
+    lastLocalPrompt = request.messages[0].content;
     assert.equal(init.headers['CF-Access-Client-Id'], 'id');
     if (local === 'down') throw new TypeError('connect failed');
     if (local === 'busy') return new Response('{"error":"busy"}', { status: 503 });
+    if (request.stream) return new Response([
+      JSON.stringify({ type: 'meta', model: 'qwen' }),
+      JSON.stringify({ type: 'delta', text: 'From ' }),
+      JSON.stringify({ type: 'delta', text: 'my Mac.' }),
+      JSON.stringify({ type: 'done', model: 'qwen', metrics: { promptTokens: 120, outputTokens: 3 } }),
+      '',
+    ].join('\n'), { headers: { 'content-type': 'application/x-ndjson' } });
     return new Response(JSON.stringify({ answer: '<think>x</think>From my Mac.', model: 'qwen' }));
   }
   throw new Error('unexpected fetch ' + url);
@@ -75,6 +84,14 @@ const ask = async (q, extra = {}) => {
   }), env, ctx);
   return { status: res.status, body: await res.json(), cors: res.headers.get('access-control-allow-origin') };
 };
+const askStream = async (q, extra = {}) => {
+  const res = await worker.fetch(new Request('https://qa.example/', {
+    method: 'POST', headers: { Origin: 'https://antaresyuan.site', 'content-type': 'application/json' },
+    body: JSON.stringify({ q, stream: true, ...extra }),
+  }), env, ctx);
+  const events = (await res.text()).trim().split('\n').map(JSON.parse);
+  return { status: res.status, events, cors: res.headers.get('access-control-allow-origin'), contentType: res.headers.get('content-type') };
+};
 
 let pass = 0, fail = 0;
 const t = async (name, fn) => { try { await fn(); pass++; } catch (e) { fail++; console.log(`FAIL ${name}\n  ${e.stack}`); } };
@@ -97,8 +114,28 @@ await t('a matched FAQ brief precedes the retrieved site evidence', async () => 
   assert.deepEqual(r.body.tools, ['find_work_resources']);
   assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
   assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*\/projects\/agentic-hiring\//);
+  assert.match(lastLocalPrompt, /Project: Agentic Hiring/);
+  assert.doesNotMatch(lastLocalPrompt, /Project: Kaboo|Project: SusBench/);
   const saved = traces.get(`trace:${r.body.traceId}`).value;
   assert.deepEqual(saved.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
+  assert.equal(saved.retrieval, 'faq-exact');
+  assert.deepEqual(saved.passages.map((passage) => passage.id), ['assistant-guide', 'project-agentic-hiring']);
+});
+await t('streaming sends metadata before incremental local deltas and saves the trace', async () => {
+  local = 'ok';
+  const r = await askStream('What is your most mature project?');
+  assert.equal(r.status, 200);
+  assert.match(r.contentType, /application\/x-ndjson/);
+  assert.equal(r.events[0].type, 'meta');
+  assert.equal(r.events[0].via, 'local');
+  assert.ok(r.events.find((event) => event.type === 'meta' && event.model === 'qwen'));
+  assert.equal(r.events.filter((event) => event.type === 'delta').map((event) => event.text).join(''), 'From my Mac.');
+  const done = r.events.at(-1);
+  assert.equal(done.type, 'done');
+  assert.equal(done.answer, 'From my Mac.');
+  assert.deepEqual(done.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
+  assert.equal(traces.get(`trace:${done.traceId}`).value.answer, 'From my Mac.');
+  assert.equal(traces.get(`trace:${done.traceId}`).value.inference.promptTokens, 120);
 });
 await t('selected page text is included as untrusted reference context', async () => {
   local = 'ok';

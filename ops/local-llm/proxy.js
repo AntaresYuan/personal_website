@@ -7,8 +7,9 @@
    Ollama's own API can also pull, copy and delete models. This proxy lets
    exactly one thing through:
 
-     POST /chat    { messages: [{role, content}], max_tokens?, temperature? }
-                   → { answer, model }   ·   503 when already answering one
+     POST /chat    { messages: [{role, content}], max_tokens?, temperature?, stream? }
+                   → { answer, model }, or NDJSON meta/delta/done events when
+                     stream=true · 503 when already answering one
      GET  /health  → { ok, model }
 
    One answer at a time: a second visitor gets 503 at once and the Worker
@@ -52,9 +53,9 @@ function createProxy(opts = {}) {
     res.end(JSON.stringify(obj));
   };
 
-  async function chat(body) {
+  async function requestOllama(body, stream) {
     const payload = {
-      model, messages: body.messages, stream: false, think: false, keep_alive: keepAlive,
+      model, messages: body.messages, stream, think: false, keep_alive: keepAlive,
       options: {
         num_ctx: numCtx,
         num_predict: Math.min(Number(body.max_tokens) || 600, LIMITS.tokens),
@@ -68,8 +69,60 @@ function createProxy(opts = {}) {
       r = await fetch(`${ollama}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: AbortSignal.timeout(90000) });
     }
     if (!r.ok) throw new Error(`ollama ${r.status}`);
+    return r;
+  }
+
+  async function chat(body) {
+    const r = await requestOllama(body, false);
     const d = await r.json();
     return { answer: String(d?.message?.content || '').trim(), model };
+  }
+
+  async function streamChat(body, res) {
+    const r = await requestOllama(body, true);
+    if (!r.body) throw new Error('ollama returned no stream');
+    res.writeHead(200, {
+      'content-type': 'application/x-ndjson; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-accel-buffering': 'no',
+    });
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+    res.write(`${JSON.stringify({ type: 'meta', model })}\n`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', answer = '', terminal = null;
+    const accept = (line) => {
+      if (!line.trim()) return;
+      const event = JSON.parse(line);
+      const text = String(event?.message?.content || '');
+      if (text) {
+        answer += text;
+        res.write(`${JSON.stringify({ type: 'delta', text })}\n`);
+      }
+      if (event?.done) terminal = event;
+    };
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) accept(line);
+    }
+    buffer += decoder.decode();
+    if (buffer.trim()) accept(buffer);
+    const clean = answer.trim();
+    if (!clean) throw new Error('empty answer');
+    res.write(`${JSON.stringify({
+      type: 'done', model,
+      metrics: terminal ? {
+        promptTokens: Number(terminal.prompt_eval_count) || 0,
+        outputTokens: Number(terminal.eval_count) || 0,
+        totalDurationNs: Number(terminal.total_duration) || 0,
+      } : undefined,
+    })}\n`);
+    res.end();
+    return { answer: clean, model };
   }
 
   return http.createServer((req, res) => {
@@ -97,10 +150,20 @@ function createProxy(opts = {}) {
       if (busy) return done(503, { error: 'busy' });
       busy = true;
       try {
+        if (body.stream === true) {
+          const out = await streamChat(body, res);
+          log(`${new Date().toISOString()} ${req.method} ${req.url} 200 ${Date.now() - started}ms`);
+          return out;
+        }
         const out = await chat(body);
         done(out.answer ? 200 : 502, out.answer ? out : { error: 'empty answer' });
       } catch (e) {
-        done(502, { error: 'model unavailable' });
+        if (!res.headersSent) done(502, { error: 'model unavailable' });
+        else {
+          res.write(`${JSON.stringify({ type: 'error', error: 'model unavailable' })}\n`);
+          res.end();
+          log(`${new Date().toISOString()} ${req.method} ${req.url} 502 ${Date.now() - started}ms`);
+        }
       } finally {
         busy = false;
       }

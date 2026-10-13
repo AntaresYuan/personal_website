@@ -14,7 +14,16 @@ const ollama = http.createServer((req, res) => {
   req.on('end', () => {
     const body = JSON.parse(b);
     seen.push({ url: req.url, body });
-    const answer = () => { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify({ message: { content: ' Hello from Qwen. ' } })); };
+    const answer = () => {
+      res.writeHead(200, { 'content-type': body.stream ? 'application/x-ndjson' : 'application/json' });
+      if (body.stream) {
+        res.write(JSON.stringify({ message: { content: 'Hello ' }, done: false }) + '\n');
+        res.write(JSON.stringify({ message: { content: 'from Qwen.' }, done: false }) + '\n');
+        res.end(JSON.stringify({ message: { content: '' }, done: true, prompt_eval_count: 12, eval_count: 3, total_duration: 42 }) + '\n');
+      } else {
+        res.end(JSON.stringify({ message: { content: ' Hello from Qwen. ' } }));
+      }
+    };
     if (body.messages[0].content === 'slow') release = answer; else answer();
   });
 });
@@ -39,6 +48,16 @@ const ollama = http.createServer((req, res) => {
     assert.equal(sent.body.stream, false);
     assert.equal(sent.body.options.num_predict, 900);    // capped
     assert.equal(sent.body.options.temperature, 1);      // clamped
+  });
+  await t('streams Ollama tokens as NDJSON events', async () => {
+    const r = await post({ messages: [{ role: 'user', content: 'stream please' }], stream: true });
+    assert.equal(r.status, 200);
+    assert.match(r.headers.get('content-type'), /application\/x-ndjson/);
+    const events = (await r.text()).trim().split('\n').map(JSON.parse);
+    assert.deepEqual(events.map((event) => event.type), ['meta', 'delta', 'delta', 'done']);
+    assert.equal(events.filter((event) => event.type === 'delta').map((event) => event.text).join(''), 'Hello from Qwen.');
+    assert.deepEqual(events.at(-1).metrics, { promptTokens: 12, outputTokens: 3, totalDurationNs: 42 });
+    assert.equal(seen.at(-1).body.stream, true);
   });
   await t('health', async () => {
     assert.deepEqual(await (await fetch(base + '/health')).json(), { ok: true, model: 'test-model' });

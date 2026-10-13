@@ -382,6 +382,40 @@ export function selectPassages(chunks, { semantic, lexical, budget }) {
   return picked;
 }
 
+/* A matched FAQ is already an owner-authored routing decision. Do not run a
+   broad semantic search after it: keep only the Assistant's durable guide /
+   background notes and the page explicitly linked by that FAQ. Besides
+   removing unrelated evidence, this saves an embedding request and gives
+   the local model a much smaller prompt. */
+export function selectFaqPassages(chunks, faqs, budget = 6500) {
+  if (!Array.isArray(chunks) || !Array.isArray(faqs) || !faqs.length) return [];
+  const normalizePath = (value) => {
+    const raw = String(value || '').trim();
+    if (!raw.startsWith('/')) return '';
+    let path = raw.split(/[?#]/, 1)[0].replace(/^\/zh(?=\/)/, '');
+    if (!path.endsWith('/')) path += '/';
+    return path;
+  };
+  const targets = new Set(faqs.map((faq) => normalizePath(faq && faq.href)).filter(Boolean));
+  const core = chunks.filter((chunk) => chunk && (
+    chunk.id === 'assistant-guide' || String(chunk.id || '').startsWith('knowledge-')
+  ));
+  const exact = chunks.filter((chunk) => chunk && targets.has(normalizePath(chunk.url)));
+  const seen = new Set();
+  const picked = [];
+  let used = 0;
+  for (const chunk of [...core, ...exact]) {
+    const key = String(chunk.id || `${chunk.title || ''}\n${chunk.url || ''}`);
+    if (seen.has(key)) continue;
+    const size = String(chunk.text || '').length;
+    if (picked.length && used + size > budget) continue;
+    picked.push(chunk);
+    seen.add(key);
+    used += size;
+  }
+  return picked;
+}
+
 export const contextOf = (passages) => passages
   .map((c) => `### ${c.title}${c.url ? ` (${c.url})` : ''}\n${c.text}`)
   .join('\n\n');
