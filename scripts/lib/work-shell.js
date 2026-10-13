@@ -62,6 +62,7 @@ const railItemsHtml = (active, lang = 'en') => {
 const ICON_AUTO  = '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/>';
 const ICON_LIGHT = '<circle cx="12" cy="12" r="3.6"/><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M5.8 18.2l1.4-1.4M16.8 7.2l1.4-1.4"/>';
 const ICON_DARK  = '<path d="M19.2 14.6A7.6 7.6 0 0 1 9.4 4.8a7.6 7.6 0 1 0 9.8 9.8z"/>';
+const ICON_GLASS = '<path d="M12 3.3s6.2 6.8 6.2 11.1a6.2 6.2 0 0 1-12.4 0C5.8 10.1 12 3.3 12 3.3z"/><path d="M8.9 14.2c.2 1.7 1.2 2.7 2.9 3" opacity=".72"/>';
 
 /* The language switch links to this page in the other language. The
    ?lang= query is for the edge middleware (functions/_middleware.js): it
@@ -94,6 +95,24 @@ const topbarInner = (lang = 'en', pagePath = '/') => `
       <button class="theme-btn" type="button" role="radio" data-mode="auto" aria-label="${escape(t('shell.theme.auto', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_AUTO}</svg></button>
       <button class="theme-btn" type="button" role="radio" data-mode="light" aria-label="${escape(t('shell.theme.light', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_LIGHT}</svg></button>
       <button class="theme-btn" type="button" role="radio" data-mode="dark" aria-label="${escape(t('shell.theme.dark', lang))}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_DARK}</svg></button>
+    </div>
+  </div>
+  <div class="glass-control" id="glass-control">
+    <button class="glass-control-trigger glass" id="glass-control-trigger" type="button"
+            aria-label="${escape(t('shell.glass.aria', lang))}" aria-expanded="false" aria-controls="glass-control-panel" data-lens>
+      <svg viewBox="0 0 24 24" aria-hidden="true">${ICON_GLASS}</svg>
+    </button>
+    <div class="glass-control-panel glass" id="glass-control-panel" hidden>
+      <div class="glass-control-head">
+        <label for="glass-control-range">${escape(t('shell.glass.title', lang))}</label>
+        <output id="glass-control-output" for="glass-control-range">80%</output>
+      </div>
+      <input class="glass-control-range" id="glass-control-range" type="range" min="0" max="100" step="1" value="80"
+             aria-label="${escape(t('shell.glass.aria', lang))}">
+      <div class="glass-control-scale" aria-hidden="true">
+        <span>${escape(t('shell.glass.low', lang))}</span>
+        <span>${escape(t('shell.glass.high', lang))}</span>
+      </div>
     </div>
   </div>
   </div>

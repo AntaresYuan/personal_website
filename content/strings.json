@@ -20,6 +20,12 @@
       "light": "Light",
       "dark": "Dark"
     },
+    "glass": {
+      "aria": "Liquid Glass intensity",
+      "title": "Liquid Glass",
+      "low": "Subtle",
+      "high": "Liquid"
+    },
     "rail": {
       "aria": "Site",
       "soon": "soon"

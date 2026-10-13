@@ -132,7 +132,11 @@
         setTimeout(function () { (checked || current).focus({ preventScroll: true }); }, 60);
       }
     };
-    current.addEventListener('click', function (ev) { ev.stopPropagation(); setThemeOpen(true); });
+    current.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (typeof setGlassOpen === 'function') setGlassOpen(false);
+      setThemeOpen(true);
+    });
     themeSwitch.querySelectorAll('[data-mode]').forEach(function (b) {
       b.addEventListener('click', function (ev) {
         ev.stopPropagation();
@@ -148,6 +152,88 @@
     });
     themeSwitch.addEventListener('keydown', function (ev) {
       if (ev.key === 'Escape' && themeSwitch.classList.contains('is-open')) { setThemeOpen(false); current.focus(); }
+    });
+  }
+
+  /* ── Liquid Glass ────────────────────────────────────────────────────
+     One material control for every floating surface. More intensity means
+     clearer glass, stronger backdrop colour and a brighter refractive rim;
+     less intensity settles into a quieter frosted surface. */
+  var glassControl = $('glass-control');
+  var glassTrigger = $('glass-control-trigger');
+  var glassPanel = $('glass-control-panel');
+  var glassRange = $('glass-control-range');
+  var glassOutput = $('glass-control-output');
+  var GLASS_KEY = 'antares.glass';
+  var GLASS_DEFAULT = 80;
+  var clampGlass = function (value) {
+    var n = Number(value);
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : GLASS_DEFAULT;
+  };
+  var storedGlass = function () {
+    try {
+      var value = localStorage.getItem(GLASS_KEY);
+      return value === null ? GLASS_DEFAULT : clampGlass(value);
+    } catch (e) { return GLASS_DEFAULT; }
+  };
+  var mixGlass = function (from, to, amount) { return from + (to - from) * amount; };
+  var applyGlass = function (value, persist) {
+    value = clampGlass(value);
+    var amount = value / 100;
+    var set = function (name, n, unit) {
+      root.style.setProperty(name, Number(n).toFixed(unit === 'px' ? 1 : 3) + (unit || ''));
+    };
+    root.setAttribute('data-glass-intensity', String(value));
+    set('--glass-bg-alpha', mixGlass(0.58, 0.24, amount));
+    set('--glass-clear-alpha', mixGlass(0.44, 0.08, amount));
+    set('--glass-typing-alpha', mixGlass(0.82, 0.50, amount));
+    set('--glass-strong-alpha', mixGlass(0.97, 0.84, amount));
+    set('--glass-blur', mixGlass(8, 24, amount), 'px');
+    set('--glass-sat', mixGlass(1.05, 2.25, amount));
+    set('--glass-lens-blur', mixGlass(1.8, 0.35, amount), 'px');
+    set('--glass-lens-sat', mixGlass(1.1, 2.45, amount));
+    set('--glass-lens-bright', mixGlass(1, 1.07, amount));
+    set('--glass-rim-opacity', mixGlass(0.52, 1, amount));
+    set('--glass-glare-idle', mixGlass(0.18, 0.62, amount));
+    set('--glass-glare-hover', mixGlass(0.32, 1, amount));
+    if (glassRange) {
+      glassRange.value = String(value);
+      glassRange.style.setProperty('--glass-range', value + '%');
+      glassRange.setAttribute('aria-valuetext', value + '%');
+    }
+    if (glassOutput) glassOutput.value = value + '%';
+    if (persist) {
+      try { localStorage.setItem(GLASS_KEY, String(value)); } catch (e) {}
+    }
+  };
+  applyGlass(storedGlass(), false);
+
+  var setGlassOpen = function (open) {
+    if (!glassControl || !glassTrigger || !glassPanel) return;
+    glassControl.classList.toggle('is-open', open);
+    glassTrigger.setAttribute('aria-expanded', String(open));
+    glassPanel.hidden = !open;
+    if (open && glassRange) setTimeout(function () { glassRange.focus({ preventScroll: true }); }, 40);
+  };
+  if (glassControl && glassTrigger && glassPanel && glassRange) {
+    glassTrigger.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (typeof setThemeOpen === 'function') setThemeOpen(false);
+      setGlassOpen(!glassControl.classList.contains('is-open'));
+    });
+    glassPanel.addEventListener('click', function (ev) { ev.stopPropagation(); });
+    glassRange.addEventListener('input', function () { applyGlass(glassRange.value, true); });
+    doc.addEventListener('click', function (ev) {
+      if (glassControl.classList.contains('is-open') && !glassControl.contains(ev.target)) setGlassOpen(false);
+    });
+    glassControl.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && glassControl.classList.contains('is-open')) {
+        setGlassOpen(false);
+        glassTrigger.focus();
+      }
+    });
+    window.addEventListener('storage', function (ev) {
+      if (ev.key === GLASS_KEY) applyGlass(ev.newValue === null ? GLASS_DEFAULT : ev.newValue, false);
     });
   }
 

@@ -16,6 +16,12 @@
       "light": "浅色",
       "dark": "深色"
     },
+    "glass": {
+      "aria": "Liquid Glass 强度",
+      "title": "Liquid Glass",
+      "low": "柔和",
+      "high": "通透"
+    },
     "rail": {
       "aria": "站点导航",
       "soon": "即将上线"

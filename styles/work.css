@@ -35,10 +35,10 @@
 
   /* Glass. The rim is a gradient border (brighter top-left, where the light
      comes from); the inset shadows are the specular edges. */
-  --glass-bg:        rgba(255, 255, 255, 0.34);
-  --glass-bg-clear:  rgba(255, 255, 255, 0.14);
-  --glass-bg-typing: rgba(255, 255, 255, 0.62);
-  --glass-bg-strong: rgba(250, 250, 252, 0.92);
+  --glass-bg:        rgba(255, 255, 255, var(--glass-bg-alpha, 0.34));
+  --glass-bg-clear:  rgba(255, 255, 255, var(--glass-clear-alpha, 0.14));
+  --glass-bg-typing: rgba(255, 255, 255, var(--glass-typing-alpha, 0.62));
+  --glass-bg-strong: rgba(250, 250, 252, var(--glass-strong-alpha, 0.92));
   --glass-solid:     #FBFBFD;
   --glass-blur:      14px;
   --glass-sat:       1.9;
@@ -110,10 +110,10 @@
   --card-shadow:       inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 28px -12px rgba(0, 0, 0, 0.7);
   --card-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 22px 44px -16px rgba(0, 0, 0, 0.8);
 
-  --glass-bg:        rgba(44, 44, 50, 0.32);
-  --glass-bg-clear:  rgba(32, 32, 38, 0.22);
-  --glass-bg-typing: rgba(36, 36, 42, 0.70);
-  --glass-bg-strong: rgba(28, 28, 32, 0.94);
+  --glass-bg:        rgba(44, 44, 50, var(--glass-bg-alpha, 0.32));
+  --glass-bg-clear:  rgba(32, 32, 38, var(--glass-clear-alpha, 0.22));
+  --glass-bg-typing: rgba(36, 36, 42, var(--glass-typing-alpha, 0.70));
+  --glass-bg-strong: rgba(28, 28, 32, var(--glass-strong-alpha, 0.94));
   --glass-solid:     #1E1E22;
   --glass-rim: linear-gradient(140deg,
       rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.14) 26%,
@@ -249,6 +249,7 @@ body::after {
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: var(--glass-rim-opacity, 1);
   pointer-events: none;
 }
 /* Specular glare that follows the pointer (scripts/work.js sets --mx/--my). */
@@ -259,11 +260,11 @@ body::after {
   z-index: -1;
   border-radius: inherit;
   background: radial-gradient(140px circle at var(--mx, 30%) var(--my, -30%), var(--glass-glare), transparent 70%);
-  opacity: 0.5;
+  opacity: var(--glass-glare-idle, 0.5);
   transition: opacity 0.35s;
   pointer-events: none;
 }
-.glass:hover::after { opacity: 1; }
+.glass:hover::after { opacity: var(--glass-glare-hover, 1); }
 /* Chromium: refraction at the rim (scripts/work.js draws a displacement map
    per element and exposes it as --lens). This is the "clear" variant: barely
    any blur and a thin tint, because the bend is only visible if what is
@@ -271,8 +272,8 @@ body::after {
    it bends the sharp backdrop, then the light blur softens the result. */
 .glass.has-lens {
   --glass-bg: var(--glass-bg-clear);
-  -webkit-backdrop-filter: var(--lens) blur(0.6px) saturate(2.1) brightness(1.04);
-  backdrop-filter: var(--lens) blur(0.6px) saturate(2.1) brightness(1.04);
+  -webkit-backdrop-filter: var(--lens) blur(var(--glass-lens-blur, 0.6px)) saturate(var(--glass-lens-sat, 2.1)) brightness(var(--glass-lens-bright, 1.04));
+  backdrop-filter: var(--lens) blur(var(--glass-lens-blur, 0.6px)) saturate(var(--glass-lens-sat, 2.1)) brightness(var(--glass-lens-bright, 1.04));
 }
 .glass-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
 
@@ -428,6 +429,119 @@ body::after {
   color: var(--text);
   background: var(--knob-bg);
   box-shadow: var(--knob-shadow);
+}
+
+/* Liquid Glass strength lives beside appearance because it is a material
+   preference, not a colour theme. The control adjusts the shared glass
+   tokens, so every floating control changes together instead of becoming a
+   one-off demo. */
+.glass-control { position: relative; }
+.glass-control-trigger {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-2);
+  transition: color 0.2s, scale 0.35s var(--spring), background 0.2s;
+}
+.glass-control-trigger:hover,
+.glass-control.is-open .glass-control-trigger { color: var(--text); }
+.glass-control-trigger:active { scale: 0.94; }
+.glass-control.is-open .glass-control-trigger {
+  background: var(--knob-bg);
+  box-shadow: var(--knob-shadow);
+}
+.glass-control-trigger svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.glass-control-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 5;
+  width: 240px;
+  padding: 14px 16px 12px;
+  border-radius: 20px;
+  --glass-bg: var(--glass-bg-strong);
+  --glass-blur: 28px;
+}
+.glass-control-head,
+.glass-control-scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.glass-control-head {
+  gap: 16px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 650;
+}
+.glass-control-head output {
+  min-width: 34px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.glass-control-range {
+  --glass-range: 80%;
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.glass-control-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent) 0 var(--glass-range), var(--chip-bg) var(--glass-range) 100%);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.glass-control-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--knob-bg);
+  box-shadow: var(--knob-shadow), 0 1px 5px rgba(20, 22, 40, 0.16);
+}
+.glass-control-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.glass-control-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.glass-control-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--knob-bg);
+  box-shadow: var(--knob-shadow), 0 1px 5px rgba(20, 22, 40, 0.16);
+}
+.glass-control-scale {
+  margin-top: -1px;
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-weight: 500;
 }
 
 /* ── Rail ───────────────────────────────────────────────────────────────── */
