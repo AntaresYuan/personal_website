@@ -890,7 +890,7 @@ body::after {
   transform: translateX(-50%);
 }
 .ask-shell {
-  width: 300px;
+  width: 238px;
   border-radius: 30px;
   overflow: hidden;
   transition: width 0.6s var(--spring-bounce), background 0.3s;
@@ -1007,6 +1007,7 @@ body::after {
 .ask-send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
 .ask.is-open .ask-send { opacity: 1; scale: 1; visibility: visible; transition-delay: 0s; }
 .ask-send:disabled { background: var(--chip-bg); color: var(--text-3); cursor: default; }
+.ask:not(.is-open) .ask-send { display: none; }
 
 .ask-suggest {
   /* Above the composer, left-aligned with it: they read as things the avatar
