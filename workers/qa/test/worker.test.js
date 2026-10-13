@@ -75,7 +75,8 @@ const env = {
     traces.set(key, { value: JSON.parse(value), options });
   } },
 };
-const ctx = { waitUntil: (p) => p };
+const waits = [];
+const ctx = { waitUntil: (p) => { waits.push(p); return p; } };
 const { default: worker } = await import('../src/index.js');
 const ask = async (q, extra = {}) => {
   const res = await worker.fetch(new Request('https://qa.example/', {
@@ -123,6 +124,7 @@ await t('a matched FAQ brief precedes the retrieved site evidence', async () => 
 });
 await t('streaming sends metadata before incremental local deltas and saves the trace', async () => {
   local = 'ok';
+  const beforeWaits = waits.length;
   const r = await askStream('What is your most mature project?');
   assert.equal(r.status, 200);
   assert.match(r.contentType, /application\/x-ndjson/);
@@ -134,6 +136,8 @@ await t('streaming sends metadata before incremental local deltas and saves the 
   assert.equal(done.type, 'done');
   assert.equal(done.answer, 'From my Mac.');
   assert.deepEqual(done.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
+  assert.equal(waits.length, beforeWaits + 1, 'stream trace work is registered before the response returns');
+  await waits.at(-1);
   assert.equal(traces.get(`trace:${done.traceId}`).value.answer, 'From my Mac.');
   assert.equal(traces.get(`trace:${done.traceId}`).value.inference.promptTokens, 120);
 });

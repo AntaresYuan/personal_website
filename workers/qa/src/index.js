@@ -368,8 +368,7 @@ export default {
       trajectory.verified = Boolean(payload.verified);
       trajectory.answer = payload.answer || '';
       if (metrics) trajectory.inference = metrics;
-      const saving = saveTrace(env, id, trajectory);
-      if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(saving);
+      return saveTrace(env, id, trajectory);
     };
     const pageContext = String(body.context || '').trim().slice(0, 1200);
     const pageCtx = pageContext
@@ -442,13 +441,21 @@ export default {
     if (body.stream === true) {
       const upstream = await openLocalStream(env, localMessages);
       if (upstream) {
+        // Register the completion promise before returning the streaming
+        // response. Workers may reject a new waitUntil() added only after the
+        // body finishes, which would silently lose this query's trajectory.
+        let resolveTrace;
+        const traceWork = new Promise((resolve) => { resolveTrace = resolve; });
+        if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(traceWork);
         return localStreamResponse(upstream, {
           traceId: id,
           via: 'local',
           verified: false,
           resources: toolResult.resources,
           tools: toolResult.tools,
-        }, { ...ch, 'X-Query-ID': id }, finishStream);
+        }, { ...ch, 'X-Query-ID': id }, (payload, metrics) => {
+          resolveTrace(finishStream(payload, metrics));
+        });
       }
     } else {
       local = await askLocal(env, localMessages);
