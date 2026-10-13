@@ -138,6 +138,11 @@ const USAGE_INTENT = [
   /\bhow many tokens\b/i,
   /(?:token|令牌).{0,16}(?:使用|消耗|用量|统计|多少|总量)/i,
   /(?:使用|消耗|用量|统计).{0,16}(?:token|令牌)/i,
+  /(?:今天|今日|多少|用了多少).{0,20}(?:token|令牌)/i,
+];
+const RESOURCE_REQUEST = [
+  /\b(?:send|show|open|link|website|site|download|file|pdf|github|repo|repository|source|image|cover)\b/i,
+  /发给|打开|链接|官网|网站|下载|文件|附件|源码|仓库|图片|封面|资源/i,
 ];
 
 export const wantsUsage = (query) => hasAny(String(query || ''), USAGE_INTENT);
@@ -148,12 +153,19 @@ export function findResources(resources, query, lang = 'en', limit = 5) {
   const qTokens = [...new Set(tokens(q).filter((t) => !STOP.has(t)))];
   const resume = hasAny(q, RESUME_INTENT);
   const usage = wantsUsage(q);
+  const explicitRequest = resume || usage || hasAny(q, RESOURCE_REQUEST);
   const explicitZh = /中文|chinese/i.test(q);
   const explicitEn = /英文|english/i.test(q);
   const preferredLang = explicitZh ? 'zh' : explicitEn ? 'en' : (lang === 'zh' ? 'zh' : 'en');
 
   const ranked = resources.map((resource, index) => {
     if (!resource || !resource.url || !resource.title) return null;
+    const id = String(resource.id || '');
+    const passiveMainPage = /^(?:project|skill|writing)-/.test(id) && resource.kind !== 'image' && !/-cover$/.test(id);
+    const namedTitle = [resource.title, resource.titleZh].filter(Boolean)
+      .map((title) => String(title).normalize('NFKC').toLowerCase().trim())
+      .some((title) => title.length >= 4 && q.includes(title));
+    if (!explicitRequest && (!passiveMainPage || !namedTitle)) return null;
     const haystack = [
       resource.title, resource.titleZh, resource.description, resource.descriptionZh,
       resource.url, ...(Array.isArray(resource.keywords) ? resource.keywords : []),
@@ -163,7 +175,7 @@ export function findResources(resources, query, lang = 'en', limit = 5) {
     let score = overlap * 2 + (qTokens.length ? overlap / qTokens.length : 0);
     if (resource.title && q.includes(String(resource.title).toLowerCase())) score += 5;
     if (resource.titleZh && q.includes(String(resource.titleZh).toLowerCase())) score += 5;
-    if (resume && resource.kind === 'pdf' && /^resume-/.test(String(resource.id || ''))) {
+    if (resume && resource.kind === 'pdf' && /^resume-/.test(id)) {
       score += 100;
       if (resource.lang === preferredLang) score += 20;
       else score -= 10;
@@ -174,7 +186,7 @@ export function findResources(resources, query, lang = 'en', limit = 5) {
     if (/\b(?:demo|website|site)\b|官网|网站|演示/i.test(q) && /demo|website|live|官网|网站|演示/i.test(haystack)) score += 8;
     if (/\b(?:download|pdf|file)\b|下载|文件/i.test(q) && resource.kind === 'pdf') score += 8;
     return { resource, score, index };
-  }).filter(Boolean).filter((item) => item.score >= 1)
+  }).filter(Boolean).filter((item) => item.score >= 3.5)
     .sort((a, b) => b.score - a.score || a.index - b.index);
 
   // A generic resume request should hand back one useful file, not make the
@@ -183,7 +195,7 @@ export function findResources(resources, query, lang = 'en', limit = 5) {
     ? ranked.filter((item) => item.resource.kind === 'pdf' && /^resume-/.test(String(item.resource.id || '')))
         .sort((a, b) => Number(b.resource.lang === preferredLang) - Number(a.resource.lang === preferredLang))
         .slice(0, /both|中英文|两个版本/i.test(q) ? 2 : 1)
-    : ranked.slice(0, Math.max(1, limit));
+    : ranked.slice(0, explicitRequest ? Math.min(3, Math.max(1, limit)) : 1);
   const labels = RESOURCE_LABELS[lang === 'zh' ? 'zh' : 'en'];
   const seen = new Set();
   return selected.filter(({ resource }) => {
@@ -227,10 +239,15 @@ export function summarizeUsage(payload) {
     }
   }
   const last30 = days.slice(-30).reduce((sum, day) => sum + dayTokens(day), 0);
+  const latest = days[days.length - 1] || null;
   const topSource = [...sources.entries()].sort((a, b) => b[1] - a[1])[0] || null;
   return {
     totalTokens,
     last30Tokens: last30,
+    latestDate: String(latest?.date || ''),
+    latestTokens: dayTokens(latest),
+    latestSessions: Number(latest?.sessions) || 0,
+    latestCostCents: Number(latest?.costCents) || 0,
     sessions,
     costCents,
     activeDays,
@@ -239,6 +256,37 @@ export function summarizeUsage(payload) {
     updated: String((payload && payload.updated) || ''),
     topSource: topSource ? { name: topSource[0], tokens: topSource[1] } : null,
   };
+}
+
+const usageWindow = (query) => {
+  const q = String(query || '');
+  if (/\btoday\b|今天|今日/i.test(q)) return 'today';
+  if (/\b(?:last|past)\s*30\b|最近\s*30|近\s*30/i.test(q)) return 'last30';
+  return 'total';
+};
+
+export function usageAnswer(summary, query, lang = 'en') {
+  if (!summary) return '';
+  const window = usageWindow(query);
+  const locale = lang === 'zh' ? 'zh-CN' : 'en-US';
+  const n = (value) => new Intl.NumberFormat(locale).format(Number(value) || 0);
+  const updated = summary.updated ? String(summary.updated) : '';
+  if (lang === 'zh') {
+    if (window === 'today') {
+      return `今天（${summary.latestDate || '最新记录'}）用了 ${n(summary.latestTokens)} tokens，共 ${n(summary.latestSessions)} 个 sessions。${updated ? `数据更新于 ${updated}。` : ''}`;
+    }
+    if (window === 'last30') {
+      return `最近 30 天用了 ${n(summary.last30Tokens)} tokens。${updated ? `数据更新于 ${updated}。` : ''}`;
+    }
+    return `目前记录的总用量是 ${n(summary.totalTokens)} tokens，共 ${n(summary.sessions)} 个 sessions。${updated ? `数据更新于 ${updated}。` : ''}`;
+  }
+  if (window === 'today') {
+    return `Today (${summary.latestDate || 'latest record'}), I used ${n(summary.latestTokens)} tokens across ${n(summary.latestSessions)} sessions.${updated ? ` The data was updated at ${updated}.` : ''}`;
+  }
+  if (window === 'last30') {
+    return `I used ${n(summary.last30Tokens)} tokens in the last 30 days.${updated ? ` The data was updated at ${updated}.` : ''}`;
+  }
+  return `My recorded total is ${n(summary.totalTokens)} tokens across ${n(summary.sessions)} sessions.${updated ? ` The data was updated at ${updated}.` : ''}`;
 }
 
 export const resourceContextOf = (resources, lang = 'en') => {
@@ -254,6 +302,9 @@ export const usageContextOf = (summary, lang = 'en') => {
   const rows = [
     `totalTokens=${summary.totalTokens}`,
     `last30Tokens=${summary.last30Tokens}`,
+    `latestDate=${summary.latestDate}`,
+    `latestTokens=${summary.latestTokens}`,
+    `latestSessions=${summary.latestSessions}`,
     `sessions=${summary.sessions}`,
     `activeDays=${summary.activeDays}`,
     `periodDays=${summary.periodDays}`,

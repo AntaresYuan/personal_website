@@ -17,12 +17,14 @@
 
   var safeUrl = function (raw) {
     var value = String(raw || '').trim();
-    if (/^\/(?!\/)/.test(value) && !/[\u0000-\u001f\u007f]/.test(value)) return encodeURI(value);
+    if (/^\/(?!\/)/.test(value) && !/[\u0000-\u001f\u007f]/.test(value)) {
+      try { return encodeURI(decodeURI(value)).replace(/\(/g, '%28').replace(/\)/g, '%29'); } catch (e) { return ''; }
+    }
     if (/^#[A-Za-z][\w:.-]*$/.test(value)) return value;
     if (/^mailto:[^\s@]+@[^\s@]+$/i.test(value)) return value;
     try {
       var url = new URL(value);
-      return (url.protocol === 'https:' || url.protocol === 'http:') ? url.href : '';
+      return (url.protocol === 'https:' || url.protocol === 'http:') ? url.href.replace(/\(/g, '%28').replace(/\)/g, '%29') : '';
     } catch (e) { return ''; }
   };
 
@@ -34,7 +36,7 @@
 
   var inline = function (text) {
     var source = String(text || '');
-    var pattern = /\[([^\]\n]{1,200})\]\(([^)\s]{1,1000})\)|(https?:\/\/[^\s<>{}\[\]]+)/gi;
+    var pattern = /\[([^\]\n]{1,200})\]\(((?:[^()\n]|\([^()\n]*\)){1,1000})\)|(https?:\/\/[^\s<>{}\[\]]+)/gi;
     var out = '', cursor = 0, match;
     while ((match = pattern.exec(source))) {
       out += decorate(source.slice(cursor, match.index));

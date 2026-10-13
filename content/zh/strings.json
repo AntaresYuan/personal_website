@@ -149,8 +149,13 @@
         "pending": "正在选择可用模型…",
         "local": "本地 · {model}",
         "cloud": "云端 · Workers AI",
+        "tool": "实时数据 · Usage 工具",
         "offline": "内置 FAQ · 无模型",
         "model": "模型：{model}"
+      },
+      "trace": {
+        "copy": "复制 Query ID {id}",
+        "copied": "Query ID 已复制"
       },
       "resources": {
         "aria": "相关文件与链接",

@@ -32,7 +32,8 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
    RSS, agent text files and both résumé PDFs. `find_work_resources` returns
    exact URLs as structured cards instead of asking a model to invent links.
    Token questions call `get_token_usage` through the `USAGE` service binding
-   to `antares-usage`, then inject the live totals into the model context.
+   to `antares-usage` and return the requested live number deterministically;
+   a model never gets a chance to omit or alter it.
 3. **Answer from the Mac**, if `LOCAL_LLM_URL` is set. This is a Cloudflare
    Tunnel, behind an Access service token, to a small proxy in front of Ollama
    on Antares's Mac (`ops/local-llm/`). It is skipped when the Mac is busy, and
@@ -43,6 +44,17 @@ content, and **in the visitor's language** (Chinese question, Chinese answer).
    against the same passages.
 
 No API keys touch the frontend; CORS is locked to the site origin.
+
+Every successful answer includes an `AQ-*` Query ID. The frontend reveals it
+when an answer is hovered (and copies it on click). A privacy-conscious
+trajectory is retained in the `QA_TRACE` KV namespace for 14 days: current
+query, two-turn retrieval query, FAQ and passage matches, tool calls, returned
+resources, model route, duration and answer. It does not store the visitor's
+IP. Retrieve one during debugging with:
+
+```bash
+npx wrangler kv key get --remote --namespace-id af132d82c9c84668a9b72656d51b317e "trace:AQ-YYYYMMDD-XXXXXXXX"
+```
 
 The Work frontend stores the current conversation in browser `localStorage`
 after every turn. It is a rolling one-hour cache: a new message refreshes the
@@ -87,9 +99,12 @@ Content-Type: application/json
 → 200  { "answer": "…", "model": "qwen3.5:4b", "via": "local", "verified": false,
          "resources": [{ "kind": "pdf", "title": "Antares Yuan — Résumé",
                          "url": "/media/…pdf", "typeLabel": "PDF" }],
-         "tools": ["find_work_resources"] }
+         "tools": ["find_work_resources"], "traceId": "AQ-20261013-12AB34CD" }
 → 200  { "answer": "…", "model": "@cf/meta/llama-3.1-8b-instruct-fast", "via": "cloud", "verified": true,
-         "resources": [], "tools": ["get_token_usage"] }
+         "resources": [], "tools": [], "traceId": "AQ-20261013-56EF78AB" }
+→ 200  { "answer": "Today (…), I used … tokens…", "model": "get_token_usage", "via": "tool", "verified": true,
+         "resources": [{ "kind": "page", "url": "/usage/" }],
+         "tools": ["find_work_resources", "get_token_usage"], "traceId": "AQ-20261013-90AB12CD" }
 → 4xx/5xx  { "error": "…", "detail"?: "…" }
 ```
 

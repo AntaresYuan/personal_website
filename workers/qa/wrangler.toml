@@ -34,6 +34,12 @@ binding = "AI"
 binding = "USAGE"
 service = "antares-usage"
 
+# Short-lived, privacy-conscious debugging trajectories. Each answer returns
+# its AQ-* id; the matching record is retained for 14 days and stores no IP.
+[[kv_namespaces]]
+binding = "QA_TRACE"
+id = "af132d82c9c84668a9b72656d51b317e"
+
 [observability]
 enabled = true
 

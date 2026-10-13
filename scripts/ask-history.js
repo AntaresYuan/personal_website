@@ -9,19 +9,21 @@
 (function (root) {
   'use strict';
 
-  var KEY = 'antares.ask.history.v1';
-  var VERSION = 1;
+  var KEY = 'antares.ask.history.v2';
+  var VERSION = 2;
   var TTL = 60 * 60 * 1000;
   var MAX_MESSAGES = 40;
   var MAX_CONTENT = 10000;
   var MAX_RESOURCES = 6;
-  var SOURCE = { local: true, cloud: true, offline: true };
+  var SOURCE = { local: true, cloud: true, tool: true, offline: true };
   var RESOURCE_KIND = { pdf: true, image: true, page: true, link: true, data: true };
 
   var cleanResource = function (resource) {
     if (!resource || typeof resource !== 'object') return null;
     var url = String(resource.url || '').trim().slice(0, 1000);
-    if (/^\/(?!\/)/.test(url) && !/[\u0000-\u001f\u007f]/.test(url)) url = encodeURI(url);
+    if (/^\/(?!\/)/.test(url) && !/[\u0000-\u001f\u007f]/.test(url)) {
+      try { url = encodeURI(decodeURI(url)).replace(/\(/g, '%28').replace(/\)/g, '%29'); } catch (e) { return null; }
+    }
     else if (!/^https?:\/\/[^\s]+$/i.test(url)) return null;
     var title = String(resource.title || '').trim().slice(0, 180);
     if (!title) return null;
@@ -43,6 +45,7 @@
       var item = { role: message.role, content: content };
       if (message.role === 'assistant' && SOURCE[message.via]) item.via = message.via;
       if (message.role === 'assistant' && message.model) item.model = String(message.model).slice(0, 120);
+      if (message.role === 'assistant' && /^AQ-[A-Z0-9-]{8,40}$/.test(String(message.traceId || ''))) item.traceId = String(message.traceId);
       if (message.role === 'assistant' && Array.isArray(message.resources)) {
         var resources = message.resources.map(cleanResource).filter(Boolean).slice(0, MAX_RESOURCES);
         if (resources.length) item.resources = resources;

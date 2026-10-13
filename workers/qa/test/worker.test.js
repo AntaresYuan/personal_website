@@ -41,6 +41,7 @@ globalThis.fetch = async (url, init = {}) => {
 // Embeddings: one direction per passage; the question points at SusBench.
 const VEC = { Note: [1, 0, 0], Kaboo: [0, 1, 0], SusBench: [0, 0, 1] };
 let usageCalls = 0;
+const traces = new Map();
 const env = {
   LOCAL_LLM_URL: 'https://llm.example',
   ACCESS_CLIENT_ID: 'id', ACCESS_CLIENT_SECRET: 'secret',
@@ -60,6 +61,9 @@ const env = {
       ],
     }));
   } },
+  QA_TRACE: { put: async (key, value, options) => {
+    traces.set(key, { value: JSON.parse(value), options });
+  } },
 };
 const ctx = { waitUntil: (p) => p };
 const { default: worker } = await import('../src/index.js');
@@ -78,6 +82,7 @@ await t('the Mac answers when it is up; thinking is stripped', async () => {
   const r = await ask('Tell me about the dark-pattern benchmark');
   assert.equal(r.status, 200);
   assert.deepEqual([r.body.via, r.body.answer, r.cors], ['local', 'From my Mac.', 'https://antaresyuan.site']);
+  assert.match(r.body.traceId, /^AQ-\d{8}-[A-F0-9]{8}$/);
   // Retrieval: the pinned note, then the passage the question points at.
   assert.ok(lastLocalPrompt.indexOf('### Note') < lastLocalPrompt.indexOf('### Project: SusBench'));
   assert.match(lastLocalPrompt, /Reply in English/);
@@ -114,15 +119,44 @@ await t('resume request returns the exact PDF as a structured resource', async (
   const zh = await ask('\u628a\u4f60\u7684\u7b80\u5386\u53d1\u7ed9\u6211');
   assert.equal(zh.body.resources[0].url, '/media/resume-zh.pdf');
 });
-await t('token question calls the usage service binding and grounds both models', async () => {
+await t('token question returns the exact live number without asking a model', async () => {
   local = 'ok';
-  const before = usageCalls;
+  const beforeUsage = usageCalls;
+  const beforeLocal = localCalls;
   const r = await ask('How many tokens have you used?');
-  assert.equal(usageCalls, before + 1);
+  assert.equal(usageCalls, beforeUsage + 1);
+  assert.equal(localCalls, beforeLocal);
+  assert.equal(r.body.via, 'tool');
+  assert.equal(r.body.model, 'get_token_usage');
+  assert.match(r.body.answer, /2,000 tokens[\s\S]*3 sessions/);
   assert.ok(r.body.tools.includes('get_token_usage'));
   assert.ok(r.body.tools.includes('find_work_resources'));
   assert.equal(r.body.resources[0].url, '/usage/');
-  assert.match(lastLocalPrompt, /Tool result: live token usage[\s\S]*totalTokens=2000[\s\S]*updated=2026-10-13/);
+  const saved = traces.get(`trace:${r.body.traceId}`);
+  assert.equal(saved.value.route, 'tool');
+  assert.equal(saved.value.usage.latestTokens, 800);
+  assert.equal(saved.options.expirationTtl, 14 * 24 * 60 * 60);
+});
+await t('today-token follow-up does not repeat the previous resume resource', async () => {
+  const beforeLocal = localCalls;
+  const r = await ask('', { messages: [
+    { role: 'user', content: '看看简历' },
+    { role: 'assistant', content: '简历在下方。' },
+    { role: 'user', content: '今天用了多少token你' },
+  ], lang: 'zh' });
+  assert.equal(r.body.via, 'tool');
+  assert.match(r.body.answer, /2026-10-13[\s\S]*800 tokens[\s\S]*1 个 sessions/);
+  assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/usage/?lang=zh']);
+  assert.equal(localCalls, beforeLocal);
+  const saved = traces.get(`trace:${r.body.traceId}`).value;
+  assert.equal(saved.query, '今天用了多少token你');
+  assert.match(saved.retrievalQuery, /看看简历/);
+  assert.deepEqual(saved.resources.map((resource) => resource.url), ['/usage/?lang=zh']);
+});
+await t('generic project questions do not attach unrelated resource cards', async () => {
+  local = 'ok';
+  const r = await ask('讲一个有意思的项目 你做过的');
+  assert.deepEqual(r.body.resources, []);
 });
 await t('busy Mac → cloud, and the Mac is not parked', async () => {
   local = 'busy';

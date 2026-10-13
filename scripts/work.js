@@ -628,6 +628,7 @@
       pending: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.25"/><path d="M8 4.75V8l2.25 1.5"/></svg>',
       local: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.25" y="2.5" width="11.5" height="8" rx="1.5"/><path d="M1.5 13h13"/></svg>',
       cloud: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.1 12.25h6.2a2.45 2.45 0 0 0 .35-4.88A4 4 0 0 0 4 6.25v.1a3 3 0 0 0 1.1 5.9Z"/></svg>',
+      tool: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4 11V8.5M8 11V4.5M12 11V6.5"/></svg>',
       offline: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3z"/><path d="M10 2.5v3h3M5.5 9h5M5.5 11.5h3.5"/></svg>'
     };
     var setSource = function (source, model) {
@@ -637,6 +638,7 @@
         pending: T('ask.source.pending', 'Choosing an available model\u2026'),
         local: T('ask.source.local', 'Local \u00b7 {model}', { model: model || 'Ollama' }),
         cloud: T('ask.source.cloud', 'Cloud \u00b7 Workers AI'),
+        tool: T('ask.source.tool', 'Live data \u00b7 usage tool'),
         offline: T('ask.source.offline', 'Built-in FAQ \u00b7 no model')
       };
       sourceEl.setAttribute('data-source', source);
@@ -648,7 +650,7 @@
       for (var i = convo.length - 1; i >= 0; i--) {
         if (convo[i].role === 'assistant') { last = convo[i]; break; }
       }
-      if (last && (last.via === 'local' || last.via === 'cloud' || last.via === 'offline')) {
+      if (last && (last.via === 'local' || last.via === 'cloud' || last.via === 'tool' || last.via === 'offline')) {
         setSource(last.via, last.model || '');
       } else {
         setSource('idle');
@@ -706,7 +708,11 @@
               image: T('ask.resources.image', 'Image')
             })
           : '';
-        return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + '</div>';
+        var trace = m.traceId ? '<button class="ask-trace" type="button" data-trace="' + escape(m.traceId) + '" title="' +
+          escape(T('ask.trace.copy', 'Copy Query ID {id}', { id: m.traceId })) + '" aria-label="' +
+          escape(T('ask.trace.copy', 'Copy Query ID {id}', { id: m.traceId })) + '"><span>' + escape(m.traceId) +
+          '</span><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.25" y="5.25" width="7.25" height="7.25" rx="1.25"/><path d="M3.5 10.5V4.75c0-.7.55-1.25 1.25-1.25h5.75"/></svg></button>' : '';
+        return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + trace + '</div>';
       }).join('');
       if (pending) {
         html += '<div class="msg msg-bot"><div class="msg-dots" role="status" aria-label="' + escape(T('ask.thinking', 'Thinking')) + '"><span></span><span></span><span></span></div></div>';
@@ -820,7 +826,8 @@
               if (r.ok && d && d.answer) return {
                 answer: String(d.answer), via: d.via, model: d.model,
                 resources: Array.isArray(d.resources) ? d.resources : [],
-                tools: Array.isArray(d.tools) ? d.tools : []
+                tools: Array.isArray(d.tools) ? d.tools : [],
+                traceId: String(d.traceId || '')
               };
               return offlineAnswer(q);
             });
@@ -832,10 +839,12 @@
         var via = res && res.via;
         var model = res && res.model ? String(res.model) : '';
         var resources = res && Array.isArray(res.resources) ? res.resources : [];
+        var traceId = res && res.traceId ? String(res.traceId) : '';
         if (via === 'local') setSource('local', model);
         else if (via === 'cloud') setSource('cloud', model);
+        else if (via === 'tool') setSource('tool', model);
         else setSource('offline');
-        convo.push({ role: 'assistant', content: answer, via: via, model: model, resources: resources });
+        convo.push({ role: 'assistant', content: answer, via: via, model: model, resources: resources, traceId: traceId });
         saveHistory();
         busy = false;
         renderLog(false);
@@ -875,6 +884,18 @@
     pForm.addEventListener('submit', function (ev) { ev.preventDefault(); ask$(pInput.value); });
     [suggest, log].forEach(function (box) {
       box.addEventListener('click', function (ev) {
+        var traceButton = ev.target.closest('.ask-trace');
+        if (traceButton) {
+          var id = traceButton.getAttribute('data-trace') || '';
+          if (id && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(id).then(function () {
+              traceButton.classList.add('is-copied');
+              traceButton.title = T('ask.trace.copied', 'Query ID copied');
+              setTimeout(function () { traceButton.classList.remove('is-copied'); }, 1200);
+            }, function () {});
+          }
+          return;
+        }
         var c = ev.target.closest('.ask-chip');
         if (c) ask$(c.getAttribute('data-q'));
       });
