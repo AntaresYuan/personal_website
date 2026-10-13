@@ -42,15 +42,21 @@
   --glass-solid:     #FBFBFD;
   --glass-blur:      14px;
   --glass-sat:       1.9;
-  --glass-rim: linear-gradient(140deg,
-      rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.4) 26%,
-      rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.3) 74%,
-      rgba(255, 255, 255, 0.95));
+  --glass-rim:
+      linear-gradient(140deg,
+        rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.38) 26%,
+        rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.28) 74%,
+        rgba(255, 255, 255, 0.95)),
+      conic-gradient(from 210deg,
+        rgba(91, 138, 255, var(--glass-chroma-opacity, 0.4)), transparent 18%,
+        rgba(255, 255, 255, var(--glass-chroma-opacity, 0.4)) 34%, transparent 48%,
+        rgba(255, 106, 219, var(--glass-chroma-opacity, 0.4)) 67%, transparent 82%,
+        rgba(82, 225, 255, var(--glass-chroma-opacity, 0.4)));
   --glass-shadow:
-      inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
-      inset 0 -1.5px 1px rgba(255, 255, 255, 0.5),
-      inset 0 0 14px rgba(255, 255, 255, 0.22),
-      0 14px 34px -12px rgba(20, 22, 40, 0.26),
+      inset 0 1.5px 1px rgba(255, 255, 255, var(--glass-inset-top-alpha, 0.95)),
+      inset 0 -1.5px 1px rgba(255, 255, 255, var(--glass-inset-bottom-alpha, 0.5)),
+      inset 0 0 var(--glass-inner-blur, 14px) rgba(255, 255, 255, var(--glass-inner-alpha, 0.22)),
+      0 var(--glass-shadow-y, 14px) var(--glass-shadow-blur, 34px) var(--glass-shadow-spread, -12px) rgba(20, 22, 40, var(--glass-shadow-alpha, 0.26)),
       0 2px 6px rgba(20, 22, 40, 0.06);
   --glass-glare: rgba(255, 255, 255, 0.55);
   --knob-bg:     rgba(255, 255, 255, 0.92);
@@ -115,15 +121,21 @@
   --glass-bg-typing: rgba(36, 36, 42, var(--glass-typing-alpha, 0.70));
   --glass-bg-strong: rgba(28, 28, 32, var(--glass-strong-alpha, 0.94));
   --glass-solid:     #1E1E22;
-  --glass-rim: linear-gradient(140deg,
-      rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.14) 26%,
-      rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.1) 74%,
-      rgba(255, 255, 255, 0.45));
+  --glass-rim:
+      linear-gradient(140deg,
+        rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.14) 26%,
+        rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.1) 74%,
+        rgba(255, 255, 255, 0.45)),
+      conic-gradient(from 210deg,
+        rgba(109, 145, 255, var(--glass-chroma-opacity, 0.4)), transparent 18%,
+        rgba(255, 255, 255, var(--glass-chroma-opacity, 0.4)) 34%, transparent 48%,
+        rgba(255, 111, 220, var(--glass-chroma-opacity, 0.4)) 67%, transparent 82%,
+        rgba(83, 224, 255, var(--glass-chroma-opacity, 0.4)));
   --glass-shadow:
-      inset 0 1.5px 1px rgba(255, 255, 255, 0.32),
-      inset 0 -1.5px 1px rgba(255, 255, 255, 0.12),
-      inset 0 0 14px rgba(255, 255, 255, 0.06),
-      0 14px 36px -10px rgba(0, 0, 0, 0.65),
+      inset 0 1.5px 1px rgba(255, 255, 255, var(--glass-inset-top-alpha, 0.32)),
+      inset 0 -1.5px 1px rgba(255, 255, 255, var(--glass-inset-bottom-alpha, 0.12)),
+      inset 0 0 var(--glass-inner-blur, 14px) rgba(255, 255, 255, calc(var(--glass-inner-alpha, 0.22) * 0.32)),
+      0 var(--glass-shadow-y, 14px) var(--glass-shadow-blur, 36px) var(--glass-shadow-spread, -10px) rgba(0, 0, 0, calc(var(--glass-shadow-alpha, 0.26) * 2.15)),
       0 2px 6px rgba(0, 0, 0, 0.3);
   --glass-glare: rgba(255, 255, 255, 0.14);
   --knob-bg:     rgba(255, 255, 255, 0.16);
@@ -259,7 +271,15 @@ body::after {
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(140px circle at var(--mx, 30%) var(--my, -30%), var(--glass-glare), transparent 70%);
+  background:
+    radial-gradient(160px circle at var(--mx, 30%) var(--my, -30%), var(--glass-glare), transparent 68%),
+    linear-gradient(112deg,
+      transparent 24%,
+      rgba(91, 138, 255, calc(var(--glass-chroma-opacity, 0.4) * 0.22)) 43%,
+      rgba(255, 255, 255, calc(var(--glass-chroma-opacity, 0.4) * 0.12)) 50%,
+      rgba(255, 106, 219, calc(var(--glass-chroma-opacity, 0.4) * 0.22)) 57%,
+      transparent 76%);
+  background-blend-mode: screen;
   opacity: var(--glass-glare-idle, 0.5);
   transition: opacity 0.35s;
   pointer-events: none;
@@ -470,7 +490,7 @@ body::after {
   padding: 14px 16px 12px;
   border-radius: 20px;
   --glass-bg: var(--glass-bg-strong);
-  --glass-blur: 28px;
+  --glass-blur: var(--glass-panel-blur, 28px);
 }
 .glass-control-head,
 .glass-control-scale {
@@ -1282,7 +1302,7 @@ body.ask-panel-open {
   flex-direction: column;
   border-radius: 28px;
   --glass-bg: var(--glass-bg-strong);
-  --glass-blur: 28px;
+  --glass-blur: var(--glass-panel-blur, 28px);
   translate: calc(100% + 24px) 0;
   transition: translate 0.5s var(--spring);
 }

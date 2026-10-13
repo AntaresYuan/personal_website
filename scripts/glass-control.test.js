@@ -27,9 +27,17 @@ assert.match(runtime, /GLASS_DEFAULT = 80/,
   'The default should favor a distinctly liquid material');
 assert.match(runtime, /glassRange\.addEventListener\('input'/,
   'The material should update while the slider is dragged');
-for (const token of ['--glass-bg-alpha', '--glass-blur', '--glass-sat', '--glass-rim-opacity', '--glass-glare-idle']) {
+for (const token of [
+  '--glass-bg-alpha', '--glass-blur', '--glass-panel-blur', '--glass-sat',
+  '--glass-rim-opacity', '--glass-chroma-opacity', '--glass-glare-idle',
+  '--glass-shadow-alpha', '--glass-inner-alpha'
+]) {
   assert.ok(runtime.includes(token), `${token} should respond to the control`);
 }
+assert.match(runtime, /amount \* amount \* \(3 - \(2 \* amount\)\)/,
+  'The material should use a perceptual curve rather than an imperceptible linear fade');
+assert.match(runtime, /mixGlass\(0\.94, 0\.035, liquid\)/,
+  'The subtle and liquid endpoints should have visibly different transmission');
 
 assert.match(css, /\.glass-control-panel/);
 assert.match(css, /\.glass-control-range::-webkit-slider-thumb/);
@@ -37,5 +45,9 @@ assert.match(css, /var\(--glass-bg-alpha/,
   'Glass surfaces should consume the dynamic alpha token');
 assert.match(css, /var\(--glass-lens-sat/,
   'Refractive surfaces should consume the dynamic lens token');
+assert.match(css, /var\(--glass-chroma-opacity/,
+  'Liquid surfaces should gain a chromatic refractive edge');
+assert.match(css, /var\(--glass-shadow-alpha/,
+  'Liquid surfaces should gain depth as the material increases');
 
 console.log('Liquid Glass control tests passed');

@@ -180,22 +180,37 @@
   var applyGlass = function (value, persist) {
     value = clampGlass(value);
     var amount = value / 100;
+    /* Smoothstep gives the control a material curve instead of a linear
+       opacity fade: the first half stays calm, while the liquid end opens
+       up quickly enough to make its refraction and depth unmistakable. */
+    var liquid = amount * amount * (3 - (2 * amount));
     var set = function (name, n, unit) {
       root.style.setProperty(name, Number(n).toFixed(unit === 'px' ? 1 : 3) + (unit || ''));
     };
     root.setAttribute('data-glass-intensity', String(value));
-    set('--glass-bg-alpha', mixGlass(0.58, 0.24, amount));
-    set('--glass-clear-alpha', mixGlass(0.44, 0.08, amount));
-    set('--glass-typing-alpha', mixGlass(0.82, 0.50, amount));
-    set('--glass-strong-alpha', mixGlass(0.97, 0.84, amount));
-    set('--glass-blur', mixGlass(8, 24, amount), 'px');
-    set('--glass-sat', mixGlass(1.05, 2.25, amount));
-    set('--glass-lens-blur', mixGlass(1.8, 0.35, amount), 'px');
-    set('--glass-lens-sat', mixGlass(1.1, 2.45, amount));
-    set('--glass-lens-bright', mixGlass(1, 1.07, amount));
-    set('--glass-rim-opacity', mixGlass(0.52, 1, amount));
-    set('--glass-glare-idle', mixGlass(0.18, 0.62, amount));
-    set('--glass-glare-hover', mixGlass(0.32, 1, amount));
+    set('--glass-liquid', liquid);
+    set('--glass-bg-alpha', mixGlass(0.92, 0.14, liquid));
+    set('--glass-clear-alpha', mixGlass(0.94, 0.035, liquid));
+    set('--glass-typing-alpha', mixGlass(0.95, 0.42, liquid));
+    set('--glass-strong-alpha', mixGlass(0.985, 0.54, liquid));
+    set('--glass-blur', mixGlass(4, 30, liquid), 'px');
+    set('--glass-panel-blur', mixGlass(6, 34, liquid), 'px');
+    set('--glass-sat', mixGlass(1, 2.7, liquid));
+    set('--glass-lens-blur', mixGlass(2.8, 0.15, liquid), 'px');
+    set('--glass-lens-sat', mixGlass(1, 3, liquid));
+    set('--glass-lens-bright', mixGlass(1, 1.12, liquid));
+    set('--glass-rim-opacity', mixGlass(0.22, 1, liquid));
+    set('--glass-chroma-opacity', mixGlass(0, 0.58, liquid));
+    set('--glass-glare-idle', mixGlass(0.025, 0.82, liquid));
+    set('--glass-glare-hover', mixGlass(0.08, 1, liquid));
+    set('--glass-shadow-y', mixGlass(4, 18, liquid), 'px');
+    set('--glass-shadow-blur', mixGlass(14, 44, liquid), 'px');
+    set('--glass-shadow-spread', mixGlass(-8, -14, liquid), 'px');
+    set('--glass-shadow-alpha', mixGlass(0.07, 0.30, liquid));
+    set('--glass-inset-top-alpha', mixGlass(0.24, 1, liquid));
+    set('--glass-inset-bottom-alpha', mixGlass(0.08, 0.56, liquid));
+    set('--glass-inner-alpha', mixGlass(0.02, 0.24, liquid));
+    set('--glass-inner-blur', mixGlass(2, 18, liquid), 'px');
     if (glassRange) {
       glassRange.value = String(value);
       glassRange.style.setProperty('--glass-range', value + '%');
