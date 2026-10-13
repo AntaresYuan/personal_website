@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {
   normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
-  matchFaqs, faqContextOf, findResources, wantsUsage, summarizeUsage,
+  matchFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
   resourceContextOf, usageContextOf, usageAnswer, genPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
 
@@ -85,6 +85,11 @@ t('resource tool returns the exact localized resume PDF', () => {
   assert.deepEqual(findResources(resources, '讲一个有意思的项目，你做过的', 'zh'), [], 'generic project words must not flood the answer with cards');
   assert.equal(findResources(resources, 'Tell me about Agentic Hiring', 'en')[0].url, '/projects/agentic-hiring/');
   assert.deepEqual(findResources(resources, 'hello there', 'en'), []);
+  assert.deepEqual(findFaqResources(resources, [{ href: '/projects/agentic-hiring/' }], 'en'), [{
+    kind: 'page', title: 'Agentic Hiring', description: '', url: '/projects/agentic-hiring/', typeLabel: 'Page',
+  }]);
+  assert.equal(findFaqResources(resources, [{ href: '/projects/agentic-hiring/' }], 'zh')[0].url, '/projects/agentic-hiring/');
+  assert.deepEqual(findFaqResources(resources, [{ href: '/not-in-the-catalogue/' }], 'en'), []);
   assert.match(resourceContextOf(findResources(resources, 'resume', 'en'), 'en'), /exact[\s\S]*resume-en\.pdf/);
 });
 t('usage tool intent and summary use the dashboard token basis', () => {

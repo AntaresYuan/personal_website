@@ -16,6 +16,7 @@ const INDEX = { version: 'v1', faqs: [
   { id: 'resume-en', kind: 'pdf', lang: 'en', title: 'Antares Yuan — Résumé', titleZh: 'Antares Yuan — 英文简历', url: '/media/resume-en.pdf', keywords: ['resume', 'cv', '简历'] },
   { id: 'resume-zh', kind: 'pdf', lang: 'zh', title: 'Antares Yuan — Chinese résumé', titleZh: '袁晨杰 — 中文简历', url: '/media/resume-zh.pdf', keywords: ['resume', 'cv', '简历'] },
   { id: 'page-usage', kind: 'page', title: 'Personal token consumption', titleZh: '个人 Token 使用量', url: '/usage/', urlZh: '/usage/?lang=zh', keywords: ['token', 'usage', 'consumption', '使用量'] },
+  { id: 'project-agentic-hiring', kind: 'page', title: 'Agentic Hiring', titleZh: 'Agentic Hiring', url: '/projects/agentic-hiring/', urlZh: '/zh/projects/agentic-hiring/', description: 'Recruiting workbench.', descriptionZh: '招聘工作台。', keywords: ['project', 'Agentic Hiring'] },
 ], chunks: [
   { id: 'brief-1', title: 'Note', url: '', text: 'I study at UW.', pin: true },
   { id: 'p1', title: 'Project: Kaboo', url: '/projects/kaboo/', text: 'Kaboo analyzes token use.' },
@@ -89,10 +90,15 @@ await t('the Mac answers when it is up; thinking is stripped', async () => {
 });
 await t('a matched FAQ brief precedes the retrieved site evidence', async () => {
   local = 'ok';
-  await ask('What is your most mature project?');
+  const r = await ask('What is your most mature project?');
   assert.ok(lastLocalPrompt.indexOf('### FAQ guidance') < lastLocalPrompt.indexOf('### Note'));
   assert.match(lastLocalPrompt, /21% to 25%/);
   assert.match(lastLocalPrompt, /FAQ FIRST/);
+  assert.deepEqual(r.body.tools, ['find_work_resources']);
+  assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
+  assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*\/projects\/agentic-hiring\//);
+  const saved = traces.get(`trace:${r.body.traceId}`).value;
+  assert.deepEqual(saved.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
 });
 await t('selected page text is included as untrusted reference context', async () => {
   local = 'ok';

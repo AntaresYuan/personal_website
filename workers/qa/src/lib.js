@@ -147,6 +147,36 @@ const RESOURCE_REQUEST = [
 
 export const wantsUsage = (query) => hasAny(String(query || ''), USAGE_INTENT);
 
+const shapeResource = (resource, lang) => {
+  const labels = RESOURCE_LABELS[lang === 'zh' ? 'zh' : 'en'];
+  return {
+    kind: resource.kind || 'link',
+    title: (lang === 'zh' && resource.titleZh) || resource.title,
+    description: (lang === 'zh' && resource.descriptionZh) || resource.description || '',
+    url: (lang === 'zh' && resource.urlZh) || resource.url,
+    typeLabel: labels[resource.kind] || labels.link,
+  };
+};
+
+/* FAQ briefs can choose the canonical example even when the visitor asks a
+   generic question ("your most mature project"). In that case the raw query
+   contains no project name for findResources() to match. Resolve the FAQ's
+   owner-authored href back through the same trusted catalogue so the answer
+   gets exactly one relevant card without reopening the unrelated-link flood. */
+export function findFaqResources(resources, faqs, lang = 'en') {
+  if (!Array.isArray(resources) || !Array.isArray(faqs)) return [];
+  const seen = new Set();
+  return faqs.map((faq) => String(faq && faq.href || '').trim()).filter(Boolean)
+    .map((href) => resources.find((resource) => resource && (resource.url === href || resource.urlZh === href)))
+    .filter(Boolean)
+    .map((resource) => shapeResource(resource, lang))
+    .filter((resource) => {
+      if (!resource.url || seen.has(resource.url)) return false;
+      seen.add(resource.url);
+      return true;
+    });
+}
+
 export function findResources(resources, query, lang = 'en', limit = 5) {
   if (!Array.isArray(resources) || !String(query || '').trim()) return [];
   const q = String(query).normalize('NFKC').toLowerCase();
@@ -196,20 +226,13 @@ export function findResources(resources, query, lang = 'en', limit = 5) {
         .sort((a, b) => Number(b.resource.lang === preferredLang) - Number(a.resource.lang === preferredLang))
         .slice(0, /both|中英文|两个版本/i.test(q) ? 2 : 1)
     : ranked.slice(0, explicitRequest ? Math.min(3, Math.max(1, limit)) : 1);
-  const labels = RESOURCE_LABELS[lang === 'zh' ? 'zh' : 'en'];
   const seen = new Set();
   return selected.filter(({ resource }) => {
     const url = lang === 'zh' && resource.urlZh ? resource.urlZh : resource.url;
     if (seen.has(url)) return false;
     seen.add(url);
     return true;
-  }).map(({ resource }) => ({
-    kind: resource.kind || 'link',
-    title: (lang === 'zh' && resource.titleZh) || resource.title,
-    description: (lang === 'zh' && resource.descriptionZh) || resource.description || '',
-    url: (lang === 'zh' && resource.urlZh) || resource.url,
-    typeLabel: labels[resource.kind] || labels.link,
-  }));
+  }).map(({ resource }) => shapeResource(resource, lang));
 }
 
 const dayTokens = (day) => {

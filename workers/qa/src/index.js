@@ -26,7 +26,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 import {
   normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
-  matchFaqs, faqContextOf, findResources, wantsUsage, summarizeUsage,
+  matchFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
   resourceContextOf, usageContextOf, usageAnswer, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
 
@@ -140,8 +140,15 @@ async function getLiveUsage(env) {
   } catch { return null; }
 }
 
-async function runTools(env, index, query, lang) {
-  const resources = findResources(index?.resources, query, lang, 5);
+async function runTools(env, index, query, lang, matchedFaqs = []) {
+  const queryResources = findResources(index?.resources, query, lang, 5);
+  const faqResources = findFaqResources(index?.resources, matchedFaqs, lang);
+  const seenResources = new Set();
+  const resources = [...queryResources, ...faqResources].filter((resource) => {
+    if (!resource.url || seenResources.has(resource.url)) return false;
+    seenResources.add(resource.url);
+    return true;
+  }).slice(0, 5);
   const tools = [];
   const contexts = [];
   if (resources.length) {
@@ -260,10 +267,14 @@ export default {
 
     // Grounding: the passage index; the old whole-site text if it's missing.
     const index = await grab(env.INDEX_URL || INDEX_URL, 'json', 60);
+    const matchedFaqs = matchFaqs(index?.faqs, query);
+    trajectory.faqs = matchedFaqs.map((faq) => ({ id: faq.id || '', question: faq.question || '' }));
     // The two-turn query is valuable for semantic follow-ups, but tool
     // intent must come from this turn alone. Otherwise an earlier request
     // for a résumé contaminates the next, unrelated answer.
-    const toolResult = await runTools(env, index, currentQuery, lang);
+    // A matched FAQ may, however, deliberately choose a canonical project;
+    // its exact owner-authored href is safe to attach for this answer.
+    const toolResult = await runTools(env, index, currentQuery, lang, matchedFaqs);
     trajectory.tools = toolResult.tools;
     trajectory.resources = toolResult.resources.map(({ kind, title, url }) => ({ kind, title, url }));
     if (toolResult.usage) trajectory.usage = toolResult.usage;
@@ -284,8 +295,6 @@ export default {
 
     let localCtx, cloudCtx;
     if (index && Array.isArray(index.chunks) && index.chunks.length) {
-      const matchedFaqs = matchFaqs(index.faqs, query);
-      trajectory.faqs = matchedFaqs.map((faq) => ({ id: faq.id || '', question: faq.question || '' }));
       const faqCtx = faqContextOf(matchedFaqs);
       const siteBudget = Math.max(2000, BUDGET.local - faqCtx.length - pageCtx.length - toolCtx.length);
       const wide = await retrieve(env, ctx, index, query, siteBudget);
