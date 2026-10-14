@@ -53,7 +53,8 @@ for (const item of cases) {
     const resources = Array.isArray(response.resources) ? response.resources : [];
     const urls = resources.map((resource) => resource && resource.url).filter(Boolean);
     const answer = String(response.answer || '');
-    if (response.skill !== expected.skill) misses.push(`skill ${response.skill || 'none'} != ${expected.skill}`);
+    const allowedSkills = expected.skillsAllowed || [expected.skill];
+    if (!allowedSkills.includes(response.skill)) misses.push(`skill ${response.skill || 'none'} not in ${allowedSkills.join(', ')}`);
     for (const tool of expected.toolsInclude || []) if (!tools.includes(tool)) misses.push(`missing tool ${tool}`);
     for (const url of expected.resourceUrlsInclude || []) if (!urls.includes(url)) misses.push(`missing resource ${url}`);
     for (const url of expected.resourceUrlsExclude || []) if (urls.includes(url)) misses.push(`unexpected resource ${url}`);

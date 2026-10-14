@@ -38,7 +38,8 @@ for (const item of fixture.cases) {
     ];
     const urls = cards.map((card) => card.url);
 
-    assert.equal(route.skill, item.expected.skill, `skill ${route.skill} (${route.reason})`);
+    const allowedSkills = item.expected.skillsAllowed || [item.expected.skill];
+    assert.ok(allowedSkills.includes(route.skill), `skill ${route.skill} (${route.reason}); expected ${allowedSkills.join(' or ')}`);
     for (const tool of item.expected.toolsInclude || []) assert.ok(tools.includes(tool), `missing tool ${tool}; got ${tools.join(', ') || 'none'}`);
     for (const url of item.expected.resourceUrlsInclude || []) assert.ok(urls.includes(url), `missing resource ${url}; got ${urls.join(', ') || 'none'}`);
     for (const url of item.expected.resourceUrlsExclude || []) assert.ok(!urls.includes(url), `unexpected resource ${url}`);

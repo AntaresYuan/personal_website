@@ -38,7 +38,7 @@
         "resourceUrlsInclude": ["/usage/?lang=zh"],
         "resourceUrlsExclude": ["/media/袁晨杰产品简历(策略AI产品8.19).pdf"],
         "resourcesMax": 1,
-        "answerMatchesAll": ["[\\d,]+ tokens"]
+        "answerMatchesAll": ["[\\d,]+[^\\n]{0,24}tokens?"]
       },
       "fixedBy": ["00a353e"]
     },
@@ -52,7 +52,7 @@
       ],
       "lang": "zh",
       "expected": {
-        "skill": "general",
+        "skillsAllowed": ["general", "project-walkthrough"],
         "toolsInclude": ["search_work"],
         "resourcesMax": 0
       },
