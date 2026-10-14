@@ -183,11 +183,17 @@ export function planFor(route, index) {
   if (route.skill === 'project-walkthrough') {
     const lists = route.focus.map((e) => chunks.filter(ownChunk(e.chunkPrefix)).map((c) => c.id));
     const must = [...lists.map((l) => l[0]).filter(Boolean), ...lists.flatMap((l) => l.slice(1))];
-    return { must, fill: 2500, retrieve: true, site: true };
+    // A named item already supplies an exact scope. Semantic fill from the
+    // rest of the corpus is more likely to leak another project's facts
+    // than to help answer the question.
+    return { must, fill: 0, retrieve: false, site: true };
   }
   if (route.skill === 'qa') {
     const targets = new Set(route.faqs.map((f) => pagePath(f.href)).filter(Boolean));
-    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 2500, retrieve: true, site: true };
+    // The owner-written QA answer is authoritative. When it names an
+    // internal page, read that page exactly; never pad it with semantically
+    // similar passages from unrelated projects or writing.
+    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 0, retrieve: false, site: true };
   }
   if (route.skill === 'share-files') {
     return { must: route.focus.map((e) => (chunks.find(ownChunk(e.chunkPrefix)) || {}).id).filter(Boolean), fill: 0, retrieve: false, site: true };

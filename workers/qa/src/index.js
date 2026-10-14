@@ -36,7 +36,7 @@
 import {
   normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
   faqContextOf, findResources, findFaqResources, shapeResource, summarizeUsage,
-  resourceContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+  resourceContextOf, detachResourceLinks, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
 import { routeQuestion, planFor, skillPrompt, skillAvailable, usesTool } from './skills.js';
 
@@ -282,7 +282,7 @@ const ndjson = (event) => `${JSON.stringify(event)}\n`;
    A stream that fails parks the Mac, so the visitor's retry (and the next
    visitors) go to the cloud. If the visitor goes away mid-answer, the
    stream stops writing but still completes the trace. */
-function localStreamResponse(upstream, meta, headers, onComplete, onFailure) {
+function localStreamResponse(upstream, meta, headers, onComplete, onFailure, lang) {
   const encoder = new TextEncoder();
   let upstreamReader;
   const stream = new ReadableStream({
@@ -325,7 +325,7 @@ function localStreamResponse(upstream, meta, headers, onComplete, onFailure) {
       } catch (error) {
         failed = String(error?.message || error || 'stream interrupted');
       }
-      const clean = stripThinking(answer);
+      const clean = detachResourceLinks(stripThinking(answer), meta.resources, lang);
       if (failed || !clean) {
         emit({ type: 'error', error: failed || 'model returned an empty answer', traceId: meta.traceId });
         if (open) await onFailure();   // a visitor who left didn't see the Mac fail
@@ -403,15 +403,18 @@ export default {
       passages: [],
     };
     const finish = (payload, status = 200) => {
+      const finalPayload = payload.answer
+        ? { ...payload, answer: detachResourceLinks(payload.answer, payload.resources, lang) }
+        : payload;
       trajectory.completedAt = new Date().toISOString();
       trajectory.durationMs = Date.now() - started;
-      trajectory.route = payload.via || 'error';
-      trajectory.model = payload.model || '';
-      trajectory.verified = Boolean(payload.verified);
-      trajectory.answer = payload.answer || '';
+      trajectory.route = finalPayload.via || 'error';
+      trajectory.model = finalPayload.model || '';
+      trajectory.verified = Boolean(finalPayload.verified);
+      trajectory.answer = finalPayload.answer || '';
       const saving = saveTrace(env, id, trajectory);
       if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(saving);
-      return reply({ ...payload, traceId: id }, status, { ...ch, 'X-Query-ID': id });
+      return reply({ ...finalPayload, traceId: id }, status, { ...ch, 'X-Query-ID': id });
     };
     const finishStream = (payload, metrics) => {
       trajectory.completedAt = new Date().toISOString();
@@ -525,7 +528,7 @@ export default {
         return localStreamResponse(upstream, { traceId: id, via: 'local', verified: false, ...extra },
           { ...ch, 'X-Query-ID': id },
           (payload, metrics) => { resolveTrace(finishStream(payload, metrics)); },
-          () => parkLocal());
+          () => parkLocal(), lang);
       }
     } else {
       local = await askLocal(env, localMessages);
