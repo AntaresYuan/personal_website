@@ -89,13 +89,14 @@ export const wantsFetch = (text) => FETCH.some((re) => re.test(String(text || ''
 // "what about", or pointing back with "it" / "this project".
 const FOLLOW_UP_CUES = [
   /^(?:and|also|so|then|but|what about|how about)\b/i,
+  /^(?:why|how|what|which one|the (?:result|metric|impact|users?|role))\s*[?!.,]*$/i,
   /\b(?:it|its|that|this|they|them|there)\b/i,
   /^(?:\u90a3|\u8fd8\u6709|\u7136\u540e|\u6240\u4ee5|\u4f46\u662f)/,
-  /\u5b83|\u8fd9\u4e2a\u9879\u76ee|\u90a3\u4e2a\u9879\u76ee|\u8be5\u9879\u76ee|\u5176\u4e2d|\u5177\u4f53|\u8be6\u7ec6|\u5462[?\uff1f]?$/,
+  /\u5b83|\u8fd9\u4e2a\u9879\u76ee|\u90a3\u4e2a\u9879\u76ee|\u8be5\u9879\u76ee|\u5176\u4e2d|\u91cc\u9762|\u5177\u4f53|\u8be6\u7ec6|\u4e3a\u4ec0\u4e48|\u600e\u4e48|\u5462[?\uff1f]?$/,
 ];
 export const isFollowUp = (text) => {
   const t = String(text || '').trim();
-  return t.length <= 30 || (t.length <= 80 && FOLLOW_UP_CUES.some((re) => re.test(t)));
+  return t.length <= 80 && FOLLOW_UP_CUES.some((re) => re.test(t));
 };
 
 // "and today?" after a token question stays with the usage skill.
@@ -182,11 +183,17 @@ export function planFor(route, index) {
   if (route.skill === 'project-walkthrough') {
     const lists = route.focus.map((e) => chunks.filter(ownChunk(e.chunkPrefix)).map((c) => c.id));
     const must = [...lists.map((l) => l[0]).filter(Boolean), ...lists.flatMap((l) => l.slice(1))];
-    return { must, fill: 2500, retrieve: true, site: true };
+    // A named item already supplies an exact scope. Semantic fill from the
+    // rest of the corpus is more likely to leak another project's facts
+    // than to help answer the question.
+    return { must, fill: 0, retrieve: false, site: true };
   }
   if (route.skill === 'qa') {
     const targets = new Set(route.faqs.map((f) => pagePath(f.href)).filter(Boolean));
-    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 2500, retrieve: true, site: true };
+    // The owner-written QA answer is authoritative. When it names an
+    // internal page, read that page exactly; never pad it with semantically
+    // similar passages from unrelated projects or writing.
+    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 0, retrieve: false, site: true };
   }
   if (route.skill === 'share-files') {
     return { must: route.focus.map((e) => (chunks.find(ownChunk(e.chunkPrefix)) || {}).id).filter(Boolean), fill: 0, retrieve: false, site: true };

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
   matchFaqs, scoreFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
-  resourceContextOf, usageContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+  resourceContextOf, detachResourceLinks, usageContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
 
 let pass = 0, fail = 0;
@@ -102,6 +102,13 @@ t('resource tool returns the exact localized resume PDF', () => {
   assert.equal(findFaqResources(resources, [{ href: '/projects/agentic-hiring/' }], 'zh')[0].url, '/projects/agentic-hiring/');
   assert.deepEqual(findFaqResources(resources, [{ href: '/not-in-the-catalogue/' }], 'en'), []);
   assert.match(resourceContextOf(findResources(resources, 'resume', 'en'), 'en'), /exact[\s\S]*resume-en\.pdf/);
+});
+t('resource URLs already rendered as cards are removed from model prose', () => {
+  const cards = [{ url: '/projects/agentic-hiring/' }];
+  assert.equal(detachResourceLinks('Read [Agentic Hiring](/projects/agentic-hiring/) below.', cards, 'en'), 'Read Agentic Hiring below.');
+  assert.equal(detachResourceLinks('Read [/projects/agentic-hiring/](/projects/agentic-hiring/).', cards, 'en'), 'Read the attached resource below.');
+  assert.equal(detachResourceLinks('见 /projects/agentic-hiring/', cards, 'zh'), '见 下方附带的资源');
+  assert.equal(detachResourceLinks('Keep https://example.com', cards, 'en'), 'Keep https://example.com');
 });
 t('usage tool intent and summary use the dashboard token basis', () => {
   assert.equal(wantsUsage('How many tokens have you used?'), true);

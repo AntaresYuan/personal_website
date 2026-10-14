@@ -184,8 +184,9 @@ await t('qa skill: the QA pair and its page lead, under the qa system prompt', a
   assert.ok(ownAt > 0);
   for (const other of ['### Project: Kaboo', '### Project: SusBench']) {
     const at = lastLocalPrompt.indexOf(other);
-    assert.ok(at === -1 || at > ownAt, `${other} must not precede the QA pair's own page`);
+    assert.equal(at, -1, `${other} must not enter an exact QA answer`);
   }
+  assert.doesNotMatch(lastLocalPrompt, /### Writing:/, 'unrelated writing must not enter an exact QA answer');
   const saved = d1Traces.get(r.body.traceId);
   assert.equal(saved.skill.id, 'qa');
   assert.equal(saved.retrieval, 'qa');
@@ -199,6 +200,8 @@ await t('project-walkthrough: naming Kaboo with "token usage" reads Kaboo, not m
   assert.deepEqual([r.body.skill, r.body.via], ['project-walkthrough', 'local']);
   assert.match(lastLocalPrompt, /SKILL: project-walkthrough\nAnswer about FOCUS from its own passages\.\nFOCUS: Kaboo \(project\)/);
   assert.ok(lastLocalPrompt.indexOf('### Project: Kaboo') < lastLocalPrompt.indexOf('### Kaboo: What I did'));
+  assert.doesNotMatch(lastLocalPrompt, /### Project: (?:Agentic Hiring|Lark Loom|Roundtable|SusBench)/);
+  assert.doesNotMatch(lastLocalPrompt, /### Writing:/);
   assert.equal(r.body.resources[0].url, '/projects/kaboo/');
   assert.deepEqual(d1Traces.get(r.body.traceId).skill.focus, ['project-kaboo']);
 });

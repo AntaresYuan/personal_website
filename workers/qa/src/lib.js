@@ -350,6 +350,26 @@ export const resourceContextOf = (resources, lang = 'en') => {
   return [intro, ...resources.map((resource) => `- ${resource.title} [${resource.typeLabel}]: ${resource.url}${resource.description ? ` — ${resource.description}` : ''}`)].join('\n');
 };
 
+// Resource cards are the single source of truth for files and links. Models
+// may still repeat an exact catalogue URL in prose even when instructed not
+// to; remove only URLs that are already attached as cards, preserving a
+// human-readable link label when one exists.
+export function detachResourceLinks(answer, resources, lang = 'en') {
+  let text = String(answer || '');
+  const attached = lang === 'zh' ? '下方附带的资源' : 'the attached resource below';
+  const escapeRe = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const resource of Array.isArray(resources) ? resources : []) {
+    const url = String(resource && resource.url || '').trim();
+    if (!url) continue;
+    text = text.replace(new RegExp(`\\[([^\\]]*)\\]\\(\\s*${escapeRe(url)}\\s*\\)`, 'g'), (_match, label) => {
+      const visible = String(label || '').trim();
+      return visible && visible !== url && !/^(?:https?:\/\/|\/)/.test(visible) ? visible : attached;
+    });
+    text = text.split(url).join(attached);
+  }
+  return text.trim();
+}
+
 export const usageContextOf = (summary, lang = 'en') => {
   if (!summary) return '';
   const rows = [

@@ -4,9 +4,10 @@
 
    The site cut into short, titled passages, so the qa Worker (workers/qa/)
    can pick the few that answer a question instead of truncating the whole
-   site to its first few thousand words. Some passages are `pin`ned, sent
-   with every model-written answer: the background notes (CMS → Agent infra
-   → System prompt), the llms.txt summary and an overview of the Work site.
+   site to its first few thousand words. Owner-written background notes are
+   `pin`ned and sent with every model-written answer. The site summary and
+   overview remain searchable, but narrow skills do not receive them unless
+   they are relevant.
 
    Public content is Work-only: home, case studies, AI Skills, Gallery and
    Writing. Personal roadmap, Lens and Contact content are never indexed.
@@ -188,14 +189,13 @@ if (profile.resumeZh) addResource({
   id: `file-${id}`, kind: id === 'source' ? 'link' : 'data', title, url, description, keywords,
 }));
 
-/* ── Pinned: background notes, the llms.txt summary, and an overview ─── */
-// /llms.txt is the concise, agent-readable summary of the public site. Keep
-// it visible as an explicit Assistant source and send it with every answer
-// when enabled. /llms-full.txt remains the Worker's safety fallback if this
-// richer passage index cannot be loaded.
+/* ── Shared background and searchable site summaries ────────────────── */
+// /llms.txt and the overview stay in the index for general search, but are
+// not pinned into every narrow skill. /llms-full.txt remains the Worker's
+// safety fallback if this richer passage index cannot be loaded.
 if (sourceOn('llmsSummary')) {
   const llmsSummary = tryReadText('llms.txt');
-  if (llmsSummary) add('llms-summary', 'Work summary from llms.txt', '/llms.txt', llmsSummary, true);
+  if (llmsSummary) add('llms-summary', 'Work summary from llms.txt', '/llms.txt', llmsSummary);
 }
 
 (assistant.knowledge ?? []).filter((n) => n && n.enabled !== false)
@@ -215,7 +215,7 @@ const overview = [
   sourceOn('projects') ? `Projects on this site: ${projects.map((p) => `${p.title} (${p.kind || ''}) — ${p.summary || ''}`).join(' | ')}` : '',
   sourceOn('skills') ? `AI skills I built: ${(skills.items ?? []).map((s) => `${s.name} — ${s.tagline || s.summary || ''}`).join(' | ')}` : '',
 ].filter(Boolean).join('\n\n');
-if (overview) add('overview', 'Who I am and what is in the Work portfolio', '/', overview, true);
+if (overview) add('overview', 'Who I am and what is in the Work portfolio', '/', overview);
 
 /* ── Work case studies ────────────────────────────────────────────────── */
 for (const p of sourceOn('projects') ? projects : []) {
