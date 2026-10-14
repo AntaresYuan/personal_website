@@ -4,6 +4,11 @@
       "enabled": true,
       "title": "Who am I",
       "body": "I am a junior in University of Washington, major in Human Centered Design & Engineering, Human Computer Interaction track."
+    },
+    {
+      "enabled": true,
+      "title": "People around me",
+      "body": "Gloria Qi（齐沛彤） is my girlfriend, who is a senior in Informatics, University of Washington. She is also an AI PM and interned at StarDust（星辰科技） this summer, building Friday Agent and Subway RAG system."
     }
   ]
 }
