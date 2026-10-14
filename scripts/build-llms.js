@@ -151,7 +151,7 @@ if (galleryItems.length) sections.push(`# Gallery\n\n${galleryItems.map(galleryT
 if (posts.length) sections.push(`# Writing\n\n${posts.map(postText).join('\n\n---\n\n')}`);
 
 const full = sections.join('\n\n') + '\n';
-const footer = `\n---\nGenerated ${new Date().toISOString().slice(0, 10)} from Work content only. Last site update: ${lastUpdated}. Edit the Work collections or /admin/ → Assistant, then run \`node scripts/build.js\`.\n`;
+const footer = `\n---\nGenerated ${new Date().toISOString().slice(0, 10)} from Work content only. Last site update: ${lastUpdated}. Edit the Work collections or /admin/ → Agent infra, then run \`node scripts/build.js\`.\n`;
 
 fs.writeFileSync(path.join(root, 'llms.txt'), short + footer);
 fs.writeFileSync(path.join(root, 'llms-full.txt'), full + footer);

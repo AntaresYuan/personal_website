@@ -1,4 +1,4 @@
-/* GENERATED from content/assistant/faqs.json — edit it in /admin/, not here. */
+/* GENERATED from content/agent/skills/qa/pairs.json — edit it in /admin/ (Skills → qa), not here. */
 window.QA_FAQ_DATA = [
   {
     "question": "are you looking for a job / open to roles?",

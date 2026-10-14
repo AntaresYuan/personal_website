@@ -606,7 +606,7 @@
      (body.ask-panel-open re-margins the layout) rather than covering what
      the visitor was reading; the avatar moves into the panel's header while
      it is open. Answers come from the qa Worker; the CMS-authored FAQ
-     (content/assistant/faqs.json → scripts/qa-faq-data.js) answers when the Worker cannot be reached — common
+     (content/agent/skills/qa/pairs.json → scripts/qa-faq-data.js) answers when the Worker cannot be reached — common
      on mainland-China networks. */
   var ask = $('ask');
   var panel = $('ask-panel');

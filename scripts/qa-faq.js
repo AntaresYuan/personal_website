@@ -2,7 +2,7 @@
    qa-faq.js — runtime matcher for the CMS-authored FAQ, exposed as
    `window.QA = { FAQ, starters, match }`.
 
-   The data is generated from content/assistant/faqs.json into qa-faq-data.js. Consumed by:
+   The data is generated from content/agent/skills/qa/pairs.json into qa-faq-data.js. Consumed by:
      - scripts/palette.js  — surfaces FAQ entries as ⌘K search results
      - scripts/render.js   — the hero "ask" bar (`wireHeroAsk`): when the
        antares-qa Worker isn't configured, it answers inline from QA.match()

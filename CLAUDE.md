@@ -60,15 +60,17 @@ Cloudflare `*.workers.dev` is intermittently DNS-poisoned / SNI-reset on
 mainland-China networks. **Every Worker URL stored in `content/site.json`
 must be a custom subdomain on the same zone as the main site.** Currently:
 
-- `qa.antaresyuan.site` — the "ask" assistant (`workers/qa/`). It routes
-  each question to one skill (usage, qa, resources, project, general —
-  `workers/qa/src/skills.js`), each with its own system prompt from CMS →
-  Agent infra (`content/assistant/`), gathers that skill's passages from
-  `/ask-index.json` (`scripts/build-ask-index.js`), and answers from the
-  model on Antares's Mac when `LOCAL_LLM_URL` is set (`ops/local-llm/`, a
-  Cloudflare Tunnel behind an Access service token), else Workers AI. The
-  Mac's hostname is only ever called by the Worker. A routing change gets a
-  case in `workers/qa/test/routing-cases.json`.
+- `qa.antaresyuan.site` — the "ask" assistant (`workers/qa/`). Its Agent
+  infra lives in `content/agent/` (CMS → Agent infra): the system prompt,
+  one `skills/<name>/SKILL.md` per skill, and the tools. The Worker routes
+  each question to one skill (`workers/qa/src/skills.js`), runs only the
+  tools that skill lists, gathers its passages from `/ask-index.json`
+  (`scripts/build-ask-index.js`), and answers from the model on Antares's
+  Mac when `LOCAL_LLM_URL` is set (`ops/local-llm/`, a Cloudflare Tunnel
+  behind an Access service token), else Workers AI. The Mac's hostname is
+  only ever called by the Worker. A new skill needs a SKILL.md, a rule in
+  `skills.js` and its CMS entry; a routing change gets a case in
+  `workers/qa/test/routing-cases.json`.
 - `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
 - `comments.antaresyuan.site` — reactions + comments on Writing posts
   (`workers/comments/`, D1; client `scripts/comments.js`). Off until
@@ -199,7 +201,8 @@ sync agent's data lags by up to 60s. Background: `workers/usage/README.md` §
 ### Code is English; Chinese lives in content
 
 The site is bilingual (see "Two languages" below), so Chinese is allowed in
-**content** — `content/zh/`, `content/boards/zh/` — and in the pages
+**content** — `content/zh/`, `content/boards/zh/`, and the owner's own text
+in `content/agent/` (skill titles and descriptions, QA aliases) — and in the pages
 generated from it (`zh/`, `media/projects/*/cover.zh.svg`), and in test
 fixtures that hold what visitors type (`workers/qa/test/routing-cases.json`).
 Everything else stays **pure English**: code, code comments, READMEs,

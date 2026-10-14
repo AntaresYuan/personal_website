@@ -10,13 +10,13 @@ globalThis.caches = { default: {
   put: async (k, res) => { store.set(k, await res.text()); },
 } };
 
-const INDEX = { version: 'v1', skills: {
-  project: { enabled: true, prompt: 'Answer about FOCUS from its own passages.' },
-  qa: { enabled: true, prompt: 'Lead with the QA pair.' },
-  resources: { enabled: true, prompt: 'Say what is attached.' },
-  usage: { enabled: true },
-  general: { enabled: true, prompt: 'Answer from the best passages.' },
-}, tools: { resources: { enabled: true, maxCards: 3 } }, entities: [
+const INDEX = { version: 'v1', systemPrompt: 'SYSTEM: answer as Antares, from CONTEXT only.', skills: {
+  'project-walkthrough': { enabled: true, tools: ['search_work', 'find_resources'], answer: 'model', prompt: 'Answer about FOCUS from its own passages.' },
+  qa: { enabled: true, tools: ['search_work', 'find_resources'], answer: 'model', prompt: 'Lead with the QA pair.' },
+  'share-files': { enabled: true, tools: ['find_resources'], answer: 'model', prompt: 'Say what is attached.' },
+  'token-usage': { enabled: true, tools: ['get_token_usage', 'find_resources'], answer: 'tool', prompt: '' },
+  general: { enabled: true, tools: ['search_work', 'find_resources'], answer: 'model', prompt: 'Answer from the best passages.' },
+}, tools: { search_work: { enabled: true }, find_resources: { enabled: true, maxCards: 3 }, get_token_usage: { enabled: true } }, entities: [
   { id: 'project-agentic-hiring', kind: 'project', names: ['Agentic Hiring'], chunkPrefix: 'project-agentic-hiring', resourceId: 'project-agentic-hiring', url: '/projects/agentic-hiring/' },
   { id: 'project-kaboo', kind: 'project', names: ['Kaboo'], chunkPrefix: 'project-kaboo', resourceId: 'project-kaboo', url: '/projects/kaboo/' },
   { id: 'project-susbench', kind: 'project', names: ['SusBench'], chunkPrefix: 'project-susbench', resourceId: 'project-susbench', url: '/projects/susbench/' },
@@ -30,7 +30,7 @@ const INDEX = { version: 'v1', skills: {
   { id: 'project-kaboo', kind: 'page', title: 'Kaboo', url: '/projects/kaboo/', keywords: ['project', 'Kaboo'] },
   { id: 'project-susbench', kind: 'page', title: 'SusBench', url: '/projects/susbench/', keywords: ['project', 'SusBench'] },
 ], chunks: [
-  { id: 'assistant-guide', title: 'Note', url: '', text: 'I study at UW.', pin: true },
+  { id: 'knowledge-1', title: 'Note', url: '', text: 'I study at UW.', pin: true },
   { id: 'project-agentic-hiring', title: 'Project: Agentic Hiring', url: '/projects/agentic-hiring/', text: 'Agentic Hiring is a recruiting workbench. Pass rate rose from 21% to 25%.' },
   { id: 'project-kaboo', title: 'Project: Kaboo', url: '/projects/kaboo/', text: 'Kaboo analyzes token use.' },
   { id: 'project-kaboo-1', title: 'Kaboo: What I did', url: '/projects/kaboo/', text: 'I built the Token Efficiency Leaderboard.' },
@@ -138,6 +138,7 @@ await t('the Mac answers when it is up; thinking is stripped', async () => {
   // Retrieval: the pinned note, then the passage the question points at.
   assert.ok(lastLocalPrompt.indexOf('### Note') < lastLocalPrompt.indexOf('### Project: SusBench'));
   assert.match(lastLocalPrompt, /Reply in English/);
+  assert.ok(lastLocalPrompt.startsWith('SYSTEM: answer as Antares'), 'the CMS system prompt comes first');
 });
 await t('qa skill: the QA pair and its page lead, under the qa system prompt', async () => {
   local = 'ok';
@@ -145,9 +146,8 @@ await t('qa skill: the QA pair and its page lead, under the qa system prompt', a
   assert.equal(r.body.skill, 'qa');
   assert.ok(lastLocalPrompt.indexOf('### QA pair') < lastLocalPrompt.indexOf('### Note'));
   assert.match(lastLocalPrompt, /SKILL: qa\nLead with the QA pair\./);
-  assert.match(lastLocalPrompt, /QA PAIR FIRST/);
   assert.match(lastLocalPrompt, /21% to 25%/);
-  assert.deepEqual(r.body.tools, ['find_work_resources']);
+  assert.deepEqual(r.body.tools, ['find_resources', 'search_work']);
   assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
   assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*\/projects\/agentic-hiring\//);
   const ownAt = lastLocalPrompt.indexOf('### Project: Agentic Hiring');
@@ -159,39 +159,39 @@ await t('qa skill: the QA pair and its page lead, under the qa system prompt', a
   const saved = d1Traces.get(r.body.traceId);
   assert.equal(saved.skill.id, 'qa');
   assert.equal(saved.retrieval, 'qa');
-  assert.deepEqual(saved.passages.slice(0, 2).map((passage) => passage.id), ['assistant-guide', 'project-agentic-hiring']);
+  assert.deepEqual(saved.passages.slice(0, 2).map((passage) => passage.id), ['knowledge-1', 'project-agentic-hiring']);
 });
-await t('project skill: naming Kaboo with "token usage" reads Kaboo, not my usage numbers', async () => {
+await t('project-walkthrough: naming Kaboo with "token usage" reads Kaboo, not my usage numbers', async () => {
   local = 'ok';
   const beforeUsage = usageCalls;
   const r = await ask('How does Kaboo measure token usage?');
   assert.equal(usageCalls, beforeUsage);
-  assert.deepEqual([r.body.skill, r.body.via], ['project', 'local']);
-  assert.match(lastLocalPrompt, /SKILL: project\nAnswer about FOCUS from its own passages\.\nFOCUS: Kaboo \(project\)/);
+  assert.deepEqual([r.body.skill, r.body.via], ['project-walkthrough', 'local']);
+  assert.match(lastLocalPrompt, /SKILL: project-walkthrough\nAnswer about FOCUS from its own passages\.\nFOCUS: Kaboo \(project\)/);
   assert.ok(lastLocalPrompt.indexOf('### Project: Kaboo') < lastLocalPrompt.indexOf('### Kaboo: What I did'));
   assert.equal(r.body.resources[0].url, '/projects/kaboo/');
   assert.deepEqual(d1Traces.get(r.body.traceId).skill.focus, ['project-kaboo']);
 });
-await t('project skill: a follow-up naming a new project leaves the previous QA pair', async () => {
+await t('project-walkthrough: a follow-up naming a new project leaves the previous QA pair', async () => {
   local = 'ok';
   const r = await ask('', { messages: [
     { role: 'user', content: 'walk me through your most mature project.' },
     { role: 'assistant', content: 'Agentic Hiring…' },
     { role: 'user', content: 'and what did you do at SusBench?' },
   ] });
-  assert.equal(r.body.skill, 'project');
+  assert.equal(r.body.skill, 'project-walkthrough');
   assert.match(lastLocalPrompt, /FOCUS: SusBench/);
   assert.match(lastLocalPrompt, /### Project: SusBench/);
   assert.doesNotMatch(lastLocalPrompt, /### QA pair/);
 });
-await t('project skill: a short follow-up keeps the project it follows', async () => {
+await t('project-walkthrough: a short follow-up keeps the project it follows', async () => {
   local = 'ok';
   const r = await ask('', { messages: [
     { role: 'user', content: 'Tell me about Kaboo' },
     { role: 'assistant', content: 'Kaboo is…' },
     { role: 'user', content: 'what did you own there?' },
   ] });
-  assert.equal(r.body.skill, 'project');
+  assert.equal(r.body.skill, 'project-walkthrough');
   assert.match(lastLocalPrompt, /FOCUS: Kaboo/);
   assert.match(d1Traces.get(r.body.traceId).skill.reason, /follows up/);
 });
@@ -232,11 +232,14 @@ await t('a Chinese question gets a Chinese reply rule', async () => {
 await t('resume request returns the exact PDF as a structured resource', async () => {
   local = 'ok';
   const r = await ask('Please send me your resume PDF');
-  assert.deepEqual(r.body.tools, ['find_work_resources']);
+  assert.deepEqual(r.body.tools, ['find_resources']);
   assert.equal(r.body.resources[0].url, '/media/resume-en.pdf');
   assert.equal(r.body.resources[0].kind, 'pdf');
-  assert.equal(r.body.skill, 'resources');
-  assert.match(lastLocalPrompt, /SKILL: resources\nSay what is attached\./);
+  assert.equal(r.body.skill, 'share-files');
+  assert.match(lastLocalPrompt, /SKILL: share-files\nSay what is attached\./);
+  // share-files lists no search_work: it reads the background notes, no site passages.
+  assert.match(lastLocalPrompt, /### Note/);
+  assert.doesNotMatch(lastLocalPrompt, /### Project:/);
   assert.match(lastLocalPrompt, /Tool result: Work files and links[\s\S]*resume-en\.pdf/);
 
   const zh = await ask('\u628a\u4f60\u7684\u7b80\u5386\u53d1\u7ed9\u6211');
@@ -253,7 +256,7 @@ await t('token question returns the exact live number without asking a model', a
   assert.equal(r.body.model, 'get_token_usage');
   assert.match(r.body.answer, /2,000 tokens[\s\S]*3 sessions/);
   assert.ok(r.body.tools.includes('get_token_usage'));
-  assert.ok(r.body.tools.includes('find_work_resources'));
+  assert.ok(r.body.tools.includes('find_resources'));
   assert.equal(r.body.resources[0].url, '/usage/');
   const saved = d1Traces.get(r.body.traceId);
   assert.equal(saved.route, 'tool');
@@ -280,17 +283,31 @@ await t('usage skill: when the live numbers are unavailable, a fixed answer and 
   const beforeLocal = localCalls;
   const r = await ask('How many tokens have you used today?');
   usageDown = false;
-  assert.deepEqual([r.body.skill, r.body.via, r.body.model], ['usage', 'tool', 'get_token_usage']);
+  assert.deepEqual([r.body.skill, r.body.via, r.body.model], ['token-usage', 'tool', 'get_token_usage']);
   assert.match(r.body.answer, /can't read the live token numbers/);
   assert.equal(localCalls, beforeLocal);
 });
-await t('a skill switched off in the CMS is skipped', async () => {
-  INDEX.skills.usage.enabled = false;
+await t('a skill switched off in the CMS, or without the tool it needs, is skipped', async () => {
   const beforeUsage = usageCalls;
-  const r = await ask('How many tokens have you used?');
-  INDEX.skills.usage.enabled = true;
+  INDEX.skills['token-usage'].enabled = false;
+  const off = await ask('How many tokens have you used?');
+  INDEX.skills['token-usage'].enabled = true;
+  INDEX.tools.get_token_usage.enabled = false;
+  const toolOff = await ask('How many tokens have you used?');
+  INDEX.tools.get_token_usage.enabled = true;
   assert.equal(usageCalls, beforeUsage);
-  assert.notEqual(r.body.skill, 'usage');
+  assert.notEqual(off.body.skill, 'token-usage');
+  assert.notEqual(toolOff.body.skill, 'token-usage');
+});
+await t('a skill gets only the tools its SKILL.md lists', async () => {
+  local = 'ok';
+  INDEX.skills['project-walkthrough'].tools = ['search_work'];
+  const r = await ask('Tell me about Kaboo');
+  INDEX.skills['project-walkthrough'].tools = ['search_work', 'find_resources'];
+  assert.equal(r.body.skill, 'project-walkthrough');
+  assert.deepEqual(r.body.resources, []);
+  assert.deepEqual(r.body.tools, ['search_work']);
+  assert.match(lastLocalPrompt, /### Project: Kaboo/);
 });
 await t('generic project questions do not attach unrelated resource cards', async () => {
   local = 'ok';

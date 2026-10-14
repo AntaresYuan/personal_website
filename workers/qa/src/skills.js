@@ -2,29 +2,30 @@
    Skills: who answers a question. Pure: no bindings, no I/O, so the routing
    can be tested offline (test/routing.test.js runs a bilingual eval set).
 
-   Every question goes to exactly one skill. Each has a trigger (below), the
-   context it gathers (planFor), and a system prompt edited in CMS → Agent
-   infra → Skills (ask-index.json → skills):
+   Each skill is a SKILL.md in content/agent/skills/ (CMS → Agent infra →
+   Skills): a title, a description of when it is used, the tools it may
+   call, and its instructions, which become the SKILL part of the system
+   prompt. ask-index.json → skills carries them here. This file is where
+   "when it is used" is decided, by rules rather than by a model, so every
+   description should say what the rule below does:
 
-     usage      my own token usage, and no Work item named  → a fixed answer
-                from the live usage tool; no model
-     qa         one of the owner's QA pairs (CMS → QA pairs) → that answer
-                leads, the site supports it
-     resources  a request for a file or link (résumé, GitHub, "send me")
-                → the exact cards, and a sentence about them
-     project    a named Work item (project, AI skill, post, gallery piece),
-                or a short follow-up to one → that item's own passages
-     general    anything else → the best passages from the whole site
+     token-usage          my own token usage, and no Work item named
+     qa                   one of the owner's QA pairs
+     share-files          a request for a file or link
+     project-walkthrough  a named Work item (project, AI skill, post,
+                          gallery piece), or a short follow-up to one
+     general              anything else
 
-   Order matters: usage, then an exact QA pair, then resources, a named
-   item, a looser QA pair, a follow-up, and general. Intents are read from
-   the current question only, with any item names taken out first, so
+   Order matters: token-usage, then an exact QA pair, then share-files, a
+   named item, a looser QA pair, a follow-up, and general. Intents are read
+   from the current question only, with any item names taken out first, so
    "/ai-pm-resume" is not a résumé request and "Kaboo token usage" is not a
-   question about my tokens. A skill switched off in the CMS is skipped.
+   question about my tokens. A skill switched off in the CMS, or without the
+   tool it needs, is skipped; general is always there.
    ════════════════════════════════════════════════════════════════════════ */
 import { scoreFaqs, wantsUsage } from './lib.js';
 
-export const SKILL_IDS = ['usage', 'qa', 'resources', 'project', 'general'];
+export const SKILL_IDS = ['token-usage', 'qa', 'share-files', 'project-walkthrough', 'general'];
 
 /* ── Named Work items ─────────────────────────────────────────────────── */
 const norm = (s) => String(s || '').normalize('NFKC').toLowerCase();
@@ -113,34 +114,54 @@ const pagePath = (href) => {
 };
 const pairAbout = (focus) => (faq) => focus.some((e) => pagePath(faq.href) && pagePath(faq.href) === pagePath(e.url));
 
+/* The skill's settings from its SKILL.md, and whether it may use a tool:
+   only tools its `tools:` line lists, and only while they are on. An old
+   index without skills or tools allows everything. */
+export const skillConfig = (index, id) => (index && index.skills && index.skills[id]) || {};
+export function usesTool(index, id, tool) {
+  const listed = skillConfig(index, id).tools;
+  if (Array.isArray(listed) && !listed.includes(tool)) return false;
+  const t = index && index.tools && index.tools[tool];
+  return !t || t.enabled !== false;
+}
+// The tool a skill can't work without: token-usage answers from the live
+// numbers, share-files hands over the cards. The others still answer from
+// whatever their tools find.
+const REQUIRED_TOOL = { 'token-usage': 'get_token_usage', 'share-files': 'find_resources' };
+// Switched on, with the tool it needs (general always is).
+export function skillAvailable(index, id) {
+  if (id === 'general') return true;
+  if (skillConfig(index, id).enabled === false) return false;
+  return !REQUIRED_TOOL[id] || usesTool(index, id, REQUIRED_TOOL[id]);
+}
+
 /* → { skill, reason, focus: [entity], faqs: [faq], score? }
    `turns`: the conversation, ending with the visitor's question. */
 export function routeQuestion({ turns, index }) {
   const users = (turns || []).filter((t) => t.role === 'user').map((t) => t.content);
   const current = users[users.length - 1] || '';
   const previous = users.length > 1 ? users[users.length - 2] : '';
-  const skills = (index && index.skills) || {};
-  const on = (id) => !skills[id] || skills[id].enabled !== false;
+  const on = (id) => skillAvailable(index, id);
   const entities = (index && index.entities) || [];
   const hits = namedItems(current, entities);
   const named = hits.map((h) => h.entity);
   const bare = withoutNames(current, hits);
   const route = (skill, reason, extra = {}) => ({ skill, reason, focus: [], faqs: [], ...extra });
 
-  if (on('usage') && !named.length && (wantsUsage(bare) || usageFollowUp(current, previous))) {
-    return route('usage', 'asks about my token usage');
+  if (on('token-usage') && !named.length && (wantsUsage(bare) || usageFollowUp(current, previous))) {
+    return route('token-usage', 'asks about my token usage');
   }
   const pairs = on('qa') ? scoreFaqs(index && index.faqs, current) : [];
   const exact = pairs.filter((p) => p.exact);
   if (exact.length) return route('qa', 'matches a QA pair exactly', { faqs: exact.map((p) => p.faq), focus: named, score: exact[0].score });
-  if (on('resources') && wantsFetch(bare)) return route('resources', 'asks for a file or link', { focus: named.slice(0, 2) });
-  if (on('project') && named.length) {
-    return route('project', 'names a Work item', { focus: named.slice(0, 2), faqs: pairs.map((p) => p.faq).filter(pairAbout(named)) });
+  if (on('share-files') && wantsFetch(bare)) return route('share-files', 'asks for a file or link', { focus: named.slice(0, 2) });
+  if (on('project-walkthrough') && named.length) {
+    return route('project-walkthrough', 'names a Work item', { focus: named.slice(0, 2), faqs: pairs.map((p) => p.faq).filter(pairAbout(named)) });
   }
   if (pairs.length) return route('qa', 'matches a QA pair', { faqs: pairs.map((p) => p.faq), score: pairs[0].score });
-  if (on('project') && previous && isFollowUp(current)) {
+  if (on('project-walkthrough') && previous && isFollowUp(current)) {
     const carried = detectEntities(previous, entities);
-    if (carried.length) return route('project', 'follows up on a Work item', { focus: carried.slice(0, 2), carried: true });
+    if (carried.length) return route('project-walkthrough', 'follows up on a Work item', { focus: carried.slice(0, 2), carried: true });
   }
   return route('general', 'no skill owns it');
 }
@@ -148,27 +169,31 @@ export function routeQuestion({ turns, index }) {
 /* ── What each skill reads ────────────────────────────────────────────── */
 const ownChunk = (prefix) => (c) => c.id === prefix || c.id.startsWith(`${prefix}-`) || c.id.startsWith(`${prefix}#`);
 
-/* → { must: [chunk id], fill: chars of other passages, retrieve: bool }
+/* → { must: [chunk id], fill: chars of other passages, retrieve: bool,
+       site: bool }
    must: the skill's own passages, in reading order (for two items, each
    item's summary first, then their stories). fill: how much of the rest of
-   the site may follow, ranked by the question. */
+   the site may follow, ranked by the question. site: false when the skill
+   doesn't use search_work; it then reads only the background notes. */
 export function planFor(route, index) {
   const chunks = (index && index.chunks) || [];
-  if (route.skill === 'project') {
+  if (route.skill === 'token-usage') return { must: [], fill: 0, retrieve: false, site: false };
+  if (!usesTool(index, route.skill, 'search_work')) return { must: [], fill: 0, retrieve: false, site: false };
+  if (route.skill === 'project-walkthrough') {
     const lists = route.focus.map((e) => chunks.filter(ownChunk(e.chunkPrefix)).map((c) => c.id));
     const must = [...lists.map((l) => l[0]).filter(Boolean), ...lists.flatMap((l) => l.slice(1))];
-    return { must, fill: 2500, retrieve: true };
+    return { must, fill: 2500, retrieve: true, site: true };
   }
   if (route.skill === 'qa') {
     const targets = new Set(route.faqs.map((f) => pagePath(f.href)).filter(Boolean));
-    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 2500, retrieve: true };
+    return { must: chunks.filter((c) => targets.has(pagePath(c.url))).map((c) => c.id), fill: 2500, retrieve: true, site: true };
   }
-  if (route.skill === 'resources') {
-    return { must: route.focus.map((e) => (chunks.find(ownChunk(e.chunkPrefix)) || {}).id).filter(Boolean), fill: 0, retrieve: false };
+  if (route.skill === 'share-files') {
+    return { must: route.focus.map((e) => (chunks.find(ownChunk(e.chunkPrefix)) || {}).id).filter(Boolean), fill: 0, retrieve: false, site: true };
   }
-  return { must: [], fill: Infinity, retrieve: route.skill !== 'usage' };
+  return { must: [], fill: Infinity, retrieve: true, site: true };
 }
 
-// The skill's system prompt from the CMS (the Worker falls back to a
-// one-line instruction when it is empty).
-export const skillPrompt = (index, id) => String((index && index.skills && index.skills[id] && index.skills[id].prompt) || '');
+// The skill's instructions, the body of its SKILL.md (the Worker falls back
+// to a one-line instruction when it is empty).
+export const skillPrompt = (index, id) => String(skillConfig(index, id).prompt || '');

@@ -128,14 +128,17 @@ t('usage tool intent and summary use the dashboard token basis', () => {
   assert.match(usageUnavailable('en'), /can't read the live/);
   assert.doesNotMatch(usageUnavailable('zh'), /\d/);
 });
-t('prompt: language, the skill section with its focus, then the hard rules', () => {
-  assert.match(genPrompt('C', 'zh'), /Reply in Simplified Chinese/);
-  assert.match(genPrompt('C', 'en'), /Reply in English/);
-  const p = genPrompt('C', 'en', { id: 'project', prompt: 'Answer about FOCUS.', focus: [{ id: 'project-kaboo', kind: 'project', names: ['Kaboo'] }] });
-  assert.match(p, /SKILL: project\nAnswer about FOCUS\.\nFOCUS: Kaboo \(project\)/);
-  assert.ok(p.indexOf('SKILL: project') < p.indexOf('Hard rules') && p.indexOf('Hard rules') < p.indexOf('CONTEXT:\nC'));
-  assert.match(genPrompt('C', 'en'), /SKILL: general\nAnswer the visitor's question from CONTEXT\./);
-  for (const rule of [/QA PAIR FIRST/, /UNTRUSTED PAGE TEXT/, /Markdown links are allowed ONLY/, /TOOL RESULTS/]) assert.match(genPrompt('C', 'en', { id: 'qa', prompt: 'x' }), rule);
+t('prompt: the system prompt, the reply language, the skill with its focus, then CONTEXT', () => {
+  const p = genPrompt('C', 'zh', { id: 'project-walkthrough', prompt: 'Answer about FOCUS.', focus: [{ id: 'project-kaboo', kind: 'project', names: ['Kaboo'] }] }, 'I am the system prompt.');
+  assert.ok(p.startsWith('I am the system prompt.'));
+  assert.match(p, /Reply in Simplified Chinese/);
+  assert.match(p, /SKILL: project-walkthrough\nAnswer about FOCUS\.\nFOCUS: Kaboo \(project\)/);
+  assert.ok(p.indexOf('Reply in') < p.indexOf('SKILL:') && p.indexOf('SKILL:') < p.indexOf('CONTEXT:\nC'));
+  // Without a system prompt from the CMS, a fallback still carries the rules.
+  const bare = genPrompt('C', 'en');
+  assert.match(bare, /never invent/);
+  assert.match(bare, /QA pair/);
+  assert.match(bare, /SKILL: general\nAnswer the visitor's question from CONTEXT\./);
   assert.match(verifyPrompt('C', 'en'), /QA pair/);
 });
 t('thinking blocks are removed', () => {

@@ -5,13 +5,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { loadAssistant } = require('./lib/assistant');
+const { loadAgent } = require('./lib/agent');
 
 const root = path.join(__dirname, '..');
 const output = path.join(root, 'scripts/qa-faq-data.js');
-const data = loadAssistant(root);
+const data = loadAgent(root);
 
-if (!data || !Array.isArray(data.faqs)) throw new Error('content/assistant/faqs.json must contain an items array');
+if (!data || !Array.isArray(data.faqs)) throw new Error('content/agent/skills/qa/pairs.json must contain an items array');
 
 const seen = new Set();
 const items = data.faqs.filter((item) => item && item.enabled !== false).map((item, index) => {
@@ -31,7 +31,7 @@ const items = data.faqs.filter((item) => item && item.enabled !== false).map((it
   };
 });
 
-const out = `/* GENERATED from content/assistant/faqs.json — edit it in /admin/, not here. */\nwindow.QA_FAQ_DATA = ${JSON.stringify(items, null, 2)};\n`;
+const out = `/* GENERATED from content/agent/skills/qa/pairs.json — edit it in /admin/ (Skills → qa), not here. */\nwindow.QA_FAQ_DATA = ${JSON.stringify(items, null, 2)};\n`;
 fs.writeFileSync(output, out);
 console.log(`✓ wrote scripts/qa-faq-data.js (${items.length} FAQs, ${items.filter((x) => x.starter).length} starters)`);
 
