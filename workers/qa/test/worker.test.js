@@ -38,6 +38,31 @@ const INDEX = { version: 'v1', systemPrompt: 'SYSTEM: answer as Antares, from CO
 ] };
 
 let local = 'ok';            // 'ok' | 'down' | 'busy' | 'breaks' (a stream that fails midway)
+let planner = 'smart';       // 'smart' plans like a good model; 'prose' never writes JSON
+const PLANNER = 'You plan how to answer';
+/* A scripted planner for the agent tests: picks the skill by keywords,
+   then calls that skill's tools once, then answers. */
+const plan = (system, user) => {
+  if (planner === 'prose') return 'I would use the project skill here.';
+  const q = (user.match(/Visitor: (.*)\n\n/) || [])[1] || '';
+  if (!/LOADED SKILL: (\S+)/.test(system)) {
+    const skill = /resume|\u7b80\u5386/i.test(q) ? 'share-files'
+      : /tokens/i.test(q) && !/Kaboo/.test(q) ? 'token-usage'
+      : /Kaboo|SusBench/.test(q) ? 'project-walkthrough'
+      : /mature/.test(q) ? 'qa' : 'general';
+    return JSON.stringify({ actions: [{ tool: 'load_skill', args: { name: skill } }] });
+  }
+  if (/DONE SO FAR[\s\S]*\n\d\. (search_work|find_resources|get_token_usage) /.test(user)) return '{"answer": true}';
+  const skill = system.match(/LOADED SKILL: (\S+)\./)[1];
+  const actions = {
+    'project-walkthrough': [{ tool: 'search_work', args: { query: 'what it measures', item: 'Kaboo' } }, { tool: 'find_resources', args: { query: 'Kaboo' } }],
+    'share-files': [{ tool: 'find_resources', args: { query: 'resume' } }],
+    'token-usage': [{ tool: 'get_token_usage', args: { window: 'total' } }],
+    qa: [{ tool: 'find_resources', args: { query: 'Agentic Hiring' } }],
+    general: [{ tool: 'search_work', args: { query: q } }],
+  }[skill];
+  return 'Here is my plan:\n' + JSON.stringify({ actions });
+};
 let localCalls = 0, lastLocalPrompt = '';
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
@@ -45,6 +70,9 @@ globalThis.fetch = async (url, init = {}) => {
   if (url.startsWith('https://llm.example/')) {
     localCalls++;
     const request = JSON.parse(init.body);
+    if (local === 'ok' && request.messages[0].content.startsWith(PLANNER)) {
+      return new Response(JSON.stringify({ answer: plan(request.messages[0].content, request.messages[1].content), model: 'qwen' }));
+    }
     lastLocalPrompt = request.messages[0].content;
     assert.equal(init.headers['CF-Access-Client-Id'], 'id');
     if (local === 'down') throw new TypeError('connect failed');
@@ -71,15 +99,17 @@ globalThis.fetch = async (url, init = {}) => {
 // SusBench. QA phrasings about the "mature project" get their own direction,
 // so only questions that say so come near them.
 const VEC = { mature: [0.7, 0.7, 0], Note: [1, 0, 0], Kaboo: [0, 1, 0], SusBench: [0, 0, 1] };
-let usageCalls = 0, usageDown = false;
+let usageCalls = 0, usageDown = false, cloudPlans = 0;
 const traces = new Map();
 const d1Traces = new Map();
 const env = {
+  AGENT_MODE: 'off',           // the tests below the fixed pipeline; the agent's come last
   LOCAL_LLM_URL: 'https://llm.example',
   ACCESS_CLIENT_ID: 'id', ACCESS_CLIENT_SECRET: 'secret',
   AI: { run: async (model, input) => {
     if (model.includes('bge')) return { data: input.text.map((s) => VEC[Object.keys(VEC).find((k) => s.includes(k))] || [0, 0.1, 0.9]) };
     const sys = input.messages[0].content;
+    if (sys.startsWith(PLANNER)) { cloudPlans++; return { response: plan(sys, input.messages[1].content) }; }
     if (sys.startsWith('You are a strict fact-checker')) return { response: 'Checked: from the cloud.' };
     return { response: 'Draft from the cloud.' };
   } },
@@ -111,11 +141,11 @@ const env = {
 const waits = [];
 const ctx = { waitUntil: (p) => { waits.push(p); return p; } };
 const { default: worker } = await import('../src/index.js');
-const ask = async (q, extra = {}) => {
+const ask = async (q, extra = {}, useEnv = env) => {
   const res = await worker.fetch(new Request('https://qa.example/', {
     method: 'POST', headers: { Origin: 'https://antaresyuan.site', 'content-type': 'application/json' },
     body: JSON.stringify({ q, ...extra }),
-  }), env, ctx);
+  }), useEnv, ctx);
   return { status: res.status, body: await res.json(), cors: res.headers.get('access-control-allow-origin') };
 };
 const askStream = async (q, extra = {}) => {
@@ -357,6 +387,74 @@ await t('bad requests', async () => {
   assert.equal((await ask('')).status, 400);
   const r = await worker.fetch(new Request('https://qa.example/', { method: 'GET' }), env, ctx);
   assert.equal(r.status, 405);
+});
+
+/* ── The agent: the model picks the skill and calls the tools ─────────── */
+const agentEnv = { ...env, AGENT_MODE: 'on' };
+const askAgent = (q, extra = {}) => ask(q, extra, agentEnv);
+
+await t('agent: the model loads project-walkthrough for Kaboo and calls its tools', async () => {
+  store.delete('https://qa-cache.internal/local-down');
+  local = 'ok'; planner = 'smart';
+  const beforeUsage = usageCalls;
+  const r = await askAgent('How does Kaboo measure token usage?');
+  assert.equal(usageCalls, beforeUsage, 'no usage tool for a Kaboo question');
+  assert.deepEqual([r.body.skill, r.body.via, r.body.answer], ['project-walkthrough', 'local', 'From my Mac.']);
+  assert.deepEqual(r.body.tools, ['load_skill', 'search_work', 'find_resources']);
+  assert.equal(r.body.resources[0].url, '/projects/kaboo/');
+  // The answer is written from the loaded skill and the passages it searched.
+  assert.match(lastLocalPrompt, /^SYSTEM: answer as Antares/);
+  assert.match(lastLocalPrompt, /SKILL: project-walkthrough\nAnswer about FOCUS from its own passages\.\nFOCUS: Kaboo \(project\)/);
+  assert.ok(lastLocalPrompt.indexOf('### Project: Kaboo') < lastLocalPrompt.indexOf('### Kaboo: What I did'));
+  const saved = d1Traces.get(r.body.traceId);
+  assert.equal(saved.skill.reason, 'chosen by the model');
+  assert.equal(saved.agent.ok, true);
+  assert.equal(saved.agent.steps.length, 3);
+  assert.match(saved.agent.steps[1].note, /search_work .*Kaboo.* → \d passage\(s\): Project: Kaboo; Kaboo: What I did/);
+});
+await t('agent: share-files gets cards and reads no site passages', async () => {
+  const r = await askAgent('Please send me your resume PDF');
+  assert.equal(r.body.skill, 'share-files');
+  assert.equal(r.body.resources[0].url, '/media/resume-en.pdf');
+  assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
+  assert.match(lastLocalPrompt, /SKILL: share-files/);
+  assert.doesNotMatch(lastLocalPrompt, /### Project:/);
+});
+await t('agent: a token answer keeps the exact number the tool returned', async () => {
+  const r = await askAgent('How many tokens have you used?');
+  assert.equal(r.body.skill, 'token-usage');
+  assert.ok(r.body.tools.includes('get_token_usage'));
+  // The fake model answered "From my Mac." without the number: the guard
+  // replaced it with the tool's own sentence.
+  assert.match(r.body.answer, /2,000 tokens/);
+});
+await t('agent: the qa skill gets the QA pairs, the matching one first', async () => {
+  const r = await askAgent('What is your most mature project?');
+  assert.equal(r.body.skill, 'qa');
+  assert.match(lastLocalPrompt, /### QA pair: walk me through your most mature project\./);
+});
+await t('agent: when the Mac is busy, the cloud plans and answers', async () => {
+  local = 'busy';
+  const before = cloudPlans;
+  const r = await askAgent('Tell me about SusBench');
+  local = 'ok';
+  assert.ok(cloudPlans > before);
+  assert.deepEqual([r.body.skill, r.body.via], ['project-walkthrough', 'cloud']);
+});
+await t('agent: no usable plan → the fixed pipeline answers, and the trace says why', async () => {
+  planner = 'prose';
+  const r = await askAgent('How does Kaboo measure token usage?');
+  planner = 'smart';
+  assert.equal(r.body.skill, 'project-walkthrough');
+  const saved = d1Traces.get(r.body.traceId);
+  assert.equal(saved.agent.ok, false);
+  assert.match(saved.skill.reason, /^fixed pipeline \(agent: no usable plan\)/);
+});
+await t('agent: AGENT_MODE=off goes straight to the fixed pipeline', async () => {
+  const before = cloudPlans;
+  const r = await ask('How does Kaboo measure token usage?');
+  assert.equal(cloudPlans, before);
+  assert.equal(d1Traces.get(r.body.traceId).agent, undefined);
 });
 
 console.log(`qa worker: ${pass} passed, ${fail} failed`);

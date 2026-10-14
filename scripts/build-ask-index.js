@@ -13,8 +13,8 @@
    Writing. Personal roadmap, Lens and Contact content are never indexed.
    The Agent infra (content/agent/, scripts/lib/agent.js) comes along too:
      - systemPrompt: the system prompt, sent with every answer;
-     - skills: each SKILL.md (title, description, tools, answer, enabled and
-       its instructions); faqs: the qa skill's QA pairs;
+     - skills: each SKILL.md (title, description, tools, enabled and its
+       instructions); faqs: the qa skill's QA pairs;
      - tools: each tool's switch and settings;
      - entities: every named Work item (project, AI skill, post, gallery
        piece) with the names a visitor may use for it, the passages that are
@@ -341,7 +341,7 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
 /* ── Write ────────────────────────────────────────────────────────────── */
 /* ── Skills and tools, as the Worker needs them ───────────────────────── */
 const skillsOut = Object.fromEntries(Object.values(assistant.skills).map((s) => [s.name, {
-  title: s.title, description: s.description, tools: s.tools, answer: s.answer,
+  title: s.title, description: s.description, tools: s.tools,
   enabled: s.name === 'general' ? true : s.enabled, prompt: s.prompt,
 }]));
 const toolsOut = {

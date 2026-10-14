@@ -188,13 +188,15 @@ export function findFaqResources(resources, faqs, lang = 'en') {
     });
 }
 
-export function findResources(resources, query, lang = 'en', limit = 5) {
+// `explicit`: the visitor (or the agent, by calling the tool) asked for a
+// file or link, so more than a named item's own page may be returned.
+export function findResources(resources, query, lang = 'en', limit = 5, { explicit = false } = {}) {
   if (!Array.isArray(resources) || !String(query || '').trim()) return [];
   const q = String(query).normalize('NFKC').toLowerCase();
   const qTokens = [...new Set(tokens(q).filter((t) => !STOP.has(t)))];
   const resume = hasAny(q, RESUME_INTENT);
   const usage = wantsUsage(q);
-  const explicitRequest = resume || usage || hasAny(q, RESOURCE_REQUEST);
+  const explicitRequest = explicit || resume || usage || hasAny(q, RESOURCE_REQUEST);
   const explicitZh = /中文|chinese/i.test(q);
   const explicitEn = /英文|english/i.test(q);
   const preferredLang = explicitZh ? 'zh' : explicitEn ? 'en' : (lang === 'zh' ? 'zh' : 'en');

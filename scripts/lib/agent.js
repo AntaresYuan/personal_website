@@ -3,8 +3,8 @@
      content/agent/system-prompt.md        the system prompt, every answer
      content/agent/knowledge.json          background notes, every answer
      content/agent/skills/<name>/SKILL.md  one skill each: frontmatter (name,
-                                           title, description, tools, answer,
-                                           enabled) and its instructions
+                                           title, description, tools, enabled)
+                                           and its instructions
      content/agent/skills/qa/pairs.json    the qa skill's QA pairs
      content/agent/tools/<name>.json       one tool each, with its settings
 
@@ -52,7 +52,6 @@ function loadAgent(root = defaultRoot) {
       title: String(d.title || name).trim(),
       description: String(d.description || '').trim(),
       tools: asList(d.tools),
-      answer: d.answer === 'tool' ? 'tool' : 'model',
       enabled: d.enabled !== false,
       prompt: String(md.body || '').trim(),
     };

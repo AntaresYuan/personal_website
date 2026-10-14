@@ -35,10 +35,11 @@
    ════════════════════════════════════════════════════════════════════════ */
 import {
   normTurns, replyLang, searchText, lexicalScores, cosine, selectPassages, contextOf,
-  faqContextOf, findResources, findFaqResources, shapeResource, summarizeUsage,
-  resourceContextOf, detachResourceLinks, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
+  faqContextOf, findResources, findFaqResources, shapeResource, summarizeUsage, scoreFaqs,
+  resourceContextOf, detachResourceLinks, usageContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
-import { routeQuestion, planFor, skillPrompt, skillAvailable, usesTool } from './skills.js';
+import { routeQuestion, planFor, skillPrompt, skillAvailable, usesTool, detectEntities, ownChunk } from './skills.js';
+import { runAgent } from './agent.js';
 
 const SITE = 'https://antaresyuan.site';
 // Version the cache key when the corpus shape changes. The short TTL keeps a
@@ -215,7 +216,7 @@ function cardsFor(index, route, current, lang) {
 const parkLocal = () => caches.default.put(DOWN_KEY, new Response('1', { headers: { 'cache-control': 'max-age=60' } }));
 
 // The model on Antares's Mac, through the tunnel. null = not this time.
-async function askLocal(env, messages) {
+async function askLocal(env, messages, { maxTokens = 700, temperature = 0.1 } = {}) {
   if (!env.LOCAL_LLM_URL) return null;
   const cache = caches.default;
   if (await cache.match(DOWN_KEY)) return null;
@@ -228,7 +229,7 @@ async function askLocal(env, messages) {
         'content-type': 'application/json',
         ...(env.ACCESS_CLIENT_ID ? { 'CF-Access-Client-Id': env.ACCESS_CLIENT_ID, 'CF-Access-Client-Secret': env.ACCESS_CLIENT_SECRET } : {}),
       },
-      body: JSON.stringify({ messages, max_tokens: 700, temperature: 0.1 }),
+      body: JSON.stringify({ messages, max_tokens: maxTokens, temperature }),
       signal: AbortSignal.timeout(Number(env.LOCAL_TIMEOUT_MS) || LOCAL_TIMEOUT_MS),
     });
     if (r.status === 503) return null;   // busy with another visitor: fall back, but don't park
@@ -367,6 +368,183 @@ async function askCloud(env, context, lang, turns, skill, systemPrompt) {
   return { answer, model: env.CLOUD_MODEL || CLOUD_MODEL, via: 'cloud', verified };
 }
 
+/* ── The agent ──────────────────────────────────────────────────────────
+   The model plans (agent.js): it loads a skill by its description and
+   calls the skill's tools; the Worker runs them here. The answer is then
+   written from the loaded skill's instructions and everything the tools
+   returned. Mac first, for planning and answering, while it answers; once
+   it fails or is busy, the rest of this answer is the cloud's. */
+const SEARCH_BUDGET = 3500;            // characters of passages per search_work call
+const WINDOW_TEXT = { today: 'today', month: 'this month', last30: 'last 30 days', total: '' };
+
+// search_work: passages for a query, the item's own first when it names one;
+// a later search returns passages not given yet.
+async function searchWork(env, ctx, index, query, itemName, given) {
+  const item = detectEntities(itemName, index.entities)[0] || detectEntities(query, index.entities)[0] || null;
+  let semantic = null;
+  try {
+    const [vecs, [qv]] = await Promise.all([
+      cachedVectors(env, ctx, vecKey(index.version), index.chunks.map((c) => `${c.title}\n${c.text}`)),
+      embed(env, [query]),
+    ]);
+    semantic = vecs.map((v) => cosine(qv, v));
+  } catch { /* embeddings unavailable — TF-IDF ranks alone */ }
+  const lexical = lexicalScores(query, index.chunks);
+  const maxLex = Math.max(1e-9, ...lexical);
+  const ranked = index.chunks
+    .map((c, i) => ({ c, s: (semantic ? semantic[i] : 0) + 0.15 * (lexical[i] / maxLex), hit: semantic || lexical[i] > 0 }))
+    .filter((x) => !x.c.pin && x.hit)
+    .sort((a, b) => b.s - a.s)
+    .map((x) => x.c);
+  const own = item ? index.chunks.filter(ownChunk(item.chunkPrefix)) : [];
+  const picked = [];
+  let used = 0;
+  for (const c of [...own, ...ranked]) {
+    if (given.has(c.id) || used + c.text.length > SEARCH_BUDGET) continue;
+    picked.push(c);
+    given.add(c.id);
+    used += c.text.length;
+  }
+  return {
+    note: picked.length ? `${picked.length} passage(s): ${picked.map((c) => c.title).join('; ')}` : 'nothing new found',
+    passages: picked, item,
+  };
+}
+
+// The number a token answer must contain, in the forms it may be written.
+function usageFigures(summary, window) {
+  const value = { today: summary.latestTokens, month: summary.monthTokens, last30: summary.last30Tokens }[window] ?? summary.totalTokens;
+  return [String(value), new Intl.NumberFormat('en-US').format(value), new Intl.NumberFormat('zh-CN').format(value)];
+}
+
+/* → a Response, or null when the model never produced a usable plan (the
+   caller then answers with the fixed pipeline). */
+async function answerWithAgent(p) {
+  const { env, ctx, index, turns, lang, currentQuery, pageCtx, trajectory, finish, finishStream, stream, ch, id } = p;
+  const catalog = Object.entries(index.skills || {})
+    .filter(([name]) => skillAvailable(index, name))
+    .map(([name, sk]) => ({
+      name, title: sk.title || name, tools: Array.isArray(sk.tools) ? sk.tools : [], prompt: sk.prompt || '',
+      // The qa skill is chosen by its questions, so the list shows them.
+      description: name === 'qa' && (index.faqs || []).length
+        ? `${sk.description || ''} QA pairs: ${index.faqs.map((f) => f.question).join(' | ')}`
+        : sk.description || '',
+    }));
+  if (!catalog.length) return null;
+  const maxCards = Number(index.tools?.find_resources?.maxCards) || 3;
+
+  let mac = !!env.LOCAL_LLM_URL;
+  const callModel = async (messages) => {
+    if (mac) {
+      const r = await askLocal(env, messages, { maxTokens: 250, temperature: 0 });
+      if (r) return { text: r.answer, engine: 'local', model: r.model };
+      mac = false;
+    }
+    return { text: await cloud(env, messages, 0, 250), engine: 'cloud', model: env.CLOUD_MODEL || CLOUD_MODEL };
+  };
+  const given = new Set();
+  const runTool = async (tool, args) => {
+    if (tool === 'search_work') return searchWork(env, ctx, index, String(args.query || currentQuery).slice(0, 300), String(args.item || ''), given);
+    if (tool === 'find_resources') {
+      if (index.tools?.find_resources?.enabled === false) return { note: 'this tool is switched off', cards: [] };
+      const cards = findResources(index.resources, String(args.query || currentQuery), lang, maxCards, { explicit: true });
+      return { note: cards.length ? `${cards.length} card(s): ${cards.map((c) => c.title).join('; ')}` : 'nothing found', cards };
+    }
+    if (tool === 'get_token_usage') {
+      const window = Object.hasOwn(WINDOW_TEXT, args.window) ? args.window : 'total';
+      const usage = index.tools?.get_token_usage?.enabled === false ? null : await getLiveUsage(env);
+      return usage
+        ? { note: usageAnswer(usage, WINDOW_TEXT[window], 'en'), usage, window }
+        : { note: 'the live numbers are unavailable right now', usage: null, window };
+    }
+    return { note: 'unknown tool' };
+  };
+
+  let agent;
+  try {
+    agent = await runAgent({ turns, catalog, systemPrompt: index.systemPrompt, callModel, runTool });
+  } catch (e) {
+    agent = { ok: false, reason: String((e && e.message) || e), skill: null, steps: [], results: [] };
+  }
+  trajectory.agent = {
+    ok: agent.ok, reason: agent.reason || '', skill: agent.skill ? agent.skill.name : '',
+    steps: agent.steps.map((st) => ({ engine: st.engine, model: st.model, output: st.output, note: st.note })),
+  };
+  if (!agent.ok) return null;
+
+  const loaded = agent.skill;
+  const searches = agent.results.filter((r) => r.tool === 'search_work');
+  const passages = searches.flatMap((r) => r.passages || []);
+  const seenCards = new Set();
+  const cards = agent.results.flatMap((r) => r.cards || [])
+    .filter((c) => c.url && !seenCards.has(c.url) && seenCards.add(c.url)).slice(0, maxCards);
+  const usageResult = [...agent.results].reverse().find((r) => r.tool === 'get_token_usage');
+  const focus = [...new Map(searches.map((r) => r.item).filter(Boolean).map((e) => [e.id, e])).values()];
+  const tools = ['load_skill', ...new Set(agent.results.map((r) => r.tool))];
+  trajectory.skill = { id: loaded.name, reason: 'chosen by the model', focus: focus.map((e) => e.id) };
+  trajectory.tools = tools;
+  trajectory.resources = cards.map(({ kind, title, url }) => ({ kind, title, url }));
+  trajectory.passages = passages.map((c) => ({ id: c.id, title: c.title, url: c.url || '' }));
+  const extra = { skill: loaded.name, resources: cards, tools };
+
+  // Live numbers that couldn't be read: say so, never a guess.
+  if (usageResult && !usageResult.usage) {
+    return finish({ answer: usageUnavailable(lang), model: 'get_token_usage', via: 'tool', verified: true, ...extra });
+  }
+
+  // The answer's context: the background notes always; the site summary
+  // and overview when the skill searched; the loaded skill's references
+  // (the qa skill's QA pairs, the ones matching the question first); the
+  // tool results.
+  const pins = index.chunks.filter((c) => c.pin && (String(c.id).startsWith('knowledge-') || searches.length));
+  const pairs = loaded.name === 'qa'
+    ? (() => {
+        const matched = scoreFaqs(index.faqs, currentQuery, 3).map((x) => x.faq);
+        return [...matched, ...(index.faqs || []).filter((f) => !matched.includes(f))].slice(0, 12);
+      })()
+    : [];
+  const toolCtx = [
+    cards.length ? resourceContextOf(cards, lang) : '',
+    usageResult ? usageContextOf(usageResult.usage, lang) : '',
+  ].filter(Boolean).join('\n\n');
+  const qaCtx = faqContextOf(pairs);
+  const fit = (budget) => {
+    let used = 0;
+    return [...pins, ...passages].filter((c) => (used + c.text.length <= budget ? (used += c.text.length, true) : false));
+  };
+  const head = [toolCtx, pageCtx, qaCtx].filter(Boolean);
+  const room = (budget) => Math.max(1500, budget - head.join('').length);
+  const localCtx = [...head, contextOf(fit(room(BUDGET.local)))].filter(Boolean).join('\n\n');
+  const cloudCtx = [...head, contextOf(fit(room(BUDGET.cloud)))].filter(Boolean).join('\n\n');
+  const skill = { id: loaded.name, prompt: loaded.prompt, focus };
+
+  // A token answer must carry the exact number the tool returned.
+  const guard = (answer) => {
+    if (!usageResult) return answer;
+    return usageFigures(usageResult.usage, usageResult.window).some((f) => answer.includes(f))
+      ? answer : usageAnswer(usageResult.usage, WINDOW_TEXT[usageResult.window], lang);
+  };
+
+  const messages = [{ role: 'system', content: genPrompt(localCtx, lang, skill, index.systemPrompt) }, ...turns];
+  if (mac && stream && !usageResult) {
+    const upstream = await openLocalStream(env, messages);
+    if (upstream) {
+      let resolveTrace;
+      const traceWork = new Promise((resolve) => { resolveTrace = resolve; });
+      if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(traceWork);
+      return localStreamResponse(upstream, { traceId: id, via: 'local', verified: false, ...extra },
+        { ...ch, 'X-Query-ID': id },
+        (payload, metrics) => { resolveTrace(finishStream(payload, metrics)); },
+        () => parkLocal(), lang);
+    }
+  } else if (mac) {
+    const local = await askLocal(env, messages);
+    if (local) return finish({ ...local, answer: guard(local.answer), ...extra });
+  }
+  const answered = await askCloud(env, cloudCtx, lang, turns, skill, index.systemPrompt);
+  return finish({ ...answered, answer: guard(answered.answer), ...extra });
+}
+
 /* ── Entry ──────────────────────────────────────────────────────────────── */
 export default {
   async fetch(request, env, ctx) {
@@ -434,6 +612,20 @@ export default {
     const index = await grab(env.INDEX_URL || INDEX_URL, 'json', 60);
     const hasIndex = !!(index && Array.isArray(index.chunks) && index.chunks.length);
 
+    // The agent first: the model picks the skill and calls the tools. If it
+    // can't produce a usable plan, the fixed pipeline below answers.
+    if (hasIndex && env.AGENT_MODE !== 'off') {
+      try {
+        const answered = await answerWithAgent({
+          env, ctx, index, turns, lang, currentQuery, pageCtx, trajectory, finish, finishStream,
+          stream: body.stream === true, ch, id,
+        });
+        if (answered) return answered;
+      } catch (e) {
+        trajectory.agent = { ...(trajectory.agent || {}), ok: false, reason: `answer failed: ${String((e && e.message) || e)}` };
+      }
+    }
+
     // Route. A question no rule claimed may still mean one of the QA pairs.
     let route = routeQuestion({ turns, index });
     const plan0 = planFor(route, index);
@@ -447,7 +639,7 @@ export default {
     }
     const plan = planFor(route, index);
     trajectory.skill = {
-      id: route.skill, reason: route.reason,
+      id: route.skill, reason: trajectory.agent ? `fixed pipeline (agent: ${trajectory.agent.reason || 'no plan'}): ${route.reason}` : route.reason,
       focus: route.focus.map((e) => e.id),
       qaPairs: route.faqs.map((f) => f.question),
       ...(route.score != null ? { score: Number(Number(route.score).toFixed(3)) } : {}),
