@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "test": "node test/lib.test.js && node test/a2ui.test.js && node test/worker.test.js"
+    "test": "node test/lib.test.js && node test/a2ui.test.js && node test/worker.test.js && node test/agent.test.js && node test/routing.test.js && node test/user-reported.test.js",
+    "eval:badcases": "node eval/user-reported-eval.mjs"
   }
 }

@@ -1,0 +1,55 @@
+name: Ask Antares evals
+
+# Every code/content change gets the deterministic regression suite. Once a
+# week (and on manual dispatch), the full suite is replayed against the live
+# Worker and real models. Live results are retained as an Actions artifact.
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 16 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ask-evals-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run deterministic regressions
+        run: npm run test:qa-regressions
+
+  live-full-eval:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Replay the full suite against production
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run eval:full 2>&1 | tee ask-eval.log
+      - name: Preserve the evaluation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ask-eval-${{ github.run_id }}
+          path: ask-eval.log
+          retention-days: 30

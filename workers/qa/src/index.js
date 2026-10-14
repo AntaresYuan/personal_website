@@ -201,7 +201,7 @@ async function getLiveUsage(env) {
 /* The file-and-link cards for an answer (find_resources). share-files
    searches the catalogue for what was asked; the others attach their item's
    page, the page a QA pair links to, and anything the question names. */
-function cardsFor(index, route, current, lang) {
+export function cardsFor(index, route, current, lang) {
   if (!usesTool(index, route.skill, 'find_resources') || !Array.isArray(index?.resources)) return [];
   const max = Number(index?.tools?.find_resources?.maxCards) || 3;
   const byId = new Map(index.resources.map((r) => [r.id, r]));
@@ -531,6 +531,45 @@ async function answerWithAgent(p) {
   } catch (e) {
     agent = { ok: false, reason: String((e && e.message) || e), skill: null, steps: [], results: [] };
   }
+
+  /* A small planner may load the qa skill and immediately answer because the
+     owner-written pair is already visible. The pair is authoritative, but a
+     linked page is still a contract: attach its exact catalogue card and
+     read that page's own passages. Enforce both here so correctness does not
+     depend on the planner remembering optional-looking tool calls. */
+  const enforced = [];
+  if (agent.ok && agent.skill?.name === 'qa') {
+    const route = routeQuestion({ turns, index });
+    if (route.skill === 'qa') {
+      trajectory.faqs = route.faqs.map((faq) => ({ id: faq.id || '', question: faq.question || '' }));
+      const requiredCards = cardsFor(index, route, currentQuery, lang);
+      const existingUrls = new Set(agent.results.flatMap((result) => result.cards || []).map((card) => card.url));
+      const missingCards = requiredCards.filter((card) => card.url && !existingUrls.has(card.url));
+      if (missingCards.length) {
+        agent.results.push({
+          tool: 'find_resources', args: { query: currentQuery }, durationMs: 0,
+          note: `${missingCards.length} required QA resource card(s): ${missingCards.map((card) => card.title).join('; ')}`,
+          cards: missingCards,
+        });
+        enforced.push('find_resources');
+      }
+
+      const requiredIds = planFor(route, index).must;
+      const existingIds = new Set(agent.results.flatMap((result) => result.passages || []).map((passage) => passage.id));
+      const missingPassages = requiredIds
+        .filter((chunkId) => !existingIds.has(chunkId))
+        .map((chunkId) => index.chunks.find((chunk) => chunk.id === chunkId))
+        .filter(Boolean);
+      if (missingPassages.length) {
+        agent.results.push({
+          tool: 'search_work', args: { query: currentQuery }, durationMs: 0,
+          note: `${missingPassages.length} required QA passage(s): ${missingPassages.map((passage) => passage.title).join('; ')}`,
+          passages: missingPassages, item: null,
+        });
+        enforced.push('search_work');
+      }
+    }
+  }
   trajectory.timings.agentMs = Date.now() - agentStarted;
   trajectory.timings.planningMs = agent.steps.reduce((sum, step) => sum + (Number(step.durationMs) || 0), 0);
   trajectory.timings.planningLocalAttemptMs = agent.steps.reduce((sum, step) => sum + (Number(step.localAttemptMs) || 0), 0);
@@ -538,6 +577,7 @@ async function answerWithAgent(p) {
   trajectory.timings.toolMs = agent.results.reduce((sum, result) => sum + (Number(result.durationMs) || 0), 0);
   trajectory.agent = {
     ok: agent.ok, reason: agent.reason || '', skill: agent.skill ? agent.skill.name : '',
+    ...(enforced.length ? { enforced } : {}),
     steps: agent.steps.map((st) => ({
       engine: st.engine, model: st.model, output: st.output, note: st.note,
       durationMs: st.durationMs,
