@@ -23,4 +23,4 @@
 This file and /llms-full.txt describe the Work space only.
 
 ---
-Generated 2026-10-14 from Work content only. Last site update: 2026-10-14. Edit the Work collections or /admin/ → Agent infra, then run `node scripts/build.js`.
+Generated 2026-10-14 from Work content only. Last site update: 2026-10-13. Edit the Work collections or /admin/ → Agent infra, then run `node scripts/build.js`.
