@@ -167,7 +167,7 @@ export function routeQuestion({ turns, index }) {
 }
 
 /* ── What each skill reads ────────────────────────────────────────────── */
-const ownChunk = (prefix) => (c) => c.id === prefix || c.id.startsWith(`${prefix}-`) || c.id.startsWith(`${prefix}#`);
+export const ownChunk = (prefix) => (c) => c.id === prefix || c.id.startsWith(`${prefix}-`) || c.id.startsWith(`${prefix}#`);
 
 /* → { must: [chunk id], fill: chars of other passages, retrieve: bool,
        site: bool }

@@ -60,16 +60,18 @@ Cloudflare `*.workers.dev` is intermittently DNS-poisoned / SNI-reset on
 mainland-China networks. **Every Worker URL stored in `content/site.json`
 must be a custom subdomain on the same zone as the main site.** Currently:
 
-- `qa.antaresyuan.site` — the "ask" assistant (`workers/qa/`). Its Agent
-  infra lives in `content/agent/` (CMS → Agent infra): the system prompt,
-  one `skills/<name>/SKILL.md` per skill, and the tools. The Worker routes
-  each question to one skill (`workers/qa/src/skills.js`), runs only the
-  tools that skill lists, gathers its passages from `/ask-index.json`
-  (`scripts/build-ask-index.js`), and answers from the model on Antares's
-  Mac when `LOCAL_LLM_URL` is set (`ops/local-llm/`, a Cloudflare Tunnel
-  behind an Access service token), else Workers AI. The Mac's hostname is
-  only ever called by the Worker. A new skill needs a SKILL.md, a rule in
-  `skills.js` and its CMS entry; a routing change gets a case in
+- `qa.antaresyuan.site` — the "ask" assistant (`workers/qa/`), an agent.
+  Its Agent infra lives in `content/agent/` (CMS → Agent infra): the
+  system prompt, one `skills/<name>/SKILL.md` per skill, and the tools.
+  The model loads a skill by its description and calls that skill's tools
+  in a JSON plan the Worker executes (`workers/qa/src/agent.js`), then
+  answers from the skill's instructions and the results; when it can't
+  plan, the fixed router (`skills.js`) answers. Models: the one on
+  Antares's Mac when `LOCAL_LLM_URL` is set (`ops/local-llm/`, a Cloudflare
+  Tunnel behind an Access service token), else Workers AI. The Mac's
+  hostname is only ever called by the Worker. A new skill is a SKILL.md
+  plus its CMS entry (and a rule in `skills.js` for the fallback); check
+  choices with `npm run eval:agent` against
   `workers/qa/test/routing-cases.json`.
 - `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
 - `comments.antaresyuan.site` — reactions + comments on Writing posts

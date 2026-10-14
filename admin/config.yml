@@ -869,11 +869,10 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
-          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
-          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "The model reads this to choose the skill, so say plainly which questions it is for (and which it isn't)." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Once the model loads this skill, it may call only these tools. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
           - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
-          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "What the model reads after loading the skill: which tools to call (## Steps) and how to answer (## Answer). Write them in English; the reply language is set separately." }
       - file: "content/agent/skills/qa/pairs.json"
         label: "qa — QA pairs"
         name: "skill_qa_pairs"
@@ -904,11 +903,10 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
-          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
-          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "The model reads this to choose the skill, so say plainly which questions it is for (and which it isn't)." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Once the model loads this skill, it may call only these tools. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
           - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
-          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "What the model reads after loading the skill: which tools to call (## Steps) and how to answer (## Answer). Write them in English; the reply language is set separately." }
       - file: "content/agent/skills/share-files/SKILL.md"
         label: "share-files — SKILL.md"
         name: "skill_share_files"
@@ -916,11 +914,10 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
-          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
-          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "The model reads this to choose the skill, so say plainly which questions it is for (and which it isn't)." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Once the model loads this skill, it may call only these tools. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
           - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
-          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "What the model reads after loading the skill: which tools to call (## Steps) and how to answer (## Answer). Write them in English; the reply language is set separately." }
       - file: "content/agent/skills/token-usage/SKILL.md"
         label: "token-usage — SKILL.md"
         name: "skill_token_usage"
@@ -928,11 +925,10 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
-          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
-          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "The model reads this to choose the skill, so say plainly which questions it is for (and which it isn't)." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Once the model loads this skill, it may call only these tools. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
           - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
-          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "What the model reads after loading the skill: which tools to call (## Steps) and how to answer (## Answer). Write them in English; the reply language is set separately." }
       - file: "content/agent/skills/general/SKILL.md"
         label: "general — SKILL.md"
         name: "skill_general"
@@ -940,10 +936,9 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
           - { label: "Title", name: "title", widget: "string" }
-          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
-          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
-          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
-          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "The model reads this to choose the skill, so say plainly which questions it is for (and which it isn't)." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Once the model loads this skill, it may call only these tools. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "What the model reads after loading the skill: which tools to call (## Steps) and how to answer (## Answer). Write them in English; the reply language is set separately." }
 
   - name: "agent_tools"
     label: "Tools"

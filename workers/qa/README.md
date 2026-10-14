@@ -22,65 +22,87 @@ content/agent/
 ```
 
 A **skill** is a SKILL.md:
-- frontmatter: `name`, `title`, `description` (when it is used), `tools` (the
-  tools it may call), `answer` (`model`, or `tool` for an answer straight
-  from a tool) and `enabled`;
-- body: its instructions.
+- frontmatter: `name`, `title`, `description` (which questions it is for; the
+  model reads this to choose), `tools` (the tools it may call once loaded)
+  and `enabled`;
+- body: its instructions, with `## Steps` (which tools to call) and
+  `## Answer` (how to write the reply).
 
-| Skill | When | Tools | Answer |
-|---|---|---|---|
-| `token-usage` | My own token usage ("how many tokens today / this month"), no Work item named | get_token_usage, find_resources | A fixed sentence with the live number; no model |
-| `qa` | One of the QA pairs: its question or an alias, or, failing every other rule, the same meaning (bge-m3 ≥ 0.8) | search_work, find_resources | Model; the pair's answer leads |
-| `share-files` | A request for a file or link: résumé, GitHub, "send me…", "where can I download…" | find_resources | Model, one or two sentences about the cards |
-| `project-walkthrough` | A named Work item (project, AI skill, post, gallery piece), or a short follow-up to one | search_work, find_resources | Model; that item's passages first |
-| `general` | Anything else | search_work, find_resources | Model; whole-site retrieval |
+| Skill | For | Tools |
+|---|---|---|
+| `qa` | Questions I've written answers to (its QA pairs; the list the model sees includes their questions) | search_work, find_resources |
+| `project-walkthrough` | A specific project, AI skill, post or gallery piece, named or followed up on | search_work, find_resources |
+| `share-files` | A file or link: résumé, GitHub, paper, demo | find_resources |
+| `token-usage` | My own token usage (not how a project analyses tokens) | get_token_usage, find_resources |
+| `general` | Anything else, and questions about me | search_work, find_resources |
 
 **Tools:**
-- `search_work`: the passage index (`scripts/build-ask-index.js`), built from
-  the Work case studies, AI Skills, Gallery and every Writing post. It holds
-  no Personal content, which the build and tests enforce. Its source switches
-  are in the tool's CMS entry. Passages are ranked by `@cf/baai/bge-m3`
-  (multilingual, so a Chinese question finds English passages) plus a TF-IDF
-  nudge toward exact names, within a character budget: about 12k for the Mac
-  and 9k for the cloud.
-- `find_resources`: exact URLs from the resource catalogue, returned as cards
-  and never written by a model. On/off and the most cards per answer.
-- `get_token_usage`: the `antares-usage` Worker through a fetch-only service
-  binding. On/off.
+- `search_work {query, item?}`: passages from the index
+  (`scripts/build-ask-index.js`), built from the Work case studies, AI Skills,
+  Gallery and every Writing post. It holds no Personal content, which the
+  build and tests enforce, and its sources are switched in the tool's CMS
+  entry.
+  - Ranking: `@cf/baai/bge-m3` (multilingual, so a Chinese question finds
+    English passages) plus a TF-IDF nudge toward exact names.
+  - `item`: that Work item's own passages come first.
+  - A later search returns passages not given yet; each call returns up to
+    about 3,500 characters.
+- `find_resources {query}`: exact URLs from the resource catalogue, returned
+  as cards and never written by a model. On/off and the most cards per answer.
+- `get_token_usage {window}`: today, this month, the last 30 days or the
+  total, from the `antares-usage` Worker through a fetch-only service binding.
+  On/off.
 
-A skill runs **only the tools its SKILL.md lists**. Without `search_work` it
-reads only the background notes. A skill switched off, or without the tool
-it can't work without (token-usage: get_token_usage; share-files:
-find_resources), is skipped; `general` is always there.
+## The agent
 
-**Who picks the skill.** The router (`src/skills.js`) is plain code, with no
-model call, so each decision is fast, repeatable and tested. A skill's
-`description` describes the router's rule; it doesn't change it. The router
-checks, in order:
-1. token-usage
-2. an exact QA pair
-3. share-files
-4. a named item
-5. a looser QA pair
-6. a follow-up
-7. general
+The model chooses the skill and calls the tools itself (`src/agent.js`). This
+is how Claude Code uses skills, run on the same two models: the Mac's qwen
+and Workers AI's llama 3.1 8B. Neither takes a `tools` parameter here, so the
+model plans in text: each step it writes **one JSON object**, and the Worker
+runs what it asked for.
 
-It reads the intent from the **current question only**, with item names taken
-out first. So "How does Kaboo measure token usage?" goes to
-project-walkthrough, and "/ai-pm-resume" isn't a résumé request. The names
-come from `ask-index.json → entities`, which the index build makes from:
-- project titles
-- AI skill names, plus a slash command's bare name unless it's an everyday
-  word
-- post titles and their distinctive tail ("Toothpaste Squeezer")
-- gallery titles, in English and Chinese
+```
+step 1  the system prompt, the skills (name + description), the conversation
+        → {"actions":[{"tool":"load_skill","args":{"name":"project-walkthrough"}}]}
+step 2  + the loaded skill's instructions; only its tools are allowed now
+        → {"actions":[{"tool":"search_work","args":{"query":"…","item":"Kaboo"}},
+                      {"tool":"find_resources","args":{"query":"Kaboo"}}]}
+step 3  + short summaries of the results
+        → {"answer": true}
+answer  system prompt + reply language + SKILL: the loaded skill's
+        instructions (+ FOCUS) + CONTEXT: the background notes, the qa
+        skill's QA pairs, and everything the tools returned  (streamed)
+```
 
-**The prompt** (`src/lib.js → genPrompt`), in order:
+- **Limits.** At most 3 planning steps (each at most 250 tokens) and 3 tool
+  calls per step.
+- **Bad replies.** An unreadable reply gets one correction. A tool the loaded
+  skill doesn't list, or any tool before a skill is loaded, is refused and
+  the model is told why.
+- **Mac first.** Planning and answering use the Mac first. Once it is busy or
+  fails, the rest of that answer is the cloud's.
+- **Token numbers.** A token answer must contain the exact number
+  get_token_usage returned; otherwise the tool's own sentence replaces it.
+  Numbers that can't be read get a fixed "can't read it now" reply.
+- **Fallback: the fixed pipeline.** When the model produces no usable plan
+  (or `AGENT_MODE = "off"` in `wrangler.toml`), the router in `src/skills.js`
+  picks the skill by rules, in this order:
+  1. token-usage
+  2. an exact QA pair
+  3. share-files
+  4. a named item
+  5. a looser QA pair
+  6. a follow-up
+  7. general
+
+  It then gathers that skill's context itself. Visitors always get an answer.
+
+**The prompt** for the answer (`src/lib.js → genPrompt`), in order:
 1. the system prompt
 2. the reply language, from the question
 3. `SKILL: <name>` with the skill's instructions, and `FOCUS:` naming the
-   item for project-walkthrough
-4. `CONTEXT`: tool results, the selected page text, QA pairs and passages
+   item searched for
+4. `CONTEXT`
 
 The fact-check prompt for the cloud's second pass stays in code.
 
@@ -103,8 +125,9 @@ answer is hovered, and copies it on click. A trace is kept in **D1**
 (`QA_DB`, table `qa_traces`; KV `QA_TRACE` is the fallback) for 14 days, and
 stores no IP. It holds:
 - the question and the two-turn retrieval query
-- **the skill, why it was chosen** and its focus or QA pair (plus the nearest
-  QA pair's meaning score, for tuning)
+- **the skill and who chose it**: the model (with every planning step: the
+  engine, its reply and what the Worker did with it) or, on a fallback, the
+  fixed pipeline's rule, focus and QA pair
 - the tools, the resources and the passages
 - the model route, the duration and the answer
 
@@ -178,9 +201,13 @@ History is capped at the last 8 turns; each turn at 600 characters.
 - **Recurring answers belong in QA pairs** (Skills → qa — QA pairs). Write the
   answer and likely English and Chinese aliases; an exact alias always
   reaches the pair.
-- **Routing eval**: `test/routing-cases.json` lists bilingual questions with
-  the skill, focus and QA pair each must reach; `test/routing.test.js` runs
-  them against the built `ask-index.json`. Add a case for every routing bug.
+- **Evals.** `test/routing-cases.json` lists 54 bilingual questions with the
+  skill each must reach.
+  - `test/routing.test.js` runs them through the fixed pipeline's router,
+    offline, in `npm test`.
+  - `npm run eval:agent` (`eval/agent-eval.mjs`) asks the live Worker, so it
+    measures how well the real models choose skills.
+  - Add a case for every wrong choice.
 - **Budgets** (in characters) are `BUDGET` in `src/index.js`: about 12k for
   the Mac and 9k for the cloud. A skill's own passages come right after the
   pinned ones; `planFor` in `src/skills.js` caps how much else follows.
@@ -190,4 +217,4 @@ History is capped at the last 8 turns; each turn at 600 characters.
   block in `wrangler.toml` and redeploy.
 - **When the index is missing**, the Worker grounds in the first part of
   `/llms-full.txt`, the old behaviour.
-- **Tests**: `node workers/qa/test/lib.test.js && node workers/qa/test/worker.test.js && node workers/qa/test/routing.test.js` (the last after a build).
+- **Tests**: `node workers/qa/test/lib.test.js && node workers/qa/test/worker.test.js && node workers/qa/test/agent.test.js && node workers/qa/test/routing.test.js` (the last after a build). The agent's tests use a scripted model.
