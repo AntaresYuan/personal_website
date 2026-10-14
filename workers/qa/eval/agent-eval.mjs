@@ -25,6 +25,7 @@ for (const c of cases) {
       method: 'POST',
       headers: { 'content-type': 'application/json', origin: 'https://antaresyuan.site' },
       body: JSON.stringify({ messages, lang: /[\u3400-\u9fff]/.test(c.ask) ? 'zh' : 'en' }),
+      signal: AbortSignal.timeout(60_000),
     });
     const d = await r.json();
     ({ skill = '', via = '', traceId = '' } = d);
@@ -45,3 +46,4 @@ for (const [skill, b] of Object.entries(bySkill)) console.log(`  ${skill.padEnd(
 const routes = rows.reduce((m, r) => ({ ...m, [r.via || 'error']: (m[r.via || 'error'] || 0) + 1 }), {});
 console.log(`answered by: ${Object.entries(routes).map(([k, v]) => `${k} ${v}`).join(', ')}`);
 console.log(`median latency: ${rows.map((r) => r.ms).sort((a, b) => a - b)[Math.floor(rows.length / 2)]}ms`);
+if (hit !== rows.length) process.exitCode = 1;

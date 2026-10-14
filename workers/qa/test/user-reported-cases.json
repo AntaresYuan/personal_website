@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "about": "Sanitized regression contracts for bad cases reported by the site owner. An AQ id preserves trajectory provenance when available; older screenshot-only reports use a REPORTED id. Raw trajectories stay in Cloudflare and are not committed. Offline tests check deterministic routing, retrieval scope, and resource delivery. The live eval also checks model answers.",
+  "cases": [
+    {
+      "id": "REPORTED-20261013-RESUME-DUPLICATE",
+      "reportedAt": "2026-10-13",
+      "title": "A resume reply rendered a broken prose link and a duplicate attachment",
+      "regression": "The model wrote a malformed resume URL in prose while the frontend also rendered the same PDF as a resource card.",
+      "messages": [
+        { "role": "user", "content": "看看简历" }
+      ],
+      "lang": "zh",
+      "expected": {
+        "skill": "share-files",
+        "toolsInclude": ["find_resources"],
+        "resourceUrlsInclude": ["/media/袁晨杰产品简历(策略AI产品8.19).pdf"],
+        "resourcesMax": 1,
+        "answerIncludesAll": ["袁晨杰产品简历"],
+        "answerExcludesAll": ["/media/", ".pdf).pdf"]
+      },
+      "fixedBy": ["00a353e", "d574ad1"]
+    },
+    {
+      "id": "REPORTED-20261013-TOKEN-NUMBER-MISSING",
+      "reportedAt": "2026-10-13",
+      "title": "A token question returned a dashboard link and repeated the resume",
+      "regression": "The answer described where token data lived instead of returning the live number, then leaked the prior turn's resume card into the response.",
+      "messages": [
+        { "role": "user", "content": "看看简历" },
+        { "role": "assistant", "content": "简历在下方。" },
+        { "role": "user", "content": "今天用了多少token你" }
+      ],
+      "lang": "zh",
+      "expected": {
+        "skill": "token-usage",
+        "toolsInclude": ["get_token_usage"],
+        "resourceUrlsInclude": ["/usage/?lang=zh"],
+        "resourceUrlsExclude": ["/media/袁晨杰产品简历(策略AI产品8.19).pdf"],
+        "resourcesMax": 1,
+        "answerMatchesAll": ["[\\d,]+ tokens"]
+      },
+      "fixedBy": ["00a353e"]
+    },
+    {
+      "id": "REPORTED-20261013-UNRELATED-RESOURCE-FLOOD",
+      "reportedAt": "2026-10-13",
+      "title": "A broad project question attached five unrelated links",
+      "regression": "Generic words such as project matched unrelated catalogue items, so the answer showed token, Kaboo, projects and Lark Loom cards together.",
+      "messages": [
+        { "role": "user", "content": "讲一个有意思的项目 你做过的" }
+      ],
+      "lang": "zh",
+      "expected": {
+        "skill": "general",
+        "toolsInclude": ["search_work"],
+        "resourcesMax": 0
+      },
+      "fixedBy": ["00a353e"]
+    },
+    {
+      "id": "AQ-20261013-E55D128B",
+      "reportedAt": "2026-10-13T18:29:46.740Z",
+      "title": "The mature-project answer omitted its project card",
+      "regression": "An exact FAQ selected Agentic Hiring in prose, but no resource tool result was attached.",
+      "messages": [
+        { "role": "user", "content": "walk me through your most mature project." }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "qa",
+        "toolsInclude": ["find_resources"],
+        "resourceUrlsInclude": ["/projects/agentic-hiring/"],
+        "resourcesMax": 1,
+        "answerIncludesAll": ["Agentic Hiring", "21%", "25%"]
+      },
+      "fixedBy": ["bde7317"]
+    },
+    {
+      "id": "AQ-20261013-70902F21",
+      "reportedAt": "2026-10-13T18:56:46.902Z",
+      "title": "The mature-project answer did not read the project's own evidence",
+      "regression": "The response had a project card but retrieved unrelated writing instead of Agentic Hiring, allowing unsupported details into the answer.",
+      "messages": [
+        { "role": "user", "content": "walk me through your most mature project." }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "qa",
+        "toolsInclude": ["find_resources", "search_work"],
+        "resourceUrlsInclude": ["/projects/agentic-hiring/"],
+        "resourcesMax": 1,
+        "passagePrefixesInclude": ["project-agentic-hiring"],
+        "answerIncludesAll": ["Agentic Hiring", "21%", "25%"],
+        "answerExcludesAll": ["Senior Frontend Engineer in Seattle"]
+      },
+      "fixedBy": ["5ede4c4", "4aa9b10"]
+    },
+    {
+      "id": "AQ-20261014-CD336A23",
+      "reportedAt": "2026-10-14T10:49:19.633Z",
+      "title": "A Chinese resume request returned no file",
+      "regression": "The agent loaded share-files, but an accented search term missed the Chinese resume and the model incorrectly said no resume was published.",
+      "messages": [
+        { "role": "user", "content": "你做过什么" },
+        { "role": "assistant", "content": "我可以介绍项目。" },
+        { "role": "user", "content": "看看简历" }
+      ],
+      "lang": "zh",
+      "expected": {
+        "skill": "share-files",
+        "toolsInclude": ["find_resources"],
+        "resourceUrlsInclude": ["/media/袁晨杰产品简历(策略AI产品8.19).pdf"],
+        "resourcesMax": 1,
+        "answerIncludesAll": ["袁晨杰产品简历"],
+        "answerExcludesAll": ["没有在网站上发布过简历", "没有简历文件"]
+      },
+      "fixedBy": ["46118c4", "d574ad1"]
+    }
+  ]
+}

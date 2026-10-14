@@ -497,6 +497,12 @@ await t('agent: the qa skill gets the QA pairs, the matching one first', async (
   const r = await askAgent('What is your most mature project?');
   assert.equal(r.body.skill, 'qa');
   assert.match(lastLocalPrompt, /### QA pair: walk me through your most mature project\./);
+  assert.deepEqual(r.body.resources.map((resource) => resource.url), ['/projects/agentic-hiring/']);
+  assert.ok(r.body.tools.includes('find_resources'));
+  assert.ok(r.body.tools.includes('search_work'));
+  const saved = d1Traces.get(r.body.traceId);
+  assert.deepEqual(saved.agent.enforced, ['search_work']);
+  assert.ok(saved.passages.some((passage) => passage.id === 'project-agentic-hiring'));
 });
 await t('agent: when the Mac is busy, the cloud plans and answers', async () => {
   local = 'busy';

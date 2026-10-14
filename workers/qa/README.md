@@ -245,13 +245,23 @@ History is capped at the last 8 turns; each turn at 600 characters.
 - **Recurring answers belong in QA pairs** (Skills → qa — QA pairs). Write the
   answer and likely English and Chinese aliases; an exact alias always
   reaches the pair.
-- **Evals.** `test/routing-cases.json` lists 54 bilingual questions with the
+- **Evals.** `test/routing-cases.json` lists bilingual questions with the
   skill each must reach.
   - `test/routing.test.js` runs them through the fixed pipeline's router,
     offline, in `npm test`.
   - `npm run eval:agent` (`eval/agent-eval.mjs`) asks the live Worker, so it
     measures how well the real models choose skills.
   - Add a case for every wrong choice.
+- **Owner-reported bad cases.** `test/user-reported-cases.json` is the
+  permanent, sanitized record of every bad case the owner reports. Each
+  entry keeps the original AQ id when available (or a `REPORTED-*` id for
+  older screenshot-only cases) and the expected skill, tools, retrieval scope,
+  resource cards and answer constraints; raw trajectories remain in
+  Cloudflare. `test/user-reported.test.js` checks the deterministic contract
+  on every `npm test`. `npm run eval:badcases` replays those cases against the
+  live Worker and real models. `.github/workflows/qa-evals.yml` runs offline
+  on every pull request and main-branch update, then runs the complete live
+  routing + bad-case evaluation every Monday and on manual dispatch.
 - **Budgets** (in characters) are `BUDGET` in `src/index.js`: about 12k for
   the Mac and 9k for the cloud. A skill's own passages come right after the
   pinned ones; `planFor` in `src/skills.js` caps how much else follows.

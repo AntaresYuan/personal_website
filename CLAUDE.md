@@ -100,6 +100,16 @@ leaving the live site one full rebuild behind every CMS edit. The paths
 filter alone is enough to prevent re-trigger loops (the bot commit only
 touches artifacts, which aren't watched).
 
+### Every reported AQ bad case becomes an eval
+
+When the owner reports an `AQ-*` query as a bad case, retrieve its trajectory
+from D1 (or the `QA_TRACE` KV fallback), then add a sanitized contract to
+`workers/qa/test/user-reported-cases.json` in the same change that fixes it.
+Keep the AQ id, minimal conversation, failure description, and expected
+skill/tools/retrieval/resources/answer constraints; never commit the raw
+trajectory. `npm test` runs these contracts offline. The scheduled workflow
+replays the full routing and owner-reported suites against the live models.
+
 ### Work and Personal share content, not markup or styles
 
 - **Work** (`/`, `/projects/`, `/blog/`, `/gallery/`, `/skills/`): `styles/work.css` +
