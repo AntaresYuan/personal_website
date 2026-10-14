@@ -430,12 +430,15 @@ await t('agent: the model loads project-walkthrough for Kaboo and calls its tool
   assert.ok(saved.agent.steps.every((step) => Number.isInteger(step.durationMs) && step.durationMs >= 0));
 });
 await t('agent: share-files gets cards and reads no site passages', async () => {
+  const beforeLocal = localCalls;
   const r = await askAgent('Please send me your resume PDF');
   assert.equal(r.body.skill, 'share-files');
+  assert.deepEqual([r.body.via, r.body.model, r.body.verified], ['tool', 'find_resources', true]);
   assert.equal(r.body.resources[0].url, '/media/resume-en.pdf');
   assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
-  assert.match(lastLocalPrompt, /SKILL: share-files/);
-  assert.doesNotMatch(lastLocalPrompt, /### Project:/);
+  assert.equal(r.body.answer, "I've attached Antares Yuan — Résumé below.");
+  assert.equal(localCalls - beforeLocal, 2, 'one skill-selection call and one resource-tool planning call');
+  assert.equal(d1Traces.get(r.body.traceId).timings.answerMs, 0);
 });
 await t('agent: a bad resume alias and query recover with the visitor wording', async () => {
   planner = 'bad-resume';
@@ -448,10 +451,12 @@ await t('agent: a bad resume alias and query recover with the visitor wording', 
   assert.equal(r.body.skill, 'share-files');
   assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
   assert.equal(r.body.resources[0].url, '/media/resume-zh.pdf');
+  assert.deepEqual([r.body.via, r.body.model, r.body.verified], ['tool', 'find_resources', true]);
   const saved = d1Traces.get(r.body.traceId);
-  assert.equal(saved.agent.steps.length, 2);
+  assert.equal(saved.agent.steps.length, 1);
   assert.match(saved.agent.steps[0].note, /loaded share-files and normalized to find_resources/);
   assert.match(saved.agent.steps[0].note, /retrying with the visitor's wording/);
+  assert.equal(saved.timings.answerMs, 0);
 });
 await t('agent: a2ui returns a validated card without a separate answer call', async () => {
   const beforeLocal = localCalls;
