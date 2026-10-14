@@ -13,7 +13,7 @@
     var reader = response.body.getReader();
     var decoder = new TextDecoder();
     var buffer = '';
-    var result = { answer: '', via: '', model: '', resources: [], tools: [], traceId: '' };
+    var result = { answer: '', via: '', model: '', resources: [], ui: [], tools: [], traceId: '' };
     var accept = function (line) {
       if (!line.trim()) return;
       var event = JSON.parse(line);
@@ -23,6 +23,7 @@
         if (event.model) result.model = String(event.model);
         if (event.traceId) result.traceId = String(event.traceId);
         if (Array.isArray(event.resources)) result.resources = event.resources;
+        if (Array.isArray(event.ui)) result.ui = event.ui;
         if (Array.isArray(event.tools)) result.tools = event.tools;
         if (event.type === 'done' && event.answer) result.answer = String(event.answer);
       } else if (event.type === 'delta') {

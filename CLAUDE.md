@@ -73,6 +73,11 @@ must be a custom subdomain on the same zone as the main site.** Currently:
   plus its CMS entry (and a rule in `skills.js` for the fallback); check
   choices with `npm run eval:agent` against
   `workers/qa/test/routing-cases.json`.
+  `a2ui` is the cross-turn interaction skill: its `render_ui` tool returns a
+  bounded choice, form, confirmation or catalogue-backed resource card. The
+  model never writes card HTML or resource URLs; `scripts/ask-render.js`
+  renders the validated payload, and the next request carries a structured
+  `interaction` alongside the human-readable message.
 - `usage.antaresyuan.site` — `/usage` dashboard (`workers/usage/`)
 - `comments.antaresyuan.site` — reactions + comments on Writing posts
   (`workers/comments/`, D1; client `scripts/comments.js`). Off until

@@ -9,6 +9,7 @@ const t = async (name, fn) => { try { await fn(); pass++; } catch (e) { fail++; 
 const catalog = [
   { name: 'project-walkthrough', title: 'Project', description: 'A named project, skill, post or gallery piece.', tools: ['search_work', 'find_resources'], prompt: '## Steps\n1. Call search_work with item.' },
   { name: 'share-files', title: 'Files', description: 'A file or link.', tools: ['find_resources'], prompt: '## Steps\n1. Call find_resources.' },
+  { name: 'a2ui', title: 'Interactive', description: 'Missing input or a decision.', tools: ['render_ui'], prompt: '## Steps\n1. Call render_ui once.' },
   { name: 'general', title: 'General', description: 'Anything else.', tools: ['search_work', 'find_resources'], prompt: '## Steps\n1. Call search_work.' },
 ];
 const turns = [{ role: 'user', content: 'How does Kaboo measure token usage?' }];
@@ -105,7 +106,7 @@ await t('an unknown skill is named back with the real choices', async () => {
     '{"answer": true}',
   ]);
   const r = await runAgent({ turns, catalog, callModel: m.callModel, runTool });
-  assert.match(m.seen[1][1].content, /no such skill\. Choose one of: project-walkthrough, share-files, general/);
+  assert.match(m.seen[1][1].content, /no such skill\. Choose one of: project-walkthrough, share-files, a2ui, general/);
   assert.equal(r.skill.name, 'project-walkthrough');
 });
 
@@ -134,6 +135,26 @@ await t('answering before loading a skill is sent back once', async () => {
   const r = await runAgent({ turns, catalog, callModel: m.callModel, runTool });
   assert.match(m.seen[1][1].content, /must load a skill before answering/);
   assert.equal(r.ok, true);
+});
+
+await t('a terminal A2UI tool ends the loop without an extra model call', async () => {
+  const m = scripted([
+    '{"actions":[{"tool":"load_skill","args":{"name":"a2ui"}}]}',
+    '{"actions":[{"tool":"render_ui","args":{"type":"choice","title":"Choose","options":["One","Two"]}}]}',
+  ]);
+  const calls = [];
+  const r = await runAgent({
+    turns, catalog, callModel: m.callModel,
+    runTool: async (tool, args) => {
+      calls.push({ tool, args });
+      return { note: 'card ready', terminal: true, ui: { id: 'AQ-1-UI1', type: 'choice' } };
+    },
+  });
+  assert.equal(r.ok, true);
+  assert.equal(r.skill.name, 'a2ui');
+  assert.equal(r.terminal.ui.id, 'AQ-1-UI1');
+  assert.equal(m.seen.length, 2);
+  assert.deepEqual(calls.map((call) => call.tool), ['render_ui']);
 });
 
 await t('out of steps: answer with what there is, or give up if no skill', async () => {

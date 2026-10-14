@@ -12,7 +12,7 @@ const chunks = [
   '{"type":"meta","traceId":"AQ-1","via":"local","model":"qwen","resources":[]',
   '}\n{"type":"delta","text":"你',
   '好"}\n{"type":"delta","text":" world"}\n',
-  '{"type":"done","traceId":"AQ-1","via":"local","model":"qwen"}\n',
+  '{"type":"done","traceId":"AQ-1","via":"local","model":"qwen","ui":[{"version":1,"id":"AQ-1-UI1","type":"confirm","title":"Continue?"}]}\n',
 ].map((value) => encode.encode(value));
 let index = 0;
 const response = {
@@ -28,6 +28,7 @@ const response = {
   assert.equal(result.traceId, 'AQ-1');
   assert.equal(result.via, 'local');
   assert.equal(result.model, 'qwen');
+  assert.equal(result.ui[0].id, 'AQ-1-UI1');
   assert.equal(stream.isStreaming({ headers: { get: () => 'application/json' }, body: {} }), false);
   console.log('ask stream: 6 passed, 0 failed');
 })().catch((error) => { console.error(error); process.exit(1); });

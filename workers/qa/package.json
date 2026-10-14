@@ -4,6 +4,6 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "test": "node test/lib.test.js && node test/worker.test.js"
+    "test": "node test/lib.test.js && node test/a2ui.test.js && node test/worker.test.js"
   }
 }

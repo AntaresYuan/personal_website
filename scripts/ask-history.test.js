@@ -27,13 +27,21 @@ history.save([
   { role: 'assistant', content: 'Kaboo is…', via: 'tool', model: 'get_token_usage', traceId: 'AQ-20261013-ABC12345', resources: [
     { kind: 'pdf', title: 'Résumé', url: '/media/resume(test file).pdf', description: 'English PDF', typeLabel: 'PDF' },
     { kind: 'link', title: 'unsafe', url: 'javascript:alert(1)' },
-  ] },
+  ], ui: [{
+    version: 1, id: 'AQ-20261013-ABC12345-UI1', type: 'choice', title: 'Choose one',
+    options: [{ id: 'en', label: 'English' }, { id: 'zh', label: 'Chinese' }],
+    submitted: true, summary: 'English',
+  }] },
 ], storage, now);
 assert.deepEqual(JSON.parse(JSON.stringify(history.load(storage, now + history.ttl - 1).messages)), [
   { role: 'user', content: 'Tell me about Kaboo' },
   { role: 'assistant', content: 'Kaboo is…', via: 'tool', model: 'get_token_usage', traceId: 'AQ-20261013-ABC12345', resources: [
     { kind: 'pdf', title: 'Résumé', url: '/media/resume%28test%20file%29.pdf', description: 'English PDF', typeLabel: 'PDF' },
-  ] },
+  ], ui: [{
+    version: 1, id: 'AQ-20261013-ABC12345-UI1', type: 'choice', title: 'Choose one',
+    options: [{ id: 'en', label: 'English' }, { id: 'zh', label: 'Chinese' }],
+    submitted: true, summary: 'English',
+  }] },
 ]);
 
 assert.equal(history.load(storage, now + history.ttl), null, 'history expires after one hour');

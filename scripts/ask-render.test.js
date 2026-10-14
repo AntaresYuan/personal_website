@@ -31,4 +31,19 @@ assert.match(cards, /data-kind="pdf"/);
 assert.match(cards, />Résumé</);
 assert.doesNotMatch(cards, /javascript:/);
 
+const ui = render.ui([
+  { version: 1, id: 'AQ-1-UI1', type: 'choice', title: 'Choose <one>', body: 'No <script> here', options: [
+    { id: 'en', label: 'English' }, { id: 'zh', label: 'Chinese', description: 'Translated' },
+  ] },
+  { version: 1, id: 'AQ-2-UI1', type: 'form', title: 'Details', fields: [
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'notes', label: 'Notes', type: 'textarea' },
+  ] },
+], { kicker: 'Interactive', submit: 'Continue' });
+assert.match(ui, /data-a2ui-card="AQ-1-UI1"/);
+assert.match(ui, /type="radio"/);
+assert.match(ui, /type="email"/);
+assert.doesNotMatch(ui, /<script>/);
+assert.match(ui, /Choose &lt;one&gt;/);
+
 console.log('Ask rich rendering tests passed');
