@@ -1,0 +1,7 @@
+{
+  "name": "find_resources",
+  "title": "文件与链接",
+  "description": "从资源目录里找准确的文件和链接（简历、项目页、GitHub、论文、演示、图片），在回答下方显示为卡片。链接永远来自目录，不由模型书写。",
+  "enabled": true,
+  "maxCards": 3
+}

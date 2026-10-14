@@ -6,24 +6,29 @@
    →  { answer, model, via, verified, skill, resources, tools, traceId }
    →  { error, detail? }                                        on failure
 
-   1. LOAD /ask-index.json: passages, QA pairs, named Work items, the
-      resource catalogue, and each skill's switch and system prompt
-      (scripts/build-ask-index.js; CMS → Agent infra).
-   2. ROUTE to one skill (skills.js): usage, qa, resources, project or
-      general. A question no rule claims may still reach a QA pair by
-      meaning (bge-m3 similarity to its question and aliases).
-   3. TOOLS for that skill: the live usage numbers (usage — answered from a
-      template, no model) and the exact file and link cards.
-   4. CONTEXT for that skill: the pinned owner notes, the skill's own
-      passages (a project's case study, a QA pair's page), then the best of
-      the rest by bge-m3 + TF-IDF, within a character budget.
+   1. LOAD /ask-index.json: the Agent infra (CMS → Agent infra: the system
+      prompt, each skill's SKILL.md, the tools' settings), the passages, QA
+      pairs, named Work items and the resource catalogue
+      (scripts/build-ask-index.js).
+   2. ROUTE to one skill (skills.js): token-usage, qa, share-files,
+      project-walkthrough or general. A question no rule claims may still
+      reach a QA pair by meaning (bge-m3 similarity to its question and
+      aliases).
+   3. TOOLS: only those the skill's SKILL.md lists, and only while on —
+      get_token_usage (token-usage answers from it, no model),
+      find_resources (exact file and link cards), search_work (below).
+   4. CONTEXT, from search_work: the pinned background notes and site
+      overview, the skill's own passages (a project's case study, a QA
+      pair's page), then the best of the rest by bge-m3 + TF-IDF, within a
+      character budget. A skill without search_work reads only the notes.
    5. ANSWER, LOCAL FIRST from the model on Antares's Mac (ops/local-llm/,
       a Cloudflare Tunnel behind an Access service token), streamed when
       asked; busy, unreachable or slow → Workers AI, which drafts and then
       fact-checks. A failure parks the Mac for a minute.
 
-   The system prompt is the skill's prompt plus fixed hard rules (lib.js →
-   genPrompt). Replies come in the visitor's language. Every answer gets an
+   The prompt: the system prompt (CMS), the reply language, the skill's
+   instructions (+ FOCUS), then CONTEXT (lib.js → genPrompt). Replies come
+   in the visitor's language. Every answer gets an
    AQ-* Query ID and a 14-day trace in D1 (KV as a fallback), with the
    skill and why it was chosen. No keys in the frontend; CORS is locked to
    the site origin (+ localhost for dev).
@@ -33,7 +38,7 @@ import {
   faqContextOf, findResources, findFaqResources, shapeResource, summarizeUsage,
   resourceContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from './lib.js';
-import { routeQuestion, planFor, skillPrompt } from './skills.js';
+import { routeQuestion, planFor, skillPrompt, skillAvailable, usesTool } from './skills.js';
 
 const SITE = 'https://antaresyuan.site';
 // Version the cache key when the corpus shape changes. The short TTL keeps a
@@ -189,16 +194,15 @@ async function getLiveUsage(env) {
   } catch { return null; }
 }
 
-/* The file-and-link cards for an answer. The resources skill searches the
-   catalogue for what was asked; the others attach their item's page, the
-   page a QA pair links to, and anything the question explicitly names. */
+/* The file-and-link cards for an answer (find_resources). share-files
+   searches the catalogue for what was asked; the others attach their item's
+   page, the page a QA pair links to, and anything the question names. */
 function cardsFor(index, route, current, lang) {
-  const settings = index?.tools?.resources || {};
-  if (settings.enabled === false || !Array.isArray(index?.resources)) return [];
-  const max = Number(settings.maxCards) || 3;
+  if (!usesTool(index, route.skill, 'find_resources') || !Array.isArray(index?.resources)) return [];
+  const max = Number(index?.tools?.find_resources?.maxCards) || 3;
   const byId = new Map(index.resources.map((r) => [r.id, r]));
   const own = route.focus.map((e) => byId.get(e.resourceId)).filter(Boolean).map((r) => shapeResource(r, lang));
-  const found = route.skill === 'resources'
+  const found = route.skill === 'share-files'
     ? [...findResources(index.resources, current, lang, max), ...own]
     : [...own, ...findFaqResources(index.resources, route.faqs, lang), ...findResources(index.resources, current, lang, max)];
   const seen = new Set();
@@ -352,8 +356,8 @@ async function cloud(env, messages, temperature, maxTokens) {
   return String((out && (out.response ?? out.result ?? '')) || '').trim();
 }
 
-async function askCloud(env, context, lang, turns, skill) {
-  const draft = await cloud(env, [{ role: 'system', content: genPrompt(context, lang, skill) }, ...turns], 0.1, 480);
+async function askCloud(env, context, lang, turns, skill, systemPrompt) {
+  const draft = await cloud(env, [{ role: 'system', content: genPrompt(context, lang, skill, systemPrompt) }, ...turns], 0.1, 480);
   if (!draft) throw new Error('the model returned an empty answer');
   let answer = draft, verified = false;
   try {
@@ -431,7 +435,7 @@ export default {
     let route = routeQuestion({ turns, index });
     const plan0 = planFor(route, index);
     const vectors = hasIndex && plan0.retrieve ? await vectorsFor(env, ctx, index, currentQuery, query) : null;
-    if (route.skill === 'general' && vectors && !(index.skills?.qa?.enabled === false)) {
+    if (route.skill === 'general' && vectors && skillAvailable(index, 'qa')) {
       const near = nearestQaPair(vectors);
       if (near) trajectory.qaSemantic = { question: near.faq.question, phrasing: near.text, score: Number(near.score.toFixed(3)) };
       if (near && near.score >= QA_SEMANTIC_MIN) {
@@ -448,19 +452,19 @@ export default {
     trajectory.faqs = route.faqs.map((faq) => ({ id: faq.id || '', question: faq.question || '' }));
 
     const cards = hasIndex ? cardsFor(index, route, currentQuery, lang) : [];
-    const tools = cards.length ? ['find_work_resources'] : [];
+    const tools = cards.length ? ['find_resources'] : [];
     trajectory.resources = cards.map(({ kind, title, url }) => ({ kind, title, url }));
 
-    // usage: the live numbers, from a fixed template. No model can omit,
-    // round or invent the number the visitor asked for.
-    if (route.skill === 'usage') {
+    // token-usage: the live numbers, from a fixed template. No model can
+    // omit, round or invent the number the visitor asked for.
+    if (route.skill === 'token-usage') {
       tools.push('get_token_usage');
       trajectory.tools = tools;
       const usage = await getLiveUsage(env);
       if (usage) trajectory.usage = usage;
       return finish({
         answer: usage ? usageAnswer(usage, currentQuery, lang) : usageUnavailable(lang),
-        model: 'get_token_usage', via: 'tool', verified: true, skill: 'usage', resources: cards, tools,
+        model: 'get_token_usage', via: 'tool', verified: true, skill: 'token-usage', resources: cards, tools,
       });
     }
     trajectory.tools = tools;
@@ -468,14 +472,17 @@ export default {
     const skill = { id: route.skill, prompt: skillPrompt(index, route.skill), focus: route.focus };
     const toolCtx = cards.length
       ? resourceContextOf(cards, lang)
-      : (route.skill === 'resources' ? '### Tool result: Work files and links\nNothing in the catalogue matches this request.' : '');
+      : (route.skill === 'share-files' ? '### Tool result: Work files and links\nNothing in the catalogue matches this request.' : '');
     const qaCtx = faqContextOf(route.faqs);
     let localCtx, cloudCtx;
     if (hasIndex) {
+      if (plan.site) tools.push('search_work');
       const siteBudget = Math.max(2000, BUDGET.local - qaCtx.length - pageCtx.length - toolCtx.length);
       const semantic = vectors ? vectors.passages.map((v) => cosine(vectors.qSearch, v)) : null;
-      const wide = selectPassages(index.chunks, {
-        semantic, lexical: lexicalScores(query, index.chunks), budget: siteBudget, must: plan.must, fill: plan.fill,
+      // Without search_work a skill reads only the background notes.
+      const readable = plan.site ? index.chunks : index.chunks.filter((c) => String(c.id).startsWith('knowledge-'));
+      const wide = selectPassages(readable, {
+        semantic: plan.site ? semantic : null, lexical: lexicalScores(query, readable), budget: siteBudget, must: plan.must, fill: plan.fill,
       });
       trajectory.retrieval = route.skill;
       trajectory.passages = wide.map((passage) => ({
@@ -503,7 +510,7 @@ export default {
       cloudCtx = fallback.slice(0, BUDGET.cloud);
     }
 
-    const localMessages = [{ role: 'system', content: genPrompt(localCtx, lang, skill) }, ...turns];
+    const localMessages = [{ role: 'system', content: genPrompt(localCtx, lang, skill, index?.systemPrompt) }, ...turns];
     const extra = { skill: route.skill, resources: cards, tools };
     let local = null;
     if (body.stream === true) {
@@ -525,7 +532,7 @@ export default {
     }
     if (local) return finish({ ...local, ...extra });
     try {
-      return finish({ ...(await askCloud(env, cloudCtx, lang, turns, skill)), ...extra });
+      return finish({ ...(await askCloud(env, cloudCtx, lang, turns, skill, index?.systemPrompt)), ...extra });
     } catch (e) {
       return finish({ error: 'generation failed', detail: String((e && e.message) || e) }, 502);
     }

@@ -819,66 +819,64 @@ collections:
             fields:
               - { label: "Worker URL", name: "workerUrl", widget: "string", required: false, hint: "URL of the deployed antares-qa Worker (see workers/qa/README.md), e.g. https://antares-qa.<sub>.workers.dev — powers Ask Antares across the Work space. Personal never loads the assistant." }
 
-  # ── Agent infra ────────────────────────────────────────────────────
-  # Everything the owner controls about Ask Antares (workers/qa/): the base
-  # system prompt, the skills (each with its own system prompt), the QA
-  # pairs the qa skill answers from, background knowledge, and the tools.
-  # Files stay in content/assistant/; scripts/build-ask-index.js carries
-  # them into /ask-index.json for the Worker.
-  - name: "assistant"
-    label: "Agent infra"
+  # ── AGENT INFRA — Ask Antares (workers/qa/) ─────────────────────────
+  # Three modules, all in content/agent/ (scripts/lib/agent.js):
+  #   System prompt — sent with every answer, plus the background notes;
+  #   Skills — one SKILL.md each (when it is used, its tools, its
+  #     instructions); the qa skill's QA pairs sit next to its SKILL.md;
+  #   Tools — what the skills may call, with their settings.
+  # scripts/build-ask-index.js carries them into /ask-index.json.
+  - divider: true
+    name: "div_agent"
+    label: "— AGENT INFRA —"
+    files: []
+
+  - name: "agent_system"
+    label: "System prompt"
     icon: psychology          # Sveltia: Material Symbols name; Decap ignores it
     files:
-      - file: "content/assistant/guide.json"
-        label: "Response guide (every skill)"
-        name: "assistant_guide"
+      - file: "content/agent/system-prompt.md"
+        label: "System prompt"
+        name: "system_prompt"
+        format: "frontmatter"
+        fields:
+          - { label: "Title", name: "title", widget: "hidden", default: "System prompt" }
+          - { label: "System prompt", name: "body", widget: "markdown", hint: "Sent first with every answer, whatever the skill: who is speaking, the voice, and the rules. Then come the reply language, the skill's instructions and the context." }
+      - file: "content/agent/knowledge.json"
+        label: "Background knowledge"
+        name: "background_knowledge"
         format: "json"
         fields:
-          - { label: "Identity", name: "identity", widget: "text", hint: "Who the assistant is speaking as. Sent with every answer, whatever the skill." }
-          - { label: "Voice and style", name: "voice", widget: "text", hint: "How answers should sound and how detailed they should be." }
-          - { label: "When information is missing", name: "whenMissing", widget: "text", hint: "What to say instead of guessing." }
-          - { label: "Additional guidance", name: "additional", widget: "markdown", required: false, hint: "Optional extra instructions for every answer. Safety and fact-grounding rules remain enforced by the Worker." }
-      - file: "content/assistant/skills.json"
-        label: "Skills"
-        name: "assistant_skills"
-        format: "json"
+          - label: "Background notes — sent with every model-written answer"
+            name: "notes"
+            widget: "list"
+            collapsed: false
+            summary: "{{fields.title}}"
+            hint: "Facts, preferences and stories that don't belong to one QA pair. Not rendered as a page, but /agent-brief.txt is publicly fetchable."
+            fields:
+              - { label: "Give this note to the model", name: "enabled", widget: "boolean", required: false, default: true }
+              - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
+              - { label: "What the assistant should know", name: "body", widget: "markdown" }
+
+  - name: "agent_skills"
+    label: "Skills"
+    icon: extension
+    files:
+      - file: "content/agent/skills/qa/SKILL.md"
+        label: "qa — SKILL.md"
+        name: "skill_qa"
+        format: "frontmatter"
         fields:
-          - label: "project — a named project, AI skill, post or gallery piece"
-            name: "project"
-            widget: "object"
-            hint: "Used when the question names a Work item (Kaboo, /devloop, the OXO post…) or briefly follows up on one. The model reads that item's own passages first."
-            fields:
-              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: such questions go to general." }
-              - { label: "System prompt", name: "prompt", widget: "text", required: false, hint: "Instructions for this skill. FOCUS (the item's name) is added after it. The fact-grounding rules always follow and win." }
-          - label: "qa — one of your QA pairs"
-            name: "qa"
-            widget: "object"
-            hint: "Used when the question matches a QA pair's question or an alias, or means the same. Your answer leads; the site only supports it."
-            fields:
-              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: QA pairs are no longer used for answers (they still feed the starter questions and the offline answer)." }
-              - { label: "System prompt", name: "prompt", widget: "text", required: false }
-          - label: "resources — a request for a file or link"
-            name: "resources"
-            widget: "object"
-            hint: "Used for “send me your résumé”, “the GitHub link for…”, “where can I download…”. The exact cards come from the Files & links tool; the model writes a sentence about them."
-            fields:
-              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: such questions go to the other skills, which still attach cards." }
-              - { label: "System prompt", name: "prompt", widget: "text", required: false }
-          - label: "usage — my own token usage"
-            name: "usage"
-            widget: "object"
-            hint: "Used for “how many tokens have you used (today / this month)?” when no Work item is named. Answered from the live usage numbers with a fixed sentence, without a model, so it has no system prompt."
-            fields:
-              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: token questions are answered from the site content instead of the live numbers." }
-          - label: "general — everything else"
-            name: "general"
-            widget: "object"
-            hint: "Used when no other skill claims the question. Always on."
-            fields:
-              - { label: "System prompt", name: "prompt", widget: "text", required: false }
-      - file: "content/assistant/faqs.json"
-        label: "QA pairs (qa skill)"
-        name: "assistant_faqs"
+          - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+      - file: "content/agent/skills/qa/pairs.json"
+        label: "qa — QA pairs"
+        name: "skill_qa_pairs"
         format: "json"
         fields:
           - label: "QA pairs — drag to reorder; starter questions use this order"
@@ -899,46 +897,93 @@ collections:
                 field: { label: "Alias", name: "alias", widget: "string" }
               - { label: "Answer content", name: "answer", widget: "markdown", hint: "Your answer. The model may rephrase it and add facts from the site, but this content takes priority." }
               - { label: "Related page / link", name: "href", widget: "string", required: false, hint: "Optional: /projects/agentic-hiring/, #contact, or a full URL. Its page is read with the answer and attached as a card; also used by the offline answer and command palette." }
-      - file: "content/assistant/knowledge.json"
-        label: "Background knowledge"
-        name: "assistant_knowledge"
+      - file: "content/agent/skills/project-walkthrough/SKILL.md"
+        label: "project-walkthrough — SKILL.md"
+        name: "skill_project_walkthrough"
+        format: "frontmatter"
+        fields:
+          - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+      - file: "content/agent/skills/share-files/SKILL.md"
+        label: "share-files — SKILL.md"
+        name: "skill_share_files"
+        format: "frontmatter"
+        fields:
+          - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+      - file: "content/agent/skills/token-usage/SKILL.md"
+        label: "token-usage — SKILL.md"
+        name: "skill_token_usage"
+        format: "frontmatter"
+        fields:
+          - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: its questions go to the next skill that fits, finally general." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+      - file: "content/agent/skills/general/SKILL.md"
+        label: "general — SKILL.md"
+        name: "skill_general"
+        format: "frontmatter"
+        fields:
+          - { label: "Name", name: "name", widget: "string", hint: "The skill's id. Don't change it: the router knows the skill by it." }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description: when it is used", name: "description", widget: "text", hint: "What decides this is the router in workers/qa/src/skills.js; keep this in step with it." }
+          - { label: "Tools it may use", name: "tools", widget: "select", multiple: true, options: ["search_work", "find_resources", "get_token_usage"], hint: "Only these tools run for this skill. Without search_work it reads only the background notes; without find_resources it attaches no cards." }
+          - { label: "Who writes the answer", name: "answer", widget: "select", options: ["model", "tool"], default: "model", hint: "tool: answered from the tool result alone, without a model (token-usage)." }
+          - { label: "Instructions (the SKILL part of the system prompt)", name: "body", widget: "markdown", hint: "Sent after the system prompt when this skill answers. Write them in English; the reply language is set separately." }
+
+  - name: "agent_tools"
+    label: "Tools"
+    icon: build
+    files:
+      - file: "content/agent/tools/search_work.json"
+        label: "search_work"
+        name: "tool_search_work"
         format: "json"
         fields:
-          - label: "Background notes — sent with every model-written answer"
-            name: "notes"
-            widget: "list"
-            collapsed: false
-            summary: "{{fields.title}}"
-            hint: "Facts, preferences and stories that don't belong to one QA pair. They are not rendered as a page, but /agent-brief.txt is publicly fetchable."
+          - { label: "Name", name: "name", widget: "hidden", default: "search_work" }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description", name: "description", widget: "text" }
+          - label: "Sources it can read"
+            name: "sources"
+            widget: "object"
             fields:
-              - { label: "Give this note to the model", name: "enabled", widget: "boolean", required: false, default: true }
-              - { label: "Title / topic", name: "title", widget: "string", hint: "Short label, e.g. “Worth Fly — the backstory”, “What I actually optimise for”." }
-              - { label: "What the assistant should know", name: "body", widget: "markdown" }
-      - file: "content/assistant/tools.json"
-        label: "Tools"
-        name: "assistant_tools"
+              - { label: "llms.txt Work summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Send the concise, Work-only /llms.txt summary with every model-written answer. /llms-full.txt remains the automatic fallback if the index is unavailable." }
+              - { label: "Work profile and current status", name: "profile", widget: "boolean", default: true }
+              - { label: "Work homepage message and update", name: "home", widget: "boolean", default: true }
+              - { label: "Work project case studies", name: "projects", widget: "boolean", default: true }
+              - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
+              - { label: "Writing", name: "writing", widget: "boolean", default: true }
+              - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
+      - file: "content/agent/tools/find_resources.json"
+        label: "find_resources"
+        name: "tool_find_resources"
         format: "json"
         fields:
-          - label: "Work search — what the skills can read"
-            name: "search"
-            widget: "object"
-            hint: "The site content in the passage index. Personal is never included."
-            fields:
-              - label: "Sources"
-                name: "sources"
-                widget: "object"
-                fields:
-                  - { label: "llms.txt Work summary", name: "llmsSummary", widget: "boolean", default: true, hint: "Send the concise, Work-only /llms.txt summary with every answer. /llms-full.txt remains the automatic fallback if the index is unavailable." }
-                  - { label: "Work profile and current status", name: "profile", widget: "boolean", default: true }
-                  - { label: "Work homepage message and update", name: "home", widget: "boolean", default: true }
-                  - { label: "Work project case studies", name: "projects", widget: "boolean", default: true }
-                  - { label: "AI Skills", name: "skills", widget: "boolean", default: true }
-                  - { label: "Writing", name: "writing", widget: "boolean", default: true }
-                  - { label: "Gallery", name: "gallery", widget: "boolean", default: true }
-          - label: "Files & links — exact cards under an answer"
-            name: "resources"
-            widget: "object"
-            hint: "Résumés, project pages, GitHub, papers, demos, images: found in the resource catalogue, never written by the model."
-            fields:
-              - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: no cards, and the resources skill has nothing to hand over." }
-              - { label: "Most cards per answer", name: "maxCards", widget: "number", value_type: "int", min: 1, max: 5, default: 3 }
+          - { label: "Name", name: "name", widget: "hidden", default: "find_resources" }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description", name: "description", widget: "text" }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: no skill attaches cards, and share-files is switched off with it." }
+          - { label: "Most cards per answer", name: "maxCards", widget: "number", value_type: "int", min: 1, max: 5, default: 3 }
+      - file: "content/agent/tools/get_token_usage.json"
+        label: "get_token_usage"
+        name: "tool_get_token_usage"
+        format: "json"
+        fields:
+          - { label: "Name", name: "name", widget: "hidden", default: "get_token_usage" }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description", name: "description", widget: "text" }
+          - { label: "On", name: "enabled", widget: "boolean", default: true, hint: "Off: token-usage is switched off with it, and token questions are answered from the site content." }

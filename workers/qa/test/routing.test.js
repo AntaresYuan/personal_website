@@ -1,7 +1,7 @@
 /* The routing eval: every case in routing-cases.json against the real
    ask-index.json (run after a build). It checks the skill each question
    reaches, the Work items it focuses on, the QA pair it uses, and that the
-   project skill reads its item's own passages first. Routing needs no
+   project-walkthrough reads its item's own passages first. Routing needs no
    model, so this runs offline on every change to skills, QA pairs or names. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ for (const c of cases) {
     assert.equal(route.skill, c.skill, `skill ${route.skill} (${route.reason}), expected ${c.skill}`);
     if (c.focus) assert.deepEqual(route.focus.map((e) => e.id), c.focus, 'focus');
     if (c.qa) assert.ok(route.faqs.some((f) => f.question.startsWith(c.qa)), `QA pair: got ${route.faqs.map((f) => f.question).join(' + ') || 'none'}`);
-    if (c.skill === 'project') {
+    if (c.skill === 'project-walkthrough') {
       for (const e of route.focus) assert.ok(plan.must.some((id) => id === e.chunkPrefix || id.startsWith(`${e.chunkPrefix}-`) || id.startsWith(`${e.chunkPrefix}#`)), `${e.id}'s passages are read first`);
     }
     pass++;

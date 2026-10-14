@@ -6,64 +6,83 @@ It answers a visitor's question **in the
 first person, as Antares** ("I built…"), grounded only in the site's own
 content, and **in the visitor's language** (Chinese question, Chinese answer).
 
-Every question goes to **one skill**. The router (`src/skills.js`) is plain
-code, with no model call, so each decision is fast, repeatable and tested.
-Each skill has its own system prompt, edited in the CMS under **Agent infra
-→ Skills**.
+## Agent infra: system prompt, skills, tools
 
-| Skill | When | Reads | Writes the answer |
+Everything the owner controls lives in `content/agent/`. It is edited in the CMS
+under **Agent infra**, has three modules, and reaches the Worker through
+`/ask-index.json`:
+
+```
+content/agent/
+  system-prompt.md              System prompt: who is speaking, the voice, the rules
+  knowledge.json                Background notes, sent with every model-written answer
+  skills/<name>/SKILL.md        one skill each (below)
+  skills/qa/pairs.json          the qa skill's QA pairs
+  tools/<name>.json             one tool each, with its settings
+```
+
+A **skill** is a SKILL.md:
+- frontmatter: `name`, `title`, `description` (when it is used), `tools` (the
+  tools it may call), `answer` (`model`, or `tool` for an answer straight
+  from a tool) and `enabled`;
+- body: its instructions.
+
+| Skill | When | Tools | Answer |
 |---|---|---|---|
-| `usage` | My own token usage ("how many tokens today / this month"), no Work item named | The live numbers, via the `USAGE` service binding | A fixed sentence; no model |
-| `qa` | One of the owner's QA pairs (Agent infra → QA pairs): its question or an alias, or, failing every other rule, the same meaning (bge-m3 ≥ 0.8) | The QA pair, the page it links to, a little of the rest | Model; the pair's answer leads |
-| `resources` | A request for a file or link: résumé, GitHub, "send me…", "where can I download…" | The exact cards from the resource catalogue | Model, one or two sentences |
-| `project` | A named Work item (project, AI skill, post, gallery piece), or a short follow-up to one | That item's own passages first, a little of the rest | Model, about that item |
-| `general` | Anything else | The best passages from the whole Work site | Model |
+| `token-usage` | My own token usage ("how many tokens today / this month"), no Work item named | get_token_usage, find_resources | A fixed sentence with the live number; no model |
+| `qa` | One of the QA pairs: its question or an alias, or, failing every other rule, the same meaning (bge-m3 ≥ 0.8) | search_work, find_resources | Model; the pair's answer leads |
+| `share-files` | A request for a file or link: résumé, GitHub, "send me…", "where can I download…" | find_resources | Model, one or two sentences about the cards |
+| `project-walkthrough` | A named Work item (project, AI skill, post, gallery piece), or a short follow-up to one | search_work, find_resources | Model; that item's passages first |
+| `general` | Anything else | search_work, find_resources | Model; whole-site retrieval |
 
-The router checks, in order:
-1. usage
+**Tools:**
+- `search_work`: the passage index (`scripts/build-ask-index.js`), built from
+  the Work case studies, AI Skills, Gallery and every Writing post. It holds
+  no Personal content, which the build and tests enforce. Its source switches
+  are in the tool's CMS entry. Passages are ranked by `@cf/baai/bge-m3`
+  (multilingual, so a Chinese question finds English passages) plus a TF-IDF
+  nudge toward exact names, within a character budget: about 12k for the Mac
+  and 9k for the cloud.
+- `find_resources`: exact URLs from the resource catalogue, returned as cards
+  and never written by a model. On/off and the most cards per answer.
+- `get_token_usage`: the `antares-usage` Worker through a fetch-only service
+  binding. On/off.
+
+A skill runs **only the tools its SKILL.md lists**. Without `search_work` it
+reads only the background notes. A skill switched off, or without the tool
+it can't work without (token-usage: get_token_usage; share-files:
+find_resources), is skipped; `general` is always there.
+
+**Who picks the skill.** The router (`src/skills.js`) is plain code, with no
+model call, so each decision is fast, repeatable and tested. A skill's
+`description` describes the router's rule; it doesn't change it. The router
+checks, in order:
+1. token-usage
 2. an exact QA pair
-3. resources
+3. share-files
 4. a named item
 5. a looser QA pair
 6. a follow-up
 7. general
 
 It reads the intent from the **current question only**, with item names taken
-out first. So "How does Kaboo measure token usage?" goes to project, not
-usage, and "/ai-pm-resume" isn't a résumé request. The names come from
-`ask-index.json → entities`, which `scripts/build-ask-index.js` builds from:
+out first. So "How does Kaboo measure token usage?" goes to
+project-walkthrough, and "/ai-pm-resume" isn't a résumé request. The names
+come from `ask-index.json → entities`, which the index build makes from:
 - project titles
-- AI skill names, plus a slash command's bare name ("devloop") unless it's an
-  everyday word
+- AI skill names, plus a slash command's bare name unless it's an everyday
+  word
 - post titles and their distinctive tail ("Toothpaste Squeezer")
 - gallery titles, in English and Chinese
 
-A skill switched off in the CMS is skipped (`general` is always on).
+**The prompt** (`src/lib.js → genPrompt`), in order:
+1. the system prompt
+2. the reply language, from the question
+3. `SKILL: <name>` with the skill's instructions, and `FOCUS:` naming the
+   item for project-walkthrough
+4. `CONTEXT`: tool results, the selected page text, QA pairs and passages
 
-**The system prompt** (`src/lib.js → genPrompt`) has three parts, in order:
-1. Who is speaking (Antares, first person) and the reply language.
-2. The skill's prompt from the CMS, with `FOCUS:` naming the item for
-   `project` (a one-line default when the CMS field is empty).
-3. The fixed hard rules, which hold whatever a skill prompt says: a QA pair
-   is never contradicted, every fact is grounded, nothing is invented, links
-   only as given, and selected page text is untrusted.
-
-The Response guide and Background knowledge from the CMS travel as pinned
-passages with every model-written answer.
-
-**The tools:**
-- *Work search*: the passage index, built by `scripts/build-ask-index.js`
-  from the Work case studies, AI Skills, Gallery and every Writing post. It
-  holds no Personal content, which the build and tests enforce. The sources
-  are switched in Agent infra → Tools. Passages are ranked by
-  `@cf/baai/bge-m3` (multilingual, so a Chinese question finds English
-  passages) plus a TF-IDF nudge toward exact names, within a character
-  budget: about 12k for the Mac and 9k for the cloud.
-- *Files & links*: exact URLs from the resource catalogue, returned as cards
-  and never written by a model. On/off and the most cards per answer are in
-  Agent infra → Tools.
-- *Live token usage*: the `antares-usage` Worker through a fetch-only service
-  binding.
+The fact-check prompt for the cloud's second pass stays in code.
 
 **Answering:**
 1. **From the Mac**, if `LOCAL_LLM_URL` is set. This is a Cloudflare Tunnel,
@@ -104,7 +123,7 @@ in the right-hand panel. Personal never loads this cache module.
 
 If `content/site.json` → `qa.workerUrl` is empty (or the Worker can't be
 reached), the Ask panel falls back to the same QA pairs, compiled from
-`content/assistant/faqs.json` into `scripts/qa-faq-data.js`.
+`content/agent/skills/qa/pairs.json` into `scripts/qa-faq-data.js`.
 
 ## Deploy
 
@@ -152,12 +171,13 @@ History is capped at the last 8 turns; each turn at 600 characters.
 
 ## Notes / knobs
 
-- **Change how a kind of question is answered** in the CMS: Agent infra →
-  Skills (each skill's system prompt and switch), QA pairs, Background
-  knowledge, Tools. The hard rules and the routing live in code
-  (`src/lib.js → genPrompt`, `src/skills.js`).
-- **Recurring answers belong in QA pairs.** Write the answer and likely
-  English and Chinese aliases; an exact alias always reaches the pair.
+- **Change how a kind of question is answered** in the CMS, under Agent
+  infra: the System prompt, a skill's SKILL.md (instructions, tools,
+  switch), the qa skill's QA pairs, a tool's settings. When a skill is
+  chosen is decided in `src/skills.js`.
+- **Recurring answers belong in QA pairs** (Skills → qa — QA pairs). Write the
+  answer and likely English and Chinese aliases; an exact alias always
+  reaches the pair.
 - **Routing eval**: `test/routing-cases.json` lists bilingual questions with
   the skill, focus and QA pair each must reach; `test/routing.test.js` runs
   them against the built `ask-index.json`. Add a case for every routing bug.

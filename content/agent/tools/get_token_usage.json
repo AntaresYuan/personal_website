@@ -1,0 +1,6 @@
+{
+  "name": "get_token_usage",
+  "title": "Token 用量",
+  "description": "通过 usage Worker 读取实时的 token 用量（今天、本月、最近 30 天、总共）。关掉后，查用量 skill 也会停用，token 相关的问题改由网站内容回答。",
+  "enabled": true
+}

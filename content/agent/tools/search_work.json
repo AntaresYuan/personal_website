@@ -1,0 +1,14 @@
+{
+  "name": "search_work",
+  "title": "Work 搜索",
+  "description": "在 Work 网站的内容（项目案例、AI Skills、作品集、文章）里找和问题最相关的段落，交给模型作为依据。Personal 空间的内容永远不会被读到。下面的开关决定它能读哪些内容。",
+  "sources": {
+    "llmsSummary": true,
+    "profile": true,
+    "home": true,
+    "projects": true,
+    "skills": true,
+    "writing": true,
+    "gallery": true
+  }
+}

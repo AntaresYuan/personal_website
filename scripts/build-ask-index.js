@@ -4,19 +4,20 @@
 
    The site cut into short, titled passages, so the qa Worker (workers/qa/)
    can pick the few that answer a question instead of truncating the whole
-   site to its first few thousand words. Two kinds of passage are `pin`ned —
-   sent with every question — : the guide and notes Antares manages in
-   content/assistant/, plus an overview of the enabled website sources.
+   site to its first few thousand words. Some passages are `pin`ned, sent
+   with every model-written answer: the background notes (CMS → Agent infra
+   → System prompt), the llms.txt summary and an overview of the Work site.
 
    Public content is Work-only: home, case studies, AI Skills, Gallery and
    Writing. Personal roadmap, Lens and Contact content are never indexed.
-   Owner-authored Agent infra (guide, QA pairs, knowledge) is added
-   separately, and so is what the Worker routes with:
+   The Agent infra (content/agent/, scripts/lib/agent.js) comes along too:
+     - systemPrompt: the system prompt, sent with every answer;
+     - skills: each SKILL.md (title, description, tools, answer, enabled and
+       its instructions); faqs: the qa skill's QA pairs;
+     - tools: each tool's switch and settings;
      - entities: every named Work item (project, AI skill, post, gallery
        piece) with the names a visitor may use for it, the passages that are
-       its own, and its page in the resource catalogue;
-     - skills: each skill's switch and system prompt (CMS → Agent infra →
-       Skills); tools: the tool settings (CMS → Agent infra → Tools).
+       its own, and its page in the resource catalogue.
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
@@ -24,7 +25,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { loadPosts } = require('./lib/blog');
 const { projectList } = require('./lib/projects');
-const { loadAssistant } = require('./lib/assistant');
+const { loadAgent } = require('./lib/agent');
 const { content, t } = require('./lib/i18n');
 
 const root = path.join(__dirname, '..');
@@ -37,7 +38,7 @@ const tryReadText = (p, fallback = '') => {
 
 const profile = read('content/profile.json');
 const work = read('content/work.json');
-const assistant = loadAssistant(root);
+const assistant = loadAgent(root);
 const skills = tryRead('content/skills.json', { items: [] });
 const gallery = tryRead('content/gallery.json', { items: [] });
 const zhSkills = tryRead('content/zh/skills.json', { items: [] });
@@ -60,9 +61,8 @@ const plain = (s) => String(s ?? '')
   .replace(/\n{3,}/g, '\n\n')
   .trim();
 
-// FAQ answer briefs stay separate from ordinary passages. The Worker first
-// performs a deterministic question/alias match, then places the matching
-// brief ahead of the normal site retrieval context.
+// The qa skill's QA pairs stay separate from ordinary passages: the Worker
+// matches them itself, then places the matching answer ahead of the rest.
 const faqs = (assistant.faqs ?? []).filter((item) => item && item.enabled !== false).map((item, index) => ({
   id: `faq-${index + 1}`,
   question: String(item.question || '').trim(),
@@ -188,16 +188,7 @@ if (profile.resumeZh) addResource({
   id: `file-${id}`, kind: id === 'source' ? 'link' : 'data', title, url, description, keywords,
 }));
 
-/* ── Pinned: the owner's guide, llms.txt summary, notes, and overview ─ */
-const guide = assistant.guidance ?? {};
-const guideText = [
-  guide.identity ? `Identity: ${guide.identity}` : '',
-  guide.voice ? `Voice and style: ${guide.voice}` : '',
-  guide.whenMissing ? `When information is missing: ${guide.whenMissing}` : '',
-  guide.additional ? `Additional guidance: ${guide.additional}` : '',
-].filter(Boolean).join('\n\n');
-if (guideText) add('assistant-guide', 'Assistant response guide', '', guideText, true);
-
+/* ── Pinned: background notes, the llms.txt summary, and an overview ─── */
 // /llms.txt is the concise, agent-readable summary of the public site. Keep
 // it visible as an explicit Assistant source and send it with every answer
 // when enabled. /llms-full.txt remains the Worker's safety fallback if this
@@ -349,23 +340,22 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
 }
 /* ── Write ────────────────────────────────────────────────────────────── */
 /* ── Skills and tools, as the Worker needs them ───────────────────────── */
-const SKILL_IDS = ['project', 'qa', 'resources', 'usage', 'general'];
-const skillsOut = Object.fromEntries(SKILL_IDS.map((id) => {
-  const cfg = assistant.skills?.[id] ?? {};
-  return [id, {
-    enabled: id === 'general' ? true : cfg.enabled !== false,
-    ...(String(cfg.prompt || '').trim() ? { prompt: String(cfg.prompt).trim() } : {}),
-  }];
-}));
+const skillsOut = Object.fromEntries(Object.values(assistant.skills).map((s) => [s.name, {
+  title: s.title, description: s.description, tools: s.tools, answer: s.answer,
+  enabled: s.name === 'general' ? true : s.enabled, prompt: s.prompt,
+}]));
 const toolsOut = {
-  resources: {
-    enabled: assistant.tools?.resources?.enabled !== false,
-    maxCards: Math.max(1, Math.min(5, Number(assistant.tools?.resources?.maxCards) || 3)),
+  search_work: { enabled: true },
+  find_resources: {
+    enabled: assistant.tools.find_resources?.enabled !== false,
+    maxCards: Math.max(1, Math.min(5, Number(assistant.tools.find_resources?.maxCards) || 3)),
   },
+  get_token_usage: { enabled: assistant.tools.get_token_usage?.enabled !== false },
 };
+const systemPrompt = assistant.systemPrompt;
 
-const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks, resources, entities, skillsOut, toolsOut })).digest('hex').slice(0, 12);
-const out = { version, skills: skillsOut, tools: toolsOut, faqs, entities, resources, chunks };
+const version = crypto.createHash('sha1').update(JSON.stringify({ systemPrompt, faqs, chunks, resources, entities, skillsOut, toolsOut })).digest('hex').slice(0, 12);
+const out = { version, systemPrompt, skills: skillsOut, tools: toolsOut, faqs, entities, resources, chunks };
 fs.writeFileSync(path.join(root, 'ask-index.json'), JSON.stringify(out) + '\n');
 const pinned = chunks.filter((c) => c.pin).length;
 console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} QA pairs, ${entities.length} entities, ${resources.length} resources, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);
