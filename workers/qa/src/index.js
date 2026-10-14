@@ -491,10 +491,14 @@ async function answerWithAgent(p) {
     if (tool === 'find_resources') {
       if (index.tools?.find_resources?.enabled === false) return { note: 'this tool is switched off', cards: [] };
       const requestedQuery = String(args.query || currentQuery).slice(0, 300);
-      let cards = findResources(index.resources, requestedQuery, lang, maxCards, { explicit: true });
+      // Loading a tool does not mean the visitor asked for links. Outside
+      // share-files, let the visitor's words decide whether this is an
+      // explicit resource request; named items still receive their own card.
+      const explicit = skill?.name === 'share-files';
+      let cards = findResources(index.resources, requestedQuery, lang, maxCards, { explicit });
       let retried = false;
       if (!cards.length && requestedQuery !== currentQuery) {
-        cards = findResources(index.resources, currentQuery, lang, maxCards, { explicit: true });
+        cards = findResources(index.resources, currentQuery, lang, maxCards, { explicit });
         retried = true;
       }
       const retryNote = retried ? ' after retrying with the visitor\'s wording' : '';

@@ -45,6 +45,16 @@ const PLANNER = 'You plan how to answer';
    then calls that skill's tools once, then answers. */
 const plan = (system, user) => {
   if (planner === 'prose') return 'I would use the project skill here.';
+  if (planner === 'broad-project') {
+    if (!/LOADED SKILL: (\S+)/.test(system)) {
+      return JSON.stringify({ actions: [{ tool: 'load_skill', args: { name: 'project-walkthrough' } }] });
+    }
+    if (/DONE SO FAR[\s\S]*\n\d\. (search_work|find_resources) /.test(user)) return '{"answer": true}';
+    return JSON.stringify({ actions: [
+      { tool: 'search_work', args: { query: 'interesting project problem built role results', item: 'most mature project' } },
+      { tool: 'find_resources', args: { query: 'project page' } },
+    ] });
+  }
   if (planner === 'bad-resume') {
     if (!/LOADED SKILL: (\S+)/.test(system)) {
       return JSON.stringify({ actions: [{ tool: 'share_files', args: { query: 'career document' } }] });
@@ -428,6 +438,14 @@ await t('agent: the model loads project-walkthrough for Kaboo and calls its tool
     assert.ok(Number.isInteger(saved.timings[field]) && saved.timings[field] >= 0, `missing timing ${field}`);
   }
   assert.ok(saved.agent.steps.every((step) => Number.isInteger(step.durationMs) && step.durationMs >= 0));
+});
+await t('agent: a broad project answer does not turn a tool call into unrelated cards', async () => {
+  planner = 'broad-project';
+  const r = await askAgent('讲一个有意思的项目 你做过的');
+  planner = 'smart';
+  assert.equal(r.body.skill, 'project-walkthrough');
+  assert.ok(r.body.tools.includes('find_resources'));
+  assert.deepEqual(r.body.resources, []);
 });
 await t('agent: share-files gets cards and reads no site passages', async () => {
   const beforeLocal = localCalls;
