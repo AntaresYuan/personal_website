@@ -132,6 +132,7 @@
         "local": "Local · {model}",
         "cloud": "Cloud · Workers AI",
         "tool": "Live data · usage tool",
+        "ui": "Interactive · A2UI",
         "offline": "Built-in FAQ · no model",
         "model": "Model: {model}"
       },
@@ -143,6 +144,13 @@
         "aria": "Related files and links",
         "link": "Link",
         "image": "Image"
+      },
+      "ui": {
+        "kicker": "Interactive",
+        "submit": "Continue",
+        "confirm": "Confirm",
+        "cancel": "Not now",
+        "submitted": "Submitted"
       }
     }
   }

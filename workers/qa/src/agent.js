@@ -22,13 +22,14 @@
 
 export const MAX_STEPS = 3;            // planning calls before answering anyway
 export const MAX_ACTIONS = 3;          // tool calls per step
-export const TOOL_NAMES = ['search_work', 'find_resources', 'get_token_usage'];
+export const TOOL_NAMES = ['search_work', 'find_resources', 'get_token_usage', 'render_ui'];
 
 const TOOL_HELP = {
   load_skill: '{"name": "<skill>"} — read a skill\'s instructions. Always the first step.',
   search_work: '{"query": "<what to look for>", "item": "<optional: the project, AI skill, post or gallery piece it is about>"} — find passages on the Work site.',
   find_resources: '{"query": "<the file or link>"} — find exact files and links (résumé, project page, GitHub, paper, demo). They are shown to the visitor as cards.',
   get_token_usage: '{"window": "today" | "month" | "last30" | "total"} — my live token usage numbers.',
+  render_ui: '{"type":"choice|form|confirm|resource","title":"…",…} — return one validated interactive card when a decision or input is genuinely required. Never write HTML.',
 };
 
 /* The planner's system prompt: who it works for, the skills to choose
@@ -53,6 +54,7 @@ Reply with ONE JSON object and nothing else:
 Examples:
 {"actions": [{"tool": "load_skill", "args": {"name": "project-walkthrough"}}]}
 {"actions": [{"tool": "search_work", "args": {"query": "Kaboo results and metrics", "item": "Kaboo"}}, {"tool": "find_resources", "args": {"query": "Kaboo"}}]}
+{"actions": [{"tool": "render_ui", "args": {"type": "choice", "title": "Which version?", "message": "Choose one so I can continue.", "options": [{"id":"en","label":"English"},{"id":"zh","label":"Chinese"}]}}]}
 {"answer": true}`;
 }
 
@@ -145,6 +147,7 @@ export async function runAgent({ turns, catalog, systemPrompt, callModel, runToo
     }
 
     const notes = [];
+    let terminal = null;
     for (const action of plan.actions) {
       if (action.tool === 'load_skill') {
         const name = String(action.args.name || action.args.skill || '').trim();
@@ -164,8 +167,10 @@ export async function runAgent({ turns, catalog, systemPrompt, callModel, runToo
       const result = await runTool(action.tool, action.args, loaded);
       results.push({ tool: action.tool, args: action.args, durationMs: Date.now() - toolStarted, ...result });
       notes.push(`${action.tool} ${JSON.stringify(action.args)} → ${result.note}`);
+      if (result.terminal === true) terminal = result;
     }
     steps.push({ ...record, actions: plan.actions, note: notes.join('\n   ') });
+    if (terminal) return { ok: true, skill: loaded, steps, results, terminal };
   }
   // Out of steps: answer with what there is, if a skill was loaded.
   return loaded ? { ok: true, skill: loaded, steps, results, reason: 'step limit' } : { ok: false, reason: 'no skill loaded', skill: null, steps, results };

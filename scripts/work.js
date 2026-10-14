@@ -644,6 +644,7 @@
       local: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.25" y="2.5" width="11.5" height="8" rx="1.5"/><path d="M1.5 13h13"/></svg>',
       cloud: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.1 12.25h6.2a2.45 2.45 0 0 0 .35-4.88A4 4 0 0 0 4 6.25v.1a3 3 0 0 0 1.1 5.9Z"/></svg>',
       tool: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4 11V8.5M8 11V4.5M12 11V6.5"/></svg>',
+      ui: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="2"/><path d="M5 6h6M5 9h3"/></svg>',
       offline: '<svg class="ask-source-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3z"/><path d="M10 2.5v3h3M5.5 9h5M5.5 11.5h3.5"/></svg>'
     };
     var setSource = function (source, model) {
@@ -654,6 +655,7 @@
         local: T('ask.source.local', 'Local \u00b7 {model}', { model: model || 'Ollama' }),
         cloud: T('ask.source.cloud', 'Cloud \u00b7 Workers AI'),
         tool: T('ask.source.tool', 'Live data \u00b7 usage tool'),
+        ui: T('ask.source.ui', 'Interactive \u00b7 A2UI'),
         offline: T('ask.source.offline', 'Built-in FAQ \u00b7 no model')
       };
       sourceEl.setAttribute('data-source', source);
@@ -666,7 +668,7 @@
         if (convo[i].role === 'assistant') { last = convo[i]; break; }
       }
       if (last && (last.via === 'local' || last.via === 'cloud' || last.via === 'tool' || last.via === 'offline')) {
-        setSource(last.via, last.model || '');
+        setSource(last.via === 'tool' && last.model === 'render_ui' ? 'ui' : last.via, last.model || '');
       } else {
         setSource('idle');
       }
@@ -725,11 +727,25 @@
               image: T('ask.resources.image', 'Image')
             })
           : '';
+        var ui = renderer && typeof renderer.ui === 'function'
+          ? renderer.ui(m.ui, {
+              kicker: T('ask.ui.kicker', 'Interactive'),
+              submit: T('ask.ui.submit', 'Continue'),
+              confirm: T('ask.ui.confirm', 'Confirm'),
+              cancel: T('ask.ui.cancel', 'Not now'),
+              submitted: T('ask.ui.submitted', 'Submitted'),
+              resources: {
+                aria: T('ask.resources.aria', 'Related files and links'),
+                link: T('ask.resources.link', 'Link'),
+                image: T('ask.resources.image', 'Image')
+              }
+            })
+          : '';
         var trace = m.traceId ? '<button class="ask-trace" type="button" data-trace="' + escape(m.traceId) + '" title="' +
           escape(T('ask.trace.copy', 'Copy Query ID {id}', { id: m.traceId })) + '" aria-label="' +
           escape(T('ask.trace.copy', 'Copy Query ID {id}', { id: m.traceId })) + '"><span>' + escape(m.traceId) +
           '</span><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.25" y="5.25" width="7.25" height="7.25" rx="1.25"/><path d="M3.5 10.5V4.75c0-.7.55-1.25 1.25-1.25h5.75"/></svg></button>' : '';
-        return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + trace + '</div>';
+        return '<div class="msg msg-bot"><div class="msg-body">' + body + '</div>' + resources + ui + trace + '</div>';
       }).join('');
       var alreadyPending = convo.some(function (message) { return message.role === 'assistant' && message.pending; });
       if (pending && !alreadyPending) {
@@ -818,7 +834,7 @@
       });
     };
 
-    var ask$ = function (raw) {
+    var ask$ = function (raw, opts) {
       var q = String(raw || '').trim().slice(0, 500);
       if (!q || busy) return;
       convo.push({ role: 'user', content: q });
@@ -828,7 +844,8 @@
       var requestMessages = convo.map(function (message) {
         return { role: message.role, content: message.content };
       });
-      var responseMessage = { role: 'assistant', content: '', pending: true, resources: [], traceId: '' };
+      var interaction = opts && opts.interaction ? opts.interaction : null;
+      var responseMessage = { role: 'assistant', content: '', pending: true, resources: [], ui: [], traceId: '' };
       convo.push(responseMessage);
       input.value = '';
       pInput.value = '';
@@ -851,14 +868,15 @@
       var applySource = function (via, model) {
         if (via === 'local') setSource('local', model);
         else if (via === 'cloud') setSource('cloud', model);
-        else if (via === 'tool') setSource('tool', model);
+        else if (via === 'tool') setSource(model === 'render_ui' ? 'ui' : 'tool', model);
       };
 
       var post = function (stream) {
         return fetch(qaUrl, {
           method: 'POST',
           headers: { 'content-type': 'application/json', accept: 'application/x-ndjson, application/json' },
-          body: JSON.stringify({ q: q, messages: requestMessages, lang: document.documentElement.lang || 'en', stream: stream }),
+          body: JSON.stringify({ q: q, messages: requestMessages, lang: document.documentElement.lang || 'en', stream: stream,
+            interaction: interaction || undefined }),
           // Once tokens are visible a longer ceiling is safe; this also
           // leaves room for a cold local model or the cloud fallback.
           signal: timeout(90000),
@@ -869,6 +887,7 @@
           if (r.ok && d && d.answer) return {
             answer: String(d.answer), via: d.via, model: d.model,
             resources: Array.isArray(d.resources) ? d.resources : [],
+            ui: Array.isArray(d.ui) ? d.ui : [],
             tools: Array.isArray(d.tools) ? d.tools : [],
             traceId: String(d.traceId || '')
           };
@@ -888,6 +907,7 @@
               responseMessage.via = partial.via;
               responseMessage.model = partial.model;
               responseMessage.resources = partial.resources;
+              responseMessage.ui = partial.ui;
               responseMessage.traceId = partial.traceId;
               applySource(partial.via, partial.model);
               renderStream();
@@ -905,6 +925,7 @@
         var via = res && res.via;
         var model = res && res.model ? String(res.model) : '';
         var resources = res && Array.isArray(res.resources) ? res.resources : [];
+        var ui = res && Array.isArray(res.ui) ? res.ui : [];
         var traceId = res && res.traceId ? String(res.traceId) : '';
         if (via === 'local' || via === 'cloud' || via === 'tool') applySource(via, model);
         else setSource('offline');
@@ -912,6 +933,7 @@
         responseMessage.via = via;
         responseMessage.model = model;
         responseMessage.resources = resources;
+        responseMessage.ui = ui;
         responseMessage.traceId = traceId;
         responseMessage.pending = false;
         saveHistory();
@@ -968,6 +990,63 @@
         var c = ev.target.closest('.ask-chip');
         if (c) ask$(c.getAttribute('data-q'));
       });
+    });
+    log.addEventListener('submit', function (ev) {
+      var a2uiForm = ev.target.closest('[data-a2ui-submit]');
+      if (!a2uiForm || busy) return;
+      ev.preventDefault();
+      var cardEl = a2uiForm.closest('[data-a2ui-card]');
+      if (!cardEl) return;
+      var cardId = cardEl.getAttribute('data-a2ui-card') || '';
+      var type = cardEl.getAttribute('data-a2ui-type') || '';
+      var cardTitle = cardEl.getAttribute('data-a2ui-title') || '';
+      var action = ev.submitter && ev.submitter.name === 'a2ui-action' ? ev.submitter.value : 'submit';
+      var values = {};
+      new FormData(a2uiForm).forEach(function (value, key) {
+        if (key === 'a2ui-action') return;
+        if (Object.prototype.hasOwnProperty.call(values, key)) {
+          if (!Array.isArray(values[key])) values[key] = [values[key]];
+          values[key].push(String(value));
+        } else values[key] = String(value);
+      });
+      if (type === 'choice' && !values.selection) {
+        var firstChoice = a2uiForm.querySelector('input[name="selection"]');
+        if (firstChoice) firstChoice.focus();
+        return;
+      }
+
+      var card = null;
+      for (var i = convo.length - 1; i >= 0 && !card; i--) {
+        var list = Array.isArray(convo[i].ui) ? convo[i].ui : [];
+        for (var j = 0; j < list.length; j++) if (list[j].id === cardId) { card = list[j]; break; }
+      }
+      var summary = '';
+      if (type === 'choice' && card) {
+        var selected = Array.isArray(values.selection) ? values.selection : [values.selection];
+        var labels = selected.map(function (selectedId) {
+          var option = (card.options || []).filter(function (item) { return item.id === selectedId; })[0];
+          return option ? option.label : selectedId;
+        });
+        summary = labels.join(', ');
+      } else if (type === 'form' && card) {
+        summary = (card.fields || []).map(function (field) {
+          var value = values[field.name];
+          if (value == null || value === '') return '';
+          if (field.type === 'select') {
+            var option = (field.options || []).filter(function (item) { return item.id === value; })[0];
+            value = option ? option.label : value;
+          }
+          return field.label + ': ' + value;
+        }).filter(Boolean).join('\n');
+      } else if (type === 'confirm') {
+        summary = action === 'confirm'
+          ? (card && card.confirmLabel) || T('ask.ui.confirm', 'Confirm')
+          : (card && card.cancelLabel) || T('ask.ui.cancel', 'Not now');
+      }
+      if (!summary) summary = T('ask.ui.submitted', 'Submitted');
+      if (card) { card.submitted = true; card.summary = summary; }
+      saveHistory();
+      ask$(summary, { interaction: { cardId: cardId, type: type, action: action, title: cardTitle, values: values, summary: summary } });
     });
     $('ask-close').addEventListener('click', closePanel);
     $('ask-new').addEventListener('click', function () {

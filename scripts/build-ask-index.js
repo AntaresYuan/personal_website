@@ -351,6 +351,11 @@ const toolsOut = {
     maxCards: Math.max(1, Math.min(5, Number(assistant.tools.find_resources?.maxCards) || 3)),
   },
   get_token_usage: { enabled: assistant.tools.get_token_usage?.enabled !== false },
+  render_ui: {
+    enabled: assistant.tools.render_ui?.enabled !== false,
+    maxOptions: Math.max(2, Math.min(8, Number(assistant.tools.render_ui?.maxOptions) || 6)),
+    maxFields: Math.max(1, Math.min(6, Number(assistant.tools.render_ui?.maxFields) || 4)),
+  },
 };
 const systemPrompt = assistant.systemPrompt;
 

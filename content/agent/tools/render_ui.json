@@ -1,0 +1,8 @@
+{
+  "name": "render_ui",
+  "title": "A2UI 交互卡片",
+  "description": "把模型给出的受限 JSON 渲染成选择、表单、确认或资源卡片。模型不能输出 HTML，也不能自己填写资源 URL；访客提交后会作为下一轮结构化输入返回。",
+  "enabled": true,
+  "maxOptions": 6,
+  "maxFields": 4
+}

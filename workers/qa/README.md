@@ -34,6 +34,7 @@ A **skill** is a SKILL.md:
 | `project-walkthrough` | A specific project, AI skill, post or gallery piece, named or followed up on | search_work, find_resources |
 | `share-files` | A file or link: résumé, GitHub, paper, demo | find_resources |
 | `token-usage` | My own token usage (not how a project analyses tokens) | get_token_usage, find_resources |
+| `a2ui` | A missing decision, confirmation or input that genuinely blocks a useful answer | render_ui |
 | `general` | Anything else, and questions about me | search_work, find_resources |
 
 **Tools:**
@@ -52,6 +53,11 @@ A **skill** is a SKILL.md:
 - `get_token_usage {window}`: today, this month, the last 30 days or the
   total, from the `antares-usage` Worker through a fetch-only service binding.
   On/off.
+- `render_ui {type, title, …}`: a validated A2UI card. Supported types are
+  `choice`, `form`, `confirm` and `resource`. The model returns data, never
+  HTML; resource URLs are resolved from the Work catalogue. A successful card
+  ends the turn immediately, and its submission returns as structured input
+  on the next turn. The CMS controls the switch and card-size limits.
 
 ## The agent
 
@@ -73,6 +79,10 @@ answer  system prompt + reply language + SKILL: the loaded skill's
         instructions (+ FOCUS) + CONTEXT: the background notes, the qa
         skill's QA pairs, and everything the tools returned  (streamed)
 ```
+
+The `a2ui` path normally ends after step 2: once `render_ui` returns a valid
+card, the Worker sends it directly instead of spending another planner call
+and an answer-generation call on an introduction sentence.
 
 - **Limits.** At most 3 planning steps (each at most 250 tokens) and 3 tool
   calls per step.
@@ -129,6 +139,9 @@ stores no IP. It holds:
   engine, its reply and what the Worker did with it) or, on a fallback, the
   fixed pipeline's rule, focus and QA pair
 - the tools, the resources and the passages
+- A2UI card metadata and, on the following query, the submitted card ID,
+  action and field names. Interaction metadata does not duplicate field
+  values.
 - per-query latency under `timings`: end-to-end, index load, Agent loop,
   planning-model calls, tool calls and final answer generation; streaming
   answers also include time to first token. Cloud answers split draft and
@@ -195,6 +208,14 @@ Content-Type: application/json
   ],
   "lang": "en" }                       # the page's language; used only when the question has no letters
 
+# An A2UI submission adds a bounded interaction object. `messages` still
+# contains the human-readable user bubble.
+{ "messages": [ …, { "role": "user", "content": "English" } ],
+  "interaction": {
+    "cardId": "AQ-20261013-12AB34CD-UI1", "type": "choice", "action": "submit",
+    "title": "Which version?", "values": { "selection": "en" }, "summary": "English"
+  } }
+
 # or a single question: { "q": "what's Kaboo?" }
 
 → 200  { "answer": "…", "model": "qwen3.5:4b", "via": "local", "verified": false, "skill": "resources",
@@ -206,6 +227,10 @@ Content-Type: application/json
 → 200  { "answer": "Today (…), I used … tokens…", "model": "get_token_usage", "via": "tool", "verified": true, "skill": "usage",
          "resources": [{ "kind": "page", "url": "/usage/" }],
          "tools": ["find_work_resources", "get_token_usage"], "traceId": "AQ-20261013-90AB12CD" }
+→ 200  { "answer": "Choose one so I can continue.", "model": "render_ui", "via": "tool", "verified": true, "skill": "a2ui",
+         "ui": [{ "version": 1, "id": "AQ-…-UI1", "type": "choice", "title": "Which version?",
+                  "options": [{ "id": "en", "label": "English" }, { "id": "zh", "label": "Chinese" }] }],
+         "tools": ["load_skill", "render_ui"], "traceId": "AQ-20261013-12AB34CD" }
 → 4xx/5xx  { "error": "…", "detail"?: "…" }
 ```
 
@@ -236,4 +261,4 @@ History is capped at the last 8 turns; each turn at 600 characters.
   block in `wrangler.toml` and redeploy.
 - **When the index is missing**, the Worker grounds in the first part of
   `/llms-full.txt`, the old behaviour.
-- **Tests**: `node workers/qa/test/lib.test.js && node workers/qa/test/worker.test.js && node workers/qa/test/agent.test.js && node workers/qa/test/routing.test.js` (the last after a build). The agent's tests use a scripted model.
+- **Tests**: `node workers/qa/test/lib.test.js && node workers/qa/test/a2ui.test.js && node workers/qa/test/worker.test.js && node workers/qa/test/agent.test.js && node workers/qa/test/routing.test.js` (the last after a build). The agent's tests use a scripted model.

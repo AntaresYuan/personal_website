@@ -25,7 +25,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 import { scoreFaqs, wantsUsage } from './lib.js';
 
-export const SKILL_IDS = ['token-usage', 'qa', 'share-files', 'project-walkthrough', 'general'];
+export const SKILL_IDS = ['token-usage', 'qa', 'share-files', 'project-walkthrough', 'a2ui', 'general'];
 
 /* ── Named Work items ─────────────────────────────────────────────────── */
 const norm = (s) => String(s || '').normalize('NFKC').toLowerCase();
@@ -128,7 +128,7 @@ export function usesTool(index, id, tool) {
 // The tool a skill can't work without: token-usage answers from the live
 // numbers, share-files hands over the cards. The others still answer from
 // whatever their tools find.
-const REQUIRED_TOOL = { 'token-usage': 'get_token_usage', 'share-files': 'find_resources' };
+const REQUIRED_TOOL = { 'token-usage': 'get_token_usage', 'share-files': 'find_resources', a2ui: 'render_ui' };
 // Switched on, with the tool it needs (general always is).
 export function skillAvailable(index, id) {
   if (id === 'general') return true;

@@ -3,7 +3,7 @@
 
    POST /  { "messages": [{role, content}, …] } or { "q": "…" }, + "lang"?,
            + "stream"? (NDJSON from the Mac), + "context"? (selected page text)
-   →  { answer, model, via, verified, skill, resources, tools, traceId }
+   →  { answer, model, via, verified, skill, resources, ui, tools, traceId }
    →  { error, detail? }                                        on failure
 
    1. LOAD /ask-index.json: the Agent infra (CMS → Agent infra: the system
@@ -39,6 +39,7 @@ import {
 } from './lib.js';
 import { routeQuestion, planFor, skillPrompt, skillAvailable, usesTool, detectEntities, ownChunk } from './skills.js';
 import { runAgent } from './agent.js';
+import { createA2uiCard, parseA2uiInteraction, interactionText } from './a2ui.js';
 
 const SITE = 'https://antaresyuan.site';
 // Version the cache key when the corpus shape changes. The short TTL keeps a
@@ -475,6 +476,7 @@ async function answerWithAgent(p) {
     };
   };
   const given = new Set();
+  let uiCount = 0;
   const runTool = async (tool, args) => {
     if (tool === 'search_work') return searchWork(env, ctx, index, String(args.query || currentQuery).slice(0, 300), String(args.item || ''), given);
     if (tool === 'find_resources') {
@@ -488,6 +490,16 @@ async function answerWithAgent(p) {
       return usage
         ? { note: usageAnswer(usage, WINDOW_TEXT[window], 'en'), usage, window }
         : { note: 'the live numbers are unavailable right now', usage: null, window };
+    }
+    if (tool === 'render_ui') {
+      if (index.tools?.render_ui?.enabled === false) return { note: 'this tool is switched off' };
+      const built = createA2uiCard(args, {
+        cardId: `${id}-UI${++uiCount}`,
+        limits: index.tools?.render_ui,
+        resolveResources: (query) => findResources(index.resources, query, lang, maxCards, { explicit: true }),
+      });
+      if (built.error) return { note: `invalid card: ${built.error}` };
+      return { note: `${built.card.type} card ${built.card.id} is ready`, ui: built.card, message: built.message, terminal: true };
     }
     return { note: 'unknown tool' };
   };
@@ -524,11 +536,28 @@ async function answerWithAgent(p) {
   const usageResult = [...agent.results].reverse().find((r) => r.tool === 'get_token_usage');
   const focus = [...new Map(searches.map((r) => r.item).filter(Boolean).map((e) => [e.id, e])).values()];
   const tools = ['load_skill', ...new Set(agent.results.map((r) => r.tool))];
+  const uiResult = [...agent.results].reverse().find((r) => r.tool === 'render_ui' && r.ui);
   trajectory.skill = { id: loaded.name, reason: 'chosen by the model', focus: focus.map((e) => e.id) };
   trajectory.tools = tools;
-  trajectory.resources = cards.map(({ kind, title, url }) => ({ kind, title, url }));
+  const uiResources = uiResult?.ui?.resources || [];
+  trajectory.resources = [...cards, ...uiResources].map(({ kind, title, url }) => ({ kind, title, url }));
   trajectory.passages = passages.map((c) => ({ id: c.id, title: c.title, url: c.url || '' }));
-  const extra = { skill: loaded.name, resources: cards, tools };
+  if (uiResult) trajectory.ui = {
+    id: uiResult.ui.id, type: uiResult.ui.type, title: uiResult.ui.title,
+    options: uiResult.ui.options?.length || 0, fields: uiResult.ui.fields?.map((field) => field.name) || [],
+  };
+  const extra = { skill: loaded.name, resources: cards, ...(uiResult ? { ui: [uiResult.ui] } : {}), tools };
+
+  // A validated A2UI call is the answer for this turn. Ending here avoids a
+  // third planning call and a separate generation call just to introduce the
+  // card; the visitor's submission becomes the next turn.
+  if (uiResult) {
+    trajectory.timings.answerMs = 0;
+    return finish({
+      answer: uiResult.message || uiResult.ui.body || uiResult.ui.title,
+      model: 'render_ui', via: 'tool', verified: true, ...extra,
+    });
+  }
 
   // Live numbers that couldn't be read: say so, never a guess.
   if (usageResult && !usageResult.usage) {
@@ -617,9 +646,13 @@ export default {
 
     let body;
     try { body = await request.json(); } catch { return reply({ error: 'invalid JSON body' }, 400, ch); }
-    const turns = normTurns(body);
-    if (!turns.length) return reply({ error: 'no question — send { "q": "…" } or a "messages" array ending with a user turn' }, 400, ch);
-    const currentQuery = turns[turns.length - 1].content;
+    const visibleTurns = normTurns(body);
+    if (!visibleTurns.length) return reply({ error: 'no question — send { "q": "…" } or a "messages" array ending with a user turn' }, 400, ch);
+    const interaction = parseA2uiInteraction(body.interaction);
+    const turns = visibleTurns.map((turn, index) => index === visibleTurns.length - 1 && interaction
+      ? { ...turn, content: `${turn.content}\n\n${interactionText(interaction)}` }
+      : turn);
+    const currentQuery = visibleTurns[visibleTurns.length - 1].content;
     const lang = replyLang(currentQuery, body.lang);
     const query = searchText(turns);
     const id = makeTraceId();
@@ -636,6 +669,7 @@ export default {
       faqs: [],
       passages: [],
       timings: {},
+      ...(interaction ? { interaction: interaction.trace } : {}),
     };
     const completeTimings = (extra = {}) => {
       Object.assign(trajectory.timings, extra);

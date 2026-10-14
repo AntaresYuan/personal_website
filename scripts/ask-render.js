@@ -101,5 +101,73 @@
     return cards ? '<div class="ask-resources" aria-label="' + escape(labels.aria || 'Related resources') + '">' + cards + '</div>' : '';
   };
 
-  root.ASK_RENDER = { escape: escape, safeUrl: safeUrl, markdown: markdown, resources: resources };
+  var field = function (item) {
+    if (!item || !item.name || !item.label) return '';
+    var name = escape(String(item.name).slice(0, 48));
+    var label = escape(String(item.label).slice(0, 80));
+    var placeholder = escape(String(item.placeholder || '').slice(0, 100));
+    var required = item.required ? ' required' : '';
+    var control = '';
+    if (item.type === 'textarea') {
+      control = '<textarea name="' + name + '" rows="3" maxlength="400"' + required + (placeholder ? ' placeholder="' + placeholder + '"' : '') + '></textarea>';
+    } else if (item.type === 'select') {
+      var choices = Array.isArray(item.options) ? item.options : [];
+      control = '<select name="' + name + '"' + required + '><option value=""></option>' + choices.map(function (option) {
+        return '<option value="' + escape(String(option.id || '').slice(0, 48)) + '">' + escape(String(option.label || '').slice(0, 80)) + '</option>';
+      }).join('') + '</select>';
+    } else {
+      var type = /^(email|date)$/.test(item.type) ? item.type : 'text';
+      control = '<input type="' + type + '" name="' + name + '" maxlength="400"' + required + (placeholder ? ' placeholder="' + placeholder + '"' : '') + '>';
+    }
+    return '<label class="a2ui-field"><span>' + label + (item.required ? '<b aria-hidden="true"> *</b>' : '') + '</span>' + control + '</label>';
+  };
+
+  /* A2UI cards are data, never HTML from the model. Event handling lives in
+     work.js; this function only renders the four bounded card shapes. */
+  var ui = function (items, labels) {
+    if (!Array.isArray(items) || !items.length) return '';
+    labels = labels || {};
+    var cards = items.slice(0, 2).map(function (card) {
+      if (!card || card.version !== 1 || !/^(choice|form|confirm|resource)$/.test(card.type)) return '';
+      var cardId = escape(String(card.id || '').slice(0, 100));
+      var title = escape(String(card.title || '').slice(0, 100));
+      if (!cardId || !title) return '';
+      var body = String(card.body || '').slice(0, 360);
+      var head = '<header class="a2ui-head"><span class="a2ui-kicker">' + escape(labels.kicker || 'Interactive') + '</span><strong>' + title + '</strong>' +
+        (body ? '<p>' + escape(body) + '</p>' : '') + '</header>';
+      if (card.submitted) {
+        return '<section class="a2ui-card is-submitted" data-a2ui-card="' + cardId + '" data-a2ui-type="' + card.type + '">' + head +
+          '<div class="a2ui-submitted"><span aria-hidden="true">✓</span>' + escape(String(card.summary || labels.submitted || 'Submitted').slice(0, 300)) + '</div></section>';
+      }
+
+      var content = '';
+      var submit = escape(String(card.submitLabel || labels.submit || 'Continue').slice(0, 40));
+      if (card.type === 'choice') {
+        var inputType = card.multiple ? 'checkbox' : 'radio';
+        var options = (Array.isArray(card.options) ? card.options : []).map(function (option) {
+          var optionId = escape(String(option.id || '').slice(0, 48));
+          var optionLabel = escape(String(option.label || '').slice(0, 80));
+          if (!optionId || !optionLabel) return '';
+          var description = escape(String(option.description || '').slice(0, 140));
+          return '<label class="a2ui-option"><input type="' + inputType + '" name="selection" value="' + optionId + '"' + (!card.multiple ? ' required' : '') + '><span><strong>' + optionLabel + '</strong>' +
+            (description ? '<small>' + description + '</small>' : '') + '</span></label>';
+        }).join('');
+        content = '<form class="a2ui-form" data-a2ui-submit>' + options + '<button class="a2ui-primary" type="submit">' + submit + '</button></form>';
+      } else if (card.type === 'form') {
+        content = '<form class="a2ui-form" data-a2ui-submit>' + (Array.isArray(card.fields) ? card.fields.map(field).join('') : '') +
+          '<button class="a2ui-primary" type="submit">' + submit + '</button></form>';
+      } else if (card.type === 'confirm') {
+        content = '<form class="a2ui-actions" data-a2ui-submit>' +
+          '<button class="a2ui-secondary" type="submit" name="a2ui-action" value="cancel">' + escape(String(card.cancelLabel || labels.cancel || 'Not now').slice(0, 40)) + '</button>' +
+          '<button class="a2ui-primary" type="submit" name="a2ui-action" value="confirm">' + escape(String(card.confirmLabel || labels.confirm || 'Confirm').slice(0, 40)) + '</button></form>';
+      } else if (card.type === 'resource') {
+        content = resources(card.resources, labels.resources || {});
+      }
+      if (!content) return '';
+      return '<section class="a2ui-card" data-a2ui-card="' + cardId + '" data-a2ui-type="' + card.type + '" data-a2ui-title="' + title + '">' + head + content + '</section>';
+    }).filter(Boolean).join('');
+    return cards ? '<div class="a2ui-cards">' + cards + '</div>' : '';
+  };
+
+  root.ASK_RENDER = { escape: escape, safeUrl: safeUrl, markdown: markdown, resources: resources, ui: ui };
 })(window);

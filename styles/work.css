@@ -1241,6 +1241,100 @@ body::after {
 .ask-resource-copy span { overflow: hidden; color: var(--text-3); font-size: 11.5px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .ask-resource-copy b { color: var(--text-2); font-weight: 650; }
 .ask-resource-arrow { width: 16px; height: 16px; fill: none; stroke: var(--text-3); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.a2ui-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.a2ui-card {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--hairline));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  box-shadow: 0 12px 34px color-mix(in srgb, #000 7%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 38%, transparent);
+}
+.a2ui-head { padding: 14px 14px 11px; }
+.a2ui-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.a2ui-head strong { display: block; font-size: 15px; font-weight: 680; line-height: 1.3; }
+.a2ui-head p { margin: 5px 0 0; color: var(--text-2); font-size: 12.5px; line-height: 1.45; }
+.a2ui-form { display: grid; gap: 8px; padding: 0 10px 10px; }
+.a2ui-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, translate 0.2s var(--spring-bounce);
+}
+.a2ui-option:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); translate: 0 -1px; }
+.a2ui-option:has(input:checked) { border-color: color-mix(in srgb, var(--accent) 58%, var(--hairline)); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.a2ui-option input { width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--accent); }
+.a2ui-option strong { display: block; font-size: 13px; font-weight: 620; line-height: 1.3; }
+.a2ui-option small { display: block; margin-top: 2px; color: var(--text-3); font-size: 11.5px; line-height: 1.35; }
+.a2ui-field { display: grid; gap: 5px; }
+.a2ui-field > span { color: var(--text-2); font-size: 11.5px; font-weight: 600; }
+.a2ui-field b { color: var(--accent); }
+.a2ui-field input,
+.a2ui-field textarea,
+.a2ui-field select {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+.a2ui-field textarea { min-height: 74px; resize: vertical; }
+.a2ui-field input:focus,
+.a2ui-field textarea:focus,
+.a2ui-field select:focus { border-color: color-mix(in srgb, var(--accent) 66%, var(--hairline)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent); }
+.a2ui-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 10px 10px; }
+.a2ui-primary,
+.a2ui-secondary {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: opacity 0.18s, scale 0.2s var(--spring-bounce);
+}
+.a2ui-primary { border: 0; background: var(--accent); color: #fff; }
+.a2ui-form > .a2ui-primary { justify-self: end; margin-top: 2px; }
+.a2ui-secondary { border: 1px solid var(--hairline); background: var(--chip-bg); color: var(--text-2); }
+.a2ui-primary:hover,
+.a2ui-secondary:hover { opacity: 0.86; }
+.a2ui-primary:active,
+.a2ui-secondary:active { scale: 0.97; }
+.a2ui-card .ask-resources { margin: 0; padding: 0 10px 10px; }
+.a2ui-submitted {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0 10px 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--live) 10%, var(--chip-bg));
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+.a2ui-submitted span { color: var(--live); font-weight: 700; }
+.a2ui-card.is-submitted { opacity: 0.78; }
 .ask-trace {
   width: fit-content;
   max-width: 100%;
@@ -1342,6 +1436,7 @@ body.ask-panel-open {
 .ask-model-source[data-source="local"] .ask-source-icon { color: var(--live); }
 .ask-model-source[data-source="cloud"] .ask-source-icon { color: var(--accent); }
 .ask-model-source[data-source="tool"] .ask-source-icon { color: var(--live); }
+.ask-model-source[data-source="ui"] .ask-source-icon { color: var(--accent); }
 .ask-model-source[data-source="pending"] .ask-source-icon { animation: source-pulse 1.2s ease-in-out infinite; }
 @keyframes source-pulse { 50% { opacity: 0.38; } }
 @media (prefers-reduced-motion: reduce) {

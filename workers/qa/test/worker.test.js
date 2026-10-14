@@ -15,8 +15,9 @@ const INDEX = { version: 'v1', systemPrompt: 'SYSTEM: answer as Antares, from CO
   qa: { enabled: true, tools: ['search_work', 'find_resources'], answer: 'model', prompt: 'Lead with the QA pair.' },
   'share-files': { enabled: true, tools: ['find_resources'], answer: 'model', prompt: 'Say what is attached.' },
   'token-usage': { enabled: true, tools: ['get_token_usage', 'find_resources'], answer: 'tool', prompt: '' },
+  a2ui: { enabled: true, tools: ['render_ui'], answer: 'tool', prompt: 'Ask only when a decision is required.' },
   general: { enabled: true, tools: ['search_work', 'find_resources'], answer: 'model', prompt: 'Answer from the best passages.' },
-}, tools: { search_work: { enabled: true }, find_resources: { enabled: true, maxCards: 3 }, get_token_usage: { enabled: true } }, entities: [
+}, tools: { search_work: { enabled: true }, find_resources: { enabled: true, maxCards: 3 }, get_token_usage: { enabled: true }, render_ui: { enabled: true, maxOptions: 6, maxFields: 4 } }, entities: [
   { id: 'project-agentic-hiring', kind: 'project', names: ['Agentic Hiring'], chunkPrefix: 'project-agentic-hiring', resourceId: 'project-agentic-hiring', url: '/projects/agentic-hiring/' },
   { id: 'project-kaboo', kind: 'project', names: ['Kaboo'], chunkPrefix: 'project-kaboo', resourceId: 'project-kaboo', url: '/projects/kaboo/' },
   { id: 'project-susbench', kind: 'project', names: ['SusBench'], chunkPrefix: 'project-susbench', resourceId: 'project-susbench', url: '/projects/susbench/' },
@@ -48,6 +49,7 @@ const plan = (system, user) => {
   if (!/LOADED SKILL: (\S+)/.test(system)) {
     const skill = /resume|\u7b80\u5386/i.test(q) ? 'share-files'
       : /tokens/i.test(q) && !/Kaboo/.test(q) ? 'token-usage'
+      : /choose|which version|missing detail/i.test(q) ? 'a2ui'
       : /Kaboo|SusBench/.test(q) ? 'project-walkthrough'
       : /mature/.test(q) ? 'qa' : 'general';
     return JSON.stringify({ actions: [{ tool: 'load_skill', args: { name: skill } }] });
@@ -59,11 +61,12 @@ const plan = (system, user) => {
     'share-files': [{ tool: 'find_resources', args: { query: 'resume' } }],
     'token-usage': [{ tool: 'get_token_usage', args: { window: 'total' } }],
     qa: [{ tool: 'find_resources', args: { query: 'Agentic Hiring' } }],
+    a2ui: [{ tool: 'render_ui', args: { type: 'choice', title: 'Which version?', message: 'Choose one so I can continue.', options: [{ id: 'en', label: 'English' }, { id: 'zh', label: 'Chinese' }] } }],
     general: [{ tool: 'search_work', args: { query: q } }],
   }[skill];
   return 'Here is my plan:\n' + JSON.stringify({ actions });
 };
-let localCalls = 0, lastLocalPrompt = '';
+let localCalls = 0, lastLocalPrompt = '', lastLocalMessages = [];
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('/ask-index.json')) return new Response(JSON.stringify(INDEX));
@@ -73,6 +76,7 @@ globalThis.fetch = async (url, init = {}) => {
     if (local === 'ok' && request.messages[0].content.startsWith(PLANNER)) {
       return new Response(JSON.stringify({ answer: plan(request.messages[0].content, request.messages[1].content), model: 'qwen' }));
     }
+    lastLocalMessages = request.messages;
     lastLocalPrompt = request.messages[0].content;
     assert.equal(init.headers['CF-Access-Client-Id'], 'id');
     if (local === 'down') throw new TypeError('connect failed');
@@ -426,6 +430,33 @@ await t('agent: share-files gets cards and reads no site passages', async () => 
   assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
   assert.match(lastLocalPrompt, /SKILL: share-files/);
   assert.doesNotMatch(lastLocalPrompt, /### Project:/);
+});
+await t('agent: a2ui returns a validated card without a separate answer call', async () => {
+  const beforeLocal = localCalls;
+  const r = await askAgent('A detail is missing; let me choose between the options.');
+  assert.deepEqual([r.body.skill, r.body.via, r.body.model], ['a2ui', 'tool', 'render_ui']);
+  assert.deepEqual(r.body.tools, ['load_skill', 'render_ui']);
+  assert.equal(r.body.ui[0].type, 'choice');
+  assert.deepEqual(r.body.ui[0].options.map((option) => option.id), ['en', 'zh']);
+  assert.equal(localCalls - beforeLocal, 2, 'one skill-selection call and one tool-planning call');
+  const saved = d1Traces.get(r.body.traceId);
+  assert.equal(saved.ui.id, r.body.ui[0].id);
+  assert.equal(saved.timings.answerMs, 0);
+});
+await t('agent: an A2UI submission reaches the next planner as structured input', async () => {
+  const r = await askAgent('', {
+    messages: [
+      { role: 'user', content: 'A detail is missing; let me choose between the options.' },
+      { role: 'assistant', content: 'Choose one so I can continue.' },
+      { role: 'user', content: 'English' },
+    ],
+    interaction: { cardId: 'AQ-TEST-UI1', type: 'choice', action: 'submit', title: 'Which version?', values: { selection: 'en' }, summary: 'English' },
+  });
+  assert.equal(r.body.skill, 'general');
+  assert.match(lastLocalMessages.at(-1).content, /Structured A2UI response to card AQ-TEST-UI1/);
+  assert.deepEqual(d1Traces.get(r.body.traceId).interaction, {
+    cardId: 'AQ-TEST-UI1', type: 'choice', action: 'submit', fields: ['selection'],
+  });
 });
 await t('agent: a token answer keeps the exact number the tool returned', async () => {
   const r = await askAgent('How many tokens have you used?');

@@ -150,6 +150,7 @@
         "local": "本地 · {model}",
         "cloud": "云端 · Workers AI",
         "tool": "实时数据 · Usage 工具",
+        "ui": "交互 · A2UI",
         "offline": "内置 FAQ · 无模型",
         "model": "模型：{model}"
       },
@@ -161,6 +162,13 @@
         "aria": "相关文件与链接",
         "link": "链接",
         "image": "图片"
+      },
+      "ui": {
+        "kicker": "交互卡片",
+        "submit": "继续",
+        "confirm": "确认",
+        "cancel": "暂不",
+        "submitted": "已提交"
       }
     },
     "comments": {
