@@ -89,13 +89,14 @@ export const wantsFetch = (text) => FETCH.some((re) => re.test(String(text || ''
 // "what about", or pointing back with "it" / "this project".
 const FOLLOW_UP_CUES = [
   /^(?:and|also|so|then|but|what about|how about)\b/i,
+  /^(?:why|how|what|which one|the (?:result|metric|impact|users?|role))\s*[?!.,]*$/i,
   /\b(?:it|its|that|this|they|them|there)\b/i,
   /^(?:\u90a3|\u8fd8\u6709|\u7136\u540e|\u6240\u4ee5|\u4f46\u662f)/,
-  /\u5b83|\u8fd9\u4e2a\u9879\u76ee|\u90a3\u4e2a\u9879\u76ee|\u8be5\u9879\u76ee|\u5176\u4e2d|\u5177\u4f53|\u8be6\u7ec6|\u5462[?\uff1f]?$/,
+  /\u5b83|\u8fd9\u4e2a\u9879\u76ee|\u90a3\u4e2a\u9879\u76ee|\u8be5\u9879\u76ee|\u5176\u4e2d|\u91cc\u9762|\u5177\u4f53|\u8be6\u7ec6|\u4e3a\u4ec0\u4e48|\u600e\u4e48|\u5462[?\uff1f]?$/,
 ];
 export const isFollowUp = (text) => {
   const t = String(text || '').trim();
-  return t.length <= 30 || (t.length <= 80 && FOLLOW_UP_CUES.some((re) => re.test(t)));
+  return t.length <= 80 && FOLLOW_UP_CUES.some((re) => re.test(t));
 };
 
 // "and today?" after a token question stays with the usage skill.
