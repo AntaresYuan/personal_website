@@ -213,6 +213,15 @@ function cardsFor(index, route, current, lang) {
   return found.filter((r) => r.url && !seen.has(r.url) && seen.add(r.url)).slice(0, max);
 }
 
+function attachedResourcesAnswer(cards, lang) {
+  const titles = cards.map((card) => card.title).filter(Boolean).join('; ');
+  if (lang === 'zh') {
+    const noun = cards.length > 1 ? '\u8fd9\u4e9b\u8d44\u6599' : '\u8fd9\u4efd\u8d44\u6599';
+    return `\u5df2\u5728\u4e0b\u65b9\u9644\u4e0a${noun}\uff1a${titles}\u3002`;
+  }
+  return `I've attached ${titles} below.`;
+}
+
 /* ── Answering ──────────────────────────────────────────────────────────── */
 // After a failure, skip the Mac for a minute so visitors don't each wait
 // out its timeout.
@@ -477,7 +486,7 @@ async function answerWithAgent(p) {
   };
   const given = new Set();
   let uiCount = 0;
-  const runTool = async (tool, args) => {
+  const runTool = async (tool, args, skill) => {
     if (tool === 'search_work') return searchWork(env, ctx, index, String(args.query || currentQuery).slice(0, 300), String(args.item || ''), given);
     if (tool === 'find_resources') {
       if (index.tools?.find_resources?.enabled === false) return { note: 'this tool is switched off', cards: [] };
@@ -489,7 +498,11 @@ async function answerWithAgent(p) {
         retried = true;
       }
       const retryNote = retried ? ' after retrying with the visitor\'s wording' : '';
-      return { note: cards.length ? `${cards.length} card(s)${retryNote}: ${cards.map((c) => c.title).join('; ')}` : `nothing found${retryNote}`, cards };
+      return {
+        note: cards.length ? `${cards.length} card(s)${retryNote}: ${cards.map((c) => c.title).join('; ')}` : `nothing found${retryNote}`,
+        cards,
+        ...(cards.length && skill?.name === 'share-files' ? { terminal: true } : {}),
+      };
     }
     if (tool === 'get_token_usage') {
       const window = Object.hasOwn(WINDOW_TEXT, args.window) ? args.window : 'total';
@@ -563,6 +576,18 @@ async function answerWithAgent(p) {
     return finish({
       answer: uiResult.message || uiResult.ui.body || uiResult.ui.title,
       model: 'render_ui', via: 'tool', verified: true, ...extra,
+    });
+  }
+
+  // A successful file lookup is already the complete answer: the frontend
+  // renders the exact catalogue cards. Skipping another planner step and a
+  // generation call keeps the reply fast and prevents a model from drawing
+  // a second, fake attachment list in prose.
+  if (agent.terminal && loaded.name === 'share-files' && cards.length) {
+    trajectory.timings.answerMs = 0;
+    return finish({
+      answer: attachedResourcesAnswer(cards, lang),
+      model: 'find_resources', via: 'tool', verified: true, ...extra,
     });
   }
 
