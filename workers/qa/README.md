@@ -129,6 +129,10 @@ stores no IP. It holds:
   engine, its reply and what the Worker did with it) or, on a fallback, the
   fixed pipeline's rule, focus and QA pair
 - the tools, the resources and the passages
+- per-query latency under `timings`: end-to-end, index load, Agent loop,
+  planning-model calls, tool calls and final answer generation; streaming
+  answers also include time to first token. Cloud answers split draft and
+  verification, and local-to-cloud fallback time is kept separately
 - the model route, the duration and the answer
 
 Read one while debugging:
@@ -136,6 +140,21 @@ Read one while debugging:
 ```bash
 npx wrangler d1 execute antares-qa-traces --remote --command \
   "SELECT trajectory FROM qa_traces WHERE id = 'AQ-YYYYMMDD-XXXXXXXX'"
+```
+
+Compare the latest queries when tuning latency:
+
+```bash
+npx wrangler d1 execute antares-qa-traces --remote --command \
+  "SELECT id,
+   json_extract(trajectory, '$.skill.id') AS skill,
+   json_extract(trajectory, '$.route') AS route,
+   json_extract(trajectory, '$.timings.totalMs') AS total_ms,
+   json_extract(trajectory, '$.timings.firstTokenMs') AS first_token_ms,
+   json_extract(trajectory, '$.timings.planningMs') AS planning_ms,
+   json_extract(trajectory, '$.timings.toolMs') AS tool_ms,
+   json_extract(trajectory, '$.timings.answerMs') AS answer_ms
+   FROM qa_traces ORDER BY received_at DESC LIMIT 20"
 ```
 
 The Work frontend stores the current conversation in browser `localStorage`

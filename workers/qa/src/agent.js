@@ -122,7 +122,14 @@ export async function runAgent({ turns, catalog, systemPrompt, callModel, runToo
       { role: 'user', content: plannerInput({ turns, steps, loaded }) },
     ]);
     const plan = parsePlan(reply.text);
-    const record = { engine: reply.engine, model: reply.model, output: String(reply.text || '').slice(0, 600) };
+    const record = {
+      engine: reply.engine,
+      model: reply.model,
+      output: String(reply.text || '').slice(0, 600),
+      durationMs: Number(reply.durationMs) || 0,
+      ...(reply.localAttemptMs != null ? { localAttemptMs: Number(reply.localAttemptMs) || 0 } : {}),
+      ...(reply.cloudMs != null ? { cloudMs: Number(reply.cloudMs) || 0 } : {}),
+    };
 
     if (!plan) {
       if (retried) return { ok: false, reason: 'no usable plan', skill: loaded, steps: [...steps, { ...record, note: 'unreadable reply' }], results };
@@ -153,8 +160,9 @@ export async function runAgent({ turns, catalog, systemPrompt, callModel, runToo
         notes.push(`${action.tool} → not allowed by the ${loaded.name} skill. Allowed: ${loaded.tools.join(', ') || 'none'}.`);
         continue;
       }
+      const toolStarted = Date.now();
       const result = await runTool(action.tool, action.args, loaded);
-      results.push({ tool: action.tool, args: action.args, ...result });
+      results.push({ tool: action.tool, args: action.args, durationMs: Date.now() - toolStarted, ...result });
       notes.push(`${action.tool} ${JSON.stringify(action.args)} → ${result.note}`);
     }
     steps.push({ ...record, actions: plan.actions, note: notes.join('\n   ') });

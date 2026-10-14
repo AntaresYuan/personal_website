@@ -247,6 +247,9 @@ await t('streaming sends metadata before incremental local deltas and saves the 
   await waits.at(-1);
   assert.equal(d1Traces.get(done.traceId).answer, 'From my Mac.');
   assert.equal(d1Traces.get(done.traceId).inference.promptTokens, 120);
+  assert.ok(Number.isInteger(d1Traces.get(done.traceId).timings.firstTokenMs));
+  assert.ok(Number.isInteger(d1Traces.get(done.traceId).timings.answerFirstTokenMs));
+  assert.ok(d1Traces.get(done.traceId).timings.totalMs >= d1Traces.get(done.traceId).timings.firstTokenMs);
 });
 await t('selected page text is included as untrusted reference context', async () => {
   local = 'ok';
@@ -411,6 +414,10 @@ await t('agent: the model loads project-walkthrough for Kaboo and calls its tool
   assert.equal(saved.agent.ok, true);
   assert.equal(saved.agent.steps.length, 3);
   assert.match(saved.agent.steps[1].note, /search_work .*Kaboo.* → \d passage\(s\): Project: Kaboo; Kaboo: What I did/);
+  for (const field of ['totalMs', 'indexMs', 'agentMs', 'planningMs', 'planningLocalAttemptMs', 'planningCloudMs', 'toolMs', 'answerMs', 'modelMs']) {
+    assert.ok(Number.isInteger(saved.timings[field]) && saved.timings[field] >= 0, `missing timing ${field}`);
+  }
+  assert.ok(saved.agent.steps.every((step) => Number.isInteger(step.durationMs) && step.durationMs >= 0));
 });
 await t('agent: share-files gets cards and reads no site passages', async () => {
   const r = await askAgent('Please send me your resume PDF');

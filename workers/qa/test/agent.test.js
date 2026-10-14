@@ -62,6 +62,8 @@ await t('happy path: load a skill, call its tools, answer', async () => {
   assert.equal(r.skill.name, 'project-walkthrough');
   assert.deepEqual(toolLog.map((x) => x.tool), ['search_work', 'find_resources']);
   assert.deepEqual(r.results.map((x) => x.tool), ['search_work', 'find_resources']);
+  assert.ok(r.steps.every((step) => Number.isInteger(step.durationMs) && step.durationMs >= 0));
+  assert.ok(r.results.every((result) => Number.isInteger(result.durationMs) && result.durationMs >= 0));
   // The second call shows the skill's instructions and its tools.
   const [sys2, user2] = m.seen[1];
   assert.match(sys2.content, /LOADED SKILL: project-walkthrough/);
