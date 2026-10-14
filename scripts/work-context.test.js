@@ -11,7 +11,7 @@ const personal = read('personal/index.html');
 const terminal = read('scripts/terminal.js');
 const palette = read('scripts/palette.js');
 const brief = read('agent-brief.txt');
-const sources = JSON.parse(read('content/assistant/sources.json'));
+const sources = JSON.parse(read('content/assistant/tools.json')).search.sources;
 const index = JSON.parse(read('ask-index.json'));
 
 assert.match(llms, /^# .+ — Work/m);

@@ -1,9 +1,9 @@
 /* Offline tests for the qa Worker's pure helpers (src/lib.js). */
 import assert from 'node:assert/strict';
 import {
-  normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, selectFaqPassages, contextOf,
-  matchFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
-  resourceContextOf, usageContextOf, usageAnswer, genPrompt, stripThinking, packVectors, unpackVectors,
+  normTurns, replyLang, searchText, tokens, lexicalScores, cosine, selectPassages, contextOf,
+  matchFaqs, scoreFaqs, faqContextOf, findResources, findFaqResources, wantsUsage, summarizeUsage,
+  resourceContextOf, usageContextOf, usageAnswer, usageUnavailable, genPrompt, verifyPrompt, stripThinking, packVectors, unpackVectors,
 } from '../src/lib.js';
 
 let pass = 0, fail = 0;
@@ -55,34 +55,30 @@ t('selection: pins always, best first, within budget', () => {
   const lex = selectPassages(chunks, { semantic: null, lexical: [0, 3, 0, 0], budget: 1000 });
   assert.deepEqual(lex.map((c) => c.id), ['brief-1', 'p1']);
 });
-t('FAQ selection keeps Assistant context and only its exact linked page', () => {
-  const corpus = [
-    { id: 'assistant-guide', title: 'Guide', url: '', text: 'Be concise.', pin: true },
-    { id: 'knowledge-1', title: 'Background', url: '', text: 'I am an AI PM.', pin: true },
-    { id: 'overview#1', title: 'Overview', url: '/', text: 'All projects.', pin: true },
-    { id: 'agentic-1', title: 'Agentic Hiring', url: '/projects/agentic-hiring/', text: 'A recruiting workbench.' },
-    { id: 'agentic-2', title: 'Metrics', url: '/zh/projects/agentic-hiring/', text: 'Pass rate: 21% to 25%.' },
-    { id: 'kaboo-1', title: 'Kaboo', url: '/projects/kaboo/', text: 'Token efficiency.' },
-  ];
-  assert.deepEqual(
-    selectFaqPassages(corpus, [{ href: '/projects/agentic-hiring/' }]).map((chunk) => chunk.id),
-    ['assistant-guide', 'knowledge-1', 'agentic-1', 'agentic-2']
-  );
-  assert.deepEqual(selectFaqPassages(corpus, [{ href: 'mailto:a@example.com' }]).map((chunk) => chunk.id), ['assistant-guide', 'knowledge-1']);
+t('selection: a skill\'s own passages come right after the pins; fill caps the rest', () => {
+  const sel = selectPassages(chunks, { semantic: [0, 0.2, 0.9, 0.1], lexical: [0, 0, 0, 0], budget: 1000, must: ['p3', 'nope'], fill: 60 });
+  assert.deepEqual(sel.map((c) => c.id), ['brief-1', 'p3', 'p2']);
+  const none = selectPassages(chunks, { semantic: [0, 0.2, 0.9, 0.1], lexical: [0, 0, 0, 0], budget: 1000, must: ['p1'], fill: 0 });
+  assert.deepEqual(none.map((c) => c.id), ['brief-1', 'p1']);
 });
 t('context blocks carry title and page', () => {
   assert.match(contextOf([chunks[1]]), /^### Project: Kaboo \(\/projects\/kaboo\/\)\nKaboo/);
 });
-t('FAQ matching checks canonical questions and bilingual aliases first', () => {
+t('QA pairs match on topic, in either language, from the current question only', () => {
   const faqs = [
-    { question: 'walk me through your most mature project.', aliases: ['介绍一下你最成熟的项目。'], answer: 'Use Agentic Hiring.' },
-    { question: 'how can I contact you?', aliases: ['怎么联系你？'], answer: 'Use email.' },
+    { question: 'walk me through your most mature project.', aliases: ['\u4ecb\u7ecd\u4e00\u4e0b\u4f60\u6700\u6210\u719f\u7684\u9879\u76ee\u3002'], answer: 'Use Agentic Hiring.' },
+    { question: 'how can I contact you?', aliases: ['\u600e\u4e48\u8054\u7cfb\u4f60\uff1f'], answer: 'Use email.' },
+    { question: "what's the site built with?", aliases: ['\u8fd9\u4e2a\u7f51\u7ad9\u662f\u600e\u4e48\u505a\u7684\uff1f'], answer: 'Vanilla HTML and Cloudflare Pages.' },
   ];
   assert.equal(matchFaqs(faqs, 'What is your most mature project?')[0].answer, 'Use Agentic Hiring.');
-  assert.equal(matchFaqs(faqs, '介绍一下你最成熟的项目。')[0].answer, 'Use Agentic Hiring.');
+  assert.equal(scoreFaqs(faqs, '\u4ecb\u7ecd\u4e00\u4e0b\u4f60\u6700\u6210\u719f\u7684\u9879\u76ee\u3002')[0].exact, true);
+  assert.equal(scoreFaqs(faqs, 'What is your most mature project?')[0].exact, false);
   assert.equal(matchFaqs([{ question: 'results?', answer: 'The pass rate rose from 21% to 25%.' }], 'Did the pass rate rise?')[0].question, 'results?');
   assert.deepEqual(matchFaqs(faqs, 'Tell me about SusBench metrics'), []);
-  assert.match(faqContextOf([faqs[0]]), /authoritative[\s\S]*Use Agentic Hiring/);
+  // Chinese question words alone ("how was ... made") are not a shared topic.
+  assert.deepEqual(matchFaqs(faqs, 'SusBench \u662f\u600e\u4e48\u505a\u7684\uff1f'), []);
+  assert.deepEqual(matchFaqs(faqs, 'Lark Loom \u662f\u4ec0\u4e48\uff1f'), []);
+  assert.match(faqContextOf([faqs[0]]), /### QA pair:[\s\S]*authoritative[\s\S]*Use Agentic Hiring/);
 });
 t('resource tool returns the exact localized resume PDF', () => {
   const resources = [
@@ -119,22 +115,28 @@ t('usage tool intent and summary use the dashboard token basis', () => {
     ],
   });
   assert.deepEqual(summary, {
-    totalTokens: 220, last30Tokens: 220, latestDate: '2026-10-13', latestTokens: 50,
+    totalTokens: 220, last30Tokens: 220, month: '2026-10', monthTokens: 220, latestDate: '2026-10-13', latestTokens: 50,
     latestSessions: 1, latestCostCents: 10, sessions: 3, costCents: 30,
     activeDays: 2, periodDays: 2, since: '2026-09-01', updated: '2026-10-13T10:00:00Z',
     topSource: { name: 'codex', tokens: 200 },
   });
   assert.match(usageContextOf(summary, 'zh'), /totalTokens=220[\s\S]*updated=2026-10-13/);
   assert.match(usageAnswer(summary, '今天用了多少 token？', 'zh'), /2026-10-13[\s\S]*50 tokens[\s\S]*1 个 sessions/);
-  assert.match(usageAnswer(summary, 'How many tokens have you used?', 'en'), /220 tokens[\s\S]*3 sessions/);
+  assert.match(usageAnswer(summary, 'How many tokens have you used?', 'en'), /since 2026-09-01 is 220 tokens[\s\S]*3 sessions/);
+  assert.match(usageAnswer(summary, 'How many tokens this month?', 'en'), /this month \(2026-10\), I've used 220 tokens/);
+  assert.match(usageAnswer(summary, '\u8fd9\u4e2a\u6708\u7528\u4e86\u591a\u5c11 token', 'zh'), /2026-10[\s\S]*220 tokens/);
+  assert.match(usageUnavailable('en'), /can't read the live/);
+  assert.doesNotMatch(usageUnavailable('zh'), /\d/);
 });
-t('prompt states the reply language', () => {
+t('prompt: language, the skill section with its focus, then the hard rules', () => {
   assert.match(genPrompt('C', 'zh'), /Reply in Simplified Chinese/);
   assert.match(genPrompt('C', 'en'), /Reply in English/);
-  assert.match(genPrompt('C', 'en'), /FAQ FIRST/);
-  assert.match(genPrompt('C', 'en'), /UNTRUSTED PAGE TEXT/);
-  assert.match(genPrompt('C', 'en'), /Markdown links are allowed ONLY/);
-  assert.match(genPrompt('C', 'en'), /TOOL RESULTS/);
+  const p = genPrompt('C', 'en', { id: 'project', prompt: 'Answer about FOCUS.', focus: [{ id: 'project-kaboo', kind: 'project', names: ['Kaboo'] }] });
+  assert.match(p, /SKILL: project\nAnswer about FOCUS\.\nFOCUS: Kaboo \(project\)/);
+  assert.ok(p.indexOf('SKILL: project') < p.indexOf('Hard rules') && p.indexOf('Hard rules') < p.indexOf('CONTEXT:\nC'));
+  assert.match(genPrompt('C', 'en'), /SKILL: general\nAnswer the visitor's question from CONTEXT\./);
+  for (const rule of [/QA PAIR FIRST/, /UNTRUSTED PAGE TEXT/, /Markdown links are allowed ONLY/, /TOOL RESULTS/]) assert.match(genPrompt('C', 'en', { id: 'qa', prompt: 'x' }), rule);
+  assert.match(verifyPrompt('C', 'en'), /QA pair/);
 });
 t('thinking blocks are removed', () => {
   assert.equal(stripThinking('<think>plan…</think>\nHello'), 'Hello');

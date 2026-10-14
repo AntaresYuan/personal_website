@@ -10,7 +10,13 @@
 
    Public content is Work-only: home, case studies, AI Skills, Gallery and
    Writing. Personal roadmap, Lens and Contact content are never indexed.
-   Owner-authored Assistant guidance, FAQs and knowledge are added separately.
+   Owner-authored Agent infra (guide, QA pairs, knowledge) is added
+   separately, and so is what the Worker routes with:
+     - entities: every named Work item (project, AI skill, post, gallery
+       piece) with the names a visitor may use for it, the passages that are
+       its own, and its page in the resource catalogue;
+     - skills: each skill's switch and system prompt (CMS → Agent infra →
+       Skills); tools: the tool settings (CMS → Agent infra → Tools).
    ════════════════════════════════════════════════════════════════════════ */
 'use strict';
 const fs = require('fs');
@@ -77,6 +83,34 @@ const pieces = (text) => {
   }
   if (cur) out.push(cur);
   return out;
+};
+
+/* ── Entities: the named Work items the router recognises ─────────────────
+   A name is matched as a whole word (Latin) or as a substring (Chinese). A
+   slash-command skill is also known by its bare name ("devloop"), unless
+   that is an everyday word a visitor would use for something else. */
+const COMMON_WORDS = new Set(['iterate']);
+const entities = [];
+const addEntity = ({ id, kind, names, chunkPrefix, resourceId, url, urlZh }) => {
+  const seen = new Set();
+  const clean = [];
+  for (const raw of names) {
+    const name = String(raw || '').normalize('NFKC').trim();
+    const key = name.toLowerCase();
+    if (!name || seen.has(key)) continue;
+    const han = /[\u3400-\u9fff]/.test(name);
+    if (han ? name.length < 2 : name.replace(/[^a-z0-9]/gi, '').length < 3) continue;
+    seen.add(key);
+    clean.push(name);
+  }
+  if (clean.length) entities.push({ id, kind, names: clean, chunkPrefix, resourceId, url, ...(urlZh ? { urlZh } : {}) });
+};
+// "HCDE 351 | A1: OXO Shower Control Interface" is also asked about as
+// "OXO Shower Control Interface": the part after the last colon or dash.
+const shortTitle = (title) => {
+  const tail = String(title || '').split(/[:\uff1a]|\u2014+/).pop().trim();
+  const long = /[\u3400-\u9fff]/.test(tail) ? tail.length >= 4 : tail.length >= 8;
+  return long && tail !== String(title).trim() ? tail : '';
 };
 
 const chunks = [];
@@ -223,6 +257,11 @@ for (const p of sourceOn('projects') ? projects : []) {
     description: 'Link referenced in the project case study',
     keywords: [p.title, link.label, 'reference', 'link'],
   }));
+  addEntity({
+    id: `project-${p.slug}`, kind: 'project', chunkPrefix: `project-${p.slug}`, resourceId: `project-${p.slug}`,
+    url, urlZh: `/zh/projects/${p.slug}/`,
+    names: [p.title, pZh.title, p.slug.replace(/-/g, ' ')],
+  });
   add(`project-${p.slug}`, `Project: ${p.title}`, url, [
     `${p.title} — ${p.kind || ''}`,
     p.summary || '',
@@ -243,6 +282,14 @@ for (const s of sourceOn('skills') ? (skills.items ?? []) : []) {
     description: s.tagline || s.summary || '', descriptionZh: sZh.tagline || sZh.summary || s.tagline || s.summary || '',
     keywords: [s.name, s.slug, link.label, s.category, 'skill', 'plugin', 'github', 'website'].filter(Boolean),
   }));
+  const bare = String(s.name || '').replace(/^\//, '');
+  addEntity({
+    id: `skill-${s.slug}`, kind: 'skill', chunkPrefix: `skill-${s.slug}`,
+    resourceId: (s.links ?? []).length ? `skill-${s.slug}-link-1` : 'page-skills',
+    url: '/skills/', urlZh: '/zh/skills/',
+    names: [s.name, sZh.name, COMMON_WORDS.has(bare.toLowerCase()) ? '' : bare,
+      COMMON_WORDS.has(bare.toLowerCase()) ? `${bare} skill` : ''],
+  });
   add(`skill-${s.slug}`, `AI skill: ${s.name}`, `/skills/${s.slug}/`, [
     `${s.name} — ${s.category || ''}. ${s.tagline || ''}`,
     s.summary || '',
@@ -259,6 +306,10 @@ for (const g of sourceOn('gallery') ? (gallery.items ?? []) : []) {
     descriptionZh: (gZh.images?.[i]?.caption) || gZh.summary || image.caption || g.summary || '',
     keywords: [g.title, g.medium, gallery.categories?.[g.category], 'gallery', 'image'].filter(Boolean),
   }));
+  addEntity({
+    id: `gallery-${g.slug}`, kind: 'gallery', chunkPrefix: `gallery-${g.slug}`, resourceId: `gallery-${g.slug}-1`,
+    url: '/gallery/', urlZh: '/zh/gallery/', names: [g.title, gZh.title],
+  });
   add(`gallery-${g.slug}`, `Gallery: ${g.title}`, '/gallery/', [
     `${g.title}${g.year ? ` (${g.year})` : ''}${g.medium ? ` — ${g.medium}` : ''}. Category: ${gallery.categories?.[g.category] || g.category || ''}.`,
     g.summary || '',
@@ -284,6 +335,11 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
     description: 'Link referenced in the article',
     keywords: [post.title, link.label, 'reference', 'link'],
   }));
+  addEntity({
+    id: `post-${post.slug}`, kind: 'writing', chunkPrefix: `post-${post.slug}`, resourceId: `post-${post.slug}`,
+    url, urlZh: `/zh/blog/${post.slug}/`,
+    names: [post.title, postZh.title, shortTitle(post.title), shortTitle(postZh.title)],
+  });
   add(`post-${post.slug}`, `Writing: ${post.title}`, url, [`${post.title} (${post.date || ''})`, post.summary || ''].join('\n\n'));
   // One passage per section, so a long post doesn't crowd out everything else.
   String(post.body || '').split(/\n(?=##\s)/).forEach((sec, i) => {
@@ -292,8 +348,24 @@ for (const post of sourceOn('writing') ? loadPosts() : []) {
   });
 }
 /* ── Write ────────────────────────────────────────────────────────────── */
-const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks, resources })).digest('hex').slice(0, 12);
-const out = { version, faqs, resources, chunks };
+/* ── Skills and tools, as the Worker needs them ───────────────────────── */
+const SKILL_IDS = ['project', 'qa', 'resources', 'usage', 'general'];
+const skillsOut = Object.fromEntries(SKILL_IDS.map((id) => {
+  const cfg = assistant.skills?.[id] ?? {};
+  return [id, {
+    enabled: id === 'general' ? true : cfg.enabled !== false,
+    ...(String(cfg.prompt || '').trim() ? { prompt: String(cfg.prompt).trim() } : {}),
+  }];
+}));
+const toolsOut = {
+  resources: {
+    enabled: assistant.tools?.resources?.enabled !== false,
+    maxCards: Math.max(1, Math.min(5, Number(assistant.tools?.resources?.maxCards) || 3)),
+  },
+};
+
+const version = crypto.createHash('sha1').update(JSON.stringify({ faqs, chunks, resources, entities, skillsOut, toolsOut })).digest('hex').slice(0, 12);
+const out = { version, skills: skillsOut, tools: toolsOut, faqs, entities, resources, chunks };
 fs.writeFileSync(path.join(root, 'ask-index.json'), JSON.stringify(out) + '\n');
 const pinned = chunks.filter((c) => c.pin).length;
-console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} FAQs, ${resources.length} resources, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);
+console.log(`✓ wrote ask-index.json (${chunks.length} passages, ${pinned} pinned, ${faqs.length} QA pairs, ${entities.length} entities, ${resources.length} resources, ${Math.round(JSON.stringify(out).length / 1024)} KB)`);

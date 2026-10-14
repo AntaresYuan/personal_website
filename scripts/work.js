@@ -854,35 +854,48 @@
         else if (via === 'tool') setSource('tool', model);
       };
 
+      var post = function (stream) {
+        return fetch(qaUrl, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/x-ndjson, application/json' },
+          body: JSON.stringify({ q: q, messages: requestMessages, lang: document.documentElement.lang || 'en', stream: stream }),
+          // Once tokens are visible a longer ceiling is safe; this also
+          // leaves room for a cold local model or the cloud fallback.
+          signal: timeout(90000),
+        });
+      };
+      var fromJson = function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (r.ok && d && d.answer) return {
+            answer: String(d.answer), via: d.via, model: d.model,
+            resources: Array.isArray(d.resources) ? d.resources : [],
+            tools: Array.isArray(d.tools) ? d.tools : [],
+            traceId: String(d.traceId || '')
+          };
+          return offlineAnswer(q);
+        });
+      };
+      /* The answer streams from the Mac when it can. If that stream breaks
+         off, the Worker has already parked the Mac, so asking once more
+         without streaming gets the cloud's answer. The built-in FAQ is only
+         for when the service can't be reached at all. */
       var reply = qaUrl
-        ? fetch(qaUrl, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json', accept: 'application/x-ndjson, application/json' },
-            body: JSON.stringify({ q: q, messages: requestMessages, lang: document.documentElement.lang || 'en', stream: true }),
-            // Once tokens are visible a longer ceiling is safe; this also
-            // leaves room for a cold local model or the cloud fallback.
-            signal: timeout(90000),
-          }).then(function (r) {
+        ? post(true).then(function (r) {
             var streaming = window.ASK_STREAM;
-            if (r.ok && streaming && streaming.isStreaming(r)) {
-              return streaming.consume(r, function (event, partial) {
-                responseMessage.content = partial.answer;
-                responseMessage.via = partial.via;
-                responseMessage.model = partial.model;
-                responseMessage.resources = partial.resources;
-                responseMessage.traceId = partial.traceId;
-                applySource(partial.via, partial.model);
-                renderStream();
-              });
-            }
-            return r.json().catch(function () { return {}; }).then(function (d) {
-              if (r.ok && d && d.answer) return {
-                answer: String(d.answer), via: d.via, model: d.model,
-                resources: Array.isArray(d.resources) ? d.resources : [],
-                tools: Array.isArray(d.tools) ? d.tools : [],
-                traceId: String(d.traceId || '')
-              };
-              return offlineAnswer(q);
+            if (!(r.ok && streaming && streaming.isStreaming(r))) return fromJson(r);
+            return streaming.consume(r, function (event, partial) {
+              responseMessage.content = partial.answer;
+              responseMessage.via = partial.via;
+              responseMessage.model = partial.model;
+              responseMessage.resources = partial.resources;
+              responseMessage.traceId = partial.traceId;
+              applySource(partial.via, partial.model);
+              renderStream();
+            }).catch(function () {
+              responseMessage.content = '';
+              setSource('pending');
+              renderStream();
+              return post(false).then(fromJson);
             });
           }).catch(function () { return offlineAnswer(q); })
         : offlineAnswer(q);
