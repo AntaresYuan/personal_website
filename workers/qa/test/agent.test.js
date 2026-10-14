@@ -99,6 +99,20 @@ await t('tools before a skill is loaded are refused', async () => {
   assert.equal(r.skill.name, 'general');
 });
 
+await t('the observed share_files alias loads share-files and runs the real tool in one step', async () => {
+  toolLog.length = 0;
+  const m = scripted([
+    '{"actions":[{"tool":"share_files","args":{"query":"résumé"}}]}',
+    '{"answer": true}',
+  ]);
+  const r = await runAgent({ turns, catalog, callModel: m.callModel, runTool });
+  assert.equal(r.ok, true);
+  assert.equal(r.skill.name, 'share-files');
+  assert.deepEqual(toolLog.map((x) => x.tool), ['find_resources']);
+  assert.equal(m.seen.length, 2);
+  assert.match(r.steps[0].note, /loaded share-files and normalized to find_resources/);
+});
+
 await t('an unknown skill is named back with the real choices', async () => {
   const m = scripted([
     '{"actions":[{"tool":"load_skill","args":{"name":"projects"}}]}',

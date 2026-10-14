@@ -28,6 +28,7 @@ t('search text keeps the previous question for follow-ups', () => {
 });
 t('tokens: Latin words and CJK pairs', () => {
   assert.deepEqual(tokens('An AI-PM at ByteDance.'), ['ai-pm', 'bytedance']);
+  assert.deepEqual(tokens('résumé'), ['resume']);
   assert.deepEqual(tokens('\u5b57\u8282\u8df3'), ['\u5b57\u8282', '\u8282\u8df3']);
 });
 const chunks = [
@@ -91,6 +92,7 @@ t('resource tool returns the exact localized resume PDF', () => {
   assert.deepEqual(findResources(resources, 'Please send me your resume PDF', 'en'), [{
     kind: 'pdf', title: 'Antares resume', description: '', url: '/media/resume-en.pdf', typeLabel: 'PDF',
   }]);
+  assert.equal(findResources(resources, 'résumé', 'en', 3, { explicit: true })[0].url, '/media/resume-en.pdf');
   assert.equal(findResources(resources, '把你的简历发给我', 'zh')[0].url, '/media/resume-zh.pdf');
   assert.equal(findResources(resources, 'token 使用量', 'zh')[0].url, '/usage/?lang=zh');
   assert.deepEqual(findResources(resources, '讲一个有意思的项目，你做过的', 'zh'), [], 'generic project words must not flood the answer with cards');

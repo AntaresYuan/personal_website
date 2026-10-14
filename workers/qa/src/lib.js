@@ -9,6 +9,7 @@ export const MAX_MSG_CHARS = 600;     // per turn (user or assistant)
 export const MAX_TURNS = 8;           // recent turns kept
 
 const CJK = /[\u3400-\u9fff\uf900-\ufaff]/;
+const foldText = (text) => String(text || '').normalize('NFKD').replace(/\p{M}+/gu, '').toLowerCase();
 
 /* The request → a clean alternating user/assistant list ending with a user
    turn. Accepts { messages: [{role,content}, …] } or { q: "…" }; [] when
@@ -55,7 +56,7 @@ export function searchText(turns) {
 /* Tokens for lexical matching: lower-cased Latin words of 3+ letters, and
    CJK as overlapping character pairs (no word boundaries to split on). */
 export function tokens(text) {
-  const s = String(text || '').toLowerCase();
+  const s = foldText(text);
   const out = (s.match(/[a-z0-9][a-z0-9+.-]{2,}/g) || []).map((w) => w.replace(/[.-]+$/, ''));
   const han = s.match(/[\u3400-\u9fff\uf900-\ufaff]+/g) || [];
   for (const run of han) {
@@ -73,7 +74,7 @@ const STOP = new Set(['the', 'and', 'what', 'how', 'did', 'does', 'you', 'your',
 const CJK_FILLER = new Set(['\u4ec0\u4e48', '\u600e\u4e48', '\u600e\u6837', '\u5982\u4f55', '\u4e3a\u4ec0', '\u4e48\u6837', '\u662f\u4ec0', '\u662f\u600e', '\u4e48\u505a', '\u505a\u7684', '\u7684\u662f', '\u662f\u4e0d', '\u4e0d\u662f', '\u6709\u6ca1', '\u6ca1\u6709', '\u4e00\u4e0b', '\u4e00\u4e2a', '\u8fd9\u4e2a', '\u90a3\u4e2a', '\u54ea\u4e2a', '\u54ea\u4e9b', '\u54ea\u91cc', '\u53ef\u4ee5', '\u80fd\u4e0d', '\u4f60\u7684', '\u6211\u7684', '\u4f60\u4eec', '\u6211\u4eec', '\u4f60\u5728', '\u4f60\u662f', '\u662f\u4f60', '\u4f60\u6709', '\u6709\u4ec0', '\u6709\u54ea', '\u4e48\u662f', '\u4e86\u5417', '\u7684\u5417', '\u662f\u54ea', '\u505a\u4e86', '\u4e86\u4ec0', '\u5417', '\u5462', '\u5427', '\u7684', '\u4e86', '\u662f']);
 const topicTokens = (text) => [...new Set(tokens(text).filter((t) => !STOP.has(t) && !CJK_FILLER.has(t)))];
 
-const normalizedQuestion = (text) => String(text || '').normalize('NFKC').toLowerCase()
+const normalizedQuestion = (text) => foldText(text)
   .replace(/[^a-z0-9\u3400-\u9fff\uf900-\ufaff+]+/g, ' ').trim();
 
 /* QA pairs (CMS → Agent infra → QA pairs) are matched deterministically:
@@ -192,7 +193,7 @@ export function findFaqResources(resources, faqs, lang = 'en') {
 // file or link, so more than a named item's own page may be returned.
 export function findResources(resources, query, lang = 'en', limit = 5, { explicit = false } = {}) {
   if (!Array.isArray(resources) || !String(query || '').trim()) return [];
-  const q = String(query).normalize('NFKC').toLowerCase();
+  const q = foldText(query);
   const qTokens = [...new Set(tokens(q).filter((t) => !STOP.has(t)))];
   const resume = hasAny(q, RESUME_INTENT);
   const usage = wantsUsage(q);
@@ -206,18 +207,18 @@ export function findResources(resources, query, lang = 'en', limit = 5, { explic
     const id = String(resource.id || '');
     const passiveMainPage = /^(?:project|skill|writing)-/.test(id) && resource.kind !== 'image' && !/-cover$/.test(id);
     const namedTitle = [resource.title, resource.titleZh].filter(Boolean)
-      .map((title) => String(title).normalize('NFKC').toLowerCase().trim())
+      .map((title) => foldText(title).trim())
       .some((title) => title.length >= 4 && q.includes(title));
     if (!explicitRequest && (!passiveMainPage || !namedTitle)) return null;
     const haystack = [
       resource.title, resource.titleZh, resource.description, resource.descriptionZh,
       resource.url, ...(Array.isArray(resource.keywords) ? resource.keywords : []),
-    ].filter(Boolean).join(' ').normalize('NFKC').toLowerCase();
+    ].filter(Boolean).map(foldText).join(' ');
     const hayTokens = new Set(tokens(haystack));
     const overlap = qTokens.filter((token) => hayTokens.has(token)).length;
     let score = overlap * 2 + (qTokens.length ? overlap / qTokens.length : 0);
-    if (resource.title && q.includes(String(resource.title).toLowerCase())) score += 5;
-    if (resource.titleZh && q.includes(String(resource.titleZh).toLowerCase())) score += 5;
+    if (resource.title && q.includes(foldText(resource.title))) score += 5;
+    if (resource.titleZh && q.includes(foldText(resource.titleZh))) score += 5;
     if (resume && resource.kind === 'pdf' && /^resume-/.test(id)) {
       score += 100;
       if (resource.lang === preferredLang) score += 20;
