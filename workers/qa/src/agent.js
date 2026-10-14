@@ -23,6 +23,9 @@
 export const MAX_STEPS = 3;            // planning calls before answering anyway
 export const MAX_ACTIONS = 3;          // tool calls per step
 export const TOOL_NAMES = ['search_work', 'find_resources', 'get_token_usage', 'render_ui'];
+const TOOL_ALIASES = {
+  share_files: { tool: 'find_resources', skill: 'share-files' },
+};
 
 const TOOL_HELP = {
   load_skill: '{"name": "<skill>"} — read a skill\'s instructions. Always the first step.',
@@ -46,6 +49,8 @@ ${loaded ? `LOADED SKILL: ${loaded.name}. Follow its steps below.` : 'No skill i
 
 TOOLS you may call now:
 ${tools}
+
+Use only the exact tool names above. There is no tool named share_files.
 
 Reply with ONE JSON object and nothing else:
 - to call tools: {"actions": [{"tool": "<tool>", "args": {…}}]}  (at most ${MAX_ACTIONS})
@@ -148,7 +153,16 @@ export async function runAgent({ turns, catalog, systemPrompt, callModel, runToo
 
     const notes = [];
     let terminal = null;
-    for (const action of plan.actions) {
+    for (const requestedAction of plan.actions) {
+      const alias = TOOL_ALIASES[requestedAction.tool];
+      const action = alias ? { ...requestedAction, tool: alias.tool } : requestedAction;
+      if (!loaded && alias) {
+        const skill = byName.get(alias.skill);
+        if (skill && skill.tools.includes(alias.tool)) {
+          loaded = skill;
+          notes.push(`${requestedAction.tool} → loaded ${skill.name} and normalized to ${alias.tool}.`);
+        }
+      }
       if (action.tool === 'load_skill') {
         const name = String(action.args.name || action.args.skill || '').trim();
         const skill = byName.get(name);

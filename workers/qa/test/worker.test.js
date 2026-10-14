@@ -39,12 +39,18 @@ const INDEX = { version: 'v1', systemPrompt: 'SYSTEM: answer as Antares, from CO
 ] };
 
 let local = 'ok';            // 'ok' | 'down' | 'busy' | 'breaks' (a stream that fails midway)
-let planner = 'smart';       // 'smart' plans like a good model; 'prose' never writes JSON
+let planner = 'smart';       // 'smart' plans like a good model; other modes exercise planner failures
 const PLANNER = 'You plan how to answer';
 /* A scripted planner for the agent tests: picks the skill by keywords,
    then calls that skill's tools once, then answers. */
 const plan = (system, user) => {
   if (planner === 'prose') return 'I would use the project skill here.';
+  if (planner === 'bad-resume') {
+    if (!/LOADED SKILL: (\S+)/.test(system)) {
+      return JSON.stringify({ actions: [{ tool: 'share_files', args: { query: 'career document' } }] });
+    }
+    return '{"answer": true}';
+  }
   const q = (user.match(/Visitor: (.*)\n\n/) || [])[1] || '';
   if (!/LOADED SKILL: (\S+)/.test(system)) {
     const skill = /resume|\u7b80\u5386/i.test(q) ? 'share-files'
@@ -430,6 +436,22 @@ await t('agent: share-files gets cards and reads no site passages', async () => 
   assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
   assert.match(lastLocalPrompt, /SKILL: share-files/);
   assert.doesNotMatch(lastLocalPrompt, /### Project:/);
+});
+await t('agent: a bad resume alias and query recover with the visitor wording', async () => {
+  planner = 'bad-resume';
+  const r = await askAgent('', { messages: [
+    { role: 'user', content: '\u4f60\u505a\u8fc7\u4ec0\u4e48' },
+    { role: 'assistant', content: '\u6211\u53ef\u4ee5\u4ecb\u7ecd\u9879\u76ee\u3002' },
+    { role: 'user', content: '\u770b\u770b\u7b80\u5386' },
+  ], lang: 'zh' });
+  planner = 'smart';
+  assert.equal(r.body.skill, 'share-files');
+  assert.deepEqual(r.body.tools, ['load_skill', 'find_resources']);
+  assert.equal(r.body.resources[0].url, '/media/resume-zh.pdf');
+  const saved = d1Traces.get(r.body.traceId);
+  assert.equal(saved.agent.steps.length, 2);
+  assert.match(saved.agent.steps[0].note, /loaded share-files and normalized to find_resources/);
+  assert.match(saved.agent.steps[0].note, /retrying with the visitor's wording/);
 });
 await t('agent: a2ui returns a validated card without a separate answer call', async () => {
   const beforeLocal = localCalls;

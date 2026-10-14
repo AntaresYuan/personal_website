@@ -481,8 +481,15 @@ async function answerWithAgent(p) {
     if (tool === 'search_work') return searchWork(env, ctx, index, String(args.query || currentQuery).slice(0, 300), String(args.item || ''), given);
     if (tool === 'find_resources') {
       if (index.tools?.find_resources?.enabled === false) return { note: 'this tool is switched off', cards: [] };
-      const cards = findResources(index.resources, String(args.query || currentQuery), lang, maxCards, { explicit: true });
-      return { note: cards.length ? `${cards.length} card(s): ${cards.map((c) => c.title).join('; ')}` : 'nothing found', cards };
+      const requestedQuery = String(args.query || currentQuery).slice(0, 300);
+      let cards = findResources(index.resources, requestedQuery, lang, maxCards, { explicit: true });
+      let retried = false;
+      if (!cards.length && requestedQuery !== currentQuery) {
+        cards = findResources(index.resources, currentQuery, lang, maxCards, { explicit: true });
+        retried = true;
+      }
+      const retryNote = retried ? ' after retrying with the visitor\'s wording' : '';
+      return { note: cards.length ? `${cards.length} card(s)${retryNote}: ${cards.map((c) => c.title).join('; ')}` : `nothing found${retryNote}`, cards };
     }
     if (tool === 'get_token_usage') {
       const window = Object.hasOwn(WINDOW_TEXT, args.window) ? args.window : 'total';
