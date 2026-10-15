@@ -118,6 +118,15 @@ function cors(origin) {
     : { Vary: 'Origin' };
 }
 
+function evaluationMeta(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const suite = String(value.suite || '').trim().slice(0, 64);
+  const caseId = String(value.caseId || '').trim().slice(0, 64);
+  if (!/^[a-z0-9][a-z0-9-]{0,63}$/i.test(suite)) return null;
+  if (!/^(?:AQ-\d{8}-[A-F0-9]{8}|REPORTED-\d{8}-[A-Z0-9-]+)$/.test(caseId)) return null;
+  return { suite, caseId };
+}
+
 function reply(obj, status, headers) {
   return new Response(JSON.stringify(obj), {
     status: status || 200,
@@ -722,6 +731,7 @@ export default {
 
     let body;
     try { body = await request.json(); } catch { return reply({ error: 'invalid JSON body' }, 400, ch); }
+    const evaluation = evaluationMeta(body.evaluation);
     const visibleTurns = normTurns(body);
     if (!visibleTurns.length) return reply({ error: 'no question — send { "q": "…" } or a "messages" array ending with a user turn' }, 400, ch);
     const interaction = parseA2uiInteraction(body.interaction);
@@ -740,11 +750,13 @@ export default {
       retrievalQuery: query,
       language: lang,
       turnCount: turns.length,
+      source: evaluation ? 'eval' : 'visitor',
       tools: [],
       resources: [],
       faqs: [],
       passages: [],
       timings: {},
+      ...(evaluation ? { evaluation } : {}),
       ...(interaction ? { interaction: interaction.trace } : {}),
     };
     const completeTimings = (extra = {}) => {

@@ -21,10 +21,15 @@ for (const c of cases) {
   const started = Date.now();
   let skill = '', via = '', traceId = '', error = '';
   try {
+    const evalCaseId = `REPORTED-20261015-ROUTING-${String(rows.length + 1).padStart(3, '0')}`;
     const r = await fetch(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json', origin: 'https://antaresyuan.site' },
-      body: JSON.stringify({ messages, lang: /[\u3400-\u9fff]/.test(c.ask) ? 'zh' : 'en' }),
+      body: JSON.stringify({
+        messages,
+        lang: /[\u3400-\u9fff]/.test(c.ask) ? 'zh' : 'en',
+        evaluation: { suite: 'routing', caseId: evalCaseId },
+      }),
       signal: AbortSignal.timeout(60_000),
     });
     const d = await r.json();

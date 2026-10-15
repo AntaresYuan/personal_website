@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "about": "Sanitized regression contracts for bad cases reported by the site owner. An AQ id preserves trajectory provenance when available; older screenshot-only reports use a REPORTED id. Raw trajectories stay in Cloudflare and are not committed. Offline tests check deterministic routing, retrieval scope, and resource delivery. The live eval also checks model answers.",
+  "schemaVersion": 2,
+  "about": "Sanitized regression contracts for bad cases reported by the site owner or discovered while reviewing production trajectories. An AQ id preserves trajectory provenance when available; older screenshot-only reports use a REPORTED id. Raw trajectories stay in Cloudflare and are not committed. Offline tests check deterministic routing, retrieval scope, and resource delivery. The live eval also checks model answers and optional latency budgets. Cases marked open are still measured and reported, but remain expected failures until their fix lands.",
   "cases": [
     {
       "id": "REPORTED-20261013-RESUME-DUPLICATE",
@@ -116,6 +116,113 @@
         "answerExcludesAll": ["没有在网站上发布过简历", "没有简历文件"]
       },
       "fixedBy": ["46118c4", "d574ad1"]
+    },
+    {
+      "id": "AQ-20261014-33C422D0",
+      "reportedAt": "2026-10-14T23:00:00.978Z",
+      "status": "open",
+      "title": "A social introduction paid for three planning calls",
+      "regression": "A short greeting took 22.9 seconds and waited 20.3 seconds for the first token because the agent loaded general, searched the Work corpus and planned again before answering.",
+      "messages": [
+        { "role": "user", "content": "我叫Gloria Qi，很高兴跟你聊天" }
+      ],
+      "lang": "zh",
+      "expected": {
+        "skill": "general",
+        "toolsMax": 0
+      },
+      "performance": {
+        "maxDurationMs": 5000,
+        "maxFirstTokenMs": 2000
+      },
+      "fixedBy": []
+    },
+    {
+      "id": "AQ-20261014-BAF9F381",
+      "reportedAt": "2026-10-14T10:58:11.783Z",
+      "status": "open",
+      "title": "A structured Workers AI plan became object Object",
+      "regression": "When the Mac was unavailable, the cloud planner response was coerced to [object Object]. The agent produced no usable plan and only succeeded because the fixed QA pipeline recovered.",
+      "messages": [
+        { "role": "user", "content": "walk me through your most mature project." }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "qa",
+        "toolsInclude": ["find_resources", "search_work"],
+        "resourceUrlsInclude": ["/projects/agentic-hiring/"],
+        "resourcesMax": 1,
+        "passagePrefixesInclude": ["project-agentic-hiring"],
+        "answerIncludesAll": ["Agentic Hiring", "21%", "25%"],
+        "answerExcludesAll": ["[object Object]"]
+      },
+      "performance": {
+        "maxDurationMs": 10000
+      },
+      "fixedBy": []
+    },
+    {
+      "id": "AQ-20261015-166A6E91",
+      "reportedAt": "2026-10-15T05:41:48.717Z",
+      "status": "open",
+      "title": "A leadership interview question missed the flagship project",
+      "regression": "Without an explicit project name, the agent retrieved a classroom project, said no professional example was documented and missed Agentic Hiring. Adding a parenthetical naming Agentic Hiring immediately produced the right answer.",
+      "messages": [
+        { "role": "user", "content": "Please describe any previous experiences (professional, academic, or extracurricular) in which you’ve led a product, project, or team; from concept through launch or delivery. What did you learn from that experience?" }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "project-walkthrough",
+        "toolsInclude": ["find_resources", "search_work"],
+        "resourceUrlsInclude": ["/projects/agentic-hiring/"],
+        "resourcesMax": 1,
+        "passagePrefixesInclude": ["project-agentic-hiring"],
+        "answerIncludesAll": ["Agentic Hiring", "21%", "25%"],
+        "answerExcludesAll": ["I have not written down a specific professional"]
+      },
+      "performance": {
+        "maxDurationMs": 12000,
+        "maxFirstTokenMs": 6000
+      },
+      "fixedBy": []
+    },
+    {
+      "id": "AQ-20261015-7FD9E4B6",
+      "reportedAt": "2026-10-15T08:52:59.185Z",
+      "status": "open",
+      "title": "An exact FAQ match still waited for the full agent loop",
+      "regression": "The authored current-work FAQ took 24.3 seconds and 21.9 seconds to first token because an exact match still made two planning calls and a separate answer call.",
+      "messages": [
+        { "role": "user", "content": "what are you building right now?" }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "qa"
+      },
+      "performance": {
+        "maxDurationMs": 5000,
+        "maxFirstTokenMs": 2000
+      },
+      "fixedBy": []
+    },
+    {
+      "id": "AQ-20261015-F429CF6E",
+      "reportedAt": "2026-10-15T08:54:00.920Z",
+      "status": "open",
+      "title": "A second exact FAQ spent most of its time planning",
+      "regression": "The authored open-to-roles FAQ took 14.1 seconds and 11.7 seconds to first token even though no retrieval or external tool work was needed.",
+      "messages": [
+        { "role": "user", "content": "are you looking for a job / open to roles?" }
+      ],
+      "lang": "en",
+      "expected": {
+        "skill": "qa"
+      },
+      "performance": {
+        "maxDurationMs": 5000,
+        "maxFirstTokenMs": 2000
+      },
+      "fixedBy": []
     }
   ]
 }
