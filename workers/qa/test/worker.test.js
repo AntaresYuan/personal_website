@@ -334,6 +334,19 @@ await t('today-token follow-up does not repeat the previous resume resource', as
   assert.match(saved.retrievalQuery, /看看简历/);
   assert.deepEqual(saved.resources.map((resource) => resource.url), ['/usage/?lang=zh']);
 });
+await t('evaluation requests are tagged separately from visitor traffic', async () => {
+  const evaluated = await ask('How many tokens have you used?', {
+    evaluation: { suite: 'owner-badcases', caseId: 'AQ-20261015-F429CF6E', ignored: 'not stored' },
+  });
+  assert.equal(d1Traces.get(evaluated.body.traceId).source, 'eval');
+  assert.deepEqual(d1Traces.get(evaluated.body.traceId).evaluation, {
+    suite: 'owner-badcases', caseId: 'AQ-20261015-F429CF6E',
+  });
+
+  const visitor = await ask('How many tokens have you used?');
+  assert.equal(d1Traces.get(visitor.body.traceId).source, 'visitor');
+  assert.equal(d1Traces.get(visitor.body.traceId).evaluation, undefined);
+});
 await t('usage skill: when the live numbers are unavailable, a fixed answer and no model', async () => {
   usageDown = true;
   const beforeLocal = localCalls;

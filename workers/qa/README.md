@@ -147,6 +147,8 @@ stores no IP. It holds:
   answers also include time to first token. Cloud answers split draft and
   verification, and local-to-cloud fallback time is kept separately
 - the model route, the duration and the answer
+- `source: visitor|eval`; live evaluation runners also store their suite and
+  case id so latency reports can exclude synthetic traffic
 
 Read one while debugging:
 
@@ -256,12 +258,17 @@ History is capped at the last 8 turns; each turn at 600 characters.
   permanent, sanitized record of every bad case the owner reports. Each
   entry keeps the original AQ id when available (or a `REPORTED-*` id for
   older screenshot-only cases) and the expected skill, tools, retrieval scope,
-  resource cards and answer constraints; raw trajectories remain in
-  Cloudflare. `test/user-reported.test.js` checks the deterministic contract
-  on every `npm test`. `npm run eval:badcases` replays those cases against the
-  live Worker and real models. `.github/workflows/qa-evals.yml` runs offline
-  on every pull request and main-branch update, then runs the complete live
-  routing + bad-case evaluation every Monday and on manual dispatch.
+  resource cards, answer constraints and optional latency budgets; raw
+  trajectories remain in Cloudflare. A newly discovered case may use
+  `"status": "open"` with an empty `fixedBy` list. Open cases are always run
+  and reported as `KNOWN`/`XPASS`, but they do not make CI fail until the fix
+  lands and the case is promoted to the default fixed status.
+  `test/user-reported.test.js` checks the deterministic contract on every
+  `npm test`. `npm run eval:badcases` replays those cases against the live
+  Worker and real models; cases with `maxFirstTokenMs` use the real streaming
+  path and measure the first delta. `.github/workflows/qa-evals.yml` runs
+  offline on every pull request and main-branch update, then runs the complete
+  live routing + bad-case evaluation every Monday and on manual dispatch.
 - **Budgets** (in characters) are `BUDGET` in `src/index.js`: about 12k for
   the Mac and 9k for the cloud. A skill's own passages come right after the
   pinned ones; `planFor` in `src/skills.js` caps how much else follows.
